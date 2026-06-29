@@ -14,14 +14,14 @@
 | reference_audit | true | PASS | contains required strings | `outputs\reports\reference_audit.md` |
 | human_review_protocol | true | PASS | contains required strings | `outputs\reports\human_review_protocol.md` |
 | repro_appendix | true | PASS | contains required strings | `papers\reproducibility_appendix.md` |
-| artifact_manifest | true | PASS | 289 entries; expected at least 10 | `outputs\reports\artifact_manifest.json` |
+| artifact_manifest | true | PASS | 286 entries; expected at least 10 | `outputs\reports\artifact_manifest.json` |
 | claim_evidence_registry | true | PASS | exists (2850 bytes) | `papers\claim_evidence_registry.yaml` |
 | repeated_ablation_csv | false | MISSING | 126 rows; expected at least 210 | `outputs\reports\deepseek_ablation_repeated_results.csv` |
 | ablation_checkpoint_csv | true | PASS | 126 rows; expected at least 70 | `outputs\reports\deepseek_ablation_repeated_results.csv` |
 | ablation_checkpoint_report | true | PASS | contains required strings | `outputs\reports\deepseek_ablation_repeated_report.md` |
 | crossjudge_csv | true | PASS | 126 rows; expected at least 70 | `outputs\reports\deepseek_ablation_repeated_gemini_judge_results.csv` |
 | crossjudge_agreement_report | true | PASS | contains required strings | `outputs\reports\deepseek_ablation_repeated_gemini_judge_agreement.md` |
-| repeated_stability_report | false | PASS | contains required strings | `outputs\reports\deepseek_ablation_repeated_stability.md` |
+| repeated_stability_report | false | MISSING | missing | `outputs\reports\deepseek_ablation_repeated_stability.md` |
 | stress_generalization_csv | false | MISSING | missing | `outputs\reports\deepseek_stress_generalization_results.csv` |
 | stress_generalization_report | false | MISSING | missing | `outputs\reports\deepseek_stress_generalization_report.md` |
 | human_scalar_report | false | MISSING | missing | `outputs\human_review\deepseek_ablation_repeated\human_review_report.md` |

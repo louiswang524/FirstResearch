@@ -1,6 +1,6 @@
 # Artifact Manifest
 
-Generated at UTC: `2026-06-29T05:32:50.231654+00:00`
+Generated at UTC: `2026-06-29T05:43:46.967489+00:00`
 
 | Path | Bytes | SHA-256 |
 |---|---:|---|
@@ -262,13 +262,10 @@ Generated at UTC: `2026-06-29T05:32:50.231654+00:00`
 | `outputs/reports/reference_audit.md` | 699 | `d6d35c20e9069d59d683f137b160499b9a83ab7e709de3ef8f1266170291f675` |
 | `outputs/reports/results_table_audit.json` | 5047 | `e8e5fa8d760478b59296aca53926190c026a0cd23b9f577e87a489a7e1302331` |
 | `outputs/reports/results_table_audit.md` | 1830 | `05a4f2152732f0fc07f36841ec421b77582a87980fd22ff6c9a51ac1bb97aef3` |
-| `outputs/reports/submission_readiness_report.json` | 2917 | `ffb30825649cafc062da04fb6a66f59d7cfe113990cd01ec2186403bc0d55ece` |
-| `outputs/reports/submission_readiness_report.md` | 2781 | `70f22ef445bdfce4c3751d074ec6a15bb553cc6e7c02b2e190a434e0c418fe3e` |
 | `papers/claim_evidence_registry.yaml` | 2850 | `4c02ad017893c9f5c4ee5e420e7279993ade398aef71de9de9b5220c62c66ec1` |
 | `papers/firstresearch_draft.md` | 50254 | `ec924b2cc5fd84ec80f40e92dc5e92aa92a8781cc0454f2d599e0604c91beed3` |
 | `papers/reference_registry.yaml` | 1414 | `7e08294e90757ccf1219c57808735f68352ebe47158b4e57c7fdf98f0cd58038` |
 | `papers/reproducibility_appendix.md` | 18418 | `35b4d773568b32779ac4131d05515de3f191cc738d3d7dcb1b6604f50b5f6da9` |
-| `papers/review_response_notes.md` | 6694 | `77063765b26950122c7f95d8db77ea5ea9045bf3a214168f537ed5a841dd8eb2` |
 | `scripts/analyze_human_review.py` | 5581 | `780ca919f1185c086558563f52f3c5c8c69d7ac4faae63f37e311856cee78e31` |
 | `scripts/analyze_judge_agreement.py` | 11226 | `5e5e2970801a837b0c928f56ce59e85136fb7dca464e359c41af971985ee8605` |
 | `scripts/analyze_pairwise_review.py` | 5311 | `8b3d0b3e30314927e015a7db65d34a9942bdf5e7054aaab2784909537cb6dffb` |
