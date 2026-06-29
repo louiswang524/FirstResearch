@@ -1,0 +1,1539 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "tool-use routing",
+        "definition": "The decision process by which a coding agent selects which computational tool (e.g., code interpreter, web search, file editor) to invoke for a given subtask.",
+        "why_primitive": "This is a fundamental action selection mechanism that determines agent behavior; without it, the agent cannot interact with tools."
+      },
+      {
+        "name": "coding agent",
+        "definition": "An autonomous system that generates, modifies, or debugs source code by utilizing external tools and internal reasoning.",
+        "why_primitive": "It is the core entity of study; understanding its failures requires defining what it is and what it does."
+      },
+      {
+        "name": "failure",
+        "definition": "An outcome where the agent's tool-use routing leads to an unintended or suboptimal result, such as incorrect code, excessive cost, or task abandonment.",
+        "why_primitive": "Failure is the central phenomenon of interest; its definition drives the analysis of when and why it occurs."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The coding agent has a finite set of well-defined tools, each with known input-output specifications.",
+        "rationale": "Routing decisions rely on knowledge of what each tool can do; without this assumption, the problem becomes unbounded.",
+        "possible_failure": "Real-world tools may have undocumented behaviors or side effects, causing routing decisions based on faulty specifications."
+      },
+      {
+        "assumption": "The agent's routing policy is learned from prior experience or predefined heuristics, rather than being fully random.",
+        "rationale": "Agents use past outcomes to improve routing; otherwise, failure is expected due to randomness.",
+        "possible_failure": "The policy may overfit to training tasks and fail on novel or edge-case requests."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. exploitation: deciding whether to try less-used tools to discover their effects or to stick with known reliable tools.",
+        "variables": [
+          "exploration rate",
+          "task novelty",
+          "cost per tool invocation"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. accuracy: quickly choosing a tool to minimize latency versus carefully evaluating multiple options to avoid mistakes.",
+        "variables": [
+          "time budget",
+          "error tolerance",
+          "complexity of the subtask"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which the current subtask is novel or unseen in prior experience."
+      },
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "Complexity or intricacy of the subtask that influences tool selection difficulty."
+      },
+      {
+        "name": "exploration_rate",
+        "role": "input",
+        "description": "Agent's tendency to try less-used tools; can be learned or fixed."
+      },
+      {
+        "name": "cost_per_invocation",
+        "role": "input",
+        "description": "Cost (time/compute) incurred each time a tool is invoked."
+      },
+      {
+        "name": "time_budget",
+        "role": "input",
+        "description": "Maximum time allowed for the routing decision."
+      },
+      {
+        "name": "error_tolerance",
+        "role": "input",
+        "description": "Acceptable level of error in the task output."
+      },
+      {
+        "name": "policy_quality",
+        "role": "mediator",
+        "description": "How well the routing policy generalizes to new tasks and avoids overfitting."
+      },
+      {
+        "name": "tool_spec_accuracy",
+        "role": "mediator",
+        "description": "Accuracy of the agent's knowledge about tool capabilities and behaviors."
+      },
+      {
+        "name": "routing_decision",
+        "role": "mediator",
+        "description": "The specific tool selected by the agent for the subtask."
+      },
+      {
+        "name": "agent_performance",
+        "role": "output",
+        "description": "Success or failure of the subtask outcome (binary or continuous metric)."
+      },
+      {
+        "name": "failure_outcome",
+        "role": "outcome",
+        "description": "Indicates whether tool-use routing leads to failure."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "policy_quality",
+        "explanation": "Higher task novelty challenges the policy, potentially revealing poor generalization."
+      },
+      {
+        "step": "2",
+        "source": "task_complexity",
+        "relation": "increases",
+        "target": "routing_decision",
+        "explanation": "More complex tasks require more careful tool selection, increasing decision difficulty."
+      },
+      {
+        "step": "3",
+        "source": "exploration_rate",
+        "relation": "affects",
+        "target": "routing_decision",
+        "explanation": "Low exploration may lead to sticking with a suboptimal tool; high exploration may waste time."
+      },
+      {
+        "step": "4",
+        "source": "cost_per_invocation",
+        "relation": "moderates",
+        "target": "routing_decision",
+        "explanation": "High cost discourages exploration, potentially leading to suboptimal choices."
+      },
+      {
+        "step": "5",
+        "source": "time_budget",
+        "relation": "affects",
+        "target": "routing_decision",
+        "explanation": "Limited time forces quicker decisions, increasing chances of error."
+      },
+      {
+        "step": "6",
+        "source": "error_tolerance",
+        "relation": "affects",
+        "target": "routing_decision",
+        "explanation": "Low error tolerance demands more accurate tool selection."
+      },
+      {
+        "step": "7",
+        "source": "policy_quality",
+        "relation": "influences",
+        "target": "routing_decision",
+        "explanation": "Better policy leads to more appropriate tool selection."
+      },
+      {
+        "step": "8",
+        "source": "tool_spec_accuracy",
+        "relation": "influences",
+        "target": "routing_decision",
+        "explanation": "Inaccurate specs can cause mismatch between expected and actual tool behavior."
+      },
+      {
+        "step": "9",
+        "source": "routing_decision",
+        "relation": "determines",
+        "target": "agent_performance",
+        "explanation": "The chosen tool directly impacts the quality of the output."
+      },
+      {
+        "step": "10",
+        "source": "agent_performance",
+        "relation": "determines",
+        "target": "failure_outcome",
+        "explanation": "Poor performance indicates failure in tool-use routing."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Policy overfitting to training tasks",
+        "why_it_matters": "When the routing policy is optimized for a narrow set of tasks, it fails to generalize to novel situations, leading to incorrect tool selection."
+      },
+      {
+        "bottleneck": "Inaccurate tool specifications",
+        "why_it_matters": "Even a well-trained policy can make mistakes if the agent's model of tool capabilities is wrong, causing a mismatch between chosen tool and actual task needs."
+      },
+      {
+        "bottleneck": "Exploration-exploitation tradeoff under time constraints",
+        "why_it_matters": "With limited time budgets, agents may resort to hasty decisions that neglect less-known but more effective tools, causing suboptimal routes."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing failure in coding agents arises when the agent's routing policy, learned from prior experience, selects a suboptimal tool for a given subtask. This is exacerbated by high task novelty or complexity, inaccurate knowledge of tool capabilities, and constraints like time or cost that limit exploration. The mechanism involves a cascade from task properties to policy evaluation to routing decision, where bottlenecks such as policy overfitting and specification inaccuracies cause the decision to deviate from optimal, resulting in failure."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Exploration vs. exploitation: deciding whether to try less-used tools (exploration) to discover their effects or stick with known reliable tools (exploitation) is inherently contradictory under time and cost constraints.",
+      "derived_from": [
+        "core_tradeoffs: exploration vs. exploitation",
+        "mechanism_model: time_budget, cost_per_invocation, exploration_rate"
+      ],
+      "why_it_matters": "This tradeoff is central to routing failure: too much exploration wastes resources, too little may miss optimal tools.",
+      "what_existing_methods_may_miss": "Existing methods like fixed epsilon-greedy ignore dynamic adjustment to task novelty or cost.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Speed vs. accuracy: quickly choosing a tool minimizes latency but may lead to mistakes, while careful evaluation avoids errors but consumes time, conflicting under tight time budgets.",
+      "derived_from": [
+        "core_tradeoffs: speed vs. accuracy",
+        "mechanism_model: time_budget, error_tolerance"
+      ],
+      "why_it_matters": "This tradeoff directly impacts failure: agents under time pressure likely select suboptimal tools.",
+      "what_existing_methods_may_miss": "Many methods assume a fixed time budget without modeling the accuracy-speed curve.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Policy overfitting to training tasks vs. generalization: a routing policy learned from limited experience may perform well on seen tasks but fail on novel ones, contradicting the goal of robust tool-use routing.",
+      "derived_from": [
+        "assumptions: policy learned from prior experience",
+        "bottlenecks: policy overfitting to training tasks",
+        "mechanism_model: task_novelty, policy_quality"
+      ],
+      "why_it_matters": "Overfitting is a primary bottleneck causing failure when agents encounter novel tasks.",
+      "what_existing_methods_may_miss": "Existing methods often evaluate on similar tasks, missing the generalization gap.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Assumption of well-defined tools vs. real-world ambiguous tool specifications: agents assume known input-output specs, but real tools may have undocumented side effects, causing a mismatch between expected and actual behavior.",
+      "derived_from": [
+        "assumptions: finite set of well-defined tools",
+        "bottlenecks: inaccurate tool specifications",
+        "mechanism_model: tool_spec_accuracy"
+      ],
+      "why_it_matters": "Specification inaccuracies undermine routing even with a good policy, leading to failure.",
+      "what_existing_methods_may_miss": "Most methods ignore tool specification uncertainty, assuming perfect knowledge.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does dynamically adjusting the exploration rate based on task novelty and cost-per-invocation reduce routing failure in coding agents?",
+      "question_type": "algorithmic",
+      "source_tension": "T1",
+      "expected_contribution": "Proposes a dynamic adjustment mechanism that balances exploration and exploitation, potentially outperforming fixed-rate policies."
+    },
+    {
+      "question": "Under tight time budgets, does a speed-accuracy trade-off curve predict optimal tool selection times that minimize failure rates?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Characterizes the relationship between decision time and accuracy, enabling time-budget-aware routing."
+    },
+    {
+      "question": "To what extent does task novelty exposure during training improve policy generalization and reduce routing failure on unseen tasks?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Identifies causal effect of training diversity on policy quality, informing data collection strategies."
+    },
+    {
+      "question": "Can an online tool characterization module that updates tool_spec_accuracy from invocation feedback reduce routing failures caused by inaccurate specifications?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Presents a method to handle real-world ambiguity in tool specifications, improving robustness."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process by which a coding agent selects which computational tool (e.g., code interpreter, web search, file editor) to invoke for a given subtask.",
+          "why_primitive": "This is a fundamental action selection mechanism that determines agent behavior; without it, the agent cannot interact with tools."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that generates, modifies, or debugs source code by utilizing external tools and internal reasoning.",
+          "why_primitive": "It is the core entity of study; understanding its failures requires defining what it is and what it does."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent's tool-use routing leads to an unintended or suboptimal result, such as incorrect code, excessive cost, or task abandonment.",
+          "why_primitive": "Failure is the central phenomenon of interest; its definition drives the analysis of when and why it occurs."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite set of well-defined tools, each with known input-output specifications.",
+          "rationale": "Routing decisions rely on knowledge of what each tool can do; without this assumption, the problem becomes unbounded.",
+          "possible_failure": "Real-world tools may have undocumented behaviors or side effects, causing routing decisions based on faulty specifications."
+        },
+        {
+          "assumption": "The agent's routing policy is learned from prior experience or predefined heuristics, rather than being fully random.",
+          "rationale": "Agents use past outcomes to improve routing; otherwise, failure is expected due to randomness.",
+          "possible_failure": "The policy may overfit to training tasks and fail on novel or edge-case requests."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current subtask is novel or unseen in prior experience."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Complexity or intricacy of the subtask that influences tool selection difficulty."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "Agent's tendency to try less-used tools; can be learned or fixed."
+          },
+          {
+            "name": "cost_per_invocation",
+            "role": "input",
+            "description": "Cost (time/compute) incurred each time a tool is invoked."
+          },
+          {
+            "name": "time_budget",
+            "role": "input",
+            "description": "Maximum time allowed for the routing decision."
+          },
+          {
+            "name": "error_tolerance",
+            "role": "input",
+            "description": "Acceptable level of error in the task output."
+          },
+          {
+            "name": "policy_quality",
+            "role": "mediator",
+            "description": "How well the routing policy generalizes to new tasks and avoids overfitting."
+          },
+          {
+            "name": "tool_spec_accuracy",
+            "role": "mediator",
+            "description": "Accuracy of the agent's knowledge about tool capabilities and behaviors."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected by the agent for the subtask."
+          },
+          {
+            "name": "agent_performance",
+            "role": "output",
+            "description": "Success or failure of the subtask outcome (binary or continuous metric)."
+          },
+          {
+            "name": "failure_outcome",
+            "role": "outcome",
+            "description": "Indicates whether tool-use routing leads to failure."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "policy_quality",
+            "explanation": "Higher task novelty challenges the policy, potentially revealing poor generalization."
+          },
+          {
+            "step": "2",
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "More complex tasks require more careful tool selection, increasing decision difficulty."
+          },
+          {
+            "step": "3",
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low exploration may lead to sticking with a suboptimal tool; high exploration may waste time."
+          },
+          {
+            "step": "4",
+            "source": "cost_per_invocation",
+            "relation": "moderates",
+            "target": "routing_decision",
+            "explanation": "High cost discourages exploration, potentially leading to suboptimal choices."
+          },
+          {
+            "step": "5",
+            "source": "time_budget",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Limited time forces quicker decisions, increasing chances of error."
+          },
+          {
+            "step": "6",
+            "source": "error_tolerance",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low error tolerance demands more accurate tool selection."
+          },
+          {
+            "step": "7",
+            "source": "policy_quality",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Better policy leads to more appropriate tool selection."
+          },
+          {
+            "step": "8",
+            "source": "tool_spec_accuracy",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Inaccurate specs can cause mismatch between expected and actual tool behavior."
+          },
+          {
+            "step": "9",
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "agent_performance",
+            "explanation": "The chosen tool directly impacts the quality of the output."
+          },
+          {
+            "step": "10",
+            "source": "agent_performance",
+            "relation": "determines",
+            "target": "failure_outcome",
+            "explanation": "Poor performance indicates failure in tool-use routing."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Policy overfitting to training tasks",
+            "why_it_matters": "When the routing policy is optimized for a narrow set of tasks, it fails to generalize to novel situations, leading to incorrect tool selection."
+          },
+          {
+            "bottleneck": "Inaccurate tool specifications",
+            "why_it_matters": "Even a well-trained policy can make mistakes if the agent's model of tool capabilities is wrong, causing a mismatch between chosen tool and actual task needs."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under time constraints",
+            "why_it_matters": "With limited time budgets, agents may resort to hasty decisions that neglect less-known but more effective tools, causing suboptimal routes."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises when the agent's routing policy, learned from prior experience, selects a suboptimal tool for a given subtask. This is exacerbated by high task novelty or complexity, inaccurate knowledge of tool capabilities, and constraints like time or cost that limit exploration. The mechanism involves a cascade from task properties to policy evaluation to routing decision, where bottlenecks such as policy overfitting and specification inaccuracies cause the decision to deviate from optimal, resulting in failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Assumption of well-defined tools vs. real-world ambiguous tool specifications: agents assume known input-output specs, but real tools may have undocumented side effects, causing a mismatch between expected and actual behavior.",
+        "derived_from": [
+          "assumptions: finite set of well-defined tools",
+          "bottlenecks: inaccurate tool specifications",
+          "mechanism_model: tool_spec_accuracy"
+        ],
+        "why_it_matters": "Specification inaccuracies undermine routing even with a good policy, leading to failure.",
+        "what_existing_methods_may_miss": "Most methods ignore tool specification uncertainty, assuming perfect knowledge.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Can an online tool characterization module that updates tool_spec_accuracy from invocation feedback reduce routing failures caused by inaccurate specifications?",
+        "question_type": "algorithmic",
+        "source_tension": "T4",
+        "expected_contribution": "Presents a method to handle real-world ambiguity in tool specifications, improving robustness."
+      },
+      "hypothesis": {
+        "statement": "An online tool characterization module that updates tool_spec_accuracy from invocation feedback reduces routing failures caused by inaccurate specifications in coding agents.",
+        "predicted_effect": "The module will lower the failure rate by at least 30% compared to a baseline without the module, particularly for tasks with high tool specification ambiguity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare two versions of a coding agent: one with the online tool characterization module (experimental) and one without (control). Both agents operate on the same set of coding tasks (e.g., from a benchmark like SWE-bench or custom tasks) that include subtasks requiring tools with potentially ambiguous specifications (e.g., undocumented side effects). Measure the failure rate (proportion of tasks where the agent produces incorrect code or exceeds cost/time limits).",
+        "independent_variables": [
+          "presence of online tool characterization module",
+          "task novelty (low vs high)"
+        ],
+        "dependent_variables": [
+          "failure rate",
+          "average cost per task",
+          "average time per task"
+        ],
+        "controls": [
+          "same set of tasks",
+          "same base agent architecture (e.g., same LLM and tool set)",
+          "random seed initialization",
+          "identical training data for the routing policy prior to experiment"
+        ],
+        "falsifying_observation": "The experimental agent does not show a statistically significant reduction in failure rate compared to control, or the improvement is less than 10%."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Experimental agent shows lower failure rate than control, especially on high-novelty tasks.",
+          "Tool_spec_accuracy metric improves over time in the experimental agent.",
+          "The module correctly identifies ambiguous tool behaviors and updates specifications accordingly."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in failure rate between experimental and control.",
+          "Failure rate increases due to inaccurate updates or overhead.",
+          "Tool_spec_accuracy does not improve or remains stagnant."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, it suggests that simply updating tool specifications from invocation feedback is insufficient to reduce failures. This could be because the module may learn incorrect specifications if feedback is noisy, or the routing policy may not adequately leverage the updated specifications.",
+        "assumption_to_revise": "The assumption that tool spec inaccuracies are the primary cause of routing failures. Other bottlenecks like policy overfitting or exploration-exploitation tradeoffs may dominate.",
+        "next_question": "How does the combination of online tool characterization with policy refinement (e.g., meta-learning) affect routing failures under ambiguous specifications?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process by which a coding agent selects which computational tool (e.g., code interpreter, web search, file editor) to invoke for a given subtask.",
+          "why_primitive": "This is a fundamental action selection mechanism that determines agent behavior; without it, the agent cannot interact with tools."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that generates, modifies, or debugs source code by utilizing external tools and internal reasoning.",
+          "why_primitive": "It is the core entity of study; understanding its failures requires defining what it is and what it does."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent's tool-use routing leads to an unintended or suboptimal result, such as incorrect code, excessive cost, or task abandonment.",
+          "why_primitive": "Failure is the central phenomenon of interest; its definition drives the analysis of when and why it occurs."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite set of well-defined tools, each with known input-output specifications.",
+          "rationale": "Routing decisions rely on knowledge of what each tool can do; without this assumption, the problem becomes unbounded.",
+          "possible_failure": "Real-world tools may have undocumented behaviors or side effects, causing routing decisions based on faulty specifications."
+        },
+        {
+          "assumption": "The agent's routing policy is learned from prior experience or predefined heuristics, rather than being fully random.",
+          "rationale": "Agents use past outcomes to improve routing; otherwise, failure is expected due to randomness.",
+          "possible_failure": "The policy may overfit to training tasks and fail on novel or edge-case requests."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current subtask is novel or unseen in prior experience."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Complexity or intricacy of the subtask that influences tool selection difficulty."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "Agent's tendency to try less-used tools; can be learned or fixed."
+          },
+          {
+            "name": "cost_per_invocation",
+            "role": "input",
+            "description": "Cost (time/compute) incurred each time a tool is invoked."
+          },
+          {
+            "name": "time_budget",
+            "role": "input",
+            "description": "Maximum time allowed for the routing decision."
+          },
+          {
+            "name": "error_tolerance",
+            "role": "input",
+            "description": "Acceptable level of error in the task output."
+          },
+          {
+            "name": "policy_quality",
+            "role": "mediator",
+            "description": "How well the routing policy generalizes to new tasks and avoids overfitting."
+          },
+          {
+            "name": "tool_spec_accuracy",
+            "role": "mediator",
+            "description": "Accuracy of the agent's knowledge about tool capabilities and behaviors."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected by the agent for the subtask."
+          },
+          {
+            "name": "agent_performance",
+            "role": "output",
+            "description": "Success or failure of the subtask outcome (binary or continuous metric)."
+          },
+          {
+            "name": "failure_outcome",
+            "role": "outcome",
+            "description": "Indicates whether tool-use routing leads to failure."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "policy_quality",
+            "explanation": "Higher task novelty challenges the policy, potentially revealing poor generalization."
+          },
+          {
+            "step": "2",
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "More complex tasks require more careful tool selection, increasing decision difficulty."
+          },
+          {
+            "step": "3",
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low exploration may lead to sticking with a suboptimal tool; high exploration may waste time."
+          },
+          {
+            "step": "4",
+            "source": "cost_per_invocation",
+            "relation": "moderates",
+            "target": "routing_decision",
+            "explanation": "High cost discourages exploration, potentially leading to suboptimal choices."
+          },
+          {
+            "step": "5",
+            "source": "time_budget",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Limited time forces quicker decisions, increasing chances of error."
+          },
+          {
+            "step": "6",
+            "source": "error_tolerance",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low error tolerance demands more accurate tool selection."
+          },
+          {
+            "step": "7",
+            "source": "policy_quality",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Better policy leads to more appropriate tool selection."
+          },
+          {
+            "step": "8",
+            "source": "tool_spec_accuracy",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Inaccurate specs can cause mismatch between expected and actual tool behavior."
+          },
+          {
+            "step": "9",
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "agent_performance",
+            "explanation": "The chosen tool directly impacts the quality of the output."
+          },
+          {
+            "step": "10",
+            "source": "agent_performance",
+            "relation": "determines",
+            "target": "failure_outcome",
+            "explanation": "Poor performance indicates failure in tool-use routing."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Policy overfitting to training tasks",
+            "why_it_matters": "When the routing policy is optimized for a narrow set of tasks, it fails to generalize to novel situations, leading to incorrect tool selection."
+          },
+          {
+            "bottleneck": "Inaccurate tool specifications",
+            "why_it_matters": "Even a well-trained policy can make mistakes if the agent's model of tool capabilities is wrong, causing a mismatch between chosen tool and actual task needs."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under time constraints",
+            "why_it_matters": "With limited time budgets, agents may resort to hasty decisions that neglect less-known but more effective tools, causing suboptimal routes."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises when the agent's routing policy, learned from prior experience, selects a suboptimal tool for a given subtask. This is exacerbated by high task novelty or complexity, inaccurate knowledge of tool capabilities, and constraints like time or cost that limit exploration. The mechanism involves a cascade from task properties to policy evaluation to routing decision, where bottlenecks such as policy overfitting and specification inaccuracies cause the decision to deviate from optimal, resulting in failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Exploration vs. exploitation: deciding whether to try less-used tools (exploration) to discover their effects or stick with known reliable tools (exploitation) is inherently contradictory under time and cost constraints.",
+        "derived_from": [
+          "core_tradeoffs: exploration vs. exploitation",
+          "mechanism_model: time_budget, cost_per_invocation, exploration_rate"
+        ],
+        "why_it_matters": "This tradeoff is central to routing failure: too much exploration wastes resources, too little may miss optimal tools.",
+        "what_existing_methods_may_miss": "Existing methods like fixed epsilon-greedy ignore dynamic adjustment to task novelty or cost.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does dynamically adjusting the exploration rate based on task novelty and cost-per-invocation reduce routing failure in coding agents?",
+        "question_type": "algorithmic",
+        "source_tension": "T1",
+        "expected_contribution": "Proposes a dynamic adjustment mechanism that balances exploration and exploitation, potentially outperforming fixed-rate policies."
+      },
+      "hypothesis": {
+        "statement": "Dynamically adjusting the exploration rate based on task novelty and cost-per-invocation reduces routing failure in coding agents, compared to fixed exploration rate policies.",
+        "predicted_effect": "Lower failure rates (fewer incorrect tool selections) under conditions of high task novelty and/or high cost-per-invocation."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with a dynamic exploration rate policy that adjusts based on task novelty (e.g., novelty score from 0-1) and cost-per-invocation. Compare its performance on a diverse set of coding subtasks against agents using fixed exploration rates (e.g., epsilon=0.1, 0.2, 0.5). The tasks vary systematically in novelty (known vs. novel) and cost (low, medium, high). Measure failure rate (binary: suboptimal tool choice leading to incorrect code or delayed completion) over multiple trials.",
+        "independent_variables": [
+          "exploration adjustment strategy (dynamic vs. fixed rates)",
+          "task novelty level (low, high)",
+          "cost-per-invocation (low, high)"
+        ],
+        "dependent_variables": [
+          "failure rate (proportion of tasks where tool selection leads to failure)",
+          "average cost incurred",
+          "task completion time"
+        ],
+        "controls": [
+          "same set of available tools with known specifications",
+          "same base policy learning algorithm (e.g., Q-learning)",
+          "same set of 100 coding subtasks per condition",
+          "random seed for reproducibility"
+        ],
+        "falsifying_observation": "The dynamic adjustment strategy does not yield a statistically significant lower failure rate compared to the best fixed-rate strategy across all novelty and cost conditions, or it results in higher failure rates in some conditions."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Dynamic adjustment shows lower failure rates than any fixed-rate policy under high task novelty combined with high cost-per-invocation.",
+          "Dynamic adjustment maintains low failure rates across all novelty and cost conditions, while fixed policies fail more on one extreme."
+        ],
+        "rejects_hypothesis": [
+          "Dynamic adjustment yields similar or worse failure rates than fixed policies in all conditions.",
+          "Dynamic adjustment performs worse than a fixed moderate exploration rate (e.g., epsilon=0.2) on low novelty tasks."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If dynamic adjustment does not reduce failure rates as predicted, then the assumption that exploration should be dynamically tuned based on these two variables may be insufficient or incorrect.",
+        "assumption_to_revise": "The assumption that task novelty and cost-per-invocation are the primary drivers of exploration-exploitation tradeoff in routing decisions.",
+        "next_question": "What other factors (e.g., task complexity, error tolerance, or tool output reliability) should be incorporated into a dynamic exploration policy to effectively reduce routing failure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process by which a coding agent selects which computational tool (e.g., code interpreter, web search, file editor) to invoke for a given subtask.",
+          "why_primitive": "This is a fundamental action selection mechanism that determines agent behavior; without it, the agent cannot interact with tools."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that generates, modifies, or debugs source code by utilizing external tools and internal reasoning.",
+          "why_primitive": "It is the core entity of study; understanding its failures requires defining what it is and what it does."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent's tool-use routing leads to an unintended or suboptimal result, such as incorrect code, excessive cost, or task abandonment.",
+          "why_primitive": "Failure is the central phenomenon of interest; its definition drives the analysis of when and why it occurs."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite set of well-defined tools, each with known input-output specifications.",
+          "rationale": "Routing decisions rely on knowledge of what each tool can do; without this assumption, the problem becomes unbounded.",
+          "possible_failure": "Real-world tools may have undocumented behaviors or side effects, causing routing decisions based on faulty specifications."
+        },
+        {
+          "assumption": "The agent's routing policy is learned from prior experience or predefined heuristics, rather than being fully random.",
+          "rationale": "Agents use past outcomes to improve routing; otherwise, failure is expected due to randomness.",
+          "possible_failure": "The policy may overfit to training tasks and fail on novel or edge-case requests."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current subtask is novel or unseen in prior experience."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Complexity or intricacy of the subtask that influences tool selection difficulty."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "Agent's tendency to try less-used tools; can be learned or fixed."
+          },
+          {
+            "name": "cost_per_invocation",
+            "role": "input",
+            "description": "Cost (time/compute) incurred each time a tool is invoked."
+          },
+          {
+            "name": "time_budget",
+            "role": "input",
+            "description": "Maximum time allowed for the routing decision."
+          },
+          {
+            "name": "error_tolerance",
+            "role": "input",
+            "description": "Acceptable level of error in the task output."
+          },
+          {
+            "name": "policy_quality",
+            "role": "mediator",
+            "description": "How well the routing policy generalizes to new tasks and avoids overfitting."
+          },
+          {
+            "name": "tool_spec_accuracy",
+            "role": "mediator",
+            "description": "Accuracy of the agent's knowledge about tool capabilities and behaviors."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected by the agent for the subtask."
+          },
+          {
+            "name": "agent_performance",
+            "role": "output",
+            "description": "Success or failure of the subtask outcome (binary or continuous metric)."
+          },
+          {
+            "name": "failure_outcome",
+            "role": "outcome",
+            "description": "Indicates whether tool-use routing leads to failure."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "policy_quality",
+            "explanation": "Higher task novelty challenges the policy, potentially revealing poor generalization."
+          },
+          {
+            "step": "2",
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "More complex tasks require more careful tool selection, increasing decision difficulty."
+          },
+          {
+            "step": "3",
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low exploration may lead to sticking with a suboptimal tool; high exploration may waste time."
+          },
+          {
+            "step": "4",
+            "source": "cost_per_invocation",
+            "relation": "moderates",
+            "target": "routing_decision",
+            "explanation": "High cost discourages exploration, potentially leading to suboptimal choices."
+          },
+          {
+            "step": "5",
+            "source": "time_budget",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Limited time forces quicker decisions, increasing chances of error."
+          },
+          {
+            "step": "6",
+            "source": "error_tolerance",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low error tolerance demands more accurate tool selection."
+          },
+          {
+            "step": "7",
+            "source": "policy_quality",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Better policy leads to more appropriate tool selection."
+          },
+          {
+            "step": "8",
+            "source": "tool_spec_accuracy",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Inaccurate specs can cause mismatch between expected and actual tool behavior."
+          },
+          {
+            "step": "9",
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "agent_performance",
+            "explanation": "The chosen tool directly impacts the quality of the output."
+          },
+          {
+            "step": "10",
+            "source": "agent_performance",
+            "relation": "determines",
+            "target": "failure_outcome",
+            "explanation": "Poor performance indicates failure in tool-use routing."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Policy overfitting to training tasks",
+            "why_it_matters": "When the routing policy is optimized for a narrow set of tasks, it fails to generalize to novel situations, leading to incorrect tool selection."
+          },
+          {
+            "bottleneck": "Inaccurate tool specifications",
+            "why_it_matters": "Even a well-trained policy can make mistakes if the agent's model of tool capabilities is wrong, causing a mismatch between chosen tool and actual task needs."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under time constraints",
+            "why_it_matters": "With limited time budgets, agents may resort to hasty decisions that neglect less-known but more effective tools, causing suboptimal routes."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises when the agent's routing policy, learned from prior experience, selects a suboptimal tool for a given subtask. This is exacerbated by high task novelty or complexity, inaccurate knowledge of tool capabilities, and constraints like time or cost that limit exploration. The mechanism involves a cascade from task properties to policy evaluation to routing decision, where bottlenecks such as policy overfitting and specification inaccuracies cause the decision to deviate from optimal, resulting in failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Speed vs. accuracy: quickly choosing a tool minimizes latency but may lead to mistakes, while careful evaluation avoids errors but consumes time, conflicting under tight time budgets.",
+        "derived_from": [
+          "core_tradeoffs: speed vs. accuracy",
+          "mechanism_model: time_budget, error_tolerance"
+        ],
+        "why_it_matters": "This tradeoff directly impacts failure: agents under time pressure likely select suboptimal tools.",
+        "what_existing_methods_may_miss": "Many methods assume a fixed time budget without modeling the accuracy-speed curve.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Under tight time budgets, does a speed-accuracy trade-off curve predict optimal tool selection times that minimize failure rates?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Characterizes the relationship between decision time and accuracy, enabling time-budget-aware routing."
+      },
+      "hypothesis": {
+        "statement": "Under tight time budgets, the failure rate of tool-use routing in coding agents follows a U-shaped curve as a function of decision time, with a unique optimal decision time that minimizes failure.",
+        "predicted_effect": "Failure rate decreases with increased decision time up to a point, then increases again beyond that point due to time constraints and diminishing returns."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed set of tools and a set of coding tasks of varying complexity. For each task, vary the allowed decision time for tool selection (e.g., 0.1s, 0.5s, 1s, 2s, 5s). Repeat multiple trials per time budget. Measure the failure rate (proportion of tasks resulting in incorrect code or task abandonment) for each time budget. Plot failure rate vs. decision time.",
+        "independent_variables": [
+          "decision time (time budget for tool selection)"
+        ],
+        "dependent_variables": [
+          "failure rate"
+        ],
+        "controls": [
+          "task difficulty distribution",
+          "agent routing policy",
+          "tool set specifications",
+          "cost per tool invocation",
+          "error tolerance threshold"
+        ],
+        "falsifying_observation": "The failure rate does not achieve a minimum at an intermediate decision time; instead it continues to decrease with more time, or is non-decreasing with more time, or shows no clear pattern."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate is highest at the shortest and longest decision times, with a clear minimum at an intermediate time.",
+          "The optimal decision time shifts based on task complexity (e.g., simpler tasks have earlier optima)."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate monotonically decreases as decision time increases.",
+          "Failure rate monotonically increases as decision time increases.",
+          "Failure rate is constant across all decision times."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the minimal decisive test does not yield a U-shaped relationship, then the hypothesized speed-accuracy trade-off curve may not exist or may be task/context dependent.",
+        "assumption_to_revise": "The assumption that a simple time-accuracy trade-off curve can predict optimal tool selection times across all tasks.",
+        "next_question": "How does task complexity and agent policy quality modulate the relationship between decision time and failure rate?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process by which a coding agent selects which computational tool (e.g., code interpreter, web search, file editor) to invoke for a given subtask.",
+          "why_primitive": "This is a fundamental action selection mechanism that determines agent behavior; without it, the agent cannot interact with tools."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that generates, modifies, or debugs source code by utilizing external tools and internal reasoning.",
+          "why_primitive": "It is the core entity of study; understanding its failures requires defining what it is and what it does."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent's tool-use routing leads to an unintended or suboptimal result, such as incorrect code, excessive cost, or task abandonment.",
+          "why_primitive": "Failure is the central phenomenon of interest; its definition drives the analysis of when and why it occurs."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite set of well-defined tools, each with known input-output specifications.",
+          "rationale": "Routing decisions rely on knowledge of what each tool can do; without this assumption, the problem becomes unbounded.",
+          "possible_failure": "Real-world tools may have undocumented behaviors or side effects, causing routing decisions based on faulty specifications."
+        },
+        {
+          "assumption": "The agent's routing policy is learned from prior experience or predefined heuristics, rather than being fully random.",
+          "rationale": "Agents use past outcomes to improve routing; otherwise, failure is expected due to randomness.",
+          "possible_failure": "The policy may overfit to training tasks and fail on novel or edge-case requests."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current subtask is novel or unseen in prior experience."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Complexity or intricacy of the subtask that influences tool selection difficulty."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "Agent's tendency to try less-used tools; can be learned or fixed."
+          },
+          {
+            "name": "cost_per_invocation",
+            "role": "input",
+            "description": "Cost (time/compute) incurred each time a tool is invoked."
+          },
+          {
+            "name": "time_budget",
+            "role": "input",
+            "description": "Maximum time allowed for the routing decision."
+          },
+          {
+            "name": "error_tolerance",
+            "role": "input",
+            "description": "Acceptable level of error in the task output."
+          },
+          {
+            "name": "policy_quality",
+            "role": "mediator",
+            "description": "How well the routing policy generalizes to new tasks and avoids overfitting."
+          },
+          {
+            "name": "tool_spec_accuracy",
+            "role": "mediator",
+            "description": "Accuracy of the agent's knowledge about tool capabilities and behaviors."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected by the agent for the subtask."
+          },
+          {
+            "name": "agent_performance",
+            "role": "output",
+            "description": "Success or failure of the subtask outcome (binary or continuous metric)."
+          },
+          {
+            "name": "failure_outcome",
+            "role": "outcome",
+            "description": "Indicates whether tool-use routing leads to failure."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "policy_quality",
+            "explanation": "Higher task novelty challenges the policy, potentially revealing poor generalization."
+          },
+          {
+            "step": "2",
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "More complex tasks require more careful tool selection, increasing decision difficulty."
+          },
+          {
+            "step": "3",
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low exploration may lead to sticking with a suboptimal tool; high exploration may waste time."
+          },
+          {
+            "step": "4",
+            "source": "cost_per_invocation",
+            "relation": "moderates",
+            "target": "routing_decision",
+            "explanation": "High cost discourages exploration, potentially leading to suboptimal choices."
+          },
+          {
+            "step": "5",
+            "source": "time_budget",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Limited time forces quicker decisions, increasing chances of error."
+          },
+          {
+            "step": "6",
+            "source": "error_tolerance",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "Low error tolerance demands more accurate tool selection."
+          },
+          {
+            "step": "7",
+            "source": "policy_quality",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Better policy leads to more appropriate tool selection."
+          },
+          {
+            "step": "8",
+            "source": "tool_spec_accuracy",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "Inaccurate specs can cause mismatch between expected and actual tool behavior."
+          },
+          {
+            "step": "9",
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "agent_performance",
+            "explanation": "The chosen tool directly impacts the quality of the output."
+          },
+          {
+            "step": "10",
+            "source": "agent_performance",
+            "relation": "determines",
+            "target": "failure_outcome",
+            "explanation": "Poor performance indicates failure in tool-use routing."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Policy overfitting to training tasks",
+            "why_it_matters": "When the routing policy is optimized for a narrow set of tasks, it fails to generalize to novel situations, leading to incorrect tool selection."
+          },
+          {
+            "bottleneck": "Inaccurate tool specifications",
+            "why_it_matters": "Even a well-trained policy can make mistakes if the agent's model of tool capabilities is wrong, causing a mismatch between chosen tool and actual task needs."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under time constraints",
+            "why_it_matters": "With limited time budgets, agents may resort to hasty decisions that neglect less-known but more effective tools, causing suboptimal routes."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises when the agent's routing policy, learned from prior experience, selects a suboptimal tool for a given subtask. This is exacerbated by high task novelty or complexity, inaccurate knowledge of tool capabilities, and constraints like time or cost that limit exploration. The mechanism involves a cascade from task properties to policy evaluation to routing decision, where bottlenecks such as policy overfitting and specification inaccuracies cause the decision to deviate from optimal, resulting in failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Policy overfitting to training tasks vs. generalization: a routing policy learned from limited experience may perform well on seen tasks but fail on novel ones, contradicting the goal of robust tool-use routing.",
+        "derived_from": [
+          "assumptions: policy learned from prior experience",
+          "bottlenecks: policy overfitting to training tasks",
+          "mechanism_model: task_novelty, policy_quality"
+        ],
+        "why_it_matters": "Overfitting is a primary bottleneck causing failure when agents encounter novel tasks.",
+        "what_existing_methods_may_miss": "Existing methods often evaluate on similar tasks, missing the generalization gap.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "To what extent does task novelty exposure during training improve policy generalization and reduce routing failure on unseen tasks?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies causal effect of training diversity on policy quality, informing data collection strategies."
+      },
+      "hypothesis": {
+        "statement": "Coding agents trained on a diverse set of tasks with varying novelty levels exhibit lower failure rates on unseen novel tasks compared to agents trained on a narrow set of similar tasks.",
+        "predicted_effect": "Higher task novelty diversity in training reduces routing failure on novel tasks."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train two groups of coding agents: one on tasks with low novelty diversity (all tasks similar to each other) and another on tasks with high novelty diversity (tasks spanning a wide range of novelty). Then evaluate both groups on a set of unseen novel tasks (tasks distinct from any training task). Measure failure rate, defined as the proportion of tasks where tool-use routing leads to suboptimal outcome (e.g., incorrect code, excessive cost).",
+        "independent_variables": [
+          "training novelty diversity (low vs high)"
+        ],
+        "dependent_variables": [
+          "failure rate on unseen novel tasks"
+        ],
+        "controls": [
+          "same agent architecture",
+          "same set of tools",
+          "same evaluation tasks",
+          "same training budget (number of training tasks)",
+          "same random seed"
+        ],
+        "falsifying_observation": "The high novelty diversity group does not have a statistically significantly lower failure rate than the low novelty diversity group."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "High novelty diversity group has a statistically significantly lower failure rate on unseen novel tasks compared to low novelty diversity group."
+        ],
+        "rejects_hypothesis": [
+          "High novelty diversity group has a failure rate that is similar to or higher than the low novelty diversity group."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (i.e., no improvement from novelty diversity), then the assumption that the routing policy is primarily learned from prior experience may be insufficient.",
+        "assumption_to_revise": "The assumption 'The agent's routing policy is learned from prior experience or predefined heuristics' may need to be refined to account for other factors such as tool specification accuracy or exploration strategies.",
+        "next_question": "What other factors (e.g., tool specification accuracy, exploration rate) more strongly influence routing failure on novel tasks?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Dynamically adjusting the exploration rate based on task novelty and cost-per-invocation reduces routing failure in coding agents, compared to fixed exploration rate policies.",
+      "independent_variables": [
+        "Exploration adjustment strategy (dynamic vs fixed epsilon=0.2)",
+        "Task novelty (low vs high)",
+        "Cost-per-invocation (low vs high)"
+      ],
+      "dependent_variables": [
+        "Failure rate (proportion of tasks where tool selection leads to failure)",
+        "Average cost incurred",
+        "Task completion time"
+      ],
+      "controlled_variables": [
+        "Same set of available tools with known specifications",
+        "Same base policy learning algorithm (e.g., Q-learning)",
+        "Same set of coding subtasks per condition (e.g., 100 tasks per condition)",
+        "Random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed exploration rate (epsilon=0.2)",
+          "description": "Agent uses constant exploration rate of 0.2"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate",
+          "definition": "Proportion of tasks where the chosen tool leads to incorrect code or task abandonment"
+        },
+        {
+          "name": "Average cost",
+          "definition": "Mean cost per task"
+        },
+        {
+          "name": "Completion time",
+          "definition": "Mean time per task"
+        }
+      ],
+      "expected_result": "Dynamic adjustment yields lower failure rate than fixed rate under high novelty and high cost, and comparable or slightly lower under low novelty and low cost.",
+      "falsifying_result": "Dynamic adjustment does not show statistically significant lower failure rate than fixed rate in the high novelty-high cost condition, or it shows higher failure rate in the low novelty-low cost condition.",
+      "minimum_viable_experiment": "Implement a coding agent with dynamic exploration rate (proportional to novelty score and inverse to cost). Test on 100 coding subtasks: 50 with high novelty and high cost, 50 with low novelty and low cost. Compare failure rates using a two-proportion z-test (α=0.05).",
+      "risks_and_confounds": [
+        "Novelty score definition may be imperfect",
+        "Cost-per-invocation values may not be realistic",
+        "Agent policy learning may have variance",
+        "Number of tasks per condition may be insufficient to detect small effect sizes"
+      ]
+    },
+    {
+      "hypothesis": "Under tight time budgets, the failure rate of tool-use routing in coding agents follows a U-shaped curve as a function of decision time, with a unique optimal decision time that minimizes failure.",
+      "independent_variables": [
+        "decision time (time budget for tool selection)"
+      ],
+      "dependent_variables": [
+        "failure rate (proportion of tasks resulting in incorrect code or task abandonment)"
+      ],
+      "controlled_variables": [
+        "task difficulty distribution",
+        "agent routing policy",
+        "tool set specifications",
+        "cost per tool invocation",
+        "error tolerance threshold"
+      ],
+      "baselines": [
+        {
+          "name": "random tool selection",
+          "description": "Agent selects a tool uniformly at random, ignoring task context."
+        },
+        {
+          "name": "fixed shortest decision time",
+          "description": "Agent uses the minimum possible decision time (e.g., 0.1s) for all tasks."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure rate",
+          "definition": "Number of tasks where the agent produces incorrect code or abandons the task, divided by the total number of tasks, for each decision time setting."
+        }
+      ],
+      "expected_result": "Failure rate is highest at the shortest and longest decision times, with a clear minimum at an intermediate time.",
+      "falsifying_result": "Failure rate does not achieve a minimum at an intermediate decision time; it either decreases monotonically, increases monotonically, or remains constant across decision times.",
+      "minimum_viable_experiment": "Simulate a coding agent with a fixed set of tools (e.g., code interpreter, web search, file editor) and a set of coding tasks of varying complexity. For each task, vary the allowed decision time for tool selection among at least 5 levels (e.g., 0.1s, 0.5s, 1s, 2s, 5s). Repeat at least 100 trials per time budget. Measure the failure rate for each time budget and plot the curve.",
+      "risks_and_confounds": [
+        "Task complexity variation may interact with decision time effect; ensure proper randomization or stratification.",
+        "Agent's routing policy may adapt over time in repeated trials; use a fixed pre-trained policy to avoid learning effects.",
+        "Tool execution time may itself depend on decision time if agents are aware of time pressure; ensure time budget is strictly for decision, not execution.",
+        "Failure definition may be subjective; use objective criteria like test pass/fail or code compilation success."
+      ]
+    },
+    {
+      "hypothesis": "Coding agents trained on a diverse set of tasks with varying novelty levels exhibit lower failure rates on unseen novel tasks compared to agents trained on a narrow set of similar tasks.",
+      "independent_variables": [
+        "training novelty diversity (low vs high)"
+      ],
+      "dependent_variables": [
+        "failure rate on unseen novel tasks"
+      ],
+      "controlled_variables": [
+        "same agent architecture",
+        "same set of tools",
+        "same evaluation tasks",
+        "same training budget (number of training tasks)",
+        "same random seed"
+      ],
+      "baselines": [
+        {
+          "name": "random routing policy",
+          "description": "Agent selects tools uniformly at random without any training."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure_rate",
+          "definition": "Proportion of tasks where tool-use routing leads to a suboptimal outcome (e.g., incorrect code, excessive cost, or task abandonment)."
+        }
+      ],
+      "expected_result": "The high novelty diversity group has a statistically significantly lower failure rate on unseen novel tasks compared to the low novelty diversity group.",
+      "falsifying_result": "The high novelty diversity group does not achieve a statistically significantly lower failure rate than the low novelty diversity group; the rates are similar or the high diversity group performs worse.",
+      "minimum_viable_experiment": "Train two groups of coding agents: one on tasks with low novelty diversity (all tasks similar to each other) and another on tasks with high novelty diversity (tasks spanning a wide range of novelty). Both groups are trained on the same number of tasks. Then evaluate both groups on a held-out set of unseen novel tasks (tasks distinct from any training task). Compare failure rates using a statistical test (e.g., t-test or Mann-Whitney U) with a significance level of 0.05.",
+      "risks_and_confounds": [
+        "Ambiguity in defining 'novelty' – the novelty scaling must be meaningful and operationalized consistently.",
+        "Potential differences in exploration rate during evaluation could confound results; agents may adapt different exploration strategies not controlled for.",
+        "Small sample size may lead to insufficient statistical power; need to ensure adequate number of evaluation tasks and trials.",
+        "Training tasks may not uniformly cover the novelty space, leading to spurious conclusions.",
+        "The same random seed may not fully control for stochasticity in agent behavior; multiple seeds should be considered."
+      ]
+    },
+    {
+      "hypothesis": "An online tool characterization module that updates tool_spec_accuracy from invocation feedback reduces routing failures caused by inaccurate specifications in coding agents.",
+      "independent_variables": [
+        "Presence of online tool characterization module",
+        "Task novelty (low vs high)"
+      ],
+      "dependent_variables": [
+        "Failure rate (proportion of tasks with incorrect code or exceeding cost/time limits)",
+        "Average cost per task",
+        "Average time per task"
+      ],
+      "controlled_variables": [
+        "Same set of coding tasks (including tasks with ambiguous tool specifications)",
+        "Same base agent architecture (e.g., same LLM and tool set)",
+        "Random seed initialization",
+        "Identical training data for the routing policy prior to experiment"
+      ],
+      "baselines": [
+        {
+          "name": "Control agent",
+          "description": "The same coding agent without the online tool characterization module."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate",
+          "definition": "Proportion of tasks where the agent produces incorrect code or exceeds predefined cost/time limits."
+        },
+        {
+          "name": "Average cost per task",
+          "definition": "Mean computational cost incurred per task (e.g., number of tool invocations or time spent)."
+        },
+        {
+          "name": "Average time per task",
+          "definition": "Mean wall-clock time taken per task."
+        }
+      ],
+      "expected_result": "The experimental agent (with module) shows a lower failure rate compared to the control, especially on high-novelty tasks. The improvement is at least 30% reduction in failure rate, and tool_spec_accuracy metric improves over time.",
+      "falsifying_result": "No statistically significant reduction in failure rate between experimental and control, or the improvement is less than 10%.",
+      "minimum_viable_experiment": "Compare two versions of a coding agent on a benchmark of coding tasks (e.g., 100 tasks from SWE-bench or custom) that include subtasks requiring tools with potentially ambiguous specifications. Both agents share the same base architecture and initial routing policy. The experimental agent includes an online tool characterization module that updates tool_spec_accuracy based on invocation feedback. Run multiple trials with different random seeds. Measure failure rate, average cost, and average time.",
+      "risks_and_confounds": [
+        "Noisy feedback may cause the module to learn incorrect specifications, potentially increasing failures.",
+        "The module may introduce overhead that impacts time or cost metrics.",
+        "Task novelty may not be sufficiently varied to observe the effect.",
+        "The baseline agent might already have good performance, making improvement hard to detect."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This package presents a first-principles analysis of tool-use routing failures in coding agents, decomposing the problem into primitive definitions, assumptions, tradeoffs, and a causal mechanism model. It identifies four key tensions and proposes four corresponding research questions with experiments. The work is systematic, well-structured, and highly testable, contributing a clear framework for studying routing failures. However, the novelty of the individual mechanisms and experiments is moderate, as similar tradeoffs (exploration-exploitation, speed-accuracy, overfitting, specification uncertainty) are well-studied in reinforcement learning and multi-armed bandits, though their application to coding agents is timely.",
+    "strengths": [
+      "Rigorous first-principles decomposition with clear primitive definitions and explicit assumptions.",
+      "Comprehensive mechanism model with a causal chain and identified bottlenecks.",
+      "High falsifiability: each hypothesis has a well-defined minimal decisive test and falsifying observation.",
+      "Practical relevance: addresses a real bottleneck in coding agent performance.",
+      "Detailed experiment plans with multiple controlled variables and baselines."
+    ],
+    "weaknesses": [
+      "Moderate novelty: the tradeoffs (exploration vs. exploitation, speed vs. accuracy, overfitting, specification uncertainty) are classic RL/bandit concepts; the contribution lies more in framing than new mechanisms.",
+      "Experiments may have confounds: for example, the dynamic exploration rate experiment does not compare to adaptive exploration methods beyond fixed epsilon (e.g., epsilon-decay, UCB, Thompson sampling).",
+      "Operationalization of 'novelty' and 'task complexity' is not fully specified, risking ambiguity in replication.",
+      "The speed-accuracy curve experiment assumes a single optimal time, but the curve shape may depend on task distribution; the baseline of random selection is weak.",
+      "Some hypotheses (e.g., T4 online tool characterization) rely on a module that is not described in sufficient detail, making reproducibility uncertain."
+    ],
+    "questions": [
+      "How does the proposed dynamic exploration rate differ from standard adaptive epsilon-greedy or softmax policies in RL? What specific novelty does it bring beyond adjusting epsilon based on novelty and cost?",
+      "In the speed-accuracy experiment, how do you ensure that the decision time is the only variable affecting failure rate, controlling for decision quality differences due to policy?",
+      "Can you provide an exact formula or algorithm for the 'online tool characterization module' so that the experiment is precisely reproducible?"
+    ],
+    "missing_baselines": [
+      "For the dynamic exploration experiment: include baselines like epsilon-greedy with decay, UCB, and Thompson sampling, which also adapt exploration.",
+      "For the speed-accuracy experiment: compare to a heuristic baseline 'choose the fastest tool' and a baseline 'choose the tool that maximizes expected accuracy under a time budget'.",
+      "For the training diversity experiment: include a curriculum learning baseline where tasks are ordered by novelty.",
+      "For the online tool characterization experiment: compare to a policy that uses a fixed, more conservative tool specification or a meta-learning approach that updates the policy directly."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient novelty",
+    "root_cause": "The research reproduces standard RL tradeoffs (exploration-exploitation, speed-accuracy, overfitting, specification uncertainty) without isolating a domain-specific mechanism or boundary condition unique to coding agents.",
+    "violated_principle": "First-principles research should derive a mechanism that is not merely application of general theories but reveals a novel interaction or threshold specific to the domain.",
+    "new_or_updated_principle": "A well-formed first-principles research question must isolate a mechanism or failure regime that is distinct to the target domain, often arising from the interaction of multiple bottlenecks (e.g., policy overfitting × ambiguous tool specifications).",
+    "new_or_updated_skill": "Ability to synthesize multiple bottlenecks into a novel predictive boundary (e.g., identifying conditions where tool-spec ambiguity dominates over policy overfitting) rather than testing each in isolation.",
+    "regression_test": "Given a research package, check whether the proposed mechanism is a direct combination of known generic tradeoffs without a novel interaction or domain-specific boundary; if so, flag as insufficiently novel."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

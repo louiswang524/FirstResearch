@@ -1,0 +1,1085 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable capability or procedure that an agent can execute to achieve a specific outcome, typically learned or programmed.",
+        "why_primitive": "It is the fundamental unit of agent behavior; all decisions about discovery vs. composition revolve around what constitutes a skill."
+      },
+      {
+        "name": "Skill Composition",
+        "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a new task without modifying the skills themselves.",
+        "why_primitive": "Represents the alternative to discovery; understanding composition is necessary to compare when discovery is preferable."
+      },
+      {
+        "name": "Skill Discovery",
+        "definition": "The process of creating a new skill de novo, which may involve learning from experience, exploration, or external knowledge acquisition.",
+        "why_primitive": "The action of acquiring a new skill is the core decision variable; its cost and benefit are central to the trade-off."
+      },
+      {
+        "name": "Task Novelty",
+        "definition": "The degree to which a given task differs from tasks that can be solved by composing existing skills, measured along dimensions such as goals, actions, or environmental context.",
+        "why_primitive": "It quantifies the necessity for discovery; if task novelty is zero, composition suffices; high novelty may require discovery."
+      },
+      {
+        "name": "Cognitive Load",
+        "definition": "The computational and memory resources required to represent, maintain, and plan with existing skills and their compositions.",
+        "why_primitive": "Limits the feasibility of composition; excessive cognitive load may force discovery to simplify the agent's internal representation."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills and their compositions are composable in a predictable manner, meaning the outcome of composing known skills can be estimated without full execution.",
+        "rationale": "This allows the agent to predict whether composition will succeed before committing resources, enabling cost-benefit analysis.",
+        "possible_failure": "If compositions have emergent behaviors or low predictability, the agent may incorrectly assess feasibility, leading to suboptimal decisions."
+      },
+      {
+        "assumption": "The cost of skill discovery is always positive and varies with task structure and environment, but is independent of the agent's current skill set.",
+        "rationale": "Discovery requires additional resources (time, compute, data) beyond just executing compositions; this assumption simplifies the comparison.",
+        "possible_failure": "In practice, discovery cost may depend on existing skills (e.g., transfer learning), which could change the trade-off landscape."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Immediate efficiency vs. long-term generalization: Composition leverages existing skills for fast execution but may fail on novel tasks, while discovery builds new skills that improve future performance at a higher upfront cost.",
+        "variables": [
+          "task novelty",
+          "frequency of similar future tasks",
+          "cost per discovery"
+        ]
+      },
+      {
+        "tradeoff": "Cognitive load vs. skill diversity: Storing many skills increases load but enables more compositions; discovering a new skill may reduce load by replacing a complex sequence, but adds a new skill to the library.",
+        "variables": [
+          "number of skills",
+          "composition complexity",
+          "memory constraints"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. exploitation: Discovering a new skill is exploration with uncertain benefit, while composing is exploitation of known capabilities; the decision depends on the agent's uncertainty about the environment.",
+        "variables": [
+          "uncertainty of success",
+          "cost of failure",
+          "time horizon"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "TaskNovelty",
+        "role": "input",
+        "description": "The degree to which a task differs from those solvable by composing existing skills."
+      },
+      {
+        "name": "CompositionFeasibility",
+        "role": "mediator",
+        "description": "Whether the task can be solved by composing existing skills, given current skill library."
+      },
+      {
+        "name": "ExpectedUtilityComposition",
+        "role": "mediator",
+        "description": "Expected net benefit of composing existing skills, considering cognitive load and success probability."
+      },
+      {
+        "name": "CostOfDiscovery",
+        "role": "input",
+        "description": "The cost (time, compute, data) to discover a new skill."
+      },
+      {
+        "name": "FrequencySimilarFutureTasks",
+        "role": "input",
+        "description": "Expected frequency of similar tasks in the future."
+      },
+      {
+        "name": "ExpectedUtilityDiscovery",
+        "role": "mediator",
+        "description": "Expected net benefit of discovering a new skill, including long-term gains and discovery cost."
+      },
+      {
+        "name": "Decision",
+        "role": "output",
+        "description": "The agent's choice: 'discover' or 'compose'."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Step 1",
+        "source": "TaskNovelty",
+        "relation": "negatively affects",
+        "target": "CompositionFeasibility",
+        "explanation": "Higher task novelty reduces the likelihood that existing skills can be composed to solve the task."
+      },
+      {
+        "step": "Step 2",
+        "source": "CompositionFeasibility",
+        "relation": "positively affects",
+        "target": "ExpectedUtilityComposition",
+        "explanation": "If composition is feasible, its expected utility increases; otherwise, it decreases."
+      },
+      {
+        "step": "Step 3",
+        "source": "CostOfDiscovery",
+        "relation": "negatively affects",
+        "target": "ExpectedUtilityDiscovery",
+        "explanation": "Higher discovery cost reduces the net benefit of discovery."
+      },
+      {
+        "step": "Step 4",
+        "source": "FrequencySimilarFutureTasks",
+        "relation": "positively affects",
+        "target": "ExpectedUtilityDiscovery",
+        "explanation": "If similar tasks are frequent, discovery's long-term value increases."
+      },
+      {
+        "step": "Step 5",
+        "source": "ExpectedUtilityComposition",
+        "relation": "comparison with",
+        "target": "ExpectedUtilityDiscovery",
+        "explanation": "The agent compares the two expected utilities to decide. If ExpectedUtilityDiscovery > ExpectedUtilityComposition, then discover; otherwise compose."
+      },
+      {
+        "step": "Step 6",
+        "source": "ExpectedUtilityComposition and ExpectedUtilityDiscovery",
+        "relation": "determines",
+        "target": "Decision",
+        "explanation": "The decision output is based on which expected utility is higher."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Unreliable composition feasibility estimation",
+        "why_it_matters": "If the agent cannot predict composition outcomes accurately, it may choose composition when discovery is needed or vice versa, leading to failures."
+      },
+      {
+        "bottleneck": "High cost of discovery",
+        "why_it_matters": "Even when discovery is beneficial, if the cost is too high, the agent may be forced to compose suboptimal solutions, limiting performance."
+      },
+      {
+        "bottleneck": "Cognitive load constraints",
+        "why_it_matters": "If the skill library is too large, composition planning becomes expensive; discovery may be needed to simplify the library, but the agent may not have enough resources to discover."
+      }
+    ],
+    "mechanism_summary": "The decision to discover or compose a skill is driven by comparing the expected utilities of both options. Task novelty reduces composition feasibility, lowering its utility. Discovery utility depends on its cost and the frequency of similar future tasks. Cognitive load acts as a background constraint, affecting the planning cost of composition and the potential benefit of simplifying the library. The agent selects the option with higher expected utility."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that skill compositions have predictable outcomes may fail when compositions exhibit emergent behaviors, making the cost-benefit analysis unreliable.",
+      "derived_from": [
+        "Assumptions: Skills and their compositions are composable in a predictable manner",
+        "Mechanism: Unreliable composition feasibility estimation bottleneck"
+      ],
+      "why_it_matters": "If compositions have emergent properties, the agent may incorrectly assess feasibility, leading to suboptimal decisions between discovery and composition.",
+      "what_existing_methods_may_miss": "Existing approaches often assume composition predictability; if this fails, the entire trade-off framework collapses.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a tension between leveraging existing skills for immediate efficiency (composition) and investing in new skills for long-term generalization (discovery), where the optimal choice depends on future task frequency.",
+      "derived_from": [
+        "Core Tradeoffs: Immediate efficiency vs. long-term generalization",
+        "Variables: FrequencySimilarFutureTasks"
+      ],
+      "why_it_matters": "This is the central decision for an agent; getting it wrong can lead to suboptimal performance over time.",
+      "what_existing_methods_may_miss": "Many methods do not explicitly model future task distribution, leading to myopic decisions.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Adding new skills increases cognitive load, which may impede composition planning, yet failing to add a new skill (opting for composition) may also increase load by requiring complex sequences.",
+      "derived_from": [
+        "Core Tradeoffs: Cognitive load vs. skill diversity",
+        "Bottlenecks: Cognitive load constraints"
+      ],
+      "why_it_matters": "If cognitive load is a limiting factor, the agent may need to discover a skill to simplify planning, but discovery itself costs resources.",
+      "what_existing_methods_may_miss": "Existing models often ignore memory constraints or assume unlimited capacity.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does the presence of emergent properties in skill compositions significantly reduce the agent's ability to accurately estimate composition feasibility, leading to a higher rate of suboptimal decisions between discovery and composition?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the impact of emergent composition behaviors on the reliability of feasibility estimation, revealing when the assumption of predictability fails."
+    },
+    {
+      "question": "Can an agent that explicitly models the frequency of similar future tasks outperform an agent using a myopic decision rule in cumulative task completion over a distribution of tasks?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Demonstrate the necessity of considering future task frequency for optimal trade-off between immediate efficiency and long-term generalization."
+    },
+    {
+      "question": "Under what cognitive load conditions does the cost of discovery outweigh the benefit of reducing composition planning complexity, shifting the optimal strategy from discovery to composition?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Identify thresholds of cognitive load that determine when discovery is beneficial despite its cost, informing adaptive skill management."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability or procedure that an agent can execute to achieve a specific outcome, typically learned or programmed.",
+          "why_primitive": "It is the fundamental unit of agent behavior; all decisions about discovery vs. composition revolve around what constitutes a skill."
+        },
+        {
+          "name": "Skill Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a new task without modifying the skills themselves.",
+          "why_primitive": "Represents the alternative to discovery; understanding composition is necessary to compare when discovery is preferable."
+        },
+        {
+          "name": "Skill Discovery",
+          "definition": "The process of creating a new skill de novo, which may involve learning from experience, exploration, or external knowledge acquisition.",
+          "why_primitive": "The action of acquiring a new skill is the core decision variable; its cost and benefit are central to the trade-off."
+        },
+        {
+          "name": "Task Novelty",
+          "definition": "The degree to which a given task differs from tasks that can be solved by composing existing skills, measured along dimensions such as goals, actions, or environmental context.",
+          "why_primitive": "It quantifies the necessity for discovery; if task novelty is zero, composition suffices; high novelty may require discovery."
+        },
+        {
+          "name": "Cognitive Load",
+          "definition": "The computational and memory resources required to represent, maintain, and plan with existing skills and their compositions.",
+          "why_primitive": "Limits the feasibility of composition; excessive cognitive load may force discovery to simplify the agent's internal representation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills and their compositions are composable in a predictable manner, meaning the outcome of composing known skills can be estimated without full execution.",
+          "rationale": "This allows the agent to predict whether composition will succeed before committing resources, enabling cost-benefit analysis.",
+          "possible_failure": "If compositions have emergent behaviors or low predictability, the agent may incorrectly assess feasibility, leading to suboptimal decisions."
+        },
+        {
+          "assumption": "The cost of skill discovery is always positive and varies with task structure and environment, but is independent of the agent's current skill set.",
+          "rationale": "Discovery requires additional resources (time, compute, data) beyond just executing compositions; this assumption simplifies the comparison.",
+          "possible_failure": "In practice, discovery cost may depend on existing skills (e.g., transfer learning), which could change the trade-off landscape."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskNovelty",
+            "role": "input",
+            "description": "The degree to which a task differs from those solvable by composing existing skills."
+          },
+          {
+            "name": "CompositionFeasibility",
+            "role": "mediator",
+            "description": "Whether the task can be solved by composing existing skills, given current skill library."
+          },
+          {
+            "name": "ExpectedUtilityComposition",
+            "role": "mediator",
+            "description": "Expected net benefit of composing existing skills, considering cognitive load and success probability."
+          },
+          {
+            "name": "CostOfDiscovery",
+            "role": "input",
+            "description": "The cost (time, compute, data) to discover a new skill."
+          },
+          {
+            "name": "FrequencySimilarFutureTasks",
+            "role": "input",
+            "description": "Expected frequency of similar tasks in the future."
+          },
+          {
+            "name": "ExpectedUtilityDiscovery",
+            "role": "mediator",
+            "description": "Expected net benefit of discovering a new skill, including long-term gains and discovery cost."
+          },
+          {
+            "name": "Decision",
+            "role": "output",
+            "description": "The agent's choice: 'discover' or 'compose'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Step 1",
+            "source": "TaskNovelty",
+            "relation": "negatively affects",
+            "target": "CompositionFeasibility",
+            "explanation": "Higher task novelty reduces the likelihood that existing skills can be composed to solve the task."
+          },
+          {
+            "step": "Step 2",
+            "source": "CompositionFeasibility",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityComposition",
+            "explanation": "If composition is feasible, its expected utility increases; otherwise, it decreases."
+          },
+          {
+            "step": "Step 3",
+            "source": "CostOfDiscovery",
+            "relation": "negatively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "Higher discovery cost reduces the net benefit of discovery."
+          },
+          {
+            "step": "Step 4",
+            "source": "FrequencySimilarFutureTasks",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "If similar tasks are frequent, discovery's long-term value increases."
+          },
+          {
+            "step": "Step 5",
+            "source": "ExpectedUtilityComposition",
+            "relation": "comparison with",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "The agent compares the two expected utilities to decide. If ExpectedUtilityDiscovery > ExpectedUtilityComposition, then discover; otherwise compose."
+          },
+          {
+            "step": "Step 6",
+            "source": "ExpectedUtilityComposition and ExpectedUtilityDiscovery",
+            "relation": "determines",
+            "target": "Decision",
+            "explanation": "The decision output is based on which expected utility is higher."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Unreliable composition feasibility estimation",
+            "why_it_matters": "If the agent cannot predict composition outcomes accurately, it may choose composition when discovery is needed or vice versa, leading to failures."
+          },
+          {
+            "bottleneck": "High cost of discovery",
+            "why_it_matters": "Even when discovery is beneficial, if the cost is too high, the agent may be forced to compose suboptimal solutions, limiting performance."
+          },
+          {
+            "bottleneck": "Cognitive load constraints",
+            "why_it_matters": "If the skill library is too large, composition planning becomes expensive; discovery may be needed to simplify the library, but the agent may not have enough resources to discover."
+          }
+        ],
+        "mechanism_summary": "The decision to discover or compose a skill is driven by comparing the expected utilities of both options. Task novelty reduces composition feasibility, lowering its utility. Discovery utility depends on its cost and the frequency of similar future tasks. Cognitive load acts as a background constraint, affecting the planning cost of composition and the potential benefit of simplifying the library. The agent selects the option with higher expected utility."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that skill compositions have predictable outcomes may fail when compositions exhibit emergent behaviors, making the cost-benefit analysis unreliable.",
+        "derived_from": [
+          "Assumptions: Skills and their compositions are composable in a predictable manner",
+          "Mechanism: Unreliable composition feasibility estimation bottleneck"
+        ],
+        "why_it_matters": "If compositions have emergent properties, the agent may incorrectly assess feasibility, leading to suboptimal decisions between discovery and composition.",
+        "what_existing_methods_may_miss": "Existing approaches often assume composition predictability; if this fails, the entire trade-off framework collapses.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the presence of emergent properties in skill compositions significantly reduce the agent's ability to accurately estimate composition feasibility, leading to a higher rate of suboptimal decisions between discovery and composition?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantify the impact of emergent composition behaviors on the reliability of feasibility estimation, revealing when the assumption of predictability fails."
+      },
+      "hypothesis": {
+        "statement": "The presence of emergent properties in skill compositions significantly reduces the agent's accuracy in estimating composition feasibility, which in turn increases the rate of suboptimal decisions between discovery and composition.",
+        "predicted_effect": "When compositions have emergent properties, agents exhibit lower feasibility estimation accuracy and a higher proportion of suboptimal decisions (e.g., choosing composition when discovery is better, or vice versa) compared to when compositions are predictable."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent tasked with solving a series of problems either by composing existing skills or discovering new ones. In the 'emergence' condition, some skill combinations produce unanticipated outcomes that change the feasibility of tasks; in the 'predictable' condition, all combinations behave as expected. The agent must estimate feasibility before deciding. Compare the accuracy of feasibility estimates and the optimality of decisions between conditions.",
+        "independent_variables": [
+          "Presence of emergent properties in skill compositions (binary: emergence present vs. absent)"
+        ],
+        "dependent_variables": [
+          "Accuracy of composition feasibility estimation (percentage of correct predictions)",
+          "Rate of suboptimal decisions (percentage of choices not matching the oracle's optimal choice)"
+        ],
+        "controls": [
+          "Same set of skills",
+          "Same task distribution",
+          "Same agent architecture and decision rule",
+          "Same discovery cost and future task frequency",
+          "Same amount of training or prior knowledge"
+        ],
+        "falsifying_observation": "If there is no statistically significant difference in feasibility estimation accuracy or suboptimal decision rate between the emergence and predictable conditions, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In the emergence condition, feasibility estimation accuracy is significantly lower than in the predictable condition.",
+          "In the emergence condition, the rate of suboptimal decisions is significantly higher than in the predictable condition.",
+          "The difference in suboptimal decision rates is mediated by the decrease in estimation accuracy."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in feasibility estimation accuracy between conditions.",
+          "No significant difference in suboptimal decision rates between conditions.",
+          "Estimation accuracy remains high even when emergent properties are present."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., emergent properties do not significantly reduce estimation accuracy or increase suboptimal decisions), then the assumption that emergent properties are a primary cause of poor feasibility estimation must be revised.",
+        "assumption_to_revise": "The assumption that 'skill compositions are composable in a predictable manner' is false only when emergent properties are present; but the test suggests that even with emergent properties, estimation might still be reliable, perhaps due to agent adaptation or low impact of emergence.",
+        "next_question": "What factors determine the impact of emergent properties on feasibility estimation? Specifically, does the magnitude or frequency of emergent behaviors affect estimation accuracy, or are agents able to learn to anticipate emergent outcomes?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability or procedure that an agent can execute to achieve a specific outcome, typically learned or programmed.",
+          "why_primitive": "It is the fundamental unit of agent behavior; all decisions about discovery vs. composition revolve around what constitutes a skill."
+        },
+        {
+          "name": "Skill Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a new task without modifying the skills themselves.",
+          "why_primitive": "Represents the alternative to discovery; understanding composition is necessary to compare when discovery is preferable."
+        },
+        {
+          "name": "Skill Discovery",
+          "definition": "The process of creating a new skill de novo, which may involve learning from experience, exploration, or external knowledge acquisition.",
+          "why_primitive": "The action of acquiring a new skill is the core decision variable; its cost and benefit are central to the trade-off."
+        },
+        {
+          "name": "Task Novelty",
+          "definition": "The degree to which a given task differs from tasks that can be solved by composing existing skills, measured along dimensions such as goals, actions, or environmental context.",
+          "why_primitive": "It quantifies the necessity for discovery; if task novelty is zero, composition suffices; high novelty may require discovery."
+        },
+        {
+          "name": "Cognitive Load",
+          "definition": "The computational and memory resources required to represent, maintain, and plan with existing skills and their compositions.",
+          "why_primitive": "Limits the feasibility of composition; excessive cognitive load may force discovery to simplify the agent's internal representation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills and their compositions are composable in a predictable manner, meaning the outcome of composing known skills can be estimated without full execution.",
+          "rationale": "This allows the agent to predict whether composition will succeed before committing resources, enabling cost-benefit analysis.",
+          "possible_failure": "If compositions have emergent behaviors or low predictability, the agent may incorrectly assess feasibility, leading to suboptimal decisions."
+        },
+        {
+          "assumption": "The cost of skill discovery is always positive and varies with task structure and environment, but is independent of the agent's current skill set.",
+          "rationale": "Discovery requires additional resources (time, compute, data) beyond just executing compositions; this assumption simplifies the comparison.",
+          "possible_failure": "In practice, discovery cost may depend on existing skills (e.g., transfer learning), which could change the trade-off landscape."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskNovelty",
+            "role": "input",
+            "description": "The degree to which a task differs from those solvable by composing existing skills."
+          },
+          {
+            "name": "CompositionFeasibility",
+            "role": "mediator",
+            "description": "Whether the task can be solved by composing existing skills, given current skill library."
+          },
+          {
+            "name": "ExpectedUtilityComposition",
+            "role": "mediator",
+            "description": "Expected net benefit of composing existing skills, considering cognitive load and success probability."
+          },
+          {
+            "name": "CostOfDiscovery",
+            "role": "input",
+            "description": "The cost (time, compute, data) to discover a new skill."
+          },
+          {
+            "name": "FrequencySimilarFutureTasks",
+            "role": "input",
+            "description": "Expected frequency of similar tasks in the future."
+          },
+          {
+            "name": "ExpectedUtilityDiscovery",
+            "role": "mediator",
+            "description": "Expected net benefit of discovering a new skill, including long-term gains and discovery cost."
+          },
+          {
+            "name": "Decision",
+            "role": "output",
+            "description": "The agent's choice: 'discover' or 'compose'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Step 1",
+            "source": "TaskNovelty",
+            "relation": "negatively affects",
+            "target": "CompositionFeasibility",
+            "explanation": "Higher task novelty reduces the likelihood that existing skills can be composed to solve the task."
+          },
+          {
+            "step": "Step 2",
+            "source": "CompositionFeasibility",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityComposition",
+            "explanation": "If composition is feasible, its expected utility increases; otherwise, it decreases."
+          },
+          {
+            "step": "Step 3",
+            "source": "CostOfDiscovery",
+            "relation": "negatively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "Higher discovery cost reduces the net benefit of discovery."
+          },
+          {
+            "step": "Step 4",
+            "source": "FrequencySimilarFutureTasks",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "If similar tasks are frequent, discovery's long-term value increases."
+          },
+          {
+            "step": "Step 5",
+            "source": "ExpectedUtilityComposition",
+            "relation": "comparison with",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "The agent compares the two expected utilities to decide. If ExpectedUtilityDiscovery > ExpectedUtilityComposition, then discover; otherwise compose."
+          },
+          {
+            "step": "Step 6",
+            "source": "ExpectedUtilityComposition and ExpectedUtilityDiscovery",
+            "relation": "determines",
+            "target": "Decision",
+            "explanation": "The decision output is based on which expected utility is higher."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Unreliable composition feasibility estimation",
+            "why_it_matters": "If the agent cannot predict composition outcomes accurately, it may choose composition when discovery is needed or vice versa, leading to failures."
+          },
+          {
+            "bottleneck": "High cost of discovery",
+            "why_it_matters": "Even when discovery is beneficial, if the cost is too high, the agent may be forced to compose suboptimal solutions, limiting performance."
+          },
+          {
+            "bottleneck": "Cognitive load constraints",
+            "why_it_matters": "If the skill library is too large, composition planning becomes expensive; discovery may be needed to simplify the library, but the agent may not have enough resources to discover."
+          }
+        ],
+        "mechanism_summary": "The decision to discover or compose a skill is driven by comparing the expected utilities of both options. Task novelty reduces composition feasibility, lowering its utility. Discovery utility depends on its cost and the frequency of similar future tasks. Cognitive load acts as a background constraint, affecting the planning cost of composition and the potential benefit of simplifying the library. The agent selects the option with higher expected utility."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a tension between leveraging existing skills for immediate efficiency (composition) and investing in new skills for long-term generalization (discovery), where the optimal choice depends on future task frequency.",
+        "derived_from": [
+          "Core Tradeoffs: Immediate efficiency vs. long-term generalization",
+          "Variables: FrequencySimilarFutureTasks"
+        ],
+        "why_it_matters": "This is the central decision for an agent; getting it wrong can lead to suboptimal performance over time.",
+        "what_existing_methods_may_miss": "Many methods do not explicitly model future task distribution, leading to myopic decisions.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Can an agent that explicitly models the frequency of similar future tasks outperform an agent using a myopic decision rule in cumulative task completion over a distribution of tasks?",
+        "question_type": "benchmark",
+        "source_tension": "T2",
+        "expected_contribution": "Demonstrate the necessity of considering future task frequency for optimal trade-off between immediate efficiency and long-term generalization."
+      },
+      "hypothesis": {
+        "statement": "An agent that explicitly models the frequency of similar future tasks will achieve higher cumulative task completion over a distribution of tasks compared to a myopic agent that only considers immediate utility.",
+        "predicted_effect": "The frequency-modeling agent will outperform the myopic agent in cumulative task completion, especially when tasks with high novelty appear frequently."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Two LLM agents are given a library of skills and a sequence of tasks from a distribution where task novelty and future frequency vary. One agent uses a decision rule that compares expected utility of discovery (including future frequency) vs. composition; the other uses a myopic rule (only immediate utility). Cumulative task completion (or total utility) is recorded over many tasks.",
+        "independent_variables": [
+          "Agent type (frequency-modeling vs myopic)",
+          "Frequency of similar future tasks (controlled by environment)"
+        ],
+        "dependent_variables": [
+          "Cumulative task completion rate",
+          "Total utility over the task sequence"
+        ],
+        "controls": [
+          "Same initial skill library",
+          "Same cost of discovery",
+          "Same cognitive load constraints",
+          "Same task distribution aside from frequency manipulation"
+        ],
+        "falsifying_observation": "The myopic agent achieves higher or equal cumulative task completion compared to the frequency-modeling agent across different future frequency conditions."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The frequency-modeling agent achieves higher cumulative task completion in environments where novel tasks are frequent.",
+          "The myopic agent struggles with novel tasks that require discovery, leading to lower long-term performance."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in performance between the two agents.",
+          "The myopic agent outperforms the frequency-modeling agent, especially when discovery costs are high or frequency estimates are noisy."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected, it suggests that explicit modeling of future frequency does not improve performance, possibly due to inaccurate estimation or that composition is always better.",
+        "assumption_to_revise": "The assumption that modeling future task frequency is beneficial for the trade-off between discovery and composition.",
+        "next_question": "Under what conditions does modeling future task frequency hurt performance compared to myopic decision rules?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability or procedure that an agent can execute to achieve a specific outcome, typically learned or programmed.",
+          "why_primitive": "It is the fundamental unit of agent behavior; all decisions about discovery vs. composition revolve around what constitutes a skill."
+        },
+        {
+          "name": "Skill Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a new task without modifying the skills themselves.",
+          "why_primitive": "Represents the alternative to discovery; understanding composition is necessary to compare when discovery is preferable."
+        },
+        {
+          "name": "Skill Discovery",
+          "definition": "The process of creating a new skill de novo, which may involve learning from experience, exploration, or external knowledge acquisition.",
+          "why_primitive": "The action of acquiring a new skill is the core decision variable; its cost and benefit are central to the trade-off."
+        },
+        {
+          "name": "Task Novelty",
+          "definition": "The degree to which a given task differs from tasks that can be solved by composing existing skills, measured along dimensions such as goals, actions, or environmental context.",
+          "why_primitive": "It quantifies the necessity for discovery; if task novelty is zero, composition suffices; high novelty may require discovery."
+        },
+        {
+          "name": "Cognitive Load",
+          "definition": "The computational and memory resources required to represent, maintain, and plan with existing skills and their compositions.",
+          "why_primitive": "Limits the feasibility of composition; excessive cognitive load may force discovery to simplify the agent's internal representation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills and their compositions are composable in a predictable manner, meaning the outcome of composing known skills can be estimated without full execution.",
+          "rationale": "This allows the agent to predict whether composition will succeed before committing resources, enabling cost-benefit analysis.",
+          "possible_failure": "If compositions have emergent behaviors or low predictability, the agent may incorrectly assess feasibility, leading to suboptimal decisions."
+        },
+        {
+          "assumption": "The cost of skill discovery is always positive and varies with task structure and environment, but is independent of the agent's current skill set.",
+          "rationale": "Discovery requires additional resources (time, compute, data) beyond just executing compositions; this assumption simplifies the comparison.",
+          "possible_failure": "In practice, discovery cost may depend on existing skills (e.g., transfer learning), which could change the trade-off landscape."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskNovelty",
+            "role": "input",
+            "description": "The degree to which a task differs from those solvable by composing existing skills."
+          },
+          {
+            "name": "CompositionFeasibility",
+            "role": "mediator",
+            "description": "Whether the task can be solved by composing existing skills, given current skill library."
+          },
+          {
+            "name": "ExpectedUtilityComposition",
+            "role": "mediator",
+            "description": "Expected net benefit of composing existing skills, considering cognitive load and success probability."
+          },
+          {
+            "name": "CostOfDiscovery",
+            "role": "input",
+            "description": "The cost (time, compute, data) to discover a new skill."
+          },
+          {
+            "name": "FrequencySimilarFutureTasks",
+            "role": "input",
+            "description": "Expected frequency of similar tasks in the future."
+          },
+          {
+            "name": "ExpectedUtilityDiscovery",
+            "role": "mediator",
+            "description": "Expected net benefit of discovering a new skill, including long-term gains and discovery cost."
+          },
+          {
+            "name": "Decision",
+            "role": "output",
+            "description": "The agent's choice: 'discover' or 'compose'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Step 1",
+            "source": "TaskNovelty",
+            "relation": "negatively affects",
+            "target": "CompositionFeasibility",
+            "explanation": "Higher task novelty reduces the likelihood that existing skills can be composed to solve the task."
+          },
+          {
+            "step": "Step 2",
+            "source": "CompositionFeasibility",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityComposition",
+            "explanation": "If composition is feasible, its expected utility increases; otherwise, it decreases."
+          },
+          {
+            "step": "Step 3",
+            "source": "CostOfDiscovery",
+            "relation": "negatively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "Higher discovery cost reduces the net benefit of discovery."
+          },
+          {
+            "step": "Step 4",
+            "source": "FrequencySimilarFutureTasks",
+            "relation": "positively affects",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "If similar tasks are frequent, discovery's long-term value increases."
+          },
+          {
+            "step": "Step 5",
+            "source": "ExpectedUtilityComposition",
+            "relation": "comparison with",
+            "target": "ExpectedUtilityDiscovery",
+            "explanation": "The agent compares the two expected utilities to decide. If ExpectedUtilityDiscovery > ExpectedUtilityComposition, then discover; otherwise compose."
+          },
+          {
+            "step": "Step 6",
+            "source": "ExpectedUtilityComposition and ExpectedUtilityDiscovery",
+            "relation": "determines",
+            "target": "Decision",
+            "explanation": "The decision output is based on which expected utility is higher."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Unreliable composition feasibility estimation",
+            "why_it_matters": "If the agent cannot predict composition outcomes accurately, it may choose composition when discovery is needed or vice versa, leading to failures."
+          },
+          {
+            "bottleneck": "High cost of discovery",
+            "why_it_matters": "Even when discovery is beneficial, if the cost is too high, the agent may be forced to compose suboptimal solutions, limiting performance."
+          },
+          {
+            "bottleneck": "Cognitive load constraints",
+            "why_it_matters": "If the skill library is too large, composition planning becomes expensive; discovery may be needed to simplify the library, but the agent may not have enough resources to discover."
+          }
+        ],
+        "mechanism_summary": "The decision to discover or compose a skill is driven by comparing the expected utilities of both options. Task novelty reduces composition feasibility, lowering its utility. Discovery utility depends on its cost and the frequency of similar future tasks. Cognitive load acts as a background constraint, affecting the planning cost of composition and the potential benefit of simplifying the library. The agent selects the option with higher expected utility."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Adding new skills increases cognitive load, which may impede composition planning, yet failing to add a new skill (opting for composition) may also increase load by requiring complex sequences.",
+        "derived_from": [
+          "Core Tradeoffs: Cognitive load vs. skill diversity",
+          "Bottlenecks: Cognitive load constraints"
+        ],
+        "why_it_matters": "If cognitive load is a limiting factor, the agent may need to discover a skill to simplify planning, but discovery itself costs resources.",
+        "what_existing_methods_may_miss": "Existing models often ignore memory constraints or assume unlimited capacity.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Under what cognitive load conditions does the cost of discovery outweigh the benefit of reducing composition planning complexity, shifting the optimal strategy from discovery to composition?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identify thresholds of cognitive load that determine when discovery is beneficial despite its cost, informing adaptive skill management."
+      },
+      "hypothesis": {
+        "statement": "There exists a cognitive load threshold (e.g., memory usage > 80%) above which the benefit of reducing composition planning complexity outweighs the cost of discovery, making discovery the optimal strategy.",
+        "predicted_effect": "As cognitive load increases, the frequency of discovery decisions increases, especially when discovery cost is low."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent performing a sequence of tasks. Vary cognitive load (e.g., memory buffer size, planning token budget) and discovery cost. Record the agent's decision to discover a new skill or compose existing skills.",
+        "independent_variables": [
+          "Cognitive load (e.g., memory capacity of 10, 50, 100 units)",
+          "Cost of discovery (e.g., low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Proportion of tasks where agent chooses discovery over composition"
+        ],
+        "controls": [
+          "Task novelty (fixed at moderate level)",
+          "Skill library size (fixed at 10 skills)",
+          "Frequency of similar future tasks (fixed at low)"
+        ],
+        "falsifying_observation": "The proportion of discovery choices does not increase with cognitive load, or discovery is never chosen even at high load and low discovery cost."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "High cognitive load conditions (e.g., memory > 80% full) lead to significantly more discovery choices compared to low load conditions.",
+          "Lower discovery cost amplifies the effect of cognitive load on discovery frequency."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in discovery frequency across cognitive load levels.",
+          "Discovery is never chosen regardless of cognitive load, even when cost is low."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted threshold effect is not observed (e.g., discovery frequency does not increase with cognitive load), we reject the hypothesis that cognitive load alone drives the decision.",
+        "assumption_to_revise": "The assumption that cognitive load significantly impacts composition planning complexity may be invalid; perhaps task novelty or other factors dominate.",
+        "next_question": "Does task novelty moderate the effect of cognitive load on the discovery-composition decision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The presence of emergent properties in skill compositions significantly reduces the agent's accuracy in estimating composition feasibility, which in turn increases the rate of suboptimal decisions between discovery and composition.",
+      "independent_variables": [
+        "Presence of emergent properties in skill compositions (binary: emergence present vs. absent)"
+      ],
+      "dependent_variables": [
+        "Accuracy of composition feasibility estimation (percentage of correct predictions)",
+        "Rate of suboptimal decisions (percentage of choices not matching the oracle's optimal choice)"
+      ],
+      "controlled_variables": [
+        "Same set of skills",
+        "Same task distribution",
+        "Same agent architecture and decision rule",
+        "Same discovery cost and future task frequency",
+        "Same amount of training or prior knowledge"
+      ],
+      "baselines": [
+        {
+          "name": "Predictable condition",
+          "description": "Condition where all skill combinations behave as expected, i.e., no emergent properties."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Feasibility Estimation Accuracy",
+          "definition": "Percentage of tasks for which the agent's predicted composition feasibility matches the actual outcome (whether composition succeeds or fails)."
+        },
+        {
+          "name": "Suboptimal Decision Rate",
+          "definition": "Percentage of tasks where the agent's choice (discover or compose) differs from the oracle's optimal choice, given full knowledge of outcomes."
+        }
+      ],
+      "expected_result": "In the emergence condition, feasibility estimation accuracy is significantly lower than in the predictable condition, and the rate of suboptimal decisions is significantly higher than in the predictable condition.",
+      "falsifying_result": "No statistically significant difference in feasibility estimation accuracy or suboptimal decision rate between the emergence and predictable conditions.",
+      "minimum_viable_experiment": "Simulate an agent that solves a series of problems either by composing existing skills or discovering new ones. In the 'emergence' condition, some skill combinations produce unanticipated outcomes that change the feasibility of tasks; in the 'predictable' condition, all combinations behave as expected. The agent estimates feasibility before deciding. Each condition includes the same set of tasks and skills. The number of tasks per condition should be sufficient for statistical testing (e.g., at least 100 tasks per condition). The agent's feasibility estimates and decisions are recorded, and accuracy and suboptimal decision rates are computed and compared between conditions using appropriate statistical tests (e.g., t-test or chi-square).",
+      "risks_and_confounds": [
+        "Order effects: Tasks presented in a fixed order might introduce learning effects; randomize task order across conditions.",
+        "Task difficulty variation: Ensure tasks across conditions are matched in difficulty and novelty to avoid confounding.",
+        "Agent adaptation: Agents might learn to anticipate emergent outcomes over time; consider blocking or comparing early vs. late trials.",
+        "Choice of emergence magnitude: The effect may depend on the strength or frequency of emergent properties; use a calibrated set of emergent behaviors."
+      ]
+    },
+    {
+      "hypothesis": "An agent that explicitly models the frequency of similar future tasks will achieve higher cumulative task completion over a distribution of tasks compared to a myopic agent that only considers immediate utility.",
+      "independent_variables": [
+        "Agent decision rule: frequency-modeling vs. myopic",
+        "Task environment type: high future frequency vs. low future frequency of similar tasks"
+      ],
+      "dependent_variables": [
+        "Cumulative task completion rate",
+        "Cumulative utility over the task sequence"
+      ],
+      "controlled_variables": [
+        "Initial skill library",
+        "Cost of discovery",
+        "Cognitive load constraints",
+        "Total number of tasks in sequence",
+        "Task novelty distribution (aside from frequency manipulation)"
+      ],
+      "baselines": [
+        {
+          "name": "Myopic agent",
+          "description": "An agent that decides between discovery and composition based solely on immediate expected utility, ignoring future task frequency."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "TaskCompletionRate",
+          "definition": "Fraction of tasks successfully completed by the agent over the entire sequence."
+        },
+        {
+          "name": "CumulativeUtility",
+          "definition": "Sum of utilities (e.g., reward minus cost) accumulated over all tasks in the sequence."
+        }
+      ],
+      "expected_result": "The frequency-modeling agent achieves higher cumulative task completion and cumulative utility compared to the myopic agent, particularly in the high-frequency environment.",
+      "falsifying_result": "The myopic agent achieves equal or higher cumulative task completion and cumulative utility compared to the frequency-modeling agent in both high and low frequency environments.",
+      "minimum_viable_experiment": "Two agents (frequency-modeling and myopic) are provided with the same initial skill library and face a sequence of tasks. Two environments are created: one where similar tasks occur frequently after discovery (high future frequency) and one where they rarely recur (low future frequency). Each agent runs through the task sequence once per environment, deciding per task to either compose existing skills or discover a new skill at fixed cost. Task outcome and utility are recorded. The experiment is repeated multiple trials for robustness. The hypothesis is falsified if the myopic agent performs at least as well as the frequency-modeling agent in both environments.",
+      "risks_and_confounds": [
+        "Noisy frequency estimates by the frequency-modeling agent could reduce its advantage.",
+        "Fixed discovery cost may be too high or too low, masking the effect of frequency modeling.",
+        "Cognitive load constraints may limit composition complexity, affecting both agents equally but potentially interacting with frequency.",
+        "Insufficient sequence length may not capture long-term benefits of discovery.",
+        "Initial skill library composition may bias results if it already covers many tasks."
+      ]
+    },
+    {
+      "hypothesis": "There exists a cognitive load threshold (e.g., memory usage > 80%) above which the benefit of reducing composition planning complexity outweighs the cost of discovery, making discovery the optimal strategy.",
+      "independent_variables": [
+        "Cognitive load (memory capacity: 10 units for high load, 100 units for low load)"
+      ],
+      "dependent_variables": [
+        "Proportion of tasks where agent chooses discovery over composition"
+      ],
+      "controlled_variables": [
+        "Task novelty (moderate, fixed at a level where composition is possible but complex)",
+        "Skill library size (fixed at 10 skills)",
+        "Frequency of similar future tasks (low, i.e., tasks do not repeat)",
+        "Cost of discovery (low, e.g., 1 additional token to add a new skill)",
+        "Agent architecture (same LLM model, e.g., GPT-4)",
+        "Number of tasks per run (20 tasks)",
+        "Sequencing of tasks (random order)"
+      ],
+      "baselines": [
+        {
+          "name": "Low cognitive load condition",
+          "description": "Memory capacity of 100 units, representing unlimited capacity, serving as a baseline to compare high load effects."
+        },
+        {
+          "name": "Composition-only baseline",
+          "description": "An agent that always composes, ignoring discovery option, to measure performance ceiling of composition."
+        },
+        {
+          "name": "Discovery-only baseline",
+          "description": "An agent that always discovers a new skill for every task, ignoring composition, to measure worst-case cost."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Discovery proportion",
+          "definition": "Number of tasks where agent chooses discovery divided by total tasks (20)."
+        },
+        {
+          "name": "Average planning time",
+          "definition": "Time taken by the agent to decide between discover and compose for each task."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks successfully completed (optional)."
+        }
+      ],
+      "expected_result": "The proportion of discovery choices in the high cognitive load condition (memory capacity 10 units) will be significantly higher than in the low cognitive load condition (memory capacity 100 units), with a statistical test (e.g., t-test) showing p < 0.05.",
+      "falsifying_result": "No significant difference in discovery proportion between low and high cognitive load conditions, or discovery proportion does not increase with load (e.g., p >= 0.05 or effect in opposite direction).",
+      "minimum_viable_experiment": "Simulate an LLM agent (GPT-4) performing 20 tasks with a fixed skill library of 10 moderately novel tasks. Two conditions: (1) low load: memory buffer capacity 100 planning tokens, (2) high load: memory buffer capacity 10 planning tokens. Discovery cost fixed at low (1 token). Agent chooses between composing existing skills or discovering a new skill. Run 10 independent runs per condition. Compare mean discovery proportions using an independent samples t-test (alpha=0.05). If no significant increase, hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Task novelty may interact with cognitive load, potentially masking effects if novelty is too high or too low.",
+        "The LLM agent may not accurately simulate human-like cognitive load; internal token usage might not correspond to cognitive load.",
+        "Discovery cost set to low may still be perceived as high by the agent due to token economy, affecting decisions.",
+        "Sequence order of tasks could introduce habituation or learning effects; counterbalancing needed.",
+        "Random seed and model stochasticity may require more runs to achieve stable results."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles decomposition of the agent's decision to discover a new skill versus compose existing ones. It defines key terms, lays out assumptions, builds a causal mechanism model, identifies tensions, and formulates three testable hypotheses with experiment plans. The work is conceptually clear and well-structured, but the novelty is limited as the core trade-off (exploration vs. exploitation) is extensively studied. The assumptions (e.g., predictable compositions) may be too strong for real-world applicability, and the experiments, while methodologically sound, lack critical baselines such as random or oracle agents. The certificates demonstrate a thorough derivation but overclaim in calling some tests 'minimal decisive'. Overall, the package is a solid but incremental contribution suitable for borderline acceptance.",
+    "strengths": [
+      "Clear and formal first-principles decomposition of the problem into primitive definitions, assumptions, and trade-offs.",
+      "Well-specified mechanism model with causal chains, mediating variables, and bottlenecks.",
+      "Falsifiable hypotheses with concrete experiment plans, including independent/dependent variables and controls.",
+      "Explicit identification of tensions that challenge the assumptions, increasing the work's critical depth."
+    ],
+    "weaknesses": [
+      "Limited novelty: The explore-exploit dilemma and skill composition vs. discovery are long-standing topics; the proposed framework does not introduce fundamentally new concepts.",
+      "Overly strong assumptions: The assumption that skill compositions are 'predictable' and that discovery cost is independent of existing skills may not hold in practice, limiting generality.",
+      "Missing baselines: The proposed experiments lack comparison to simple baselines (e.g., always compose, always discover, random choice, or an oracle with perfect knowledge).",
+      "The concept of 'cognitive load' is vaguely defined and operationalized only as memory buffer size in one experiment, which may conflate planning complexity with memory capacity.",
+      "The experiments are designed for simulation but do not address how to scale to real-world LLM agents (e.g., dealing with noisy skill libraries, partial observability)."
+    ],
+    "questions": [
+      "How would the proposed decision rule perform if the agent's skill library is noisy or contains partially overlapping skills?",
+      "Is the assumption of predictable compositions necessary, or can the mechanism be extended to stochastic compositions?",
+      "How sensitive are the results to the choice of cognitive load operationalization (memory tokens vs. planning time)?"
+    ],
+    "missing_baselines": [
+      "A random agent that chooses discovery/composition uniformly at random.",
+      "An oracle agent that knows the optimal decision with full information (future tasks and composition outcomes).",
+      "An agent that always discovers (high cost but perfect generalization) or always composes (zero discovery cost but may fail).",
+      "A myopic agent (already included in one hypothesis) but contrast with other heuristics like epsilon-greedy or upper confidence bound."
+    ],
+    "score": 5,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient Novelty and Lack of Sharp Boundary Condition",
+    "root_cause": "The research derived a general trade-off framework but failed to isolate a specific, testable threshold or phase transition that differentiates when discovery is superior to composition, making the hypotheses incremental rather than novel.",
+    "violated_principle": "A first-principles research package must produce at least one explicit, falsifiable boundary condition, threshold, or nonlinear interaction that is not obvious from existing literature.",
+    "new_or_updated_principle": "FirstPrinciplesResearchBoundaryRequirement: Every first-principles decomposition must yield at least one candidate threshold or critical parameter value that separates qualitatively different regimes (e.g., discovery optimal vs. composition optimal) and that can be experimentally probed.",
+    "new_or_updated_skill": "ThresholdBoundaryExtraction: A skill to extract from a mechanism model the precise conditions under which the decision flips, by analyzing causal chains and tensions to identify a sharp transition in the dependent variable as a function of a continuous input variable.",
+    "regression_test": "Given a mechanism model with at least one continuous input variable, verify that the research identifies a specific value or range where the output decision (discover vs. compose) changes sign or magnitude, and test that this threshold is not trivially derivable from known baselines (e.g., always compose)."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

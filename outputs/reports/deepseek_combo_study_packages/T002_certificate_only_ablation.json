@@ -1,0 +1,1291 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An entity that perceives its environment and takes actions to achieve goals.",
+        "why_primitive": "Cannot be decomposed further without losing the concept of autonomous decision-making; it is the fundamental subject of evaluation."
+      },
+      {
+        "name": "Process",
+        "definition": "The sequence of internal computations, decisions, and actions that an agent performs to complete a task.",
+        "why_primitive": "It is the object of fidelity measurement; without a defined process, there is nothing to measure fidelity against."
+      },
+      {
+        "name": "Fidelity",
+        "definition": "The degree to which an agent's actual process matches a specified target process or ideal.",
+        "why_primitive": "It is the core quality we aim to measure; it combines notions of accuracy, alignment, and consistency."
+      },
+      {
+        "name": "Measurement",
+        "definition": "The assignment of a quantitative or qualitative value to the fidelity of an agent's process.",
+        "why_primitive": "Measurement is the fundamental operation that turns the abstract concept of fidelity into an actionable metric."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent's process is observable or inferable from its inputs and outputs.",
+        "rationale": "Without observability, we cannot assess the process; we must assume some degree of transparency or access to internal states.",
+        "possible_failure": "Black-box agents may hide their reasoning, making faithful inference impossible."
+      },
+      {
+        "assumption": "There exists a known, desired target process for comparison.",
+        "rationale": "Fidelity is a relational property; we need a reference standard to compare against.",
+        "possible_failure": "The target process may be undefined, ambiguous, or vary across contexts, rendering measurement meaningless."
+      },
+      {
+        "assumption": "The measurement itself does not alter the agent's process.",
+        "rationale": "Measurement reactive effects could confound results; we assume observability without interference.",
+        "possible_failure": "If the agent adapts to the measurement procedure, the measured fidelity may not reflect true fidelity."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity vs. Cost: More detailed process tracking yields higher measurement precision but incurs greater computational and interpretability costs.",
+        "variables": [
+          "Granularity",
+          "Cost"
+        ]
+      },
+      {
+        "tradeoff": "Objectivity vs. Relevance: Automated, rule-based metrics are objective but may miss context-dependent nuances, while human judgment captures relevance but introduces subjectivity.",
+        "variables": [
+          "Objectivity",
+          "Relevance"
+        ]
+      },
+      {
+        "tradeoff": "Intrusiveness vs. Accuracy: Directly instrumenting the agent's process (e.g., logging) provides accurate data but may alter behavior, whereas non-intrusive methods preserve natural behavior but rely on noisy inference.",
+        "variables": [
+          "Intrusiveness",
+          "Accuracy"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "AgentProcess",
+        "role": "input",
+        "description": "The actual sequence of computations and actions performed by the agent during task completion."
+      },
+      {
+        "name": "TargetProcess",
+        "role": "input",
+        "description": "The specified ideal or desired process against which fidelity is measured."
+      },
+      {
+        "name": "MeasurementDesign",
+        "role": "mediator",
+        "description": "The methodology used to compare AgentProcess and TargetProcess, encompassing tradeoffs in granularity, intrusiveness, objectivity, and cost."
+      },
+      {
+        "name": "Observability",
+        "role": "mediator",
+        "description": "The degree to which the agent's internal process can be directly observed or inferred from behavior."
+      },
+      {
+        "name": "FidelityMetric",
+        "role": "output",
+        "description": "The resulting quantitative or qualitative value representing the fidelity of AgentProcess to TargetProcess."
+      },
+      {
+        "name": "MeasurementReactivity",
+        "role": "confounder",
+        "description": "The potential alteration of the agent's process due to the act of measurement itself."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "AgentProcess",
+        "relation": "compared to",
+        "target": "TargetProcess",
+        "explanation": "Fidelity is assessed by comparing the agent's actual process against the target process."
+      },
+      {
+        "step": "2",
+        "source": "AgentProcess",
+        "relation": "and",
+        "target": "TargetProcess",
+        "explanation": "Both processes are inputs to the measurement design."
+      },
+      {
+        "step": "3",
+        "source": "MeasurementDesign",
+        "relation": "determines",
+        "target": "FidelityMetric",
+        "explanation": "The chosen measurement approach directly produces the fidelity score."
+      },
+      {
+        "step": "4",
+        "source": "Observability",
+        "relation": "moderates",
+        "target": "MeasurementDesign",
+        "explanation": "Greater observability improves the accuracy of comparison and reduces reliance on inference."
+      },
+      {
+        "step": "5",
+        "source": "MeasurementReactivity",
+        "relation": "confounds",
+        "target": "AgentProcess",
+        "explanation": "Reactivity can alter the agent's process, distorting the fidelity measurement."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Observability",
+        "why_it_matters": "Without sufficient observability, the agent's process cannot be accurately compared to the target, making fidelity measurement unreliable or impossible."
+      },
+      {
+        "bottleneck": "Target Process Definition",
+        "why_it_matters": "Fidelity is meaningless without a well-defined, stable target process; ambiguity or variability in the target leads to inconsistent measurements."
+      },
+      {
+        "bottleneck": "Measurement Reactivity",
+        "why_it_matters": "If measurement alters the agent's process, the measured fidelity no longer reflects the true behavior, introducing systematic error."
+      }
+    ],
+    "mechanism_summary": "Measuring agent process fidelity involves comparing the agent's actual process (AgentProcess) to a target process (TargetProcess) via a chosen measurement design (MeasurementDesign) that balances tradeoffs in granularity, intrusiveness, objectivity, and cost. The fidelity metric (FidelityMetric) captures the degree of match. This mechanism is constrained by observability of the agent's process and the clarity of the target process, and is vulnerable to reactivity where measurement itself alters the behavior. Effective measurement requires maximizing observability, precisely defining the target, and minimizing interference."
+  },
+  "tensions": [
+    {
+      "tension_id": "T01",
+      "statement": "Increasing the granularity of process measurement improves fidelity assessment precision but exponentially increases computational and interpretability costs.",
+      "derived_from": [
+        "MeasurementDesign",
+        "Fidelity"
+      ],
+      "why_it_matters": "This tradeoff forces researchers to choose between detailed but expensive measurements and coarse but affordable ones, affecting the reliability of fidelity evaluations.",
+      "what_existing_methods_may_miss": "Existing methods often optimize for one side, ignoring the nonlinear cost-precision relationship.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T02",
+      "statement": "Automated metrics provide objective, reproducible fidelity scores but may miss context-dependent nuances that only human judgment captures, introducing subjectivity.",
+      "derived_from": [
+        "Objectivity vs. Relevance tradeoff",
+        "FidelityMetric"
+      ],
+      "why_it_matters": "The choice between objective and relevant metrics directly impacts the validity of fidelity measurements in real-world applications.",
+      "what_existing_methods_may_miss": "Existing methods often default to objective metrics, ignoring the loss of contextual information.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T03",
+      "statement": "Direct instrumentation of the agent's process yields high accuracy but risks altering the behavior (reactivity), whereas non-intrusive methods preserve natural behavior but rely on noisy inference.",
+      "derived_from": [
+        "Intrusiveness vs. Accuracy tradeoff",
+        "MeasurementReactivity"
+      ],
+      "why_it_matters": "This tension determines whether the measured fidelity reflects true behavior or an artifact of the measurement process.",
+      "what_existing_methods_may_miss": "Existing methods often ignore reactivity effects or assume them negligible without evidence.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T04",
+      "statement": "The assumption that an agent's process is observable or inferable is often violated for black-box or proprietary agents, making fidelity measurement infeasible or unreliable.",
+      "derived_from": [
+        "Observability",
+        "AgentProcess"
+      ],
+      "why_it_matters": "Without observability, the entire fidelity measurement framework collapses; the target process cannot be compared.",
+      "what_existing_methods_may_miss": "Existing methods may overestimate fidelity by relying on output-only comparisons, ignoring process divergence.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "What is the optimal granularity level for process measurement that minimizes computational cost while maintaining a predefined fidelity precision threshold across different agent architectures?",
+      "question_type": "algorithmic",
+      "source_tension": "T01",
+      "expected_contribution": "Provides a principled method to select measurement granularity, balancing cost and precision."
+    },
+    {
+      "question": "Under what conditions do automated fidelity metrics systematically misestimate fidelity compared to human judgment due to missing contextual cues, and how can these conditions be predicted?",
+      "question_type": "diagnostic",
+      "source_tension": "T02",
+      "expected_contribution": "Identifies the boundary conditions where automated metrics fail, guiding metric selection and potential hybrid approaches."
+    },
+    {
+      "question": "To what extent does direct instrumentation via log probes alter the agent's task completion behavior (reactivity) compared to a baseline without instrumentation, and how does this effect vary with agent complexity?",
+      "question_type": "causal",
+      "source_tension": "T03",
+      "expected_contribution": "Quantifies reactivity under controlled conditions, enabling correction factors or design of non-intrusive methods."
+    },
+    {
+      "question": "What is the prevalence of non-observable processes among current state-of-the-art AI agents, and how does limited observability correlate with discrepancies between output-based and process-based fidelity assessments?",
+      "question_type": "descriptive",
+      "source_tension": "T04",
+      "expected_contribution": "Provides an empirical baseline of observability challenges and their impact on fidelity measurement validity."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions to achieve goals.",
+          "why_primitive": "Cannot be decomposed further without losing the concept of autonomous decision-making; it is the fundamental subject of evaluation."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, and actions that an agent performs to complete a task.",
+          "why_primitive": "It is the object of fidelity measurement; without a defined process, there is nothing to measure fidelity against."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an agent's actual process matches a specified target process or ideal.",
+          "why_primitive": "It is the core quality we aim to measure; it combines notions of accuracy, alignment, and consistency."
+        },
+        {
+          "name": "Measurement",
+          "definition": "The assignment of a quantitative or qualitative value to the fidelity of an agent's process.",
+          "why_primitive": "Measurement is the fundamental operation that turns the abstract concept of fidelity into an actionable metric."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its inputs and outputs.",
+          "rationale": "Without observability, we cannot assess the process; we must assume some degree of transparency or access to internal states.",
+          "possible_failure": "Black-box agents may hide their reasoning, making faithful inference impossible."
+        },
+        {
+          "assumption": "There exists a known, desired target process for comparison.",
+          "rationale": "Fidelity is a relational property; we need a reference standard to compare against.",
+          "possible_failure": "The target process may be undefined, ambiguous, or vary across contexts, rendering measurement meaningless."
+        },
+        {
+          "assumption": "The measurement itself does not alter the agent's process.",
+          "rationale": "Measurement reactive effects could confound results; we assume observability without interference.",
+          "possible_failure": "If the agent adapts to the measurement procedure, the measured fidelity may not reflect true fidelity."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "AgentProcess",
+            "role": "input",
+            "description": "The actual sequence of computations and actions performed by the agent during task completion."
+          },
+          {
+            "name": "TargetProcess",
+            "role": "input",
+            "description": "The specified ideal or desired process against which fidelity is measured."
+          },
+          {
+            "name": "MeasurementDesign",
+            "role": "mediator",
+            "description": "The methodology used to compare AgentProcess and TargetProcess, encompassing tradeoffs in granularity, intrusiveness, objectivity, and cost."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal process can be directly observed or inferred from behavior."
+          },
+          {
+            "name": "FidelityMetric",
+            "role": "output",
+            "description": "The resulting quantitative or qualitative value representing the fidelity of AgentProcess to TargetProcess."
+          },
+          {
+            "name": "MeasurementReactivity",
+            "role": "confounder",
+            "description": "The potential alteration of the agent's process due to the act of measurement itself."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "AgentProcess",
+            "relation": "compared to",
+            "target": "TargetProcess",
+            "explanation": "Fidelity is assessed by comparing the agent's actual process against the target process."
+          },
+          {
+            "step": "2",
+            "source": "AgentProcess",
+            "relation": "and",
+            "target": "TargetProcess",
+            "explanation": "Both processes are inputs to the measurement design."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementDesign",
+            "relation": "determines",
+            "target": "FidelityMetric",
+            "explanation": "The chosen measurement approach directly produces the fidelity score."
+          },
+          {
+            "step": "4",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "MeasurementDesign",
+            "explanation": "Greater observability improves the accuracy of comparison and reduces reliance on inference."
+          },
+          {
+            "step": "5",
+            "source": "MeasurementReactivity",
+            "relation": "confounds",
+            "target": "AgentProcess",
+            "explanation": "Reactivity can alter the agent's process, distorting the fidelity measurement."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability",
+            "why_it_matters": "Without sufficient observability, the agent's process cannot be accurately compared to the target, making fidelity measurement unreliable or impossible."
+          },
+          {
+            "bottleneck": "Target Process Definition",
+            "why_it_matters": "Fidelity is meaningless without a well-defined, stable target process; ambiguity or variability in the target leads to inconsistent measurements."
+          },
+          {
+            "bottleneck": "Measurement Reactivity",
+            "why_it_matters": "If measurement alters the agent's process, the measured fidelity no longer reflects the true behavior, introducing systematic error."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves comparing the agent's actual process (AgentProcess) to a target process (TargetProcess) via a chosen measurement design (MeasurementDesign) that balances tradeoffs in granularity, intrusiveness, objectivity, and cost. The fidelity metric (FidelityMetric) captures the degree of match. This mechanism is constrained by observability of the agent's process and the clarity of the target process, and is vulnerable to reactivity where measurement itself alters the behavior. Effective measurement requires maximizing observability, precisely defining the target, and minimizing interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T01",
+        "statement": "Increasing the granularity of process measurement improves fidelity assessment precision but exponentially increases computational and interpretability costs.",
+        "derived_from": [
+          "MeasurementDesign",
+          "Fidelity"
+        ],
+        "why_it_matters": "This tradeoff forces researchers to choose between detailed but expensive measurements and coarse but affordable ones, affecting the reliability of fidelity evaluations.",
+        "what_existing_methods_may_miss": "Existing methods often optimize for one side, ignoring the nonlinear cost-precision relationship.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical granularity threshold in agent process measurement beyond which measurement reactivity introduces more distortion than the precision gain, making further refinement counterproductive?",
+        "question_type": "diagnostic",
+        "source_tension": "T01",
+        "expected_contribution": "Identifies a fundamental phase transition in process measurement design, establishing a principled upper bound on useful granularity."
+      },
+      "hypothesis": {
+        "statement": "For any agent architecture, there exists a granularity threshold G* such that for measurement granularity finer than G*, the net fidelity assessment accuracy (precision gain minus reactivity-induced distortion) decreases, while for coarser granularities it increases.",
+        "predicted_effect": "Net accuracy (precision gain minus reactivity distortion) peaks at G*; beyond G*, distortion dominates and net accuracy declines."
+      },
+      "minimal_decisive_test": {
+        "experiment": "For a set of agent architectures (e.g., transformer, LSTM, symbolic), systematically vary measurement granularity from coarse (whole task) to fine (sub-step level). For each granularity, measure: (a) precision of fidelity assessment using a known gold-standard process, and (b) reactivity distortion by comparing agent behavior with and without measurement (using a hidden baseline). Compute net accuracy = precision - distortion. Identify if net accuracy peaks at some granularity and then declines.",
+        "independent_variables": [
+          "Measurement granularity level",
+          "Agent architecture"
+        ],
+        "dependent_variables": [
+          "Precision of fidelity assessment",
+          "Reactivity distortion magnitude",
+          "Net accuracy (precision - distortion)"
+        ],
+        "controls": [
+          "Fixed task and target process",
+          "Same hardware and runtime environment",
+          "Controlled random seeds",
+          "Blind evaluation of reactivity using separate trials"
+        ],
+        "falsifying_observation": "If net accuracy monotonically increases with granularity for all architectures (i.e., no peak and decline), or if the peak granularity is identical across architectures, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Net accuracy improves as granularity coarsens up to a point, then drops beyond a threshold G*.",
+          "G* varies across architectures: simpler architectures have coarser optimal granularity than complex ones.",
+          "Reactivity distortion grows nonlinearly with granularity, eventually outpacing precision gains."
+        ],
+        "rejects_hypothesis": [
+          "Net accuracy increases monotonically with granularity for all architectures.",
+          "No clear peak is observed; net accuracy fluctuates randomly.",
+          "The threshold G* is the same for all architectures, indicating no architecture-specific effect."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or relationship is monotonic, revise the assumption that reactivity distortion grows faster than precision gains at fine granularities.",
+        "assumption_to_revise": "The assumption that measurement reactivity is a nonlinear function of granularity and eventually dominates precision gains.",
+        "next_question": "What is the functional form of the relationship between measurement granularity, precision, and reactivity distortion, and how can it be modeled to predict the optimal granularity without exhaustive search?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions to achieve goals.",
+          "why_primitive": "Cannot be decomposed further without losing the concept of autonomous decision-making; it is the fundamental subject of evaluation."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, and actions that an agent performs to complete a task.",
+          "why_primitive": "It is the object of fidelity measurement; without a defined process, there is nothing to measure fidelity against."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an agent's actual process matches a specified target process or ideal.",
+          "why_primitive": "It is the core quality we aim to measure; it combines notions of accuracy, alignment, and consistency."
+        },
+        {
+          "name": "Measurement",
+          "definition": "The assignment of a quantitative or qualitative value to the fidelity of an agent's process.",
+          "why_primitive": "Measurement is the fundamental operation that turns the abstract concept of fidelity into an actionable metric."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its inputs and outputs.",
+          "rationale": "Without observability, we cannot assess the process; we must assume some degree of transparency or access to internal states.",
+          "possible_failure": "Black-box agents may hide their reasoning, making faithful inference impossible."
+        },
+        {
+          "assumption": "There exists a known, desired target process for comparison.",
+          "rationale": "Fidelity is a relational property; we need a reference standard to compare against.",
+          "possible_failure": "The target process may be undefined, ambiguous, or vary across contexts, rendering measurement meaningless."
+        },
+        {
+          "assumption": "The measurement itself does not alter the agent's process.",
+          "rationale": "Measurement reactive effects could confound results; we assume observability without interference.",
+          "possible_failure": "If the agent adapts to the measurement procedure, the measured fidelity may not reflect true fidelity."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "AgentProcess",
+            "role": "input",
+            "description": "The actual sequence of computations and actions performed by the agent during task completion."
+          },
+          {
+            "name": "TargetProcess",
+            "role": "input",
+            "description": "The specified ideal or desired process against which fidelity is measured."
+          },
+          {
+            "name": "MeasurementDesign",
+            "role": "mediator",
+            "description": "The methodology used to compare AgentProcess and TargetProcess, encompassing tradeoffs in granularity, intrusiveness, objectivity, and cost."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal process can be directly observed or inferred from behavior."
+          },
+          {
+            "name": "FidelityMetric",
+            "role": "output",
+            "description": "The resulting quantitative or qualitative value representing the fidelity of AgentProcess to TargetProcess."
+          },
+          {
+            "name": "MeasurementReactivity",
+            "role": "confounder",
+            "description": "The potential alteration of the agent's process due to the act of measurement itself."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "AgentProcess",
+            "relation": "compared to",
+            "target": "TargetProcess",
+            "explanation": "Fidelity is assessed by comparing the agent's actual process against the target process."
+          },
+          {
+            "step": "2",
+            "source": "AgentProcess",
+            "relation": "and",
+            "target": "TargetProcess",
+            "explanation": "Both processes are inputs to the measurement design."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementDesign",
+            "relation": "determines",
+            "target": "FidelityMetric",
+            "explanation": "The chosen measurement approach directly produces the fidelity score."
+          },
+          {
+            "step": "4",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "MeasurementDesign",
+            "explanation": "Greater observability improves the accuracy of comparison and reduces reliance on inference."
+          },
+          {
+            "step": "5",
+            "source": "MeasurementReactivity",
+            "relation": "confounds",
+            "target": "AgentProcess",
+            "explanation": "Reactivity can alter the agent's process, distorting the fidelity measurement."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability",
+            "why_it_matters": "Without sufficient observability, the agent's process cannot be accurately compared to the target, making fidelity measurement unreliable or impossible."
+          },
+          {
+            "bottleneck": "Target Process Definition",
+            "why_it_matters": "Fidelity is meaningless without a well-defined, stable target process; ambiguity or variability in the target leads to inconsistent measurements."
+          },
+          {
+            "bottleneck": "Measurement Reactivity",
+            "why_it_matters": "If measurement alters the agent's process, the measured fidelity no longer reflects the true behavior, introducing systematic error."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves comparing the agent's actual process (AgentProcess) to a target process (TargetProcess) via a chosen measurement design (MeasurementDesign) that balances tradeoffs in granularity, intrusiveness, objectivity, and cost. The fidelity metric (FidelityMetric) captures the degree of match. This mechanism is constrained by observability of the agent's process and the clarity of the target process, and is vulnerable to reactivity where measurement itself alters the behavior. Effective measurement requires maximizing observability, precisely defining the target, and minimizing interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T03",
+        "statement": "Direct instrumentation of the agent's process yields high accuracy but risks altering the behavior (reactivity), whereas non-intrusive methods preserve natural behavior but rely on noisy inference.",
+        "derived_from": [
+          "Intrusiveness vs. Accuracy tradeoff",
+          "MeasurementReactivity"
+        ],
+        "why_it_matters": "This tension determines whether the measured fidelity reflects true behavior or an artifact of the measurement process.",
+        "what_existing_methods_may_miss": "Existing methods often ignore reactivity effects or assume them negligible without evidence.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What is the critical depth of an agent's reasoning process at which the introduction of log probes causes a sharp increase in task error rate, indicating a phase transition in reactivity?",
+        "question_type": "causal",
+        "source_tension": "T03",
+        "expected_contribution": "Identifies a precise threshold for non-intrusive measurement design and provides a mechanistic boundary for reactivity effects."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold process depth D* such that agents with depth below D* show no significant reactivity effect from log probes, while those with depth above D* exhibit a statistically significant jump in task error rate due to instrumentation.",
+        "predicted_effect": "A piecewise relationship: error rate difference (instrumented minus non-instrumented) is near zero for depths < D*, and positive with a step increase at D*, remaining elevated for higher depths."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Vary agent process depth across 5 levels (e.g., 1, 2, 4, 8, 16 reasoning steps) using a controlled chain-of-thought agent. For each depth, run 100 trials with log probes and 100 without. Measure task error rate. Use piecewise regression (with unknown breakpoint) to detect a threshold.",
+        "independent_variables": [
+          "Process depth (number of reasoning steps)",
+          "Instrumentation (with log probes vs. without)"
+        ],
+        "dependent_variables": [
+          "Task error rate"
+        ],
+        "controls": [
+          "Same task (e.g., math word problems of fixed difficulty)",
+          "Same initial prompt templates",
+          "Same environment (no other confounding)",
+          "Counterbalance order of instrumented/non-instrumented runs"
+        ],
+        "falsifying_observation": "No significant breakpoint is detected (best-fit is a single linear or no trend), or the threshold is not replicable across task types."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Piecewise regression identifies a breakpoint D* between 3 and 7 steps, with a 95% confidence interval not covering linear model.",
+          "Error rate difference is negligible (<1%) for depths below D* and jumps to >10% for depths above D*."
+        ],
+        "rejects_hypothesis": [
+          "Best-fit model is linear without a breakpoint (AIC favors linear over piecewise).",
+          "No observed change in error rate difference across depths (all near zero or all large)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, we must revise the assumption that reactivity exhibits a phase transition.",
+        "assumption_to_revise": "The assumption that reactivity has a nonlinear step-function relationship with process depth.",
+        "next_question": "Is reactivity proportional to process depth in a continuous fashion, or does it saturate at high depths?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions to achieve goals.",
+          "why_primitive": "Cannot be decomposed further without losing the concept of autonomous decision-making; it is the fundamental subject of evaluation."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, and actions that an agent performs to complete a task.",
+          "why_primitive": "It is the object of fidelity measurement; without a defined process, there is nothing to measure fidelity against."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an agent's actual process matches a specified target process or ideal.",
+          "why_primitive": "It is the core quality we aim to measure; it combines notions of accuracy, alignment, and consistency."
+        },
+        {
+          "name": "Measurement",
+          "definition": "The assignment of a quantitative or qualitative value to the fidelity of an agent's process.",
+          "why_primitive": "Measurement is the fundamental operation that turns the abstract concept of fidelity into an actionable metric."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its inputs and outputs.",
+          "rationale": "Without observability, we cannot assess the process; we must assume some degree of transparency or access to internal states.",
+          "possible_failure": "Black-box agents may hide their reasoning, making faithful inference impossible."
+        },
+        {
+          "assumption": "There exists a known, desired target process for comparison.",
+          "rationale": "Fidelity is a relational property; we need a reference standard to compare against.",
+          "possible_failure": "The target process may be undefined, ambiguous, or vary across contexts, rendering measurement meaningless."
+        },
+        {
+          "assumption": "The measurement itself does not alter the agent's process.",
+          "rationale": "Measurement reactive effects could confound results; we assume observability without interference.",
+          "possible_failure": "If the agent adapts to the measurement procedure, the measured fidelity may not reflect true fidelity."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "AgentProcess",
+            "role": "input",
+            "description": "The actual sequence of computations and actions performed by the agent during task completion."
+          },
+          {
+            "name": "TargetProcess",
+            "role": "input",
+            "description": "The specified ideal or desired process against which fidelity is measured."
+          },
+          {
+            "name": "MeasurementDesign",
+            "role": "mediator",
+            "description": "The methodology used to compare AgentProcess and TargetProcess, encompassing tradeoffs in granularity, intrusiveness, objectivity, and cost."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal process can be directly observed or inferred from behavior."
+          },
+          {
+            "name": "FidelityMetric",
+            "role": "output",
+            "description": "The resulting quantitative or qualitative value representing the fidelity of AgentProcess to TargetProcess."
+          },
+          {
+            "name": "MeasurementReactivity",
+            "role": "confounder",
+            "description": "The potential alteration of the agent's process due to the act of measurement itself."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "AgentProcess",
+            "relation": "compared to",
+            "target": "TargetProcess",
+            "explanation": "Fidelity is assessed by comparing the agent's actual process against the target process."
+          },
+          {
+            "step": "2",
+            "source": "AgentProcess",
+            "relation": "and",
+            "target": "TargetProcess",
+            "explanation": "Both processes are inputs to the measurement design."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementDesign",
+            "relation": "determines",
+            "target": "FidelityMetric",
+            "explanation": "The chosen measurement approach directly produces the fidelity score."
+          },
+          {
+            "step": "4",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "MeasurementDesign",
+            "explanation": "Greater observability improves the accuracy of comparison and reduces reliance on inference."
+          },
+          {
+            "step": "5",
+            "source": "MeasurementReactivity",
+            "relation": "confounds",
+            "target": "AgentProcess",
+            "explanation": "Reactivity can alter the agent's process, distorting the fidelity measurement."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability",
+            "why_it_matters": "Without sufficient observability, the agent's process cannot be accurately compared to the target, making fidelity measurement unreliable or impossible."
+          },
+          {
+            "bottleneck": "Target Process Definition",
+            "why_it_matters": "Fidelity is meaningless without a well-defined, stable target process; ambiguity or variability in the target leads to inconsistent measurements."
+          },
+          {
+            "bottleneck": "Measurement Reactivity",
+            "why_it_matters": "If measurement alters the agent's process, the measured fidelity no longer reflects the true behavior, introducing systematic error."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves comparing the agent's actual process (AgentProcess) to a target process (TargetProcess) via a chosen measurement design (MeasurementDesign) that balances tradeoffs in granularity, intrusiveness, objectivity, and cost. The fidelity metric (FidelityMetric) captures the degree of match. This mechanism is constrained by observability of the agent's process and the clarity of the target process, and is vulnerable to reactivity where measurement itself alters the behavior. Effective measurement requires maximizing observability, precisely defining the target, and minimizing interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T04",
+        "statement": "The assumption that an agent's process is observable or inferable is often violated for black-box or proprietary agents, making fidelity measurement infeasible or unreliable.",
+        "derived_from": [
+          "Observability",
+          "AgentProcess"
+        ],
+        "why_it_matters": "Without observability, the entire fidelity measurement framework collapses; the target process cannot be compared.",
+        "what_existing_methods_may_miss": "Existing methods may overestimate fidelity by relying on output-only comparisons, ignoring process divergence.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a threshold level of observability (measured as the fraction of agent steps that are directly observable) below which process fidelity estimates become dominated by measurement reactivity rather than true process alignment?",
+        "question_type": "diagnostic",
+        "source_tension": "T04",
+        "expected_contribution": "Identifies a critical observability ratio that separates regimes where process fidelity measurement is reliable vs. dominated by artifacts, providing a practical guideline for when process-based evaluation is valid."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical observability ratio θ ≈ 0.3 such that: (1) when observability ratio > θ, the correlation between estimated process fidelity (using current best methods) and true process fidelity (measured via full internal access) is positive and significant, and (2) when observability ratio < θ, the correlation becomes negative or non-significant, indicating that measurement reactivity dominates the estimated fidelity.",
+        "predicted_effect": "A phase transition in the reliability of process fidelity estimates at the threshold θ, below which higher estimated fidelity corresponds to lower true fidelity due to reactive adaptation."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of 30 LLM agents with varying degrees of observability (e.g., by controlling the transparency of their reasoning traces: fully transparent, partially masked, fully black-box with only input/output). Use a synthetic task (e.g., multi-step arithmetic) where the true process is known by design. For each agent, compute the observability ratio as the fraction of steps that can be directly observed. Then, measure both estimated process fidelity (using a standard process-based evaluation pipeline that relies on observable steps and infers the rest) and true process fidelity (by comparing the full internal trace against a fixed target process). Compute Pearson correlation between estimated and true fidelity within bins of observability ratio (0-0.2, 0.2-0.4, etc.). Determine the threshold where the correlation changes sign or becomes insignificant.",
+        "independent_variables": [
+          "Observability ratio (continuous, 0-1)"
+        ],
+        "dependent_variables": [
+          "Correlation coefficient between estimated and true process fidelity (within bins)"
+        ],
+        "controls": [
+          "Task type (same for all agents)",
+          "Target process definition (identical)",
+          "Model size (fixed)",
+          "Temperature (0)"
+        ],
+        "falsifying_observation": "If no threshold exists where correlation changes sign (i.e., correlation remains positive and significant across all observability levels), or if the threshold is not near 0.3 (e.g., <0.1 or >0.6), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For observability ratios above 0.3, the correlation between estimated and true fidelity is positive and statistically significant (r > 0.5, p < 0.05).",
+          "For observability ratios below 0.3, the correlation is negative (r < -0.3) or not significantly different from zero.",
+          "The change in correlation sign occurs within a narrow window around θ ≈ 0.3."
+        ],
+        "rejects_hypothesis": [
+          "Correlation remains positive and significant across all observability levels.",
+          "Correlation is essentially flat across observability levels.",
+          "The threshold differs drastically (e.g., below 0.1 or above 0.6)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed (correlation remains positive across all observability levels), then measurement reactivity is not the dominant confound that undermines process fidelity estimates at low observability.",
+        "assumption_to_revise": "The assumption that measurement reactivity is the primary interaction with observability. Instead, target process ambiguity or inference bias may be more critical.",
+        "next_question": "How does the ambiguity of target process definition (e.g., multiple acceptable reasoning paths) interact with observability to affect the validity of process fidelity measurement?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions to achieve goals.",
+          "why_primitive": "Cannot be decomposed further without losing the concept of autonomous decision-making; it is the fundamental subject of evaluation."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, and actions that an agent performs to complete a task.",
+          "why_primitive": "It is the object of fidelity measurement; without a defined process, there is nothing to measure fidelity against."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an agent's actual process matches a specified target process or ideal.",
+          "why_primitive": "It is the core quality we aim to measure; it combines notions of accuracy, alignment, and consistency."
+        },
+        {
+          "name": "Measurement",
+          "definition": "The assignment of a quantitative or qualitative value to the fidelity of an agent's process.",
+          "why_primitive": "Measurement is the fundamental operation that turns the abstract concept of fidelity into an actionable metric."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its inputs and outputs.",
+          "rationale": "Without observability, we cannot assess the process; we must assume some degree of transparency or access to internal states.",
+          "possible_failure": "Black-box agents may hide their reasoning, making faithful inference impossible."
+        },
+        {
+          "assumption": "There exists a known, desired target process for comparison.",
+          "rationale": "Fidelity is a relational property; we need a reference standard to compare against.",
+          "possible_failure": "The target process may be undefined, ambiguous, or vary across contexts, rendering measurement meaningless."
+        },
+        {
+          "assumption": "The measurement itself does not alter the agent's process.",
+          "rationale": "Measurement reactive effects could confound results; we assume observability without interference.",
+          "possible_failure": "If the agent adapts to the measurement procedure, the measured fidelity may not reflect true fidelity."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "AgentProcess",
+            "role": "input",
+            "description": "The actual sequence of computations and actions performed by the agent during task completion."
+          },
+          {
+            "name": "TargetProcess",
+            "role": "input",
+            "description": "The specified ideal or desired process against which fidelity is measured."
+          },
+          {
+            "name": "MeasurementDesign",
+            "role": "mediator",
+            "description": "The methodology used to compare AgentProcess and TargetProcess, encompassing tradeoffs in granularity, intrusiveness, objectivity, and cost."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal process can be directly observed or inferred from behavior."
+          },
+          {
+            "name": "FidelityMetric",
+            "role": "output",
+            "description": "The resulting quantitative or qualitative value representing the fidelity of AgentProcess to TargetProcess."
+          },
+          {
+            "name": "MeasurementReactivity",
+            "role": "confounder",
+            "description": "The potential alteration of the agent's process due to the act of measurement itself."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "AgentProcess",
+            "relation": "compared to",
+            "target": "TargetProcess",
+            "explanation": "Fidelity is assessed by comparing the agent's actual process against the target process."
+          },
+          {
+            "step": "2",
+            "source": "AgentProcess",
+            "relation": "and",
+            "target": "TargetProcess",
+            "explanation": "Both processes are inputs to the measurement design."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementDesign",
+            "relation": "determines",
+            "target": "FidelityMetric",
+            "explanation": "The chosen measurement approach directly produces the fidelity score."
+          },
+          {
+            "step": "4",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "MeasurementDesign",
+            "explanation": "Greater observability improves the accuracy of comparison and reduces reliance on inference."
+          },
+          {
+            "step": "5",
+            "source": "MeasurementReactivity",
+            "relation": "confounds",
+            "target": "AgentProcess",
+            "explanation": "Reactivity can alter the agent's process, distorting the fidelity measurement."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability",
+            "why_it_matters": "Without sufficient observability, the agent's process cannot be accurately compared to the target, making fidelity measurement unreliable or impossible."
+          },
+          {
+            "bottleneck": "Target Process Definition",
+            "why_it_matters": "Fidelity is meaningless without a well-defined, stable target process; ambiguity or variability in the target leads to inconsistent measurements."
+          },
+          {
+            "bottleneck": "Measurement Reactivity",
+            "why_it_matters": "If measurement alters the agent's process, the measured fidelity no longer reflects the true behavior, introducing systematic error."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves comparing the agent's actual process (AgentProcess) to a target process (TargetProcess) via a chosen measurement design (MeasurementDesign) that balances tradeoffs in granularity, intrusiveness, objectivity, and cost. The fidelity metric (FidelityMetric) captures the degree of match. This mechanism is constrained by observability of the agent's process and the clarity of the target process, and is vulnerable to reactivity where measurement itself alters the behavior. Effective measurement requires maximizing observability, precisely defining the target, and minimizing interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T02",
+        "statement": "Automated metrics provide objective, reproducible fidelity scores but may miss context-dependent nuances that only human judgment captures, introducing subjectivity.",
+        "derived_from": [
+          "Objectivity vs. Relevance tradeoff",
+          "FidelityMetric"
+        ],
+        "why_it_matters": "The choice between objective and relevant metrics directly impacts the validity of fidelity measurements in real-world applications.",
+        "what_existing_methods_may_miss": "Existing methods often default to objective metrics, ignoring the loss of contextual information.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the threshold of input ambiguity at which automated process fidelity metrics transition from reliable to unreliable, and does this threshold depend on the granularity of the metric's process encoding?",
+        "question_type": "diagnostic",
+        "source_tension": "T02",
+        "expected_contribution": "Identifies a critical ambiguity threshold and its dependency on metric granularity, enabling targeted metric selection and hybrid evaluation strategies."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ambiguity level above which the correlation between automated fidelity scores and human judgments drops below 0.5, and this critical ambiguity is lower for coarse-grained metrics (based on step sequence) than for fine-grained ones (based on token-level alignment).",
+        "predicted_effect": "As input ambiguity increases, the correlation between automated and human fidelity scores remains high until a threshold, then declines sharply; the threshold occurs at a lower ambiguity for coarse-grained metrics."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of agent tasks with controlled ambiguity levels (e.g., low: all pronouns resolved; medium: one ambiguous pronoun; high: multiple ambiguous references). Use two automated metrics: a coarse-grained step-sequence match and a fine-grained token-level alignment. For each task, have multiple LLM agents execute and collect fidelity judgments from human experts on a 7-point Likert scale. Compute the Pearson correlation between automated and human scores for each ambiguity level and each metric. Identify the ambiguity level at which correlation first drops below 0.5 for each metric.",
+        "independent_variables": [
+          "Ambiguity level of task inputs (low, medium, high)",
+          "Granularity of automated metric (coarse: step sequence, fine: token alignment)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation between automated fidelity score and human judgment at each ambiguity level and metric type",
+          "Critical ambiguity threshold (ambiguity level where correlation falls below 0.5)"
+        ],
+        "controls": [
+          "Same agent architecture and parameters across tasks",
+          "Same target process definition across tasks",
+          "Same set of human raters and rating scale",
+          "Order of tasks randomized",
+          "Tasks equated for length and complexity aside from ambiguity",
+          "Use identical task prompts except for controlled ambiguity manipulations"
+        ],
+        "falsifying_observation": "Correlation remains above 0.5 for all ambiguity levels and both metrics, or the threshold for coarse-grained metrics is not lower than for fine-grained ones."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For coarse-grained metric: correlation >0.5 at low ambiguity, drops below 0.5 at medium or high ambiguity.",
+          "For fine-grained metric: correlation >0.5 at low and medium ambiguity, drops below 0.5 only at high ambiguity (or remains above 0.5).",
+          "The critical ambiguity threshold is statistically significantly lower for coarse-grained metric compared to fine-grained metric."
+        ],
+        "rejects_hypothesis": [
+          "No significant drop in correlation for either metric across ambiguity levels, i.e., both remain above 0.5.",
+          "The coarse-grained metric outperforms or matches the fine-grained metric at all ambiguity levels, contradicting the predicted order.",
+          "The correlation drops below 0.5 for both metrics at the same ambiguity level, indicating no granularity-dependence."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed or the granularity-dependence is absent, then the hypothesis that context-dependence via ambiguity is the primary failure mode is incorrect.",
+        "assumption_to_revise": "The assumption that automated metrics fail primarily due to missing contextual cues; perhaps the failure is due to a mismatch between the metric's structural assumptions and the agent's reasoning style.",
+        "next_question": "Is the divergence between automated and human fidelity judgments better explained by the degree of abstraction in the metric's process representation (e.g., hierarchical vs. flat) rather than ambiguity level?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "For any agent architecture, there exists a granularity threshold G* such that for measurement granularity finer than G*, net fidelity assessment accuracy decreases, while for coarser granularities it increases.",
+      "independent_variables": [
+        "Measurement granularity level (coarse, medium, fine)",
+        "Agent architecture (transformer, LSTM)"
+      ],
+      "dependent_variables": [
+        "Precision of fidelity assessment (proportion of correctly matched process steps)",
+        "Reactivity distortion magnitude (difference in task success rate between measured and unmeasured trials)",
+        "Net accuracy (precision - distortion)"
+      ],
+      "controlled_variables": [
+        "Fixed task (e.g., arithmetic problem solving)",
+        "Fixed target process (ideal step-by-step solution)",
+        "Same hardware (CPU/GPU model)",
+        "Same runtime environment (Python version, library versions)",
+        "Controlled random seeds for reproducibility",
+        "Blind evaluation: reactivity assessed via separate unmeasured trials"
+      ],
+      "baselines": [
+        {
+          "name": "Coarse Granularity Baseline",
+          "description": "Measurement at the coarsest level (whole-task output) to serve as a reference point for net accuracy."
+        },
+        {
+          "name": "No Measurement Baseline",
+          "description": "Agent performs task without any process measurement to assess natural behavior and compute reactivity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Precision of fidelity assessment",
+          "definition": "Fraction of process steps correctly matched between measured agent process and target process, normalized by total steps in target."
+        },
+        {
+          "name": "Reactivity distortion magnitude",
+          "definition": "Absolute difference in task success rate (or process similarity) between measured trials and unmeasured baseline, averaged over trials."
+        },
+        {
+          "name": "Net accuracy",
+          "definition": "Precision minus reactivity distortion magnitude, representing overall measurement fidelity utility."
+        }
+      ],
+      "expected_result": "Net accuracy peaks at some intermediate granularity G* and then declines for finer granularities; the peak granularity G* differs between transformer and LSTM architectures.",
+      "falsifying_result": "Net accuracy increases monotonically with granularity for both architectures, or no clear peak is observed, or the peak granularity is identical for both architectures.",
+      "minimum_viable_experiment": "For two agent architectures (transformer and LSTM) and one task, run 10 trials each at three granularity levels: coarse (whole task), medium (block of 5 steps), fine (single step). Also run 10 unmeasured trials per architecture for baseline. Measure precision, reactivity distortion, and net accuracy. If net accuracy peaks at medium for at least one architecture and declines at fine, hypothesis is supported; if it monotonically increases for both, hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Measurement implementation may vary in quality across granularity levels.",
+        "Reactivity may depend on task difficulty or agent familiarity.",
+        "Gold-standard target process may not be perfectly representative.",
+        "Limited architectures may not generalize."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ambiguity level above which the correlation between automated fidelity scores and human judgments drops below 0.5, and this critical ambiguity is lower for coarse-grained metrics (based on step sequence) than for fine-grained ones (based on token-level alignment).",
+      "independent_variables": [
+        "Ambiguity level of task inputs (low, medium, high)",
+        "Granularity of automated metric (coarse: step sequence, fine: token alignment)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation between automated fidelity score and human judgment at each ambiguity level and metric type",
+        "Critical ambiguity threshold (ambiguity level where correlation falls below 0.5)"
+      ],
+      "controlled_variables": [
+        "Same agent architecture and parameters across tasks",
+        "Same target process definition across tasks",
+        "Same set of human raters and rating scale",
+        "Order of tasks randomized",
+        "Tasks equated for length and complexity aside from ambiguity",
+        "Use identical task prompts except for controlled ambiguity manipulations"
+      ],
+      "baselines": [
+        {
+          "name": "Human-human agreement",
+          "description": "Correlation between two independent human raters' fidelity judgments to ensure human baseline is above 0.5."
+        },
+        {
+          "name": "Random chance",
+          "description": "Expected correlation of 0 if automated scores are randomly assigned."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Coarse-grained step-sequence match",
+          "definition": "A metric that compares the sequence of high-level steps in the agent's process to the target process, using exact sequence matching (e.g., longest common subsequence normalized by length)."
+        },
+        {
+          "name": "Fine-grained token-level alignment",
+          "definition": "A metric that compares the agent's process token-by-token (e.g., using BLEU score or edit distance on a flattened representation of the process)."
+        }
+      ],
+      "expected_result": "For the coarse-grained metric, correlation >0.5 at low ambiguity, drops below 0.5 at medium or high ambiguity. For the fine-grained metric, correlation >0.5 at low and medium ambiguity, drops below 0.5 only at high ambiguity (or remains above 0.5). The critical ambiguity threshold is statistically significantly lower for the coarse-grained metric compared to the fine-grained metric.",
+      "falsifying_result": "Correlation remains above 0.5 for all ambiguity levels and both metrics, or the threshold for coarse-grained metrics is not lower than for fine-grained ones (i.e., either equal or reversed).",
+      "minimum_viable_experiment": "Construct a set of 30 agent tasks (10 per ambiguity level: low, medium, high) with controlled ambiguity using pronoun resolution. Use the same LLM agent (e.g., GPT-4) with fixed parameters to execute each task. For each task, record the agent's process trace and compute both coarse-grained and fine-grained fidelity scores relative to a predetermined target process. Collect human fidelity judgments from 3 expert raters on a 7-point Likert scale, averaged. Compute Pearson correlation between automated scores and human scores for each combination of ambiguity level and metric type. Then determine the lowest ambiguity level at which the correlation drops below 0.5 for each metric. The experiment is minimal because it uses three levels of ambiguity, two metrics, one agent, and a manageable number of tasks.",
+      "risks_and_confounds": [
+        "Human raters may have low inter-rater reliability; mitigate by using multiple raters and measuring agreement.",
+        "Ambiguity manipulation may affect task difficulty beyond ambiguity; control by ensuring task length and complexity are similar.",
+        "The automated metrics may not capture all aspects of process fidelity; this is part of the investigation.",
+        "Order effects; randomize task order.",
+        "The chosen agent may have particular biases; replicate with different agents if resources permit."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold process depth D* such that agents with depth below D* show no significant reactivity effect from log probes, while those with depth above D* exhibit a statistically significant jump in task error rate due to instrumentation.",
+      "independent_variables": [
+        "Process depth (number of reasoning steps)",
+        "Instrumentation (with log probes vs. without)"
+      ],
+      "dependent_variables": [
+        "Task error rate"
+      ],
+      "controlled_variables": [
+        "Same task (math word problems of fixed difficulty)",
+        "Same initial prompt templates",
+        "Same environment (no other confounding)",
+        "Counterbalance order of instrumented/non-instrumented runs",
+        "Fixed agent architecture (chain-of-thought)"
+      ],
+      "baselines": [
+        {
+          "name": "Non-instrumented agent",
+          "description": "Agent performing the task without any log probes, for each process depth level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task error rate",
+          "definition": "Proportion of incorrect responses out of total trials per condition."
+        }
+      ],
+      "expected_result": "Piecewise regression identifies a breakpoint D* between 3 and 7 steps, with a 95% confidence interval not covering linear model. Error rate difference is negligible (<1%) for depths below D* and jumps to >10% for depths above D*.",
+      "falsifying_result": "Best-fit model is linear without a breakpoint (AIC favors linear over piecewise) or no observed change in error rate difference across depths (all near zero or all large).",
+      "minimum_viable_experiment": "Vary agent process depth across at least 5 levels (e.g., 1, 2, 4, 8, 16 reasoning steps) using a controlled chain-of-thought agent. For each depth, run 100 trials with log probes and 100 without, for a total of 1000 trials. Measure task error rate. Use piecewise regression with unknown breakpoint to detect a threshold. If a breakpoint is not found, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Reactivity from log probes may be confounded with process depth if deeper reasoning is more sensitive.",
+        "Task difficulty may not be perfectly controlled across depths.",
+        "The agent's reasoning steps may not be perfectly observable or controllable."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical observability ratio θ ≈ 0.3 such that: (1) when observability ratio > θ, the correlation between estimated process fidelity (using current best methods) and true process fidelity (measured via full internal access) is positive and significant, and (2) when observability ratio < θ, the correlation becomes negative or non-significant, indicating that measurement reactivity dominates the estimated fidelity.",
+      "independent_variables": [
+        "Observability ratio (continuous, 0-1)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation coefficient between estimated and true process fidelity (within bins of observability ratio)"
+      ],
+      "controlled_variables": [
+        "Task type (multi-step arithmetic, same for all agents)",
+        "Target process definition (identical across agents)",
+        "Model size (fixed)",
+        "Temperature (0)"
+      ],
+      "baselines": [
+        {
+          "name": "Full observability",
+          "description": "Observability ratio = 1, estimated fidelity uses complete internal traces."
+        },
+        {
+          "name": "Zero observability",
+          "description": "Observability ratio = 0, estimated fidelity based only on input/output with no internal access."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Estimated process fidelity",
+          "definition": "Process fidelity computed using only observable steps and inference for unobserved steps, using a standard process-based evaluation pipeline."
+        },
+        {
+          "name": "True process fidelity",
+          "definition": "Process fidelity computed by comparing the full internal trace (including hidden steps) against the fixed target process."
+        },
+        {
+          "name": "Pearson correlation coefficient",
+          "definition": "Pearson r between estimated and true fidelity for agents within the same observability ratio bin."
+        }
+      ],
+      "expected_result": "For observability ratios above 0.3, the correlation between estimated and true fidelity is positive and statistically significant (r > 0.5, p < 0.05). For observability ratios below 0.3, the correlation is negative (r < -0.3) or not significantly different from zero. The change in correlation sign occurs within a narrow window around θ ≈ 0.3.",
+      "falsifying_result": "If no threshold exists where correlation changes sign (i.e., correlation remains positive and significant across all observability levels), or if the threshold is not near 0.3 (e.g., <0.1 or >0.6), the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct 30 LLM agents with varying observability ratios (0 to 1) by controlling the transparency of their reasoning traces (fully transparent, partially masked, fully black-box). Use a synthetic multi-step arithmetic task where the true process is known by design. For each agent, compute observability ratio as the fraction of steps directly observable. Measure both estimated process fidelity (using a standard process-based evaluation pipeline that relies on observable steps and infers the rest) and true process fidelity (by comparing the full internal trace against a fixed target process). Compute Pearson correlation between estimated and true fidelity within bins of observability ratio (0-0.2, 0.2-0.4, etc.). Determine the threshold θ where the correlation changes sign or becomes insignificant.",
+      "risks_and_confounds": [
+        "Measurement reactivity: The act of observing may alter agent behavior, especially when agents are aware of the measurement.",
+        "Inference accuracy: For low observability, inference of unseen steps may be inaccurate, biasing estimated fidelity.",
+        "Binning granularity: The choice of bin width may affect detection of the threshold.",
+        "Limited sample size: 30 agents may not provide enough statistical power per bin.",
+        "Task specificity: Results may not generalize to other tasks.",
+        "Target process definition: Ambiguity in target process could confound fidelity comparison."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical granularity threshold in agent process measurement beyond which measurement reactivity introduces more distortion than the precision gain, making further refinement counterproductive?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the threshold of input ambiguity at which automated process fidelity metrics transition from reliable to unreliable, and does this threshold depend on the granularity of the metric's process encoding?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical depth of an agent's reasoning process at which the introduction of log probes causes a sharp increase in task error rate, indicating a phase transition in reactivity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a threshold level of observability (measured as the fraction of agent steps that are directly observable) below which process fidelity estimates become dominated by measurement reactivity rather than true process alignment?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false,
+      "enable_question_debate_refinement": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T212839Z"
+  }
+}

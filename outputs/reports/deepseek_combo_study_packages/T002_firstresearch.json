@@ -1,0 +1,1012 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Process",
+        "definition": "A sequence of internal states and operations, including reasoning steps, decisions, and subgoal formulations, that an LLM-based agent performs from receiving a task to producing a final output.",
+        "why_primitive": "It is the core object of evaluation; any measure of process fidelity must be defined in terms of this sequence."
+      },
+      {
+        "name": "Process Fidelity",
+        "definition": "The degree of correspondence between an agent's observed process and a predefined reference or ideal process along relevant dimensions such as step order, content, or structure.",
+        "why_primitive": "It is the central concept being measured; all definitions of measurement methods depend on this concept."
+      },
+      {
+        "name": "Measurement Method",
+        "definition": "A systematic procedure that maps an observed agent process to a quantitative or qualitative score representing its fidelity to the ideal process.",
+        "why_primitive": "It is the operational tool for assessing fidelity; different methods define different metrics and pick different dimensions to compare."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "There exists a well-defined, canonical ideal process for a given task.",
+        "rationale": "Without a standard to compare against, fidelity is meaningless. Tasks often have multiple valid solution paths, but here we assume a specific process is deemed correct or expected.",
+        "possible_failure": "If tasks allow many equally valid processes, measuring fidelity to a single ideal may penalize acceptable variations, making the metric unfair or irrelevant."
+      },
+      {
+        "assumption": "The agent's internal process can be reliably and completely observed or inferred from its external outputs (e.g., chain-of-thought text).",
+        "rationale": "For LLM agents, we typically rely on traces like reasoning chains. We assume these traces faithfully reflect the actual internal process.",
+        "possible_failure": "Agents may produce post-hoc rationalizations or omit steps, leading to measurement that reflects surface form rather than true process."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of process comparison vs. reliability of measurement",
+        "variables": [
+          "step-by-step alignment",
+          "semantic equivalence tolerances",
+          "inter-annotator agreement"
+        ]
+      },
+      {
+        "tradeoff": "Fidelity to a strict ideal process vs. allowance for creative or efficient alternative processes",
+        "variables": [
+          "strictness of constraints",
+          "task complexity",
+          "diversity of valid solutions"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "ObservedAgentProcess",
+        "role": "input",
+        "description": "The sequence of internal states and operations performed by the agent, as inferred from external traces."
+      },
+      {
+        "name": "IdealProcess",
+        "role": "input",
+        "description": "A predefined reference process that the agent's process is compared against."
+      },
+      {
+        "name": "MeasurementMethod",
+        "role": "mediator",
+        "description": "A systematic procedure that maps the observed process and ideal process to a fidelity score."
+      },
+      {
+        "name": "FidelityScore",
+        "role": "output",
+        "description": "A quantitative or qualitative score representing the degree of correspondence between the observed process and the ideal process."
+      },
+      {
+        "name": "EvaluationOutcome",
+        "role": "outcome",
+        "description": "The final assessment or decision based on the fidelity score, such as pass/fail or ranking."
+      },
+      {
+        "name": "TaskComplexity",
+        "role": "confounder",
+        "description": "The complexity of the task, which may affect both the ideal process definition and the observed process."
+      },
+      {
+        "name": "ObservationReliability",
+        "role": "confounder",
+        "description": "The degree to which the observed process accurately reflects the true internal process of the agent."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "ObservedAgentProcess",
+        "relation": "is compared against",
+        "target": "IdealProcess",
+        "explanation": "The observed process is compared to the ideal process to assess fidelity."
+      },
+      {
+        "step": "2",
+        "source": "MeasurementMethod",
+        "relation": "uses",
+        "target": "ObservedAgentProcess",
+        "explanation": "The measurement method takes the observed process as input."
+      },
+      {
+        "step": "3",
+        "source": "MeasurementMethod",
+        "relation": "uses",
+        "target": "IdealProcess",
+        "explanation": "The measurement method also takes the ideal process as a reference."
+      },
+      {
+        "step": "4",
+        "source": "MeasurementMethod",
+        "relation": "produces",
+        "target": "FidelityScore",
+        "explanation": "The measurement method generates a fidelity score based on the comparison."
+      },
+      {
+        "step": "5",
+        "source": "FidelityScore",
+        "relation": "determines",
+        "target": "EvaluationOutcome",
+        "explanation": "The fidelity score is used to reach an evaluation conclusion."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Reliability of process observation",
+        "why_it_matters": "If the observed process does not faithfully represent the agent's internal steps, the fidelity score will be misleading, undermining the validity of the measurement."
+      },
+      {
+        "bottleneck": "Definition of ideal process",
+        "why_it_matters": "Without a well-defined ideal process, the comparison is ambiguous; different definitions lead to different fidelity scores, making the metric inconsistent across tasks or evaluators."
+      }
+    ],
+    "mechanism_summary": "The mechanism for measuring agent process fidelity involves comparing an observed agent process to an ideal process using a measurement method, which produces a fidelity score that informs an evaluation outcome. Key bottlenecks include the reliability of observing the agent's internal process (due to potential post-hoc rationalization) and the need for a well-defined ideal process (since many tasks may have multiple valid processes). Task complexity and observation reliability act as confounders. The choice of measurement method mediates the comparison, and the granularity of comparison versus reliability is a central tradeoff."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "There is a tradeoff between granularity of process comparison and reliability of measurement: finer-grained comparisons (e.g., step-by-step alignment) may capture more detail but reduce reliability due to noise, while coarser comparisons (e.g., semantic equivalence) may be more reliable but miss important variations.",
+      "derived_from": [
+        "core_tradeoffs"
+      ],
+      "why_it_matters": "This tradeoff directly impacts the validity of process fidelity metrics. Choosing an inappropriate granularity can lead to either false positives (high fidelity for dissimilar processes) or false negatives (low fidelity for acceptable alternatives).",
+      "what_existing_methods_may_miss": "Existing methods often fix a particular granularity without justifying its appropriateness for the task or evaluating the tradeoff explicitly.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a tradeoff between fidelity to a strict ideal process and allowance for creative or efficient alternative processes: strict enforcement may penalize valid but non-standard approaches, while leniency may reduce discriminability.",
+      "derived_from": [
+        "core_tradeoffs"
+      ],
+      "why_it_matters": "This tradeoff determines whether the fidelity metric is fair and useful. Overly strict metrics may discourage innovation or unfairly penalize agents that find better solutions.",
+      "what_existing_methods_may_miss": "Existing methods often define a single ideal process without considering multiple valid solution paths, leading to biased evaluations.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that a well-defined, canonical ideal process exists for a given task is often violated in practice, as many tasks admit multiple valid processes.",
+      "derived_from": [
+        "assumptions"
+      ],
+      "why_it_matters": "If the ideal process is not well-defined or is ambiguous, any fidelity score becomes arbitrary and non-reproducible, undermining the entire measurement approach.",
+      "what_existing_methods_may_miss": "Existing methods typically assume a single ideal process without verifying its uniqueness or relevance, potentially leading to invalid comparisons.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that an agent's internal process can be reliably observed from external outputs (e.g., chain-of-thought) is questionable, as agents may produce post-hoc rationalizations or omit steps.",
+      "derived_from": [
+        "assumptions"
+      ],
+      "why_it_matters": "If observed processes are incomplete or misleading, fidelity scores do not reflect true agent behavior, harming the validity of conclusions drawn from them.",
+      "what_existing_methods_may_miss": "Existing methods rarely validate the faithfulness of external traces to internal processes, often taking them at face value.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The reliability of process observation is a critical bottleneck; if the observed process does not faithfully represent the agent's internal steps, fidelity scores are misleading.",
+      "derived_from": [
+        "bottlenecks"
+      ],
+      "why_it_matters": "This bottleneck affects all downstream uses of fidelity scores, including agent evaluation, comparison, and improvement.",
+      "what_existing_methods_may_miss": "Existing methods often assume perfect observation without accounting for potential distortions or providing reliability estimates.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T6",
+      "statement": "The definition of the ideal process is ambiguous and dependent on the task, evaluator, or context; without a standardized definition, fidelity scores are inconsistent across tasks and evaluators.",
+      "derived_from": [
+        "bottlenecks"
+      ],
+      "why_it_matters": "Ambiguity in the ideal process leads to low reproducibility and comparability of fidelity metrics, limiting their practical utility.",
+      "what_existing_methods_may_miss": "Existing methods often define the ideal process ad hoc, without providing guidelines for consistent definition across different settings.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying the granularity of process comparison (e.g., step-by-step vs. semantic equivalence) affect the reliability of fidelity scores in a controlled setting where the true agent process is known?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the tradeoff between granularity and reliability to guide selection of appropriate comparison granularity for fidelity measurement."
+    },
+    {
+      "question": "Can a fidelity metric that incorporates multiple valid ideal processes (e.g., via a set of acceptable process variants) maintain discriminability between high- and low-fidelity agents as effectively as a single-ideal metric?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Evaluate whether allowing multiple ideal processes reduces false penalties on valid alternatives without sacrificing discriminability."
+    },
+    {
+      "question": "To what extent do chain-of-thought traces from large language models accurately reflect the model's internal processing, as measured by intervention-based ground truth?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Estimate the faithfulness of external process observations, informing the validity of fidelity scores derived from such traces."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "A sequence of internal states and operations, including reasoning steps, decisions, and subgoal formulations, that an LLM-based agent performs from receiving a task to producing a final output.",
+          "why_primitive": "It is the core object of evaluation; any measure of process fidelity must be defined in terms of this sequence."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree of correspondence between an agent's observed process and a predefined reference or ideal process along relevant dimensions such as step order, content, or structure.",
+          "why_primitive": "It is the central concept being measured; all definitions of measurement methods depend on this concept."
+        },
+        {
+          "name": "Measurement Method",
+          "definition": "A systematic procedure that maps an observed agent process to a quantitative or qualitative score representing its fidelity to the ideal process.",
+          "why_primitive": "It is the operational tool for assessing fidelity; different methods define different metrics and pick different dimensions to compare."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined, canonical ideal process for a given task.",
+          "rationale": "Without a standard to compare against, fidelity is meaningless. Tasks often have multiple valid solution paths, but here we assume a specific process is deemed correct or expected.",
+          "possible_failure": "If tasks allow many equally valid processes, measuring fidelity to a single ideal may penalize acceptable variations, making the metric unfair or irrelevant."
+        },
+        {
+          "assumption": "The agent's internal process can be reliably and completely observed or inferred from its external outputs (e.g., chain-of-thought text).",
+          "rationale": "For LLM agents, we typically rely on traces like reasoning chains. We assume these traces faithfully reflect the actual internal process.",
+          "possible_failure": "Agents may produce post-hoc rationalizations or omit steps, leading to measurement that reflects surface form rather than true process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ObservedAgentProcess",
+            "role": "input",
+            "description": "The sequence of internal states and operations performed by the agent, as inferred from external traces."
+          },
+          {
+            "name": "IdealProcess",
+            "role": "input",
+            "description": "A predefined reference process that the agent's process is compared against."
+          },
+          {
+            "name": "MeasurementMethod",
+            "role": "mediator",
+            "description": "A systematic procedure that maps the observed process and ideal process to a fidelity score."
+          },
+          {
+            "name": "FidelityScore",
+            "role": "output",
+            "description": "A quantitative or qualitative score representing the degree of correspondence between the observed process and the ideal process."
+          },
+          {
+            "name": "EvaluationOutcome",
+            "role": "outcome",
+            "description": "The final assessment or decision based on the fidelity score, such as pass/fail or ranking."
+          },
+          {
+            "name": "TaskComplexity",
+            "role": "confounder",
+            "description": "The complexity of the task, which may affect both the ideal process definition and the observed process."
+          },
+          {
+            "name": "ObservationReliability",
+            "role": "confounder",
+            "description": "The degree to which the observed process accurately reflects the true internal process of the agent."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ObservedAgentProcess",
+            "relation": "is compared against",
+            "target": "IdealProcess",
+            "explanation": "The observed process is compared to the ideal process to assess fidelity."
+          },
+          {
+            "step": "2",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "ObservedAgentProcess",
+            "explanation": "The measurement method takes the observed process as input."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "IdealProcess",
+            "explanation": "The measurement method also takes the ideal process as a reference."
+          },
+          {
+            "step": "4",
+            "source": "MeasurementMethod",
+            "relation": "produces",
+            "target": "FidelityScore",
+            "explanation": "The measurement method generates a fidelity score based on the comparison."
+          },
+          {
+            "step": "5",
+            "source": "FidelityScore",
+            "relation": "determines",
+            "target": "EvaluationOutcome",
+            "explanation": "The fidelity score is used to reach an evaluation conclusion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Reliability of process observation",
+            "why_it_matters": "If the observed process does not faithfully represent the agent's internal steps, the fidelity score will be misleading, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Definition of ideal process",
+            "why_it_matters": "Without a well-defined ideal process, the comparison is ambiguous; different definitions lead to different fidelity scores, making the metric inconsistent across tasks or evaluators."
+          }
+        ],
+        "mechanism_summary": "The mechanism for measuring agent process fidelity involves comparing an observed agent process to an ideal process using a measurement method, which produces a fidelity score that informs an evaluation outcome. Key bottlenecks include the reliability of observing the agent's internal process (due to potential post-hoc rationalization) and the need for a well-defined ideal process (since many tasks may have multiple valid processes). Task complexity and observation reliability act as confounders. The choice of measurement method mediates the comparison, and the granularity of comparison versus reliability is a central tradeoff."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "There is a tradeoff between granularity of process comparison and reliability of measurement: finer-grained comparisons (e.g., step-by-step alignment) may capture more detail but reduce reliability due to noise, while coarser comparisons (e.g., semantic equivalence) may be more reliable but miss important variations.",
+        "derived_from": [
+          "core_tradeoffs"
+        ],
+        "why_it_matters": "This tradeoff directly impacts the validity of process fidelity metrics. Choosing an inappropriate granularity can lead to either false positives (high fidelity for dissimilar processes) or false negatives (low fidelity for acceptable alternatives).",
+        "what_existing_methods_may_miss": "Existing methods often fix a particular granularity without justifying its appropriateness for the task or evaluating the tradeoff explicitly.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the effect of comparison granularity on fidelity score reliability depend on the level of observation noise, and is there a noise threshold below which fine-grained comparison yields higher reliability and above which coarse-grained comparison yields higher reliability?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a noise-dependent crossover in the granularity-reliability tradeoff, providing a principled rule for choosing comparison granularity based on expected observation noise."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of observation noise (e.g., proportion of missing steps) such that for noise below the threshold, step-by-step exact match yields higher test-retest reliability than semantic equivalence, while for noise above the threshold, semantic equivalence yields higher reliability.",
+        "predicted_effect": "A crossover interaction: at low noise, fine-grained comparison is more reliable; at high noise, coarse-grained comparison is more reliable."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent process with known steps. Generate multiple observed traces by adding random perturbations (e.g., omitted steps) at varying noise levels: 0%, 20%, 40%, 60% missing steps. Apply two comparison granularities: (a) step-by-step exact match, (b) semantic equivalence (compare final outcome or high-level steps). Compute fidelity scores for each trace and each method. For each noise×granularity condition, calculate the variance of scores across traces (test-retest reliability).",
+        "independent_variables": [
+          "Granularity of process comparison: exact step match vs. semantic equivalence",
+          "Observation noise level: 0%, 20%, 40%, 60% missing steps"
+        ],
+        "dependent_variables": [
+          "Variance of fidelity scores across repeated observations (test-retest reliability)"
+        ],
+        "controls": [
+          "Same ideal process",
+          "Same task",
+          "Same number of repeated observations per condition",
+          "Random seed control for perturbation generation"
+        ],
+        "falsifying_observation": "If no crossover is observed (i.e., exact match variance is always higher than semantic variance, or always lower, regardless of noise level), the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At 0% noise, exact match variance is lower than semantic variance.",
+          "At 60% noise, semantic variance is lower than exact match variance.",
+          "The crossover occurs at an intermediate noise level (e.g., 20-40%)."
+        ],
+        "rejects_hypothesis": [
+          "Exact match variance is always lower than semantic variance across all noise levels.",
+          "Exact match variance is always higher than semantic variance across all noise levels.",
+          "No monotonic trend in the relative reliability as noise increases."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected, then the assumption that observation noise differentially affects fine-grained vs. coarse-grained comparisons may be incorrect, or the effect may depend on the type of noise (e.g., omitted steps vs. paraphrasing) rather than its level.",
+        "assumption_to_revise": "Assumption: Noise primarily disrupts step-level alignment, leaving semantic-level similarity unaffected.",
+        "next_question": "How does the type of observation noise (missing steps vs. paraphrasing vs. reordering) interact with granularity to affect reliability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "A sequence of internal states and operations, including reasoning steps, decisions, and subgoal formulations, that an LLM-based agent performs from receiving a task to producing a final output.",
+          "why_primitive": "It is the core object of evaluation; any measure of process fidelity must be defined in terms of this sequence."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree of correspondence between an agent's observed process and a predefined reference or ideal process along relevant dimensions such as step order, content, or structure.",
+          "why_primitive": "It is the central concept being measured; all definitions of measurement methods depend on this concept."
+        },
+        {
+          "name": "Measurement Method",
+          "definition": "A systematic procedure that maps an observed agent process to a quantitative or qualitative score representing its fidelity to the ideal process.",
+          "why_primitive": "It is the operational tool for assessing fidelity; different methods define different metrics and pick different dimensions to compare."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined, canonical ideal process for a given task.",
+          "rationale": "Without a standard to compare against, fidelity is meaningless. Tasks often have multiple valid solution paths, but here we assume a specific process is deemed correct or expected.",
+          "possible_failure": "If tasks allow many equally valid processes, measuring fidelity to a single ideal may penalize acceptable variations, making the metric unfair or irrelevant."
+        },
+        {
+          "assumption": "The agent's internal process can be reliably and completely observed or inferred from its external outputs (e.g., chain-of-thought text).",
+          "rationale": "For LLM agents, we typically rely on traces like reasoning chains. We assume these traces faithfully reflect the actual internal process.",
+          "possible_failure": "Agents may produce post-hoc rationalizations or omit steps, leading to measurement that reflects surface form rather than true process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ObservedAgentProcess",
+            "role": "input",
+            "description": "The sequence of internal states and operations performed by the agent, as inferred from external traces."
+          },
+          {
+            "name": "IdealProcess",
+            "role": "input",
+            "description": "A predefined reference process that the agent's process is compared against."
+          },
+          {
+            "name": "MeasurementMethod",
+            "role": "mediator",
+            "description": "A systematic procedure that maps the observed process and ideal process to a fidelity score."
+          },
+          {
+            "name": "FidelityScore",
+            "role": "output",
+            "description": "A quantitative or qualitative score representing the degree of correspondence between the observed process and the ideal process."
+          },
+          {
+            "name": "EvaluationOutcome",
+            "role": "outcome",
+            "description": "The final assessment or decision based on the fidelity score, such as pass/fail or ranking."
+          },
+          {
+            "name": "TaskComplexity",
+            "role": "confounder",
+            "description": "The complexity of the task, which may affect both the ideal process definition and the observed process."
+          },
+          {
+            "name": "ObservationReliability",
+            "role": "confounder",
+            "description": "The degree to which the observed process accurately reflects the true internal process of the agent."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ObservedAgentProcess",
+            "relation": "is compared against",
+            "target": "IdealProcess",
+            "explanation": "The observed process is compared to the ideal process to assess fidelity."
+          },
+          {
+            "step": "2",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "ObservedAgentProcess",
+            "explanation": "The measurement method takes the observed process as input."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "IdealProcess",
+            "explanation": "The measurement method also takes the ideal process as a reference."
+          },
+          {
+            "step": "4",
+            "source": "MeasurementMethod",
+            "relation": "produces",
+            "target": "FidelityScore",
+            "explanation": "The measurement method generates a fidelity score based on the comparison."
+          },
+          {
+            "step": "5",
+            "source": "FidelityScore",
+            "relation": "determines",
+            "target": "EvaluationOutcome",
+            "explanation": "The fidelity score is used to reach an evaluation conclusion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Reliability of process observation",
+            "why_it_matters": "If the observed process does not faithfully represent the agent's internal steps, the fidelity score will be misleading, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Definition of ideal process",
+            "why_it_matters": "Without a well-defined ideal process, the comparison is ambiguous; different definitions lead to different fidelity scores, making the metric inconsistent across tasks or evaluators."
+          }
+        ],
+        "mechanism_summary": "The mechanism for measuring agent process fidelity involves comparing an observed agent process to an ideal process using a measurement method, which produces a fidelity score that informs an evaluation outcome. Key bottlenecks include the reliability of observing the agent's internal process (due to potential post-hoc rationalization) and the need for a well-defined ideal process (since many tasks may have multiple valid processes). Task complexity and observation reliability act as confounders. The choice of measurement method mediates the comparison, and the granularity of comparison versus reliability is a central tradeoff."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that an agent's internal process can be reliably observed from external outputs (e.g., chain-of-thought) is questionable, as agents may produce post-hoc rationalizations or omit steps.",
+        "derived_from": [
+          "assumptions"
+        ],
+        "why_it_matters": "If observed processes are incomplete or misleading, fidelity scores do not reflect true agent behavior, harming the validity of conclusions drawn from them.",
+        "what_existing_methods_may_miss": "Existing methods rarely validate the faithfulness of external traces to internal processes, often taking them at face value.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a sharp threshold in the number of intermediate reasoning steps beyond which chain-of-thought traces from LLMs become unfaithful to the model's internal causal process?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a boundary condition (step count threshold) where chain-of-thought faithfulness degrades, enabling more reliable use of traces for process fidelity measurement."
+      },
+      "hypothesis": {
+        "statement": "Chain-of-thought traces from LLMs exhibit a phase transition: they faithfully reflect internal causal steps for tasks requiring up to K intermediate steps (K ~ 5-7), but systematically omit or misrepresent steps when the task requires more than K steps.",
+        "predicted_effect": "Recall and precision of causally important steps in chain-of-thought will remain high (>=0.9) for tasks with <= K steps, but drop significantly (e.g., recall <0.7, precision <0.6) for tasks with > K steps."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Using activation patching on a set of multi-step reasoning tasks with varying number of intermediate steps (2,4,6,8,10 steps). For each task, compute recall and precision of chain-of-thought steps relative to causally important steps identified via patching. Analyze discontinuity in performance across step counts.",
+        "independent_variables": [
+          "Number of intermediate reasoning steps (2,4,6,8,10)"
+        ],
+        "dependent_variables": [
+          "Recall of causally important steps in chain-of-thought",
+          "Precision of causally important steps in chain-of-thought"
+        ],
+        "controls": [
+          "Model (Llama2-7B, Llama2-13B)",
+          "Temperature (0)",
+          "Task domain (arithmetic, commonsense)",
+          "Patching methodology (activation patching per token)"
+        ],
+        "falsifying_observation": "If recall and precision do not exhibit a sharp drop (e.g., no statistically significant difference between tasks with 6 steps and 8 steps) or if the threshold is not consistent across two model sizes, the hypothesis of a discrete threshold is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Recall and precision remain >=0.9 for tasks up to K steps (e.g., K=6), then drop to <0.7 for tasks above K.",
+          "A distinct elbow or step function is observed in the performance curve.",
+          "Causal importance of steps not in chain-of-thought increases for tasks above K."
+        ],
+        "rejects_hypothesis": [
+          "Recall and precision decline gradually with step count without a clear threshold.",
+          "Performance for 8-step tasks is not significantly different from 6-step tasks (p>0.05).",
+          "The threshold K differs substantially between model sizes (e.g., >3 steps difference)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no discrete threshold is found, revise the hypothesis to a continuous degradation model or an interaction with task type.",
+        "assumption_to_revise": "The assumption that faithfulness is binary (threshold) rather than continuous or task-dependent.",
+        "next_question": "Does the faithfulness of chain-of-thought degrade continuously with step count, and does this degradation depend on task domain or model architecture?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "A sequence of internal states and operations, including reasoning steps, decisions, and subgoal formulations, that an LLM-based agent performs from receiving a task to producing a final output.",
+          "why_primitive": "It is the core object of evaluation; any measure of process fidelity must be defined in terms of this sequence."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree of correspondence between an agent's observed process and a predefined reference or ideal process along relevant dimensions such as step order, content, or structure.",
+          "why_primitive": "It is the central concept being measured; all definitions of measurement methods depend on this concept."
+        },
+        {
+          "name": "Measurement Method",
+          "definition": "A systematic procedure that maps an observed agent process to a quantitative or qualitative score representing its fidelity to the ideal process.",
+          "why_primitive": "It is the operational tool for assessing fidelity; different methods define different metrics and pick different dimensions to compare."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined, canonical ideal process for a given task.",
+          "rationale": "Without a standard to compare against, fidelity is meaningless. Tasks often have multiple valid solution paths, but here we assume a specific process is deemed correct or expected.",
+          "possible_failure": "If tasks allow many equally valid processes, measuring fidelity to a single ideal may penalize acceptable variations, making the metric unfair or irrelevant."
+        },
+        {
+          "assumption": "The agent's internal process can be reliably and completely observed or inferred from its external outputs (e.g., chain-of-thought text).",
+          "rationale": "For LLM agents, we typically rely on traces like reasoning chains. We assume these traces faithfully reflect the actual internal process.",
+          "possible_failure": "Agents may produce post-hoc rationalizations or omit steps, leading to measurement that reflects surface form rather than true process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ObservedAgentProcess",
+            "role": "input",
+            "description": "The sequence of internal states and operations performed by the agent, as inferred from external traces."
+          },
+          {
+            "name": "IdealProcess",
+            "role": "input",
+            "description": "A predefined reference process that the agent's process is compared against."
+          },
+          {
+            "name": "MeasurementMethod",
+            "role": "mediator",
+            "description": "A systematic procedure that maps the observed process and ideal process to a fidelity score."
+          },
+          {
+            "name": "FidelityScore",
+            "role": "output",
+            "description": "A quantitative or qualitative score representing the degree of correspondence between the observed process and the ideal process."
+          },
+          {
+            "name": "EvaluationOutcome",
+            "role": "outcome",
+            "description": "The final assessment or decision based on the fidelity score, such as pass/fail or ranking."
+          },
+          {
+            "name": "TaskComplexity",
+            "role": "confounder",
+            "description": "The complexity of the task, which may affect both the ideal process definition and the observed process."
+          },
+          {
+            "name": "ObservationReliability",
+            "role": "confounder",
+            "description": "The degree to which the observed process accurately reflects the true internal process of the agent."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ObservedAgentProcess",
+            "relation": "is compared against",
+            "target": "IdealProcess",
+            "explanation": "The observed process is compared to the ideal process to assess fidelity."
+          },
+          {
+            "step": "2",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "ObservedAgentProcess",
+            "explanation": "The measurement method takes the observed process as input."
+          },
+          {
+            "step": "3",
+            "source": "MeasurementMethod",
+            "relation": "uses",
+            "target": "IdealProcess",
+            "explanation": "The measurement method also takes the ideal process as a reference."
+          },
+          {
+            "step": "4",
+            "source": "MeasurementMethod",
+            "relation": "produces",
+            "target": "FidelityScore",
+            "explanation": "The measurement method generates a fidelity score based on the comparison."
+          },
+          {
+            "step": "5",
+            "source": "FidelityScore",
+            "relation": "determines",
+            "target": "EvaluationOutcome",
+            "explanation": "The fidelity score is used to reach an evaluation conclusion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Reliability of process observation",
+            "why_it_matters": "If the observed process does not faithfully represent the agent's internal steps, the fidelity score will be misleading, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Definition of ideal process",
+            "why_it_matters": "Without a well-defined ideal process, the comparison is ambiguous; different definitions lead to different fidelity scores, making the metric inconsistent across tasks or evaluators."
+          }
+        ],
+        "mechanism_summary": "The mechanism for measuring agent process fidelity involves comparing an observed agent process to an ideal process using a measurement method, which produces a fidelity score that informs an evaluation outcome. Key bottlenecks include the reliability of observing the agent's internal process (due to potential post-hoc rationalization) and the need for a well-defined ideal process (since many tasks may have multiple valid processes). Task complexity and observation reliability act as confounders. The choice of measurement method mediates the comparison, and the granularity of comparison versus reliability is a central tradeoff."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a tradeoff between fidelity to a strict ideal process and allowance for creative or efficient alternative processes: strict enforcement may penalize valid but non-standard approaches, while leniency may reduce discriminability.",
+        "derived_from": [
+          "core_tradeoffs"
+        ],
+        "why_it_matters": "This tradeoff determines whether the fidelity metric is fair and useful. Overly strict metrics may discourage innovation or unfairly penalize agents that find better solutions.",
+        "what_existing_methods_may_miss": "Existing methods often define a single ideal process without considering multiple valid solution paths, leading to biased evaluations.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "For LLM agent process fidelity, does the discriminability advantage of multi-ideal over single-ideal metrics depend on the entropy of the set of valid processes, such that beyond a threshold entropy the advantage reverses?",
+        "question_type": "benchmark",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a critical boundary where the tradeoff between fidelity flexibility and discriminability flips, enabling principled metric selection."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold in the entropy of the set of valid ideal processes (e.g., measured by the number of distinct valid traces) below which a multi-ideal metric yields higher discriminability than a single-ideal metric, and above which the advantage reverses or disappears.",
+        "predicted_effect": "Discriminability (AUC) for the multi-ideal metric is higher than single-ideal when entropy is below threshold, and lower when entropy is above threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a controlled generation of agent tasks with varying numbers of valid ideal processes (e.g., 1, 2, 5, 10, 20 distinct solutions). For each condition, simulate agents with known high and low fidelity (e.g., by introducing step omissions or errors). Compute discriminability (AUC) for both a single-ideal metric using the most common ideal process and a multi-ideal metric using the full set. Fit a model to test for a quadratic or threshold effect.",
+        "independent_variables": [
+          "Type of fidelity metric (single-ideal vs multi-ideal)",
+          "Entropy of valid process set (number of distinct ideal processes)"
+        ],
+        "dependent_variables": [
+          "Discriminability (AUC for classifying high vs low fidelity agents)"
+        ],
+        "controls": [
+          "Same set of agent tasks",
+          "Same simulation of agent processes with controlled fidelity levels",
+          "Same observation method (e.g., chain-of-thought tracing)",
+          "Random assignment of agents to metric conditions"
+        ],
+        "falsifying_observation": "The discriminability difference between multi-ideal and single-ideal metrics does not change sign or show a significant quadratic/breakpoint effect as entropy increases; instead, the difference remains constant or monotonic."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low entropy (few valid processes), multi-ideal metric AUC is significantly higher than single-ideal metric AUC.",
+          "At high entropy (many valid processes), multi-ideal metric AUC is significantly lower than single-ideal metric AUC.",
+          "A breakpoint analysis reveals a critical entropy value where the slopes reverse."
+        ],
+        "rejects_hypothesis": [
+          "Multi-ideal metric AUC is always higher (or always lower) regardless of entropy.",
+          "No significant interaction between metric type and entropy level."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (i.e., the advantage of multi-ideal over single-ideal does not reverse), then the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that the tradeoff between flexibility and discriminability is non-monotonic. Instead, the advantage might be consistently in one direction or absent.",
+        "next_question": "What mechanism governs the relationship between process diversity and metric discriminability? For example, does multi-ideal metric degrade only when ideal processes overlap heavily?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold of observation noise (e.g., proportion of missing steps) such that for noise below the threshold, step-by-step exact match yields higher test-retest reliability than semantic equivalence, while for noise above the threshold, semantic equivalence yields higher reliability.",
+      "independent_variables": [
+        "Granularity of process comparison: exact step match vs. semantic equivalence",
+        "Observation noise level: 0%, 20%, 40%, 60% missing steps"
+      ],
+      "dependent_variables": [
+        "Variance of fidelity scores across repeated observations (test-retest reliability)"
+      ],
+      "controlled_variables": [
+        "Same ideal process",
+        "Same task",
+        "Same number of repeated observations per condition",
+        "Random seed control for perturbation generation"
+      ],
+      "baselines": [
+        {
+          "name": "Exact Step Match",
+          "description": "Comparison granularity where each step of the observed process is matched exactly to the corresponding step in the ideal process."
+        },
+        {
+          "name": "Semantic Equivalence",
+          "description": "Comparison granularity where the overall meaning or high-level steps are compared, ignoring exact step order or wording."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity Score Variance",
+          "definition": "Variance of fidelity scores computed from repeated observations under the same noise and granularity condition, used as a measure of test-retest reliability."
+        }
+      ],
+      "expected_result": "At 0% noise, exact match variance is lower than semantic variance; at 60% noise, semantic variance is lower than exact match variance; the crossover occurs at an intermediate noise level (e.g., 20-40%).",
+      "falsifying_result": "No crossover observed: exact match variance is always lower than semantic variance across all noise levels, or exact match variance is always higher than semantic variance across all noise levels, or no monotonic trend in the relative reliability as noise increases.",
+      "minimum_viable_experiment": "Simulate an agent process with known steps. Generate multiple observed traces by randomly adding omitted steps at noise levels 0%, 20%, 40%, and 60%. Apply two comparison methods: exact step match and semantic equivalence. Compute fidelity scores for each trace-method combination. For each noise level and method, compute the variance of the fidelity scores across traces. Compare the variances to determine if a crossover in reliability occurs as predicted.",
+      "risks_and_confounds": [
+        "Simulation may not accurately reflect real LLM agent behavior, especially post-hoc rationalization",
+        "Assumption that missing steps are the only type of observation noise; other noise types (paraphrasing, reordering) may interact differently",
+        "Definition of semantic equivalence may be subjective or difficult to automate consistently",
+        "The choice of noise levels (0%,20%,40%,60%) may not capture the threshold if it lies outside this range"
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold in the entropy of the set of valid ideal processes below which a multi-ideal metric yields higher discriminability than a single-ideal metric, and above which the advantage reverses or disappears.",
+      "independent_variables": [
+        "Type of fidelity metric (single-ideal, multi-ideal)",
+        "Entropy of valid process set (number of distinct ideal processes: 1, 2, 5, 10, 20)"
+      ],
+      "dependent_variables": [
+        "Discriminability (AUC for classifying high vs low fidelity agents)"
+      ],
+      "controlled_variables": [
+        "Same set of agent tasks",
+        "Same simulation of agent processes with controlled fidelity levels",
+        "Same observation method (chain-of-thought tracing)",
+        "Random assignment of agents to metric conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Single-ideal baseline",
+          "description": "Use the most common ideal process as the reference for the single-ideal metric at each entropy level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "AUC discriminability",
+          "definition": "Area under the ROC curve for classifying agents as high or low fidelity based on the fidelity score."
+        }
+      ],
+      "expected_result": "At low entropy (few valid processes), multi-ideal metric AUC is significantly higher than single-ideal metric AUC; at high entropy (many valid processes), multi-ideal metric AUC is significantly lower than single-ideal metric AUC; a breakpoint analysis reveals a critical entropy value where the slopes reverse.",
+      "falsifying_result": "The discriminability difference between multi-ideal and single-ideal metrics does not change sign or show a significant quadratic/breakpoint effect as entropy increases; instead, the difference remains constant or monotonic.",
+      "minimum_viable_experiment": "Generate agent tasks with varying numbers of valid ideal processes (1, 2, 5, 10, 20). For each, simulate agents with known high and low fidelity (e.g., step omissions/errors). Compute AUC for both a single-ideal metric (using most common ideal) and a multi-ideal metric (using full set). Test for a quadratic or threshold effect in the AUC difference across entropy levels.",
+      "risks_and_confounds": [
+        "Observation reliability: agent traces may not reflect true internal process",
+        "Task complexity: may confound with entropy",
+        "Overlap of ideal processes: multi-ideal metric may not capture distinctness",
+        "Limited number of entropy levels may miss threshold"
+      ]
+    },
+    {
+      "hypothesis": "Chain-of-thought traces from LLMs exhibit a phase transition: they faithfully reflect internal causal steps for tasks requiring up to K intermediate steps (K ~ 5-7), but systematically omit or misrepresent steps when the task requires more than K steps.",
+      "independent_variables": [
+        "Number of intermediate reasoning steps (2,4,6,8,10)"
+      ],
+      "dependent_variables": [
+        "Recall of causally important steps in chain-of-thought",
+        "Precision of causally important steps in chain-of-thought"
+      ],
+      "controlled_variables": [
+        "Model (Llama2-7B, Llama2-13B)",
+        "Temperature (0)",
+        "Task domain (arithmetic, commonsense)",
+        "Patching methodology (activation patching per token)"
+      ],
+      "baselines": [
+        {
+          "name": "Low-step baseline",
+          "description": "Performance on tasks with 2 intermediate reasoning steps, representing the high-fidelity regime."
+        },
+        {
+          "name": "High-step baseline",
+          "description": "Performance on tasks with 10 intermediate reasoning steps, representing the low-fidelity regime expected if hypothesis holds."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Recall",
+          "definition": "Proportion of causally important steps (identified by activation patching) that appear in the chain-of-thought trace."
+        },
+        {
+          "name": "Precision",
+          "definition": "Proportion of steps in the chain-of-thought trace that are causally important (as identified by activation patching)."
+        }
+      ],
+      "expected_result": "For tasks with <= 6 steps (K), recall and precision remain >=0.9. For tasks with >6 steps (8,10), recall drops below 0.7 and precision below 0.6, showing a sharp, discrete transition.",
+      "falsifying_result": "No discrete threshold is observed: recall and precision decline gradually with step count without a clear cutoff, or the difference between 6-step and 8-step tasks is not statistically significant (p>0.05), or the threshold K differs by more than 3 steps between the two model sizes.",
+      "minimum_viable_experiment": "Using activation patching on a set of multi-step reasoning tasks with 2,4,6,8,10 intermediate steps (20 tasks per condition, balanced across arithmetic and commonsense). For each task, compute recall and precision of chain-of-thought steps relative to causally important steps identified via patching. Use Llama2-7B and Llama2-13B with temperature 0. Plot recall and precision as functions of step count and test for a discontinuity (e.g., using piecewise regression or ANOVA with contrasts).",
+      "risks_and_confounds": [
+        "Step count may correlate with task difficulty, confounding the effect on faithfulness.",
+        "Activation patching may not perfectly identify all causally important steps, leading to noise in the ground truth.",
+        "Model architecture and training data may influence the threshold, making results model-specific.",
+        "Post-hoc rationalization may still occur even at low step counts, biasing the baseline."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package proposes a first-principles framework for measuring agent process fidelity, focusing on LLM agents. It decomposes the problem into primitive definitions, assumptions, tradeoffs, and a causal mechanism model. It identifies key tensions (e.g., granularity vs. reliability, strictness vs. creativity) and formulates three falsifiable hypotheses with associated experiments. The work is novel, rigorous, and methodologically sound, with clear connections between theory and empirical testing.",
+    "strengths": [
+      "Strong first-principles derivation that clearly defines core concepts and assumptions.",
+      "Well-articulated mechanism model with causal chains and identified bottlenecks.",
+      "Multiple testable hypotheses that address fundamental tradeoffs in process fidelity measurement.",
+      "Experiments are designed to be decisive, with clear falsification criteria and failure update rules.",
+      "High novelty: tackling an under-explored area (process fidelity evaluation for LLM agents) with a principled approach."
+    ],
+    "weaknesses": [
+      "The first-principles derivation, while logical, is somewhat abstract and relies on assumptions (e.g., existence of an ideal process) that may not hold in practice; the experiments test these assumptions but may not fully resolve the issue.",
+      "The proposed experiments rely on simulations (e.g., adding noise to known processes) rather than real LLM agents, which limits ecological validity.",
+      "The paper does not compare against existing process similarity metrics (e.g., BLEU, ROUGE, or process reward models used in RLHF), which could serve as baselines.",
+      "The scope is narrow (LLM agents with chain-of-thought tracing), and it is unclear how the framework generalizes to other agent architectures or observation methods."
+    ],
+    "questions": [
+      "How would the proposed metrics perform when the 'ideal process' is not predefined but must be inferred from multiple expert demonstrations?",
+      "How sensitive are the results to the choice of observation noise type (e.g., missing steps vs. paraphrasing vs. reordering)?",
+      "Can the experiments be extended to real LLM agents (e.g., GPT-4) to validate the simulation-based findings?"
+    ],
+    "missing_baselines": [
+      "Existing process fidelity or similarity metrics such as BLEU, ROUGE, METEOR, or process reward models (e.g., process reward models from Ouyang et al.) are not included as baselines.",
+      "No comparison to outcome-only evaluation (e.g., final answer accuracy) to show the added value of process fidelity.",
+      "The 'single-ideal' baseline in the third experiment could be expanded to include heuristics like edit distance or graph alignment."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Lack of empirical validation with real LLM agents",
+    "root_cause": "The proposed experiments rely on simulated agent processes rather than actual LLM agents, reducing ecological validity and potentially missing real-world artifacts such as post-hoc rationalization.",
+    "violated_principle": "First-principles research must derive testable hypotheses that can be validated with real-world systems, not just idealized simulations.",
+    "new_or_updated_principle": "When evaluating agent process fidelity, empirical tests must include at least one experiment using real LLM agents (e.g., GPT-4) to confirm simulation findings, ensuring that measurement methods are robust to actual agent behavior such as post-hoc rationalization.",
+    "new_or_updated_skill": "Design hybrid experiments that combine simulated control with real LLM agent traces, using techniques like intervention-based ground truth (e.g., activation patching) to validate simulated noise assumptions.",
+    "regression_test": "For any new process fidelity metric, require at least one experimental condition where the metric is applied to traces from actual LLM agents (e.g., using chain-of-thought from GPT-4) with known process modifications (e.g., step omissions through prompt engineering), and verify that the metric's discriminability between modified and unmodified agents exceeds 0.7 AUC."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "How does the effect of comparison granularity on fidelity score reliability depend on the level of observation noise, and is there a noise threshold below which fine-grained comparison yields higher reliability and above which coarse-grained comparison yields higher reliability?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "For LLM agent process fidelity, does the discriminability advantage of multi-ideal over single-ideal metrics depend on the entropy of the set of valid processes, such that beyond a threshold entropy the advantage reverses?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a sharp threshold in the number of intermediate reasoning steps beyond which chain-of-thought traces from LLMs become unfaithful to the model's internal causal process?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true,
+      "enable_question_debate_refinement": false
+    },
+    "replicate": 1,
+    "run_id": "run-20260628T210818Z"
+  }
+}

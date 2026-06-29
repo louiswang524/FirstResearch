@@ -1,0 +1,1021 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Process",
+        "definition": "A predetermined sequence of steps, states, or decision rules that an agent is expected to follow to accomplish a task.",
+        "why_primitive": "It defines the reference standard against which agent behavior is compared; without a process, there is no target for fidelity."
+      },
+      {
+        "name": "Agent",
+        "definition": "An entity (here an LLM-based system) that perceives its environment, reasons, and takes actions to complete a task.",
+        "why_primitive": "The agent is the subject of evaluation; fidelity measurement quantifies how closely its actions match the prescribed process."
+      },
+      {
+        "name": "Fidelity",
+        "definition": "The degree of alignment between an agent's observed actions and the prescribed process, typically quantified as a score or distance metric.",
+        "why_primitive": "It is the core construct being measured; all evaluation methods aim to capture this alignment."
+      },
+      {
+        "name": "Measurement",
+        "definition": "A systematic procedure for comparing observed agent behavior to the prescribed process to produce a fidelity score.",
+        "why_primitive": "Measurement operationalizes the abstract concept of fidelity, enabling quantitative comparison across agents and tasks."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The prescribed process is well-defined and unambiguous.",
+        "rationale": "Fidelity measurement requires a clear, stable specification of the expected behavior. Ambiguity leads to subjective interpretations and inconsistent evaluation.",
+        "possible_failure": "Real-world processes may be underspecified or have multiple valid paths, making fidelity scores unreliable or contested."
+      },
+      {
+        "assumption": "Agent behavior is fully observable at the level of process steps.",
+        "rationale": "To compare with the process, we must be able to detect each relevant action or state transition. This requires access to agent outputs and possibly internal states.",
+        "possible_failure": "Agents may take hidden actions, use external tools without logging, or produce outputs that require complex parsing, leading to incomplete observability."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity vs. Cost of Measurement: Fine-grained step-by-step evaluation yields more accurate fidelity scores but is expensive and time-consuming, whereas coarse-grained evaluation is cheaper but may miss important deviations.",
+        "variables": [
+          "granularity",
+          "cost",
+          "accuracy"
+        ]
+      },
+      {
+        "tradeoff": "Strict Adherence vs. Task Effectiveness: High process fidelity may force rigid behavior that reduces agent efficiency or adaptability, while allowing deviations improves performance but lowers fidelity.",
+        "variables": [
+          "fidelity",
+          "effectiveness",
+          "flexibility"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Process Specification",
+        "role": "input",
+        "description": "The predetermined sequence of steps, states, or decision rules that the agent is expected to follow."
+      },
+      {
+        "name": "Agent Behavior",
+        "role": "input",
+        "description": "Observable actions, states, or decisions taken by the LLM agent during task execution."
+      },
+      {
+        "name": "Comparison Method",
+        "role": "mediator",
+        "description": "Algorithm or procedure for aligning and scoring the agent's behavior against the process specification, including granularity and scoring rules."
+      },
+      {
+        "name": "Granularity",
+        "role": "mediator",
+        "description": "The level of detail at which the process steps and agent actions are defined and compared (e.g., step-level vs. sub-step)."
+      },
+      {
+        "name": "Fidelity Score",
+        "role": "output",
+        "description": "Quantitative measure of the degree of alignment between agent behavior and the prescribed process, typically a number or percentage."
+      },
+      {
+        "name": "Evaluation Outcome",
+        "role": "outcome",
+        "description": "Downstream decisions or insights derived from the fidelity score, such as trustworthiness assessment, need for retraining, or task effectiveness."
+      },
+      {
+        "name": "Observability Completeness",
+        "role": "confounder",
+        "description": "The degree to which all relevant agent actions and internal states are captured; incomplete observability leads to measurement error."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Input Collection",
+        "source": "Process Specification",
+        "relation": "and",
+        "target": "Agent Behavior",
+        "explanation": "Both the prescribed process and the agent's observed actions serve as inputs to the measurement system."
+      },
+      {
+        "step": "Comparison",
+        "source": "Comparison Method",
+        "relation": "processes",
+        "target": "Fidelity Score",
+        "explanation": "The comparison method merges process specification and agent behavior to produce a fidelity score."
+      },
+      {
+        "step": "Granularity Selection",
+        "source": "Granularity",
+        "relation": "moderates",
+        "target": "Comparison Method",
+        "explanation": "The chosen granularity affects how comparison is performed and thus influences the resulting fidelity score."
+      },
+      {
+        "step": "Observability Impact",
+        "source": "Observability Completeness",
+        "relation": "confounds",
+        "target": "Agent Behavior",
+        "explanation": "Incomplete observation of agent actions leads to missing or noisy data, biasing the comparison and fidelity score."
+      },
+      {
+        "step": "Evaluation",
+        "source": "Fidelity Score",
+        "relation": "leads to",
+        "target": "Evaluation Outcome",
+        "explanation": "The fidelity score is used to make judgments about agent performance, trustworthiness, or needed improvements."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ambiguous Process Specification",
+        "why_it_matters": "If the process is not well-defined and unambiguous, comparison becomes subjective and the fidelity score loses meaning. This violates the core assumption and undermines measurement reliability."
+      },
+      {
+        "bottleneck": "Incomplete Observability of Agent Behavior",
+        "why_it_matters": "The assumption of full observability is often unrealistic; hidden actions, tool usage, or internal reasoning steps make it impossible to capture the complete agent trajectory, leading to inaccurate fidelity scores."
+      }
+    ],
+    "mechanism_summary": "The measurement of agent process fidelity operates by comparing a well-defined process specification with observable agent behavior via a comparison method that selects a granularity level and applies scoring rules, producing a fidelity score. This score then drives downstream evaluations of agent performance and trustworthiness. Key bottlenecks include ambiguous process specifications and incomplete observability of agent actions, which can severely compromise measurement validity."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that the prescribed process is well-defined and unambiguous conflicts with the reality that many real-world processes are underspecified or have multiple valid paths.",
+      "derived_from": [
+        "Process (primitive)",
+        "Assumption 1: The prescribed process is well-defined and unambiguous."
+      ],
+      "why_it_matters": "If the process is ambiguous, fidelity scores become subjective and non-reproducible, undermining the entire measurement framework.",
+      "what_existing_methods_may_miss": "Existing methods often assume a clear, deterministic process definition, ignoring legitimate variations in interpretation.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The assumption that agent behavior is fully observable is contradicted by practical limitations such as hidden actions, tool usage without logging, and unobservable internal reasoning.",
+      "derived_from": [
+        "Agent (primitive)",
+        "Measurement (primitive)",
+        "Assumption 2: Agent behavior is fully observable at the level of process steps."
+      ],
+      "why_it_matters": "Incomplete observability leads to missing data, biasing fidelity scores and invalidating comparisons across agents.",
+      "what_existing_methods_may_miss": "Methods may not account for unobserved actions or require manual logging that is often incomplete.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "There is a fundamental tradeoff between fine-grained fidelity measurement (high accuracy) and the cost of measurement (time, resources), often resulting in use of coarse proxies that miss important deviations.",
+      "derived_from": [
+        "Core Tradeoff: Granularity vs. Cost of Measurement",
+        "Variables: Granularity, Cost, Accuracy"
+      ],
+      "why_it_matters": "This tradeoff forces practitioners to choose between accurate but expensive evaluation or cheap but potentially misleading scores.",
+      "what_existing_methods_may_miss": "Many methods fix granularity without justification, possibly missing step-level errors while overemphasizing coarse patterns.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the degree of ambiguity in a process specification (e.g., number of underspecified steps) affect the inter-rater reliability of fidelity scores when evaluated by multiple human annotators?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Establishes a quantitative relationship between process ambiguity and fidelity score variability, informing when process specifications need refinement for reliable measurement."
+    },
+    {
+      "question": "Does incomplete observability of agent actions (e.g., hidden tool usage) lead to a systematic underestimation of agent fidelity scores?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Reveals the direction and magnitude of bias introduced by missing data, guiding the design of logging mechanisms or correction factors."
+    },
+    {
+      "question": "What is the minimal granularity level (e.g., step-level vs. action-level) required to detect at least 90% of critical process deviations in a given task domain?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Provides empirical guidance for selecting granularity in fidelity measurement, balancing accuracy and measurement cost."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "A predetermined sequence of steps, states, or decision rules that an agent is expected to follow to accomplish a task.",
+          "why_primitive": "It defines the reference standard against which agent behavior is compared; without a process, there is no target for fidelity."
+        },
+        {
+          "name": "Agent",
+          "definition": "An entity (here an LLM-based system) that perceives its environment, reasons, and takes actions to complete a task.",
+          "why_primitive": "The agent is the subject of evaluation; fidelity measurement quantifies how closely its actions match the prescribed process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of alignment between an agent's observed actions and the prescribed process, typically quantified as a score or distance metric.",
+          "why_primitive": "It is the core construct being measured; all evaluation methods aim to capture this alignment."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure for comparing observed agent behavior to the prescribed process to produce a fidelity score.",
+          "why_primitive": "Measurement operationalizes the abstract concept of fidelity, enabling quantitative comparison across agents and tasks."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and unambiguous.",
+          "rationale": "Fidelity measurement requires a clear, stable specification of the expected behavior. Ambiguity leads to subjective interpretations and inconsistent evaluation.",
+          "possible_failure": "Real-world processes may be underspecified or have multiple valid paths, making fidelity scores unreliable or contested."
+        },
+        {
+          "assumption": "Agent behavior is fully observable at the level of process steps.",
+          "rationale": "To compare with the process, we must be able to detect each relevant action or state transition. This requires access to agent outputs and possibly internal states.",
+          "possible_failure": "Agents may take hidden actions, use external tools without logging, or produce outputs that require complex parsing, leading to incomplete observability."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Specification",
+            "role": "input",
+            "description": "The predetermined sequence of steps, states, or decision rules that the agent is expected to follow."
+          },
+          {
+            "name": "Agent Behavior",
+            "role": "input",
+            "description": "Observable actions, states, or decisions taken by the LLM agent during task execution."
+          },
+          {
+            "name": "Comparison Method",
+            "role": "mediator",
+            "description": "Algorithm or procedure for aligning and scoring the agent's behavior against the process specification, including granularity and scoring rules."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process steps and agent actions are defined and compared (e.g., step-level vs. sub-step)."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "output",
+            "description": "Quantitative measure of the degree of alignment between agent behavior and the prescribed process, typically a number or percentage."
+          },
+          {
+            "name": "Evaluation Outcome",
+            "role": "outcome",
+            "description": "Downstream decisions or insights derived from the fidelity score, such as trustworthiness assessment, need for retraining, or task effectiveness."
+          },
+          {
+            "name": "Observability Completeness",
+            "role": "confounder",
+            "description": "The degree to which all relevant agent actions and internal states are captured; incomplete observability leads to measurement error."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input Collection",
+            "source": "Process Specification",
+            "relation": "and",
+            "target": "Agent Behavior",
+            "explanation": "Both the prescribed process and the agent's observed actions serve as inputs to the measurement system."
+          },
+          {
+            "step": "Comparison",
+            "source": "Comparison Method",
+            "relation": "processes",
+            "target": "Fidelity Score",
+            "explanation": "The comparison method merges process specification and agent behavior to produce a fidelity score."
+          },
+          {
+            "step": "Granularity Selection",
+            "source": "Granularity",
+            "relation": "moderates",
+            "target": "Comparison Method",
+            "explanation": "The chosen granularity affects how comparison is performed and thus influences the resulting fidelity score."
+          },
+          {
+            "step": "Observability Impact",
+            "source": "Observability Completeness",
+            "relation": "confounds",
+            "target": "Agent Behavior",
+            "explanation": "Incomplete observation of agent actions leads to missing or noisy data, biasing the comparison and fidelity score."
+          },
+          {
+            "step": "Evaluation",
+            "source": "Fidelity Score",
+            "relation": "leads to",
+            "target": "Evaluation Outcome",
+            "explanation": "The fidelity score is used to make judgments about agent performance, trustworthiness, or needed improvements."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the process is not well-defined and unambiguous, comparison becomes subjective and the fidelity score loses meaning. This violates the core assumption and undermines measurement reliability."
+          },
+          {
+            "bottleneck": "Incomplete Observability of Agent Behavior",
+            "why_it_matters": "The assumption of full observability is often unrealistic; hidden actions, tool usage, or internal reasoning steps make it impossible to capture the complete agent trajectory, leading to inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity operates by comparing a well-defined process specification with observable agent behavior via a comparison method that selects a granularity level and applies scoring rules, producing a fidelity score. This score then drives downstream evaluations of agent performance and trustworthiness. Key bottlenecks include ambiguous process specifications and incomplete observability of agent actions, which can severely compromise measurement validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that the prescribed process is well-defined and unambiguous conflicts with the reality that many real-world processes are underspecified or have multiple valid paths.",
+        "derived_from": [
+          "Process (primitive)",
+          "Assumption 1: The prescribed process is well-defined and unambiguous."
+        ],
+        "why_it_matters": "If the process is ambiguous, fidelity scores become subjective and non-reproducible, undermining the entire measurement framework.",
+        "what_existing_methods_may_miss": "Existing methods often assume a clear, deterministic process definition, ignoring legitimate variations in interpretation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of process specification ambiguity beyond which inter-rater reliability of fidelity scores drops below a usable benchmark (e.g., Krippendorff's alpha < 0.7)?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise ambiguity threshold that determines when process specifications are too ambiguous for reliable fidelity measurement, enabling actionable guidelines for specification refinement."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold T such that when the number of underspecified steps exceeds T, inter-rater reliability (Krippendorff's alpha) falls below 0.7, while below T it remains above 0.7.",
+        "predicted_effect": "As ambiguity increases, inter-rater reliability will exhibit a sharp decline near a specific number of underspecified steps, rather than a gradual decrease."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Vary the ambiguity of process specifications in 5 levels (e.g., 0, 1, 2, 3, 4 underspecified steps). Use 10 human annotators to evaluate 20 agent behavior logs against each specification. Compute Krippendorff's alpha for each level. Fit a piecewise linear regression to detect discontinuity. Also test if alpha < 0.7 for levels above a candidate threshold.",
+        "independent_variables": [
+          "Ambiguity level (number of underspecified steps in process specification)"
+        ],
+        "dependent_variables": [
+          "Inter-rater reliability (Krippendorff's alpha) of fidelity scores"
+        ],
+        "controls": [
+          "Same set of 20 agent behavior logs",
+          "Same 10 annotators",
+          "Same evaluation protocol and granularity",
+          "Randomize order of specification presentation",
+          "All specifications of same total length (e.g., 10 steps)"
+        ],
+        "falsifying_observation": "If Krippendorff's alpha remains above 0.7 for all ambiguity levels, or decreases gradually without a sharp threshold, or no threshold exceeds the 0.7 boundary, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Inter-rater reliability remains above 0.7 for low ambiguity levels (e.g., 0, 1 underspecified steps) and drops below 0.7 for higher levels (e.g., 3, 4 underspecified steps).",
+          "Piecewise regression identifies a significant breakpoint at a specific ambiguity level.",
+          "Statistical test shows significant difference in reliability between levels just below and just above the threshold."
+        ],
+        "rejects_hypothesis": [
+          "Inter-rater reliability stays above 0.7 across all ambiguity levels.",
+          "Inter-rater reliability decreases monotonically but never crosses the 0.7 threshold.",
+          "No significant breakpoint is detected; reliability declines smoothly."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (i.e., reliability decreases gradually or remains above 0.7 for all tested levels), the hypothesis of a critical threshold is false.",
+        "assumption_to_revise": "That ambiguity effects on reliability are discontinuous. Instead, the relationship may be continuous, or other factors (e.g., annotator expertise, process domain) dominate.",
+        "next_question": "What continuous function best describes the relationship between ambiguity and inter-rater reliability, and what level of ambiguity is acceptable for practical use?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "A predetermined sequence of steps, states, or decision rules that an agent is expected to follow to accomplish a task.",
+          "why_primitive": "It defines the reference standard against which agent behavior is compared; without a process, there is no target for fidelity."
+        },
+        {
+          "name": "Agent",
+          "definition": "An entity (here an LLM-based system) that perceives its environment, reasons, and takes actions to complete a task.",
+          "why_primitive": "The agent is the subject of evaluation; fidelity measurement quantifies how closely its actions match the prescribed process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of alignment between an agent's observed actions and the prescribed process, typically quantified as a score or distance metric.",
+          "why_primitive": "It is the core construct being measured; all evaluation methods aim to capture this alignment."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure for comparing observed agent behavior to the prescribed process to produce a fidelity score.",
+          "why_primitive": "Measurement operationalizes the abstract concept of fidelity, enabling quantitative comparison across agents and tasks."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and unambiguous.",
+          "rationale": "Fidelity measurement requires a clear, stable specification of the expected behavior. Ambiguity leads to subjective interpretations and inconsistent evaluation.",
+          "possible_failure": "Real-world processes may be underspecified or have multiple valid paths, making fidelity scores unreliable or contested."
+        },
+        {
+          "assumption": "Agent behavior is fully observable at the level of process steps.",
+          "rationale": "To compare with the process, we must be able to detect each relevant action or state transition. This requires access to agent outputs and possibly internal states.",
+          "possible_failure": "Agents may take hidden actions, use external tools without logging, or produce outputs that require complex parsing, leading to incomplete observability."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Specification",
+            "role": "input",
+            "description": "The predetermined sequence of steps, states, or decision rules that the agent is expected to follow."
+          },
+          {
+            "name": "Agent Behavior",
+            "role": "input",
+            "description": "Observable actions, states, or decisions taken by the LLM agent during task execution."
+          },
+          {
+            "name": "Comparison Method",
+            "role": "mediator",
+            "description": "Algorithm or procedure for aligning and scoring the agent's behavior against the process specification, including granularity and scoring rules."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process steps and agent actions are defined and compared (e.g., step-level vs. sub-step)."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "output",
+            "description": "Quantitative measure of the degree of alignment between agent behavior and the prescribed process, typically a number or percentage."
+          },
+          {
+            "name": "Evaluation Outcome",
+            "role": "outcome",
+            "description": "Downstream decisions or insights derived from the fidelity score, such as trustworthiness assessment, need for retraining, or task effectiveness."
+          },
+          {
+            "name": "Observability Completeness",
+            "role": "confounder",
+            "description": "The degree to which all relevant agent actions and internal states are captured; incomplete observability leads to measurement error."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input Collection",
+            "source": "Process Specification",
+            "relation": "and",
+            "target": "Agent Behavior",
+            "explanation": "Both the prescribed process and the agent's observed actions serve as inputs to the measurement system."
+          },
+          {
+            "step": "Comparison",
+            "source": "Comparison Method",
+            "relation": "processes",
+            "target": "Fidelity Score",
+            "explanation": "The comparison method merges process specification and agent behavior to produce a fidelity score."
+          },
+          {
+            "step": "Granularity Selection",
+            "source": "Granularity",
+            "relation": "moderates",
+            "target": "Comparison Method",
+            "explanation": "The chosen granularity affects how comparison is performed and thus influences the resulting fidelity score."
+          },
+          {
+            "step": "Observability Impact",
+            "source": "Observability Completeness",
+            "relation": "confounds",
+            "target": "Agent Behavior",
+            "explanation": "Incomplete observation of agent actions leads to missing or noisy data, biasing the comparison and fidelity score."
+          },
+          {
+            "step": "Evaluation",
+            "source": "Fidelity Score",
+            "relation": "leads to",
+            "target": "Evaluation Outcome",
+            "explanation": "The fidelity score is used to make judgments about agent performance, trustworthiness, or needed improvements."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the process is not well-defined and unambiguous, comparison becomes subjective and the fidelity score loses meaning. This violates the core assumption and undermines measurement reliability."
+          },
+          {
+            "bottleneck": "Incomplete Observability of Agent Behavior",
+            "why_it_matters": "The assumption of full observability is often unrealistic; hidden actions, tool usage, or internal reasoning steps make it impossible to capture the complete agent trajectory, leading to inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity operates by comparing a well-defined process specification with observable agent behavior via a comparison method that selects a granularity level and applies scoring rules, producing a fidelity score. This score then drives downstream evaluations of agent performance and trustworthiness. Key bottlenecks include ambiguous process specifications and incomplete observability of agent actions, which can severely compromise measurement validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The assumption that agent behavior is fully observable is contradicted by practical limitations such as hidden actions, tool usage without logging, and unobservable internal reasoning.",
+        "derived_from": [
+          "Agent (primitive)",
+          "Measurement (primitive)",
+          "Assumption 2: Agent behavior is fully observable at the level of process steps."
+        ],
+        "why_it_matters": "Incomplete observability leads to missing data, biasing fidelity scores and invalidating comparisons across agents.",
+        "what_existing_methods_may_miss": "Methods may not account for unobserved actions or require manual logging that is often incomplete.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does the effect of incomplete observability on fidelity score bias depend on process specificity, with a critical level of ambiguity where underestimation switches to overestimation?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a boundary condition where measurement bias reverses, enabling design of observability-aware fidelity metrics that adjust for process ambiguity."
+      },
+      "hypothesis": {
+        "statement": "When process specificity is high, incomplete observability systematically underestimates fidelity scores; when process specificity is low (ambiguous), incomplete observability may overestimate fidelity scores, with a critical ambiguity level at which bias sign reverses.",
+        "predicted_effect": "The sign and magnitude of fidelity bias from incomplete observability depend on process specificity, exhibiting a phase transition at some ambiguity threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct two sets of processes: high-specificity (exact steps) and low-specificity (ambiguous or multiple valid paths). For each, collect agent runs with full logging. Artificially hide a fixed proportion (e.g., 30%) of actions to create incomplete observability. Compute fidelity scores using a scoring method that penalizes missing actions as skipped steps. Compare bias (score under incomplete minus score under complete) across high- and low-specificity conditions. Vary ambiguity continuously to estimate the threshold.",
+        "independent_variables": [
+          "Observability level (complete vs. incomplete, with fixed proportion hidden)",
+          "Process specificity (high vs. low, or continuous scale)"
+        ],
+        "dependent_variables": [
+          "Fidelity score",
+          "Bias (difference between incomplete and complete fidelity)"
+        ],
+        "controls": [
+          "Same agent model",
+          "Same task domain",
+          "Same comparison method and granularity",
+          "Same proportion of hidden actions in incomplete condition"
+        ],
+        "falsifying_observation": "If bias does not change sign with process specificity (e.g., always negative or no significant difference), or if no threshold is observed, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under high specificity, incomplete observability yields significantly lower fidelity scores (negative bias).",
+          "Under low specificity, incomplete observability yields similar or higher fidelity scores (non-negative bias).",
+          "There exists a measurable ambiguity level where bias transitions from negative to positive.",
+          "Bias magnitude correlates with ambiguity level."
+        ],
+        "rejects_hypothesis": [
+          "Incomplete observability always yields underestimation regardless of specificity.",
+          "Incomplete observability always yields overestimation regardless of specificity.",
+          "No significant interaction between observability and specificity on bias.",
+          "Bias direction is inconsistent across runs or conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no interaction or phase transition is observed, the assumption that process specificity moderates the effect of incomplete observability is unsupported.",
+        "assumption_to_revise": "The scoring method's treatment of missing actions may not depend on process clarity; instead, other factors like step ordering or granularity may determine bias.",
+        "next_question": "Does the direction of bias from incomplete observability depend on the scoring rule for missing steps (e.g., penalize vs. ignore) rather than process specificity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "A predetermined sequence of steps, states, or decision rules that an agent is expected to follow to accomplish a task.",
+          "why_primitive": "It defines the reference standard against which agent behavior is compared; without a process, there is no target for fidelity."
+        },
+        {
+          "name": "Agent",
+          "definition": "An entity (here an LLM-based system) that perceives its environment, reasons, and takes actions to complete a task.",
+          "why_primitive": "The agent is the subject of evaluation; fidelity measurement quantifies how closely its actions match the prescribed process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of alignment between an agent's observed actions and the prescribed process, typically quantified as a score or distance metric.",
+          "why_primitive": "It is the core construct being measured; all evaluation methods aim to capture this alignment."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure for comparing observed agent behavior to the prescribed process to produce a fidelity score.",
+          "why_primitive": "Measurement operationalizes the abstract concept of fidelity, enabling quantitative comparison across agents and tasks."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and unambiguous.",
+          "rationale": "Fidelity measurement requires a clear, stable specification of the expected behavior. Ambiguity leads to subjective interpretations and inconsistent evaluation.",
+          "possible_failure": "Real-world processes may be underspecified or have multiple valid paths, making fidelity scores unreliable or contested."
+        },
+        {
+          "assumption": "Agent behavior is fully observable at the level of process steps.",
+          "rationale": "To compare with the process, we must be able to detect each relevant action or state transition. This requires access to agent outputs and possibly internal states.",
+          "possible_failure": "Agents may take hidden actions, use external tools without logging, or produce outputs that require complex parsing, leading to incomplete observability."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Specification",
+            "role": "input",
+            "description": "The predetermined sequence of steps, states, or decision rules that the agent is expected to follow."
+          },
+          {
+            "name": "Agent Behavior",
+            "role": "input",
+            "description": "Observable actions, states, or decisions taken by the LLM agent during task execution."
+          },
+          {
+            "name": "Comparison Method",
+            "role": "mediator",
+            "description": "Algorithm or procedure for aligning and scoring the agent's behavior against the process specification, including granularity and scoring rules."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process steps and agent actions are defined and compared (e.g., step-level vs. sub-step)."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "output",
+            "description": "Quantitative measure of the degree of alignment between agent behavior and the prescribed process, typically a number or percentage."
+          },
+          {
+            "name": "Evaluation Outcome",
+            "role": "outcome",
+            "description": "Downstream decisions or insights derived from the fidelity score, such as trustworthiness assessment, need for retraining, or task effectiveness."
+          },
+          {
+            "name": "Observability Completeness",
+            "role": "confounder",
+            "description": "The degree to which all relevant agent actions and internal states are captured; incomplete observability leads to measurement error."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input Collection",
+            "source": "Process Specification",
+            "relation": "and",
+            "target": "Agent Behavior",
+            "explanation": "Both the prescribed process and the agent's observed actions serve as inputs to the measurement system."
+          },
+          {
+            "step": "Comparison",
+            "source": "Comparison Method",
+            "relation": "processes",
+            "target": "Fidelity Score",
+            "explanation": "The comparison method merges process specification and agent behavior to produce a fidelity score."
+          },
+          {
+            "step": "Granularity Selection",
+            "source": "Granularity",
+            "relation": "moderates",
+            "target": "Comparison Method",
+            "explanation": "The chosen granularity affects how comparison is performed and thus influences the resulting fidelity score."
+          },
+          {
+            "step": "Observability Impact",
+            "source": "Observability Completeness",
+            "relation": "confounds",
+            "target": "Agent Behavior",
+            "explanation": "Incomplete observation of agent actions leads to missing or noisy data, biasing the comparison and fidelity score."
+          },
+          {
+            "step": "Evaluation",
+            "source": "Fidelity Score",
+            "relation": "leads to",
+            "target": "Evaluation Outcome",
+            "explanation": "The fidelity score is used to make judgments about agent performance, trustworthiness, or needed improvements."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the process is not well-defined and unambiguous, comparison becomes subjective and the fidelity score loses meaning. This violates the core assumption and undermines measurement reliability."
+          },
+          {
+            "bottleneck": "Incomplete Observability of Agent Behavior",
+            "why_it_matters": "The assumption of full observability is often unrealistic; hidden actions, tool usage, or internal reasoning steps make it impossible to capture the complete agent trajectory, leading to inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity operates by comparing a well-defined process specification with observable agent behavior via a comparison method that selects a granularity level and applies scoring rules, producing a fidelity score. This score then drives downstream evaluations of agent performance and trustworthiness. Key bottlenecks include ambiguous process specifications and incomplete observability of agent actions, which can severely compromise measurement validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "There is a fundamental tradeoff between fine-grained fidelity measurement (high accuracy) and the cost of measurement (time, resources), often resulting in use of coarse proxies that miss important deviations.",
+        "derived_from": [
+          "Core Tradeoff: Granularity vs. Cost of Measurement",
+          "Variables: Granularity, Cost, Accuracy"
+        ],
+        "why_it_matters": "This tradeoff forces practitioners to choose between accurate but expensive evaluation or cheap but potentially misleading scores.",
+        "what_existing_methods_may_miss": "Many methods fix granularity without justification, possibly missing step-level errors while overemphasizing coarse patterns.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "At what proportion of within-step critical deviations does the minimal granularity required for 90% detection switch from step-level to action-level?",
+        "question_type": "benchmark",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in measurement granularity based on deviation type distribution, providing adaptive guidance for fidelity evaluation."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold proportion p* such that when the proportion of within-step critical deviations exceeds p*, step-level granularity fails to achieve ≥90% detection and action-level becomes necessary; we predict p* ≈ 0.5.",
+        "predicted_effect": "For a given task domain, if the proportion of within-step critical deviations is >0.5, step-level detection rate will fall below 90% while action-level remains above 90%; otherwise step-level suffices."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a multi-step question-answering task with a prescribed process, define 50 critical deviations (25 within-step, 25 between-step). Create 5 experimental conditions with ratios (within/total): 0/50, 12/38, 25/25, 38/12, 50/50 (i.e., 0, 0.24, 0.5, 0.76, 1). For each condition, inject the deviations into the agent's prompt/outputs. Run the LLM agent (e.g., GPT-4) with temperature 0 on 100 trials per condition, recording behavior. Evaluate detection rates at step-level (checking step completion) and action-level (checking atomic actions). Identify the smallest proportion at which step-level detection drops below 90% while action-level remains above 90%.",
+        "independent_variables": [
+          "Proportion of within-step critical deviations (0, 0.24, 0.5, 0.76, 1)"
+        ],
+        "dependent_variables": [
+          "Detection rate of critical deviations at step-level",
+          "Detection rate of critical deviations at action-level"
+        ],
+        "controls": [
+          "Same task domain and process specification",
+          "Same set of 50 deviation types (only ratio varies)",
+          "Same agent (e.g., GPT-4, temperature=0)",
+          "Same number of trials per condition (100)",
+          "Randomized order within each condition"
+        ],
+        "falsifying_observation": "If no clear threshold is observed (e.g., step-level detection remains ≥90% for all proportions, or action-level never exceeds 90%, or the transition is gradual over more than two successive ratio points), then the hypothesis of a sharp phase transition is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Step-level detection rate drops below 90% when proportion of within-step deviations > 0.5",
+          "Action-level detection rate remains ≥90% across all proportions",
+          "The transition occurs sharply between the 0.24 and 0.5 conditions"
+        ],
+        "rejects_hypothesis": [
+          "Step-level detection rate is ≥90% for all proportions, even when all deviations are within-step",
+          "Action-level detection rate also drops below 90% for some proportions",
+          "The transition is gradual (e.g., step-level detection slowly declines over multiple conditions) or absent"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is found, then the detection capability depends more on deviation severity or type than on within-step vs. between-step location.",
+        "assumption_to_revise": "The assumption that within-step vs. between-step classification is the critical factor determining granularity requirements.",
+        "next_question": "What features of process deviations (e.g., semantic distance, impact on task success) determine the necessary granularity for high detection rates?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold T such that when the number of underspecified steps exceeds T, inter-rater reliability (Krippendorff's alpha) falls below 0.7, while below T it remains above 0.7.",
+      "independent_variables": [
+        "Ambiguity level (number of underspecified steps in a 10-step process specification): 0, 2, 4"
+      ],
+      "dependent_variables": [
+        "Inter-rater reliability (Krippendorff's alpha) of fidelity scores assigned by annotators"
+      ],
+      "controlled_variables": [
+        "Same set of 10 agent behavior logs (each 10 steps long)",
+        "Same 5 human annotators (trained on fidelity evaluation)",
+        "Same evaluation protocol (comparison method and scoring rules)",
+        "Same granularity (step-level comparison)",
+        "All process specifications have total 10 steps (only ambiguity varies)",
+        "Randomized order of specification presentation to annotators"
+      ],
+      "baselines": [
+        {
+          "name": "Fully specified process",
+          "description": "Process specification with 0 underspecified steps (all steps defined unambiguously)"
+        },
+        {
+          "name": "Chance-level agreement",
+          "description": "Krippendorff's alpha expected under random assignment (typically 0)"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Krippendorff's alpha",
+          "definition": "Inter-rater reliability coefficient for ordinal data, measuring agreement among annotators beyond chance."
+        }
+      ],
+      "expected_result": "Krippendorff's alpha will be > 0.7 for ambiguity levels 0 and 2, but < 0.7 for ambiguity level 4, indicating a threshold between 2 and 4 underspecified steps.",
+      "falsifying_result": "If Krippendorff's alpha remains above 0.7 for all three ambiguity levels, or decreases monotonically but never falls below 0.7, or if no significant difference is observed between levels, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Create three process specifications (each 10 steps) with 0, 2, and 4 underspecified steps. Generate 10 agent behavior logs (each 10 steps) via simulation or real LLM runs. Recruit 5 annotators trained to assign fidelity scores (e.g., 0-100) at step level. Each annotator evaluates all 10 logs against each of the three specifications, in randomized order. Compute Krippendorff's alpha for each ambiguity level. Compare alpha values. If alpha drops below 0.7 for the highest ambiguity level but not for lower ones, the hypothesis is supported; otherwise, it is falsified.",
+      "risks_and_confounds": [
+        "Annotator fatigue due to repeated evaluations may reduce reliability; randomize order and allow breaks.",
+        "Small number of logs (10) may limit generalizability; but minimal experiment requires only enough to compute alpha.",
+        "Training differences among annotators could affect agreement; ensure uniform training.",
+        "The specific number of underspecified steps (0,2,4) might not capture the true threshold if it lies elsewhere; but for falsification, if no threshold is detected at any of these levels, it challenges the hypothesis.",
+        "Subjectivity in defining 'underspecified' may cause bias; use clear operational definition."
+      ]
+    },
+    {
+      "hypothesis": "When process specificity is high, incomplete observability systematically underestimates fidelity scores; when process specificity is low (ambiguous), incomplete observability may overestimate fidelity scores, with a critical ambiguity level at which bias sign reverses.",
+      "independent_variables": [
+        "Observability level (complete vs. incomplete with 30% actions hidden)",
+        "Process specificity (high vs. low)"
+      ],
+      "dependent_variables": [
+        "Fidelity score",
+        "Bias (difference between incomplete and complete fidelity)"
+      ],
+      "controlled_variables": [
+        "Same agent model (e.g., GPT-4)",
+        "Same task domain (e.g., multi-step calculation)",
+        "Same comparison method (step-wise exact match)",
+        "Same granularity (step-level)",
+        "Same proportion of hidden actions (30%)"
+      ],
+      "baselines": [
+        {
+          "name": "Complete observability, high specificity",
+          "description": "Fidelity score with full logging on a highly specific process"
+        },
+        {
+          "name": "Complete observability, low specificity",
+          "description": "Fidelity score with full logging on an ambiguous process"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity score",
+          "definition": "Proportion of agent steps that match the prescribed process steps exactly, considering only observed steps."
+        },
+        {
+          "name": "Bias",
+          "definition": "Fidelity score under incomplete observability minus fidelity score under complete observability."
+        }
+      ],
+      "expected_result": "Under high specificity, incomplete observability yields significantly lower fidelity (negative bias). Under low specificity, incomplete observability yields similar or higher fidelity (non-negative bias). A statistically significant interaction between observability and specificity on bias is observed.",
+      "falsifying_result": "If bias does not change sign with process specificity (e.g., always negative or no significant difference), or if no interaction is found, the hypothesis is falsified.",
+      "minimum_viable_experiment": "A 2x2 factorial design with 5 repetitions per condition: Use a single LLM agent on a single task (e.g., following a cooking recipe). Define two process specifications: high specificity (exact sequence of steps) and low specificity (only goal states, any valid path). For each, collect complete logs and then artificially hide 30% of randomly chosen steps to simulate incomplete observability. Compute fidelity scores using step-wise exact match. Compare bias across the four conditions. If bias direction differs, hypothesis is supported; otherwise falsified.",
+      "risks_and_confounds": [
+        "The specific choice of which actions to hide may affect results; random selection may not reflect realistic missing data.",
+        "The definition of 'low specificity' may be subjective; need to ensure it is genuinely ambiguous.",
+        "The scoring method (penalizing missing steps as skipped) may itself interact with specificity.",
+        "Agent's behavior may vary due to randomness; multiple runs needed for statistical power."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold proportion p* such that when the proportion of within-step critical deviations exceeds p*, step-level granularity fails to achieve ≥90% detection and action-level becomes necessary; we predict p* ≈ 0.5.",
+      "independent_variables": [
+        "Proportion of within-step critical deviations: 0, 0.24, 0.5, 0.76, 1"
+      ],
+      "dependent_variables": [
+        "Detection rate of critical deviations at step-level",
+        "Detection rate of critical deviations at action-level"
+      ],
+      "controlled_variables": [
+        "Same task domain and process specification",
+        "Same set of 50 deviation types (only ratio varies)",
+        "Same agent (GPT-4, temperature=0)",
+        "Same number of trials per condition (100)",
+        "Randomized order within each condition"
+      ],
+      "baselines": [
+        {
+          "name": "All between-step deviations",
+          "description": "Condition with 0 within-step deviations (proportion=0), serving as baseline for step-level detection."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Step-level detection rate",
+          "definition": "Proportion of critical deviations that are detected when evaluating at the granularity of complete process steps."
+        },
+        {
+          "name": "Action-level detection rate",
+          "definition": "Proportion of critical deviations that are detected when evaluating at the granularity of individual atomic actions."
+        }
+      ],
+      "expected_result": "Step-level detection rate drops below 90% when proportion of within-step deviations > 0.5, while action-level detection rate remains ≥90% across all proportions. The transition occurs sharply between the 0.24 and 0.5 conditions.",
+      "falsifying_result": "If no clear threshold is observed (e.g., step-level detection remains ≥90% for all proportions, or action-level never exceeds 90%, or the transition is gradual over more than two successive ratio points), then the hypothesis of a sharp phase transition is falsified.",
+      "minimum_viable_experiment": "In a multi-step question-answering task with a prescribed process, define 50 critical deviations (25 within-step, 25 between-step). Create 5 experimental conditions with within-step proportions: 0, 0.24, 0.5, 0.76, 1. For each condition, inject the deviations into the agent's prompt/outputs. Run the LLM agent (e.g., GPT-4) with temperature 0 on 100 trials per condition, recording behavior. Evaluate detection rates at step-level and action-level. Identify the smallest proportion at which step-level detection drops below 90% while action-level remains above 90%.",
+      "risks_and_confounds": [
+        "Ambiguity in defining within-step vs. between-step deviations could lead to misclassification.",
+        "Observability completeness: hidden agent actions or internal reasoning may be missed, affecting detection rates.",
+        "The specific set of 50 deviations may not be representative; results could depend on the nature of deviations chosen.",
+        "Agent behavior with temperature 0 may lack variability; using stochastic agents could alter thresholds.",
+        "The task domain itself may influence the effectiveness of step-level vs. action-level detection."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles framework for measuring agent process fidelity, focusing on LLM-based agents. The authors decompose the problem into primitives (Process, Agent, Fidelity, Measurement), identify key assumptions and tradeoffs, and propose three concrete hypotheses with experimental designs. The work is well-structured and addresses an important evaluation challenge. However, the novelty is limited as similar concepts exist in prior evaluation literature, and the experiments rely on strong assumptions (e.g., well-defined processes, full observability) that may not hold in practice. Missing baselines against existing fidelity metrics weaken the contribution.",
+    "strengths": [
+      "Clear first-principles decomposition that surfaces key assumptions and tradeoffs.",
+      "Hypotheses are specific, testable, and accompanied by detailed experimental designs with controls and falsifying conditions.",
+      "The mechanism model provides a causal framework for understanding fidelity measurement."
+    ],
+    "weaknesses": [
+      "Novelty is moderate: the identified tensions (ambiguity, observability, granularity) are well-known in evaluation and reinforcement learning communities.",
+      "Experiments rely on costly human annotation (e.g., inter-rater reliability study) without discussing scalability or automation.",
+      "The assumption that processes are well-defined and fully observable is often violated in real-world applications, limiting practical relevance.",
+      "No comparison to existing fidelity metrics (e.g., step-wise accuracy, process compliance scores, behavioral cloning distance)."
+    ],
+    "questions": [],
+    "missing_baselines": [
+      "Comparison to standard fidelity measures (e.g., exact match, F1 on steps, sequence alignment scores like Needleman-Wunsch).",
+      "Evaluation against existing process adherence benchmarks (e.g., ProcessBench, AgentBench).",
+      "Ablation over different comparison methods (e.g., partial credit vs. binary step matching)."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of process specification ambiguity beyond which inter-rater reliability of fidelity scores drops below a usable benchmark (e.g., Krippendorff's alpha < 0.7)?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Does the effect of incomplete observability on fidelity score bias depend on process specificity, with a critical level of ambiguity where underestimation switches to overestimation?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "At what proportion of within-step critical deviations does the minimal granularity required for 90% detection switch from step-level to action-level?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

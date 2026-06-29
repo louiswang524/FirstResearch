@@ -1,0 +1,2081 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+        "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+        "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+        "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+      },
+      {
+        "name": "Utility",
+        "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+        "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+      },
+      {
+        "name": "Task Distribution",
+        "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+        "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+        "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+        "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+      },
+      {
+        "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+        "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+        "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+      },
+      {
+        "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+        "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+        "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Immediate task efficiency vs. long-term versatility: Composing may be faster now but discovery yields a reusable asset for future tasks.",
+        "variables": [
+          "future task frequency",
+          "discovery cost",
+          "composition overhead",
+          "skill reuse value"
+        ]
+      },
+      {
+        "tradeoff": "Performance quality vs. resource investment: Composed solutions may be suboptimal compared to a discovered specialized skill, but discovery requires more resources.",
+        "variables": [
+          "quality gap between composed and discovered solution",
+          "resource constraints",
+          "task criticality"
+        ]
+      },
+      {
+        "tradeoff": "Adaptability vs. stability: Discovery allows the agent to adapt to novel tasks, while composition leverages existing structure; too much discovery may lead to skill bloat and decreased performance.",
+        "variables": [
+          "task novelty rate",
+          "skill inventory size",
+          "compositional flexibility",
+          "skill retrieval cost"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+      },
+      {
+        "name": "discovery_cost",
+        "role": "input",
+        "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+      },
+      {
+        "name": "composition_overhead",
+        "role": "input",
+        "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+      },
+      {
+        "name": "skill_reuse_value",
+        "role": "input",
+        "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+      },
+      {
+        "name": "task_frequency",
+        "role": "input",
+        "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+      },
+      {
+        "name": "quality_gap",
+        "role": "input",
+        "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+      },
+      {
+        "name": "resource_constraints",
+        "role": "input",
+        "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+      },
+      {
+        "name": "skill_inventory_size",
+        "role": "mediator",
+        "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+      },
+      {
+        "name": "compositional_flexibility",
+        "role": "mediator",
+        "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+      },
+      {
+        "name": "expected_utility_composition",
+        "role": "mediator",
+        "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+      },
+      {
+        "name": "expected_utility_discovery",
+        "role": "mediator",
+        "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+      },
+      {
+        "name": "decision",
+        "role": "output",
+        "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "expected_utility_discovery",
+        "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+      },
+      {
+        "step": "2",
+        "source": "discovery_cost",
+        "relation": "decreases",
+        "target": "expected_utility_discovery",
+        "explanation": "Higher upfront cost reduces net benefit of discovery."
+      },
+      {
+        "step": "3",
+        "source": "skill_reuse_value",
+        "relation": "increases",
+        "target": "expected_utility_discovery",
+        "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+      },
+      {
+        "step": "4",
+        "source": "task_frequency",
+        "relation": "moderates",
+        "target": "skill_reuse_value",
+        "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+      },
+      {
+        "step": "5",
+        "source": "composition_overhead",
+        "relation": "decreases",
+        "target": "expected_utility_composition",
+        "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+      },
+      {
+        "step": "6",
+        "source": "quality_gap",
+        "relation": "decreases",
+        "target": "expected_utility_composition",
+        "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+      },
+      {
+        "step": "7",
+        "source": "resource_constraints",
+        "relation": "moderates",
+        "target": "discovery_cost",
+        "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+      },
+      {
+        "step": "8",
+        "source": "skill_inventory_size",
+        "relation": "increases",
+        "target": "composition_overhead",
+        "explanation": "More skills increase retrieval and planning cost for composition."
+      },
+      {
+        "step": "9",
+        "source": "compositional_flexibility",
+        "relation": "decreases",
+        "target": "composition_overhead",
+        "explanation": "Better composability reduces overhead."
+      },
+      {
+        "step": "10",
+        "source": "expected_utility_composition",
+        "relation": "compared with",
+        "target": "expected_utility_discovery",
+        "explanation": "Agent selects the option with higher expected utility."
+      },
+      {
+        "step": "11",
+        "source": "expected_utility_composition",
+        "relation": " and ",
+        "target": "decision",
+        "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Estimating future task frequency and distribution",
+        "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+      },
+      {
+        "bottleneck": "Measuring skill reuse value accurately",
+        "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+      },
+      {
+        "bottleneck": "Assessing quality gap and composition overhead",
+        "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+      },
+      {
+        "bottleneck": "Handling large skill inventories",
+        "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+      }
+    ],
+    "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that skills are perfectly composable with no fidelity loss contradicts real-world LLM agent behavior where tool chaining and composition often introduce errors, degrade performance, or require fine-tuning.",
+      "derived_from": [
+        "assumption 1: Skills are perfectly composable with no loss of fidelity or emergent errors",
+        "mechanism quality_gap as a decrease to expected_utility_composition"
+      ],
+      "why_it_matters": "If composition is imperfect, the actual expected utility of composition is lower than modeled, biasing the decision toward discovery and potentially causing over-investment in new skills.",
+      "what_existing_methods_may_miss": "Existing models often treat composition as costless or perfectly reliable, ignoring error rates and performance degradation that accumulate with composition depth.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The assumption that discovery cost is finite and known conflicts with the practical reality that discovery costs are often uncertain, vary with task complexity, and may be prohibitively high in unknown environments.",
+      "derived_from": [
+        "assumption 2: The cost of discovering a new skill is finite and known",
+        "mechanism discovery_cost decreases expected_utility_discovery"
+      ],
+      "why_it_matters": "Uncertainty in discovery cost can lead to either over-commitment to discovery (if cost underestimated) or missed opportunities (if cost overestimated), reducing long-term utility.",
+      "what_existing_methods_may_miss": "Most frameworks assume a fixed discovery cost estimate rather than a distribution, failing to account for risk aversion or exploration bonuses.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "There is a fundamental tension between immediate task efficiency (favoring composition) and long-term versatility (favoring discovery), as composition offers lower upfront cost but discovery yields reusable assets for future tasks.",
+      "derived_from": [
+        "core_tradeoff 1: Immediate task efficiency vs. long-term versatility",
+        "mechanism task_frequency moderates skill_reuse_value"
+      ],
+      "why_it_matters": "Agents that always compose may incur repeated overhead and fail to adapt to novel tasks, while agents that always discover may waste resources on rarely used skills, both leading to suboptimal utility.",
+      "what_existing_methods_may_miss": "Existing strategies often use fixed thresholds or hand-tuned heuristics, ignoring the dynamic interaction between task frequency and reuse value.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Accurately estimating the quality gap between composed and discovered solutions is a key bottleneck, but it requires prior experimentation that itself consumes resources, creating a catch-22.",
+      "derived_from": [
+        "bottleneck 3: Assessing quality gap and composition overhead",
+        "core_tradeoff 2: Performance quality vs. resource investment"
+      ],
+      "why_it_matters": "Without reliable quality gap estimates, agents cannot make informed decisions; yet gathering those estimates may cost more than the benefit of choosing the optimal strategy.",
+      "what_existing_methods_may_miss": "Meta-learning or transfer learning approaches often assume the quality gap is known or can be learned offline, ignoring the cost of online exploration.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The assumption that agents have perfect self-knowledge of their existing skills and their applicability contradicts the reality that skill inventory size can be large, retrieval is costly, and agents may be unaware of all relevant capabilities.",
+      "derived_from": [
+        "assumption 3: Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability",
+        "bottleneck 4: Handling large skill inventories"
+      ],
+      "why_it_matters": "Imperfect self-knowledge leads to suboptimal decisions: agents may incorrectly believe they can compose a solution (when they lack a necessary skill) or fail to discover a skill that they already have, wasting resources.",
+      "what_existing_methods_may_miss": "Most cognitive architectures assume transparent skill libraries; real agents often suffer from incomplete retrieval or false positives in skill matching.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the number of composition steps (depth) monotonically affect the error rate or performance degradation in LLM-based agents, controlling for skill quality and task novelty?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Establishes a quantitative relationship between composition depth and quality gap, enabling better prediction of composition utility and informing when to switch to discovery."
+    },
+    {
+      "question": "Under what conditions of task complexity (e.g., novelty, number of required skills) does uncertainty in discovery cost most strongly bias agent decisions toward suboptimal discovery rates, and can a Bayesian approach mitigate this?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Identifies regimes where assuming fixed known discovery cost is most harmful, guiding development of adaptive cost estimators."
+    },
+    {
+      "question": "Can a meta-learning algorithm that dynamically adjusts the composition-discovery trade-off parameter based on observed task frequency outperform fixed-threshold heuristics in terms of cumulative utility over a sequence of tasks?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Provides a principled adaptive policy that balances immediate efficiency and long-term versatility, validated through simulation or real-agent experiments."
+    },
+    {
+      "question": "What is the empirical distribution of the quality gap between composed and discovered solutions for typical LLM agent tasks, and how does it vary with task novelty and skill inventory size?",
+      "question_type": "descriptive",
+      "source_tension": "T4",
+      "expected_contribution": "Maps the quality gap landscape, enabling agents to estimate it at inference time without costly exploration, thus resolving the catch-22."
+    },
+    {
+      "question": "How does the retrieval success rate for relevant skills in large skill inventories affect the accuracy of an agent's decision between composition and discovery, measured by utility loss relative to an oracle with perfect self-knowledge?",
+      "question_type": "benchmark",
+      "source_tension": "T5",
+      "expected_contribution": "Quantifies the cost of imperfect self-knowledge, motivating improvements in skill retrieval and inventory management."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+          "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+          "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+          "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+        },
+        {
+          "name": "Utility",
+          "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+          "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+        },
+        {
+          "name": "Task Distribution",
+          "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+          "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+          "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+          "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+        },
+        {
+          "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+          "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+          "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+        },
+        {
+          "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+          "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+          "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+          },
+          {
+            "name": "composition_overhead",
+            "role": "input",
+            "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+          },
+          {
+            "name": "skill_reuse_value",
+            "role": "input",
+            "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+          },
+          {
+            "name": "quality_gap",
+            "role": "input",
+            "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+          },
+          {
+            "name": "resource_constraints",
+            "role": "input",
+            "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+          },
+          {
+            "name": "skill_inventory_size",
+            "role": "mediator",
+            "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+          },
+          {
+            "name": "compositional_flexibility",
+            "role": "mediator",
+            "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+          },
+          {
+            "name": "expected_utility_composition",
+            "role": "mediator",
+            "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+          },
+          {
+            "name": "expected_utility_discovery",
+            "role": "mediator",
+            "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher upfront cost reduces net benefit of discovery."
+          },
+          {
+            "step": "3",
+            "source": "skill_reuse_value",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+          },
+          {
+            "step": "4",
+            "source": "task_frequency",
+            "relation": "moderates",
+            "target": "skill_reuse_value",
+            "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+          },
+          {
+            "step": "5",
+            "source": "composition_overhead",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+          },
+          {
+            "step": "6",
+            "source": "quality_gap",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+          },
+          {
+            "step": "7",
+            "source": "resource_constraints",
+            "relation": "moderates",
+            "target": "discovery_cost",
+            "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+          },
+          {
+            "step": "8",
+            "source": "skill_inventory_size",
+            "relation": "increases",
+            "target": "composition_overhead",
+            "explanation": "More skills increase retrieval and planning cost for composition."
+          },
+          {
+            "step": "9",
+            "source": "compositional_flexibility",
+            "relation": "decreases",
+            "target": "composition_overhead",
+            "explanation": "Better composability reduces overhead."
+          },
+          {
+            "step": "10",
+            "source": "expected_utility_composition",
+            "relation": "compared with",
+            "target": "expected_utility_discovery",
+            "explanation": "Agent selects the option with higher expected utility."
+          },
+          {
+            "step": "11",
+            "source": "expected_utility_composition",
+            "relation": " and ",
+            "target": "decision",
+            "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimating future task frequency and distribution",
+            "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+          },
+          {
+            "bottleneck": "Measuring skill reuse value accurately",
+            "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+          },
+          {
+            "bottleneck": "Assessing quality gap and composition overhead",
+            "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+          },
+          {
+            "bottleneck": "Handling large skill inventories",
+            "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that skills are perfectly composable with no fidelity loss contradicts real-world LLM agent behavior where tool chaining and composition often introduce errors, degrade performance, or require fine-tuning.",
+        "derived_from": [
+          "assumption 1: Skills are perfectly composable with no loss of fidelity or emergent errors",
+          "mechanism quality_gap as a decrease to expected_utility_composition"
+        ],
+        "why_it_matters": "If composition is imperfect, the actual expected utility of composition is lower than modeled, biasing the decision toward discovery and potentially causing over-investment in new skills.",
+        "what_existing_methods_may_miss": "Existing models often treat composition as costless or perfectly reliable, ignoring error rates and performance degradation that accumulate with composition depth.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical composition depth threshold beyond which the error rate of LLM agents transitions from sublinear to superlinear growth, and how does this threshold depend on individual skill quality?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in composition reliability, providing a quantitative rule for when to switch from composition to discovery, thereby sharpening the theoretical tradeoff."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold depth D_c such that for composition depth < D_c, error rate grows sublinearly or remains constant, and for depth > D_c, error rate grows superlinearly (e.g., exponentially). The threshold D_c increases linearly with skill quality.",
+        "predicted_effect": "For each unit increase in skill quality (e.g., 10% improvement in individual skill success rate), D_c increases by at least 1 step."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Design a set of tasks solvable by composing a chain of identical skills (e.g., tool calls). Vary the number of composition steps from 1 to 10. For each depth, use two skill quality levels: high (e.g., 0.95 per-step success) and low (e.g., 0.70 per-step success). Control for task novelty by using the same task type. Measure overall error rate (1 - task success rate). Use an LLM agent (e.g., GPT-4) with fixed prompts. Repeat each condition 100 times.",
+        "independent_variables": [
+          "composition depth (1 to 10)",
+          "skill quality (high vs low)"
+        ],
+        "dependent_variables": [
+          "error rate (task failure proportion)"
+        ],
+        "controls": [
+          "same underlying skills",
+          "same task type",
+          "same LLM model",
+          "same prompting strategy",
+          "same skill ordering"
+        ],
+        "falsifying_observation": "No threshold is observed: error rate grows linearly or remains constant across all depths for both quality levels, or the growth pattern does not change with quality."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Error rate remains low (e.g., <10%) for depths below a certain threshold and increases sharply (e.g., >50%) above it.",
+          "Threshold depth D_c is higher for high-quality skills than for low-quality skills.",
+          "The transition is nonlinear, e.g., a sudden jump in error rate at D_c."
+        ],
+        "rejects_hypothesis": [
+          "Error rate increases linearly with depth for all depths and quality levels.",
+          "Error rate does not depend on depth or quality in a consistent manner.",
+          "No sudden change in growth rate at any depth."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then the assumption of a phase transition is invalid.",
+        "assumption_to_revise": "The assumption that composition degradation is a function of depth only may need to incorporate other factors like task novelty or skill diversity.",
+        "next_question": "What is the functional form of composition degradation as a function of both depth and skill quality, and does it vary with task novelty?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+          "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+          "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+          "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+        },
+        {
+          "name": "Utility",
+          "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+          "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+        },
+        {
+          "name": "Task Distribution",
+          "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+          "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+          "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+          "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+        },
+        {
+          "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+          "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+          "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+        },
+        {
+          "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+          "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+          "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+          },
+          {
+            "name": "composition_overhead",
+            "role": "input",
+            "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+          },
+          {
+            "name": "skill_reuse_value",
+            "role": "input",
+            "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+          },
+          {
+            "name": "quality_gap",
+            "role": "input",
+            "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+          },
+          {
+            "name": "resource_constraints",
+            "role": "input",
+            "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+          },
+          {
+            "name": "skill_inventory_size",
+            "role": "mediator",
+            "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+          },
+          {
+            "name": "compositional_flexibility",
+            "role": "mediator",
+            "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+          },
+          {
+            "name": "expected_utility_composition",
+            "role": "mediator",
+            "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+          },
+          {
+            "name": "expected_utility_discovery",
+            "role": "mediator",
+            "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher upfront cost reduces net benefit of discovery."
+          },
+          {
+            "step": "3",
+            "source": "skill_reuse_value",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+          },
+          {
+            "step": "4",
+            "source": "task_frequency",
+            "relation": "moderates",
+            "target": "skill_reuse_value",
+            "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+          },
+          {
+            "step": "5",
+            "source": "composition_overhead",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+          },
+          {
+            "step": "6",
+            "source": "quality_gap",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+          },
+          {
+            "step": "7",
+            "source": "resource_constraints",
+            "relation": "moderates",
+            "target": "discovery_cost",
+            "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+          },
+          {
+            "step": "8",
+            "source": "skill_inventory_size",
+            "relation": "increases",
+            "target": "composition_overhead",
+            "explanation": "More skills increase retrieval and planning cost for composition."
+          },
+          {
+            "step": "9",
+            "source": "compositional_flexibility",
+            "relation": "decreases",
+            "target": "composition_overhead",
+            "explanation": "Better composability reduces overhead."
+          },
+          {
+            "step": "10",
+            "source": "expected_utility_composition",
+            "relation": "compared with",
+            "target": "expected_utility_discovery",
+            "explanation": "Agent selects the option with higher expected utility."
+          },
+          {
+            "step": "11",
+            "source": "expected_utility_composition",
+            "relation": " and ",
+            "target": "decision",
+            "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimating future task frequency and distribution",
+            "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+          },
+          {
+            "bottleneck": "Measuring skill reuse value accurately",
+            "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+          },
+          {
+            "bottleneck": "Assessing quality gap and composition overhead",
+            "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+          },
+          {
+            "bottleneck": "Handling large skill inventories",
+            "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Accurately estimating the quality gap between composed and discovered solutions is a key bottleneck, but it requires prior experimentation that itself consumes resources, creating a catch-22.",
+        "derived_from": [
+          "bottleneck 3: Assessing quality gap and composition overhead",
+          "core_tradeoff 2: Performance quality vs. resource investment"
+        ],
+        "why_it_matters": "Without reliable quality gap estimates, agents cannot make informed decisions; yet gathering those estimates may cost more than the benefit of choosing the optimal strategy.",
+        "what_existing_methods_may_miss": "Meta-learning or transfer learning approaches often assume the quality gap is known or can be learned offline, ignoring the cost of online exploration.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Is there a phase transition in the quality gap between composed and discovered solutions as a function of task novelty and skill inventory size, beyond which discovery becomes unambiguously superior?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a sharp boundary that simplifies the decision: below the threshold composition is sufficient, above it discovery is clearly better, thereby resolving the catch-22 of costly quality gap estimation."
+      },
+      "hypothesis": {
+        "statement": "The quality gap exhibits a sudden jump at a critical combination of task novelty and skill inventory size, such that below the threshold the gap is negligible (≤5%) and above the threshold the gap exceeds 20%, making the choice between composition and discovery unambiguous.",
+        "predicted_effect": "As task novelty and skill inventory size increase, the quality gap remains low until a critical point, then abruptly increases to a high level."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a grid of task novelty levels (low, medium, high, very high) and skill inventory sizes (5, 10, 15, 20, 25). For each combination, run the LLM agent on 100 tasks from the corresponding novelty level, using both composition and discovery. Measure the quality gap as the difference in success rates. Look for a discontinuity: a sharp increase in quality gap between adjacent grid points.",
+        "independent_variables": [
+          "task_novelty (ordinal: low, medium, high, very high)",
+          "skill_inventory_size (numeric: 5, 10, 15, 20, 25)"
+        ],
+        "dependent_variables": [
+          "quality_gap (difference in success rate between discovery and composition)"
+        ],
+        "controls": [
+          "Same base LLM (e.g., GPT-4)",
+          "Fixed discovery cost (e.g., 10 fine-tuning steps)",
+          "Composition via simple chaining",
+          "Tasks drawn from the same distribution per novelty level",
+          "Random seed fixed across runs"
+        ],
+        "falsifying_observation": "The quality gap increases smoothly with no evidence of a jump; or the maximum gap never exceeds 20% even at highest novelty and inventory; or the gap decreases above some point."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low novelty combined with small inventory, quality gap <5%.",
+          "At the critical boundary (e.g., high novelty & 15 skills), quality gap jumps to >20%.",
+          "All combinations beyond the boundary have quality gap >20%.",
+          "The threshold is consistent across runs."
+        ],
+        "rejects_hypothesis": [
+          "Quality gap increases linearly with no sudden jump.",
+          "Quality gap is always <20% even at highest novelty and inventory.",
+          "Quality gap shows random fluctuations with no clear pattern."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis of a phase transition is not supported (i.e., no sharp jump is observed),",
+        "assumption_to_revise": "The assumption that composition quality degrades abruptly with complexity may be false; instead, degradation may be gradual or depend on other factors like skill similarity or composition method.",
+        "next_question": "What continuous function best describes the relationship between quality gap and the joint effect of task novelty and skill inventory size?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+          "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+          "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+          "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+        },
+        {
+          "name": "Utility",
+          "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+          "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+        },
+        {
+          "name": "Task Distribution",
+          "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+          "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+          "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+          "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+        },
+        {
+          "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+          "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+          "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+        },
+        {
+          "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+          "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+          "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+          },
+          {
+            "name": "composition_overhead",
+            "role": "input",
+            "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+          },
+          {
+            "name": "skill_reuse_value",
+            "role": "input",
+            "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+          },
+          {
+            "name": "quality_gap",
+            "role": "input",
+            "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+          },
+          {
+            "name": "resource_constraints",
+            "role": "input",
+            "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+          },
+          {
+            "name": "skill_inventory_size",
+            "role": "mediator",
+            "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+          },
+          {
+            "name": "compositional_flexibility",
+            "role": "mediator",
+            "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+          },
+          {
+            "name": "expected_utility_composition",
+            "role": "mediator",
+            "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+          },
+          {
+            "name": "expected_utility_discovery",
+            "role": "mediator",
+            "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher upfront cost reduces net benefit of discovery."
+          },
+          {
+            "step": "3",
+            "source": "skill_reuse_value",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+          },
+          {
+            "step": "4",
+            "source": "task_frequency",
+            "relation": "moderates",
+            "target": "skill_reuse_value",
+            "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+          },
+          {
+            "step": "5",
+            "source": "composition_overhead",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+          },
+          {
+            "step": "6",
+            "source": "quality_gap",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+          },
+          {
+            "step": "7",
+            "source": "resource_constraints",
+            "relation": "moderates",
+            "target": "discovery_cost",
+            "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+          },
+          {
+            "step": "8",
+            "source": "skill_inventory_size",
+            "relation": "increases",
+            "target": "composition_overhead",
+            "explanation": "More skills increase retrieval and planning cost for composition."
+          },
+          {
+            "step": "9",
+            "source": "compositional_flexibility",
+            "relation": "decreases",
+            "target": "composition_overhead",
+            "explanation": "Better composability reduces overhead."
+          },
+          {
+            "step": "10",
+            "source": "expected_utility_composition",
+            "relation": "compared with",
+            "target": "expected_utility_discovery",
+            "explanation": "Agent selects the option with higher expected utility."
+          },
+          {
+            "step": "11",
+            "source": "expected_utility_composition",
+            "relation": " and ",
+            "target": "decision",
+            "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimating future task frequency and distribution",
+            "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+          },
+          {
+            "bottleneck": "Measuring skill reuse value accurately",
+            "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+          },
+          {
+            "bottleneck": "Assessing quality gap and composition overhead",
+            "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+          },
+          {
+            "bottleneck": "Handling large skill inventories",
+            "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The assumption that discovery cost is finite and known conflicts with the practical reality that discovery costs are often uncertain, vary with task complexity, and may be prohibitively high in unknown environments.",
+        "derived_from": [
+          "assumption 2: The cost of discovering a new skill is finite and known",
+          "mechanism discovery_cost decreases expected_utility_discovery"
+        ],
+        "why_it_matters": "Uncertainty in discovery cost can lead to either over-commitment to discovery (if cost underestimated) or missed opportunities (if cost overestimated), reducing long-term utility.",
+        "what_existing_methods_may_miss": "Most frameworks assume a fixed discovery cost estimate rather than a distribution, failing to account for risk aversion or exploration bonuses.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the critical task complexity threshold at which the optimal decision switches from composition to discovery, and how does uncertainty in discovery cost bias the perceived threshold? Can a Bayesian update that models cost uncertainty eliminate this bias?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a precise phase transition boundary in the skill discovery vs composition tradeoff, and shows how cost uncertainty distorts this boundary, guiding the development of adaptive decision policies."
+      },
+      "hypothesis": {
+        "statement": "There exists a task complexity threshold C* (defined by a weighted combination of novelty and number of required primitive skills) such that for tasks with complexity < C*, composition yields higher expected utility, and for complexity > C*, discovery is optimal. Uncertainty in discovery cost systematically shifts the perceived threshold away from C*, causing suboptimal decision rates. A Bayesian model that updates cost estimates from observations reduces this threshold bias, bringing the decision boundary closer to the true C*.",
+        "predicted_effect": "Under fixed cost estimation, the observed threshold C_obs will deviate from C* in proportion to the variance of the true cost distribution. Under Bayesian estimation, C_obs will converge to C* as cost observations accumulate, with the deviation shrinking."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent performing tasks with varying complexity (scaled from 0 to 1, where complexity = alpha * novelty_score + (1-alpha) * (required_skills / inventory_size)). The agent chooses to compose or discover. Two policies: Policy A uses a fixed cost estimate (mean of prior), Policy B uses a Bayesian posterior that updates after each discovery. For a given true cost distribution (e.g., lognormal with known mean but unknown variance), measure the complexity value at which the agent switches from composition to discovery (the threshold). Compare to the optimal threshold computed with full knowledge. Vary the true cost variance across conditions.",
+        "independent_variables": [
+          "true cost uncertainty (low vs high variance)",
+          "decision policy (fixed cost vs Bayesian)"
+        ],
+        "dependent_variables": [
+          "threshold deviation: |C_obs - C*|",
+          "convergence rate: number of tasks until threshold stabilizes within 5% of C*"
+        ],
+        "controls": [
+          "task distribution fixed with known complexity range",
+          "skill inventory and composition overhead constants",
+          "same cost prior for both policies"
+        ],
+        "falsifying_observation": "If the threshold deviation under fixed cost is not significantly larger than under Bayesian in high uncertainty, or if the deviation does not depend on cost variance, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In high cost uncertainty, the fixed-cost policy exhibits a threshold deviation >0.1 (on 0-1 scale), while Bayesian shows deviation <0.05.",
+          "The Bayesian policy converges to the true threshold within 10-20 tasks, while fixed-cost remains biased.",
+          "Threshold bias correlates with cost variance under fixed cost but not under Bayesian."
+        ],
+        "rejects_hypothesis": [
+          "Threshold deviations are similar across policies regardless of cost uncertainty.",
+          "Bayesian does not reduce deviation significantly.",
+          "The observed threshold does not shift with cost variance as predicted."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., no threshold exists or Bayesian fails to improve), then revise the assumption that task complexity is the primary moderator of the decision boundary and that cost uncertainty is the dominant bias.",
+        "assumption_to_revise": "The assumption that a single complexity threshold exists and that cost uncertainty is the main source of threshold bias.",
+        "next_question": "What other factors (e.g., composition quality, task correlation, skill reuse patterns) create a more nuanced phase diagram for the discovery vs composition decision, and how can these be learned?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+          "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+          "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+          "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+        },
+        {
+          "name": "Utility",
+          "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+          "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+        },
+        {
+          "name": "Task Distribution",
+          "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+          "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+          "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+          "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+        },
+        {
+          "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+          "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+          "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+        },
+        {
+          "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+          "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+          "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+          },
+          {
+            "name": "composition_overhead",
+            "role": "input",
+            "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+          },
+          {
+            "name": "skill_reuse_value",
+            "role": "input",
+            "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+          },
+          {
+            "name": "quality_gap",
+            "role": "input",
+            "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+          },
+          {
+            "name": "resource_constraints",
+            "role": "input",
+            "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+          },
+          {
+            "name": "skill_inventory_size",
+            "role": "mediator",
+            "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+          },
+          {
+            "name": "compositional_flexibility",
+            "role": "mediator",
+            "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+          },
+          {
+            "name": "expected_utility_composition",
+            "role": "mediator",
+            "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+          },
+          {
+            "name": "expected_utility_discovery",
+            "role": "mediator",
+            "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher upfront cost reduces net benefit of discovery."
+          },
+          {
+            "step": "3",
+            "source": "skill_reuse_value",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+          },
+          {
+            "step": "4",
+            "source": "task_frequency",
+            "relation": "moderates",
+            "target": "skill_reuse_value",
+            "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+          },
+          {
+            "step": "5",
+            "source": "composition_overhead",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+          },
+          {
+            "step": "6",
+            "source": "quality_gap",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+          },
+          {
+            "step": "7",
+            "source": "resource_constraints",
+            "relation": "moderates",
+            "target": "discovery_cost",
+            "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+          },
+          {
+            "step": "8",
+            "source": "skill_inventory_size",
+            "relation": "increases",
+            "target": "composition_overhead",
+            "explanation": "More skills increase retrieval and planning cost for composition."
+          },
+          {
+            "step": "9",
+            "source": "compositional_flexibility",
+            "relation": "decreases",
+            "target": "composition_overhead",
+            "explanation": "Better composability reduces overhead."
+          },
+          {
+            "step": "10",
+            "source": "expected_utility_composition",
+            "relation": "compared with",
+            "target": "expected_utility_discovery",
+            "explanation": "Agent selects the option with higher expected utility."
+          },
+          {
+            "step": "11",
+            "source": "expected_utility_composition",
+            "relation": " and ",
+            "target": "decision",
+            "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimating future task frequency and distribution",
+            "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+          },
+          {
+            "bottleneck": "Measuring skill reuse value accurately",
+            "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+          },
+          {
+            "bottleneck": "Assessing quality gap and composition overhead",
+            "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+          },
+          {
+            "bottleneck": "Handling large skill inventories",
+            "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "There is a fundamental tension between immediate task efficiency (favoring composition) and long-term versatility (favoring discovery), as composition offers lower upfront cost but discovery yields reusable assets for future tasks.",
+        "derived_from": [
+          "core_tradeoff 1: Immediate task efficiency vs. long-term versatility",
+          "mechanism task_frequency moderates skill_reuse_value"
+        ],
+        "why_it_matters": "Agents that always compose may incur repeated overhead and fail to adapt to novel tasks, while agents that always discover may waste resources on rarely used skills, both leading to suboptimal utility.",
+        "what_existing_methods_may_miss": "Existing strategies often use fixed thresholds or hand-tuned heuristics, ignoring the dynamic interaction between task frequency and reuse value.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold, defined by the ratio of discovery cost to composition overhead multiplied by the expected future frequency of similar tasks, that separates regimes where discovering a new skill is optimal from regimes where composing existing skills is optimal, and can an agent that estimates this threshold online achieve higher cumulative utility than fixed heuristics?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Sharp characterization of the discovery/composition boundary and demonstration that a simple threshold-based policy can be as effective as complex meta-learning."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold θ = (discovery_cost / composition_overhead) * (1 / expected_future_frequency) such that if the novelty of a task exceeds θ, discovering a new skill yields higher cumulative utility than composing existing skills; otherwise composition is optimal. An online estimate of θ will yield cumulative utility statistically indistinguishable from an ideal adaptive meta-learner and higher than fixed heuristics.",
+        "predicted_effect": "The threshold policy will match or exceed the performance of adaptive meta-learning while being simpler, and significantly outperform all fixed heuristics under varying task distributions."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent with a set of initial skills. Present a sequence of tasks with varying novelty and frequency. For each task, compute the threshold θ from ground-truth parameters. Implement three strategies: (1) threshold policy using an online exponential moving average estimate of frequency; (2) meta-learning policy that dynamically adjusts a trade-off parameter; (3) fixed heuristics (always compose, always discover, novelty-threshold). Measure cumulative utility over the sequence. Repeat for multiple random seeds and for conditions where the true θ is known vs. estimated. Compare mean cumulative utility with 95% confidence intervals.",
+        "independent_variables": [
+          "policy type (threshold, meta-learning, fixed heuristics)",
+          "task frequency distribution (low, medium, high)",
+          "discovery cost / composition overhead ratio (0.5, 1.0, 2.0)"
+        ],
+        "dependent_variables": [
+          "cumulative utility over task sequence",
+          "proportion of correct decisions relative to optimal oracle",
+          "average per-task utility"
+        ],
+        "controls": [
+          "same initial skill set",
+          "same utility function",
+          "same discovery cost and composition overhead values",
+          "same task difficulty scaling",
+          "same total number of tasks"
+        ],
+        "falsifying_observation": "If the threshold policy does not achieve cumulative utility statistically equivalent to or higher than the meta-learning policy, or if it performs no better than the best fixed heuristic, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The threshold policy achieves cumulative utility within 5% of the meta-learning policy across all conditions.",
+          "The threshold policy significantly outperforms all fixed heuristics in conditions with moderate-to-high variability in task frequency.",
+          "The online estimate of θ converges to the true threshold within a few tasks."
+        ],
+        "rejects_hypothesis": [
+          "The threshold policy performs worse than the meta-learning policy by more than 10% in any condition.",
+          "The threshold policy is outperformed by a simple novelty-only threshold heuristic.",
+          "The online estimate of θ fails to converge or leads to systematically wrong decisions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the threshold policy fails, we conclude that the decision boundary is more complex than a simple multiplicative threshold and that additional factors (e.g., quality gap, composition flexibility) are required to characterize the regime shift.",
+        "assumption_to_revise": "Assumption that the critical threshold depends only on cost ratio and frequency; revision will incorporate composition overhead and novelty as separate scaling factors.",
+        "next_question": "Can a multi-dimensional threshold, combining novelty, frequency, and composition overhead, yield a robust policy that outperforms meta-learning?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to achieve a specific outcome or perform a specific function, typically represented as a parametric function or procedure.",
+          "why_primitive": "Skill is the atomic unit of capability in this decomposition; agents either compose skills or discover new ones, making it a foundational concept."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential, parallel, or hierarchical manner to achieve a new task that no single skill can accomplish alone.",
+          "why_primitive": "Composition is a fundamental operation that contrasts with discovery; understanding its properties (e.g., composability, emergent behavior) is essential to the decision."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously in the agent's repertoire, typically through exploration, instruction, or reinforcement.",
+          "why_primitive": "Discovery is the alternative to composition; its costs and benefits define the core tradeoff."
+        },
+        {
+          "name": "Utility",
+          "definition": "A measure of the aggregate benefit an agent obtains from its capabilities over time, often accounting for task success rate, efficiency, and resource consumption.",
+          "why_primitive": "The decision to discover vs. compose is ultimately a utility-maximization problem; utility is the primitive objective."
+        },
+        {
+          "name": "Task Distribution",
+          "definition": "The probability distribution over tasks the agent will encounter over its lifetime, including task novelty, complexity, and frequency.",
+          "why_primitive": "The optimal strategy depends on what tasks are likely; without a task distribution, the decision is ill-defined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are perfectly composable with no loss of fidelity or emergent errors.",
+          "rationale": "This isolates the decision to the cost-benefit of discovery vs. composition, avoiding complications like composition failures that would bias toward discovery.",
+          "possible_failure": "In real LLM agents, composition of skills (e.g., tool chaining) can introduce errors, degrade performance, or require fine-tuning, making discovery more attractive than assumed."
+        },
+        {
+          "assumption": "The cost of discovering a new skill is finite and known, and includes a one-time investment (e.g., training, prompt engineering).",
+          "rationale": "Discovery has an upfront cost; without this assumption, the decision could be trivial (always discover if cost is zero).",
+          "possible_failure": "Discovery costs may be uncertain or vary with task complexity, leading to suboptimal decisions if assumed constant."
+        },
+        {
+          "assumption": "Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability.",
+          "rationale": "To decide, the agent must know what it already can do; otherwise, it might rediscover needed skills unnecessarily.",
+          "possible_failure": "Real agents may have imperfect self-knowledge, leading to under- or over-reliance on composition."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which a new task differs from previously encountered tasks. High novelty increases the likelihood that existing skills are insufficient."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "One-time cost (time, compute, data) to learn a new skill. Includes training, prompt engineering, or exploration."
+          },
+          {
+            "name": "composition_overhead",
+            "role": "input",
+            "description": "Additional cost (latency, errors, resource usage) incurred when combining multiple existing skills to perform a task."
+          },
+          {
+            "name": "skill_reuse_value",
+            "role": "input",
+            "description": "Expected cumulative benefit from reusing a newly discovered skill across future tasks."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "How often the agent expects to encounter tasks similar to the current one in the future."
+          },
+          {
+            "name": "quality_gap",
+            "role": "input",
+            "description": "Expected performance difference between a composed solution and a specialized discovered skill for the task."
+          },
+          {
+            "name": "resource_constraints",
+            "role": "input",
+            "description": "Limits on available compute, time, or data that affect feasibility of discovery or composition."
+          },
+          {
+            "name": "skill_inventory_size",
+            "role": "mediator",
+            "description": "Number of existing skills. Large inventories may increase retrieval cost and make composition more complex."
+          },
+          {
+            "name": "compositional_flexibility",
+            "role": "mediator",
+            "description": "Ease with which existing skills can be combined without degradation. Influences composition_overhead."
+          },
+          {
+            "name": "expected_utility_composition",
+            "role": "mediator",
+            "description": "Expected total benefit from using composition for the current and similar future tasks, considering overhead and quality."
+          },
+          {
+            "name": "expected_utility_discovery",
+            "role": "mediator",
+            "description": "Expected total benefit from discovering a new skill, accounting for discovery cost and future reuse."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary choice: discover a new skill or compose existing skills. Determined by comparing expected utilities."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher novelty means existing skills are less likely to suffice, making discovery more attractive."
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "expected_utility_discovery",
+            "explanation": "Higher upfront cost reduces net benefit of discovery."
+          },
+          {
+            "step": "3",
+            "source": "skill_reuse_value",
+            "relation": "increases",
+            "target": "expected_utility_discovery",
+            "explanation": "Greater potential reuse across future tasks raises discovery's long-term value."
+          },
+          {
+            "step": "4",
+            "source": "task_frequency",
+            "relation": "moderates",
+            "target": "skill_reuse_value",
+            "explanation": "Higher frequency of similar tasks amplifies the reuse value of a discovered skill."
+          },
+          {
+            "step": "5",
+            "source": "composition_overhead",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Higher overhead (latency, errors) reduces the efficiency of composed solutions."
+          },
+          {
+            "step": "6",
+            "source": "quality_gap",
+            "relation": "decreases",
+            "target": "expected_utility_composition",
+            "explanation": "Larger performance gap makes composition less satisfactory compared to discovery."
+          },
+          {
+            "step": "7",
+            "source": "resource_constraints",
+            "relation": "moderates",
+            "target": "discovery_cost",
+            "explanation": "Stricter resource limits make discovery cost relatively higher (e.g., cannot afford training)."
+          },
+          {
+            "step": "8",
+            "source": "skill_inventory_size",
+            "relation": "increases",
+            "target": "composition_overhead",
+            "explanation": "More skills increase retrieval and planning cost for composition."
+          },
+          {
+            "step": "9",
+            "source": "compositional_flexibility",
+            "relation": "decreases",
+            "target": "composition_overhead",
+            "explanation": "Better composability reduces overhead."
+          },
+          {
+            "step": "10",
+            "source": "expected_utility_composition",
+            "relation": "compared with",
+            "target": "expected_utility_discovery",
+            "explanation": "Agent selects the option with higher expected utility."
+          },
+          {
+            "step": "11",
+            "source": "expected_utility_composition",
+            "relation": " and ",
+            "target": "decision",
+            "explanation": "If composition utility > discovery utility, decide to compose; else decide to discover."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimating future task frequency and distribution",
+            "why_it_matters": "The decision hinges on how often similar tasks will recur; overestimation leads to wasteful discovery, underestimation leads to repeated composition overhead."
+          },
+          {
+            "bottleneck": "Measuring skill reuse value accurately",
+            "why_it_matters": "Reuse value is uncertain and depends on future tasks; inaccurate estimates can bias the decision."
+          },
+          {
+            "bottleneck": "Assessing quality gap and composition overhead",
+            "why_it_matters": "These parameters are often unknown a priori and may require experimentation, incurring additional cost."
+          },
+          {
+            "bottleneck": "Handling large skill inventories",
+            "why_it_matters": "Retrieval and composition become costly with many skills, potentially making composition less attractive than discovery even when it seems feasible."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovering a new skill and composing existing ones by comparing expected utilities. Expected utility of composition depends on composition overhead, quality gap, and task novelty (via skill adequacy). Expected utility of discovery depends on discovery cost, skill reuse value (moderated by future task frequency), and resource constraints. The agent chooses the option with higher expected utility. Key uncertainties include future task distribution, reuse value, and performance parameters, which can lead to suboptimal decisions if misestimated."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The assumption that agents have perfect self-knowledge of their existing skills and their applicability contradicts the reality that skill inventory size can be large, retrieval is costly, and agents may be unaware of all relevant capabilities.",
+        "derived_from": [
+          "assumption 3: Tasks arrive sequentially and the agent has perfect knowledge of its existing skill set and their applicability",
+          "bottleneck 4: Handling large skill inventories"
+        ],
+        "why_it_matters": "Imperfect self-knowledge leads to suboptimal decisions: agents may incorrectly believe they can compose a solution (when they lack a necessary skill) or fail to discover a skill that they already have, wasting resources.",
+        "what_existing_methods_may_miss": "Most cognitive architectures assume transparent skill libraries; real agents often suffer from incomplete retrieval or false positives in skill matching.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what retrieval success rate threshold, as a function of skill inventory size, does an agent's optimal decision between discovering a new skill and composing existing skills switch from discovery-dominant to composition-dominant, measured by utility relative to an oracle with perfect self-knowledge?",
+        "question_type": "benchmark",
+        "source_tension": "T5",
+        "expected_contribution": "Reveals a phase transition in the discovery-composition tradeoff, providing a clear boundary condition for when each strategy is optimal, and quantifying the impact of imperfect self-knowledge."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical retrieval success rate threshold θ such that for retrieval success rates below θ, the agent achieves higher utility by discovering new skills, while for rates above θ, composition yields higher utility, and this threshold increases with skill inventory size.",
+        "predicted_effect": "As retrieval success rate increases from low to high, the optimal decision will cross from discovery to composition at a threshold value that shifts upward as inventory size grows, due to the increased complexity of composition with more skills."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with a known skill inventory of varying size (e.g., 50, 100, 200 skills). For a fixed task distribution, vary the retrieval success rate (0.4, 0.5, 0.6, ..., 1.0) by controlling the agent's ability to retrieve all relevant skills. For each condition, let the agent decide between discovery and composition using expected utility maximization, and compare its cumulative utility to an oracle with perfect retrieval. Record the utility difference (discovery utility minus composition utility) as a function of retrieval success rate. Identify the threshold where this difference crosses zero, if any.",
+        "independent_variables": [
+          "retrieval success rate (0.4 to 1.0 in steps of 0.1)",
+          "skill inventory size (50, 100, 200)"
+        ],
+        "dependent_variables": [
+          "threshold retrieval success rate where utility of discovery equals utility of composition",
+          "utility difference (discovery minus composition) at each condition"
+        ],
+        "controls": [
+          "fixed task distribution (novelty, complexity, frequency)",
+          "fixed discovery cost and composition overhead parameters",
+          "fixed decision algorithm (expected utility maximization)",
+          "oracle with perfect retrieval uses same decision rule"
+        ],
+        "falsifying_observation": "No crossover point is observed; utility difference remains either always positive (discovery always better) or always negative (composition always better) across the entire range of retrieval success rates, or the threshold does not change with inventory size."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each inventory size, there is a clear threshold retrieval success rate where the utility difference crosses zero.",
+          "As inventory size increases from 50 to 200, the threshold increases (e.g., from 0.6 to 0.8), confirming the interaction.",
+          "The transition is sharp (e.g., utility changes sign within a 0.1 step change in retrieval success rate)."
+        ],
+        "rejects_hypothesis": [
+          "No threshold exists; utility difference remains either always positive or always negative.",
+          "Threshold does not vary monotonically with inventory size (e.g., decreases or stays constant).",
+          "The transition is gradual and not sharp, suggesting no phase transition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed or the threshold does not depend on inventory size, the hypothesis that retrieval success rate drives the decision boundary is incomplete. The failure suggests that other factors (e.g., composition overhead variability, quality gap) dominate, or that the decision algorithm itself needs revision.",
+        "assumption_to_revise": "Assumption that utility comparison is the sole decision criterion; instead, agents may use heuristic rules or incorporate uncertainty in parameter estimates.",
+        "next_question": "How do uncertainty in retrieval and composition overhead estimates affect the decision boundary between discovery and composition, and do agents exhibit a risk-averse preference for one strategy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold depth D_c such that for composition depth < D_c, error rate grows sublinearly or remains constant, and for depth > D_c, error rate grows superlinearly (e.g., exponentially). The threshold D_c increases linearly with skill quality.",
+      "independent_variables": [
+        "composition depth (1 to 10 steps)",
+        "skill quality (high: 0.95 per-step success, low: 0.70 per-step success)"
+      ],
+      "dependent_variables": [
+        "error rate (1 - task success rate)"
+      ],
+      "controlled_variables": [
+        "same underlying skills (identical tool calls)",
+        "same task type (e.g., multi-step reasoning)",
+        "same LLM model (e.g., GPT-4)",
+        "same prompting strategy",
+        "same skill ordering (sequential chain)"
+      ],
+      "baselines": [
+        {
+          "name": "single-step composition (depth=1)",
+          "description": "Baseline error rate for a single skill application, used to compare with higher depths."
+        },
+        {
+          "name": "high vs low quality at depth=1",
+          "description": "Establishes baseline difference due to skill quality."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "error rate",
+          "definition": "Proportion of trials where the LLM agent fails to produce the correct final output, measured over 100 trials per condition."
+        }
+      ],
+      "expected_result": "Error rate remains low (e.g., <10%) for depths below a certain threshold and increases sharply (e.g., >50%) above it; threshold depth D_c is higher for high-quality skills than for low-quality skills; the transition is nonlinear, e.g., a sudden jump in error rate at D_c.",
+      "falsifying_result": "No threshold is observed: error rate grows linearly or remains constant across all depths for both quality levels, or the growth pattern does not change with quality (e.g., both degrade similarly).",
+      "minimum_viable_experiment": "Use an LLM agent (e.g., GPT-4) to solve tasks requiring a chain of identical skill calls. Vary composition depth from 1 to 10. For each depth, simulate two skill quality levels by adjusting the per-step success probability (e.g., via controlled accuracy of each call). Use 100 trials per condition. Control task novelty, prompting, and skill ordering. Measure task success rate (or error rate). Analyze error rate as a function of depth for each quality level. Detect any sudden change in growth rate.",
+      "risks_and_confounds": [
+        "LLM output randomness may cause high variance; use multiple trials and statistical tests.",
+        "Skill quality manipulation may be confounded if not perfectly controlled; ensure consistent per-step accuracy.",
+        "Task novelty may affect results; use the same task type throughout.",
+        "Prompt sensitivity: small changes in wording could alter composition behavior; keep prompts fixed.",
+        "Order of skill applications might introduce bias; randomize order if possible."
+      ]
+    },
+    {
+      "hypothesis": "There exists a task complexity threshold C* such that for tasks with complexity < C*, composition yields higher expected utility, and for complexity > C*, discovery is optimal. Uncertainty in discovery cost systematically shifts the perceived threshold away from C*, causing suboptimal decision rates. A Bayesian model that updates cost estimates from observations reduces this threshold bias.",
+      "independent_variables": [
+        "true cost uncertainty (low vs high variance)",
+        "decision policy (fixed cost vs Bayesian)"
+      ],
+      "dependent_variables": [
+        "threshold deviation: |C_obs - C*|",
+        "convergence rate: number of tasks until threshold stabilizes within 5% of C*"
+      ],
+      "controlled_variables": [
+        "task distribution fixed with known complexity range",
+        "skill inventory and composition overhead constants",
+        "same cost prior for both policies"
+      ],
+      "baselines": [
+        {
+          "name": "Optimal threshold",
+          "description": "Threshold computed with full knowledge of true cost distribution (oracle)."
+        },
+        {
+          "name": "Fixed-cost policy",
+          "description": "Policy that uses a fixed cost estimate (mean of prior) without updating."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "threshold deviation",
+          "definition": "Absolute difference between observed threshold and optimal threshold on 0-1 scale."
+        },
+        {
+          "name": "convergence rate",
+          "definition": "Number of tasks required for observed threshold to stay within 5% of optimal threshold for 10 consecutive tasks."
+        }
+      ],
+      "expected_result": "Under high cost uncertainty, fixed-cost policy exhibits threshold deviation >0.1, while Bayesian policy shows deviation <0.05. Bayesian converges within 10-20 tasks; fixed-cost remains biased. Threshold bias correlates with cost variance under fixed cost but not under Bayesian.",
+      "falsifying_result": "Threshold deviations are similar across policies regardless of cost uncertainty, or Bayesian does not reduce deviation significantly, or the observed threshold does not shift with cost variance as predicted.",
+      "minimum_viable_experiment": "Simulate an LLM agent performing tasks with complexity scaled from 0 to 1, where complexity = alpha * novelty_score + (1-alpha) * (required_skills / inventory_size). Agent chooses compose or discover. Two policies: Fixed cost estimate vs Bayesian posterior updating. True cost distribution is lognormal with known mean but unknown variance. Measure complexity at which agent switches from composition to discovery. Compare to optimal threshold computed with full knowledge. Vary true cost variance across low and high conditions.",
+      "risks_and_confounds": [
+        "The definition of task complexity may not capture all relevant factors.",
+        "Agent's internal algorithm may have other biases beyond cost estimation.",
+        "Learning dynamics might be influenced by exploration strategy.",
+        "The Bayesian update may not converge if prior is misspecified."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold θ = (discovery_cost / composition_overhead) * (1 / expected_future_frequency) such that if the novelty of a task exceeds θ, discovering a new skill yields higher cumulative utility than composing existing skills; otherwise composition is optimal. An online estimate of θ will yield cumulative utility statistically indistinguishable from an ideal adaptive meta-learner and higher than fixed heuristics.",
+      "independent_variables": [
+        "policy type (threshold, meta-learning, fixed heuristics)",
+        "task frequency distribution (low, medium, high)",
+        "discovery_cost / composition_overhead ratio (0.5, 1.0, 2.0)"
+      ],
+      "dependent_variables": [
+        "cumulative utility over task sequence",
+        "proportion of correct decisions relative to optimal oracle",
+        "average per-task utility"
+      ],
+      "controlled_variables": [
+        "same initial skill set",
+        "same utility function",
+        "same discovery cost and composition overhead values (base values; ratio manipulated by scaling one)",
+        "same task difficulty scaling",
+        "same total number of tasks (e.g., 1000)",
+        "same random seeds for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Meta-learning policy",
+          "description": "An adaptive policy that dynamically adjusts a trade-off parameter using online learning, representing the upper bound of adaptive performance."
+        },
+        {
+          "name": "Always compose",
+          "description": "Always use composition to solve tasks, never discover new skills."
+        },
+        {
+          "name": "Always discover",
+          "description": "Always discover a new skill for each task, even if composition would suffice."
+        },
+        {
+          "name": "Novelty-threshold heuristic",
+          "description": "Discover if task novelty exceeds a fixed threshold (e.g., 0.5 on a normalized scale), otherwise compose."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cumulative utility",
+          "definition": "Sum of per-task utility over the entire sequence, where utility is defined as task success rate minus cost (time, computation, errors) adjusted for resource consumption."
+        },
+        {
+          "name": "Decision accuracy",
+          "definition": "Fraction of tasks where the policy’s decision (discover vs compose) matches the optimal decision as determined by ground-truth parameters."
+        },
+        {
+          "name": "Average per-task utility",
+          "definition": "Cumulative utility divided by number of tasks, capturing efficiency on a per-task basis."
+        }
+      ],
+      "expected_result": "The threshold policy achieves cumulative utility within 5% of the meta-learning policy across all conditions, and significantly outperforms the best fixed heuristic (by at least 10% relative improvement) in conditions with moderate-to-high variability in task frequency. The online estimate of θ converges to the true threshold within the first 100 tasks.",
+      "falsifying_result": "If the threshold policy performs worse than the meta-learning policy by more than 10% in any condition, or if it is outperformed by the novelty-only threshold heuristic (i.e., no statistically significant difference), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate an LLM agent with a set of 5 initial skills, each with known capability parameters. Present a sequence of 1000 tasks, each with novelty (0 to 1) drawn from a distribution that varies across conditions. For each task, compute ground-truth discovery cost (e.g., 10 units), composition overhead (e.g., 2 units), and expected future frequency (exponentially weighted moving average of similar tasks). Implement three strategies: (1) threshold policy using online estimate of θ; (2) meta-learning policy using gradient-based adaptation; (3) fixed heuristics (always compose, always discover, novelty threshold=0.5). Measure cumulative utility over the sequence. Repeat for 3 task frequency distributions (low: similar tasks rare; medium: moderate; high: frequent) and 3 cost ratios (0.5, 1.0, 2.0) by scaling discovery cost. Run 30 random seeds per condition. Compare mean cumulative utility with 95% confidence intervals. The experiment is minimal because it only varies the two key parameters (frequency and cost ratio) and uses a simple simulation environment.",
+      "risks_and_confounds": [
+        "The threshold policy relies on online estimation of frequency, which may introduce approximation errors if the task distribution is non-stationary.",
+        "The meta-learning policy may require extensive hyperparameter tuning, potentially biasing results.",
+        "The simplification of novelty to a scalar may not capture real-world task complexity.",
+        "The assumption of perfect skill composability may not hold in practice, limiting external validity."
+      ]
+    },
+    {
+      "hypothesis": "The quality gap between composed and discovered solutions exhibits a sudden jump at a critical combination of task novelty and skill inventory size, such that below the threshold the gap is negligible (≤5%) and above the threshold the gap exceeds 20%, making the choice between composition and discovery unambiguous.",
+      "independent_variables": [
+        "task_novelty (levels: low, high)",
+        "skill_inventory_size (levels: 5, 15, 25)"
+      ],
+      "dependent_variables": [
+        "quality_gap: difference in success rate between discovery and composition, measured as (success_rate_discovery - success_rate_composition) * 100%"
+      ],
+      "controlled_variables": [
+        "Base LLM: GPT-4 with fixed configuration",
+        "Discovery cost: exactly 10 fine-tuning steps for each discovered skill",
+        "Composition method: simple sequential chaining without optimization",
+        "Tasks: drawn from a predefined distribution per novelty level, each task randomly sampled without replacement",
+        "Random seed: fixed across all runs to ensure reproducibility",
+        "Task set: 100 tasks per condition, all tasks are unique per run"
+      ],
+      "baselines": [
+        {
+          "name": "Low novelty & small inventory",
+          "description": "Condition with task_novelty=low and skill_inventory_size=5, where quality gap is expected <5% if hypothesis holds."
+        },
+        {
+          "name": "High novelty & large inventory",
+          "description": "Condition with task_novelty=high and skill_inventory_size=25, where quality gap is expected >20% if hypothesis holds."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "quality_gap",
+          "definition": "Absolute difference between success rate of discovered skill and success rate of composed solution, expressed as percentage points. Computed per condition."
+        },
+        {
+          "name": "success_rate_discovery",
+          "definition": "Fraction of tasks successfully completed using the newly discovered skill, averaged over 100 tasks per condition."
+        },
+        {
+          "name": "success_rate_composition",
+          "definition": "Fraction of tasks successfully completed using composition of existing skills, averaged over 100 tasks per condition."
+        }
+      ],
+      "expected_result": "At low novelty and small inventory (task_novelty=low, skill_inventory_size=5), quality_gap < 5%. At high novelty and large inventory (high, 25), quality_gap > 20%. At intermediate conditions (e.g., low novelty with 15 skills, or high novelty with 15 skills), a sharp discontinuity is observed: one or more adjacent grid points show a jump from below 5% to above 20%. Specifically, we expect the critical boundary around (medium-high novelty, 10-15 skills) which will be confirmed by a non-linear increase.",
+      "falsifying_result": "The quality gap increases smoothly (linearly or monotonically) across conditions with no single jump exceeding 10 percentage points. Alternatively, the quality gap never exceeds 20% even at the most extreme condition (high novelty, 25 skills). Or the quality gap shows no clear pattern or decreases at higher novelty/inventory.",
+      "minimum_viable_experiment": "Run 6 conditions: 2 levels of task novelty (low, high) × 3 levels of skill inventory size (5, 15, 25). For each condition, generate 100 tasks specific to that novelty level. Equip the agent with the corresponding number of pre-existing skills (randomly selected from a skill pool). For each task, execute two policies: (a) compose the existing skills to solve the task, and (b) first discover a new skill via fine-tuning (10 steps) then use that skill. Record success/failure for each attempt. Compute success rates and quality gap. Analysis: Check if there is a discontinuity where quality gap jumps from ≤5% to >20% between adjacent conditions (e.g., between (low,15) and (high,15) or between (low,5) and (low,15) etc.). The smallest experiment that can falsify is this 2×3 design because if no jump appears here, the hypothesis is falsified; if a jump does appear, a finer grid is needed but the hypothesis is not falsified.",
+      "risks_and_confounds": [
+        "Operationalization of task novelty: The novelty levels must be distinct and validated; otherwise, low and high may not differ enough to trigger the phase transition.",
+        "Composition method may not be optimal; using a more sophisticated composition (e.g., hierarchical planning) could reduce quality gap and mask the jump.",
+        "Discovery cost fixed at 10 steps may not be appropriate for all tasks; if cost varies, the expected utility changes but the hypothesis is about quality gap, not utility.",
+        "Skill inventory size may interact with skill similarity; if skills are very similar, composition may be easier, reducing gap.",
+        "Randomness in task generation and fine-tuning may cause variance; use fixed seed and sufficient trials to ensure reliable estimates.",
+        "The threshold might be continuous rather than discrete; the 2×3 design may miss a jump if it occurs at intermediate values not tested. However, this is the smallest experiment to detect a sharp jump; if no jump found, hypothesis is falsified."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical retrieval success rate threshold θ such that for retrieval success rates below θ, the agent achieves higher utility by discovering new skills, while for rates above θ, composition yields higher utility, and this threshold increases with skill inventory size.",
+      "independent_variables": [
+        "retrieval success rate (0.4 to 1.0 in steps of 0.1)",
+        "skill inventory size (50, 100, 200)"
+      ],
+      "dependent_variables": [
+        "threshold retrieval success rate where utility of discovery equals utility of composition",
+        "utility difference (discovery minus composition) at each condition"
+      ],
+      "controlled_variables": [
+        "fixed task distribution (novelty, complexity, frequency)",
+        "fixed discovery cost and composition overhead parameters",
+        "fixed decision algorithm (expected utility maximization)",
+        "oracle with perfect retrieval uses same decision rule"
+      ],
+      "baselines": [
+        {
+          "name": "Oracle agent with perfect retrieval",
+          "description": "Agent with perfect self-knowledge of its skill inventory and their applicability, used to compute the optimal decision under each condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Utility difference",
+          "definition": "Cumulative utility of discovery minus cumulative utility of composition, computed over a set of tasks."
+        },
+        {
+          "name": "Threshold retrieval success rate",
+          "definition": "The retrieval success rate at which utility difference crosses zero, interpolated if necessary."
+        }
+      ],
+      "expected_result": "For each inventory size, there is a clear threshold retrieval success rate where the utility difference crosses zero. As inventory size increases from 50 to 200, the threshold increases (e.g., from 0.6 to 0.8). The transition is sharp (within a 0.1 step).",
+      "falsifying_result": "No threshold is observed; utility difference remains either always positive or always negative across the entire range of retrieval success rates, or the threshold does not increase with inventory size (e.g., decreases or stays constant). Alternatively, the transition is gradual and not sharp.",
+      "minimum_viable_experiment": "Simulate an agent with a known skill inventory of two sizes (e.g., 50 and 200). For a fixed task distribution, vary the retrieval success rate from 0.4 to 1.0 in steps of 0.1. For each combination of inventory size and retrieval rate, let the agent decide between discovery and composition using expected utility maximization, and compare its cumulative utility to an oracle with perfect retrieval. Record the utility difference (discovery minus composition) and identify the threshold where this difference crosses zero for each inventory size. Use at least 100 tasks per condition to estimate expected utilities reliably.",
+      "risks_and_confounds": [
+        "Parameter choices (e.g., discovery cost, composition overhead) may influence threshold location; sensitivity analysis needed.",
+        "Assumption of perfect composability may not hold in practice, but this experiment tests the decision boundary under ideal conditions.",
+        "The oracle baseline assumes perfect retrieval, but in reality, agents may have other sources of imperfection.",
+        "Task distribution is fixed; if distribution changes, threshold may shift."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical composition depth threshold beyond which the error rate of LLM agents transitions from sublinear to superlinear growth, and how does this threshold depend on individual skill quality?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical task complexity threshold at which the optimal decision switches from composition to discovery, and how does uncertainty in discovery cost bias the perceived threshold? Can a Bayesian update that models cost uncertainty eliminate this bias?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "Is there a critical threshold, defined by the ratio of discovery cost to composition overhead multiplied by the expected future frequency of similar tasks, that separates regimes where discovering a new skill is optimal from regimes where composing existing skills is optimal, and can an agent that estimates this threshold online achieve higher cumulative utility than fixed heuristics?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a phase transition in the quality gap between composed and discovered solutions as a function of task novelty and skill inventory size, beyond which discovery becomes unambiguously superior?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "At what retrieval success rate threshold, as a function of skill inventory size, does an agent's optimal decision between discovering a new skill and composing existing skills switch from discovery-dominant to composition-dominant, measured by utility relative to an oracle with perfect self-knowledge?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false,
+      "enable_question_debate_refinement": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T210818Z"
+  }
+}

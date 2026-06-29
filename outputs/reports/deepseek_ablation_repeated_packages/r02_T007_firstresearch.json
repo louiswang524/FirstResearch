@@ -1,0 +1,1331 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+        "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+      },
+      {
+        "name": "Lifelong learning agent",
+        "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+        "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+      },
+      {
+        "name": "Skill-library bloat",
+        "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+        "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+        "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+        "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+      },
+      {
+        "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+        "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+        "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Skill specificity vs. Skill generality: More specific skills reduce interference between tasks but increase library size; more general skills reuse more broadly but risk negative transfer and task conflict.",
+        "variables": [
+          "skill specificity",
+          "library size",
+          "transfer performance",
+          "interference"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+      },
+      {
+        "name": "reuse_effectiveness",
+        "role": "input",
+        "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+      },
+      {
+        "name": "skill_granularity",
+        "role": "mediator",
+        "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+      },
+      {
+        "name": "library_size",
+        "role": "output",
+        "description": "Total number of skills stored, representing skill-library bloat."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "skill_granularity",
+        "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+      },
+      {
+        "step": "2",
+        "source": "reuse_effectiveness",
+        "relation": "decreases",
+        "target": "skill_granularity",
+        "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+      },
+      {
+        "step": "3",
+        "source": "skill_granularity",
+        "relation": "increases",
+        "target": "library_size",
+        "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Inadequate reuse mechanism",
+        "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+      },
+      {
+        "bottleneck": "High task diversity",
+        "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "More specific skills reduce interference between tasks but increase library size; more general skills improve reuse but risk negative transfer and task conflict.",
+      "derived_from": [
+        "Skill",
+        "Skill-library bloat",
+        "core_tradeoffs"
+      ],
+      "why_it_matters": "This tradeoff determines whether skill libraries grow unboundedly or remain manageable; balancing it is critical for lifelong learning efficiency.",
+      "what_existing_methods_may_miss": "Existing methods often optimize for either specificity or generality without considering dynamic adjustment based on task similarity.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Storing skills as immutable parameter sets prevents catastrophic forgetting but may lead to bloat, whereas compositional or shared skill representations could reduce bloat but risk interference.",
+      "derived_from": [
+        "Skill",
+        "assumption: Skills are stored as distinct, immutable parameter sets"
+      ],
+      "why_it_matters": "The representation choice directly impacts library growth; most systems assume immutability without exploring alternatives that might mitigate bloat.",
+      "what_existing_methods_may_miss": "Research often assumes skills are separate modules; methods that allow skill merging or sharing (e.g., via hypernetworks) are less explored in this context.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "High task novelty encourages specialization, increasing skill granularity; effective reuse mechanisms encourage generality, decreasing granularity. The balance between novelty and reuse effectiveness determines bloat.",
+      "derived_from": [
+        "Lifelong learning agent",
+        "mechanism_model"
+      ],
+      "why_it_matters": "Understanding this interaction is key to predicting when bloat will occur and designing agents that adapt their specialization dynamically.",
+      "what_existing_methods_may_miss": "Many lifelong learning methods focus on either novelty detection or reuse in isolation, without jointly optimizing the tradeoff.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does dynamically adjusting skill granularity based on task similarity reduce library bloat without increasing interference?",
+      "question_type": "algorithmic",
+      "source_tension": "T1",
+      "expected_contribution": "Framework for adaptive skill granularity that balances bloat and interference."
+    },
+    {
+      "question": "Can composing skills via hypernetworks reduce library size while maintaining performance compared to storing immutable parameter sets?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Evidence for compositional representations as a bloat-mitigation strategy."
+    },
+    {
+      "question": "How does the ratio of task novelty to reuse effectiveness predict the rate of library growth over a sequence of tasks?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Predictive model for skill-library bloat based on task and agent properties."
+    },
+    {
+      "question": "Is there a threshold of reuse effectiveness beyond which skill granularity and library size stabilize?",
+      "question_type": "descriptive",
+      "source_tension": "T1",
+      "expected_contribution": "Identification of critical reuse level that bounds library growth."
+    },
+    {
+      "question": "What is the effect of allowing skill merging on catastrophic forgetting compared to immutable skills?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Understanding the tradeoff between bloat reduction and forgetting risk."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+          "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+        },
+        {
+          "name": "Lifelong learning agent",
+          "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+          "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+          "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+          "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+          "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+        },
+        {
+          "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+          "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+          "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+          },
+          {
+            "name": "reuse_effectiveness",
+            "role": "input",
+            "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "mediator",
+            "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Total number of skills stored, representing skill-library bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "skill_granularity",
+            "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+          },
+          {
+            "step": "2",
+            "source": "reuse_effectiveness",
+            "relation": "decreases",
+            "target": "skill_granularity",
+            "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+          },
+          {
+            "step": "3",
+            "source": "skill_granularity",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate reuse mechanism",
+            "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+          },
+          {
+            "bottleneck": "High task diversity",
+            "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Storing skills as immutable parameter sets prevents catastrophic forgetting but may lead to bloat, whereas compositional or shared skill representations could reduce bloat but risk interference.",
+        "derived_from": [
+          "Skill",
+          "assumption: Skills are stored as distinct, immutable parameter sets"
+        ],
+        "why_it_matters": "The representation choice directly impacts library growth; most systems assume immutability without exploring alternatives that might mitigate bloat.",
+        "what_existing_methods_may_miss": "Research often assumes skills are separate modules; methods that allow skill merging or sharing (e.g., via hypernetworks) are less explored in this context.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what threshold of task novelty does skill-library bloat become unavoidable regardless of reuse effectiveness in lifelong-learning agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifying a critical task-novelty threshold that triggers a phase transition from sublinear to linear library growth, pinning down a fundamental limitation of current skill reuse mechanisms."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task novelty level, determined by the agent's reuse capacity (e.g., maximum number of tasks a single skill can cover), above which the skill library grows linearly with the number of tasks regardless of the reuse mechanism; below this threshold, sublinear growth is achievable.",
+        "predicted_effect": "Library size growth rate will exhibit a sharp increase at a specific task-novelty value, transitioning from sublinear to linear scaling."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train a lifelong-learning agent on a sequence of tasks with varying novelty (controlled by the cosine similarity between task distributions). Measure library size after each task and compute the growth rate (library size / number of tasks). Perform this across a range of novelty levels (e.g., 0.1 to 0.9 similarity). Identify the novelty level where the growth rate changes qualitatively from <1 to ~1.",
+        "independent_variables": [
+          "Task novelty (1 - cosine similarity between consecutive task distributions)"
+        ],
+        "dependent_variables": [
+          "Library size growth rate (library size / number of tasks)"
+        ],
+        "controls": [
+          "Same agent architecture and learning algorithm (e.g., EWC)",
+          "Same skill representation (immutable, separate networks)",
+          "Same task order and number of tasks (e.g., 50 tasks)"
+        ],
+        "falsifying_observation": "If the library growth rate remains sublinear across all task novelty levels, or shows a smooth, gradual increase without a sharp threshold, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library growth rate remains below 0.5 (sublinear) for task similarity > 0.6, then jumps to near 1.0 (linear) for similarity < 0.4, indicating a clear threshold.",
+          "The threshold novelty value varies predictably with the agent's reuse capacity (e.g., number of skills allowed)."
+        ],
+        "rejects_hypothesis": [
+          "Library growth rate increases linearly with novelty without any abrupt transition.",
+          "Library growth rate does not exceed 0.8 even at the highest novelty (novelty ~0.9)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, then the assumption that task novelty alone drives a phase transition is incorrect.",
+        "assumption_to_revise": "The assumption that there exists a single critical novelty level; perhaps the transition is mediated by other factors like skill granularity or a gradual interaction.",
+        "next_question": "What combination of task structure and reuse mechanism leads to a phase transition in library growth?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+          "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+        },
+        {
+          "name": "Lifelong learning agent",
+          "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+          "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+          "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+          "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+          "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+        },
+        {
+          "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+          "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+          "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+          },
+          {
+            "name": "reuse_effectiveness",
+            "role": "input",
+            "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "mediator",
+            "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Total number of skills stored, representing skill-library bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "skill_granularity",
+            "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+          },
+          {
+            "step": "2",
+            "source": "reuse_effectiveness",
+            "relation": "decreases",
+            "target": "skill_granularity",
+            "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+          },
+          {
+            "step": "3",
+            "source": "skill_granularity",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate reuse mechanism",
+            "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+          },
+          {
+            "bottleneck": "High task diversity",
+            "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Storing skills as immutable parameter sets prevents catastrophic forgetting but may lead to bloat, whereas compositional or shared skill representations could reduce bloat but risk interference.",
+        "derived_from": [
+          "Skill",
+          "assumption: Skills are stored as distinct, immutable parameter sets"
+        ],
+        "why_it_matters": "The representation choice directly impacts library growth; most systems assume immutability without exploring alternatives that might mitigate bloat.",
+        "what_existing_methods_may_miss": "Research often assumes skills are separate modules; methods that allow skill merging or sharing (e.g., via hypernetworks) are less explored in this context.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical task-novelty threshold beyond which hypernetwork-based composition fails to prevent skill-library bloat in lifelong learning agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identification of a phase transition in bloat growth under compositional skills, providing a quantitative boundary for practical deployment."
+      },
+      "hypothesis": {
+        "statement": "Hypernetwork-based composition prevents skill-library bloat only when the average task novelty remains below a critical threshold θ; above θ, library size grows linearly with tasks, similar to immutable storage.",
+        "predicted_effect": "Library size grows sublinearly (logarithmic or constant) below θ and linearly above θ, while average performance remains comparable across regimes."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare two lifelong learning agents (immutable baseline and hypernetwork composition) on a sequence of tasks with controlled novelty levels. Vary the average pairwise task novelty (e.g., measured by cosine distance between task embeddings) across multiple runs, from low (similar tasks) to high (dissimilar). Train each agent on a fixed number of tasks and measure the final library size and growth rate. Identify the novelty level where the compositional agent's library size growth changes from sublinear to linear.",
+        "independent_variables": [
+          "Representation type: immutable vs compositional (hypernetwork)",
+          "Average task novelty (quantified by distance metric between task distributions)"
+        ],
+        "dependent_variables": [
+          "Library size (number of unique skills)",
+          "Library growth rate (slope over tasks)",
+          "Average task performance (accuracy) across all tasks"
+        ],
+        "controls": [
+          "Same task sequence length",
+          "Same learning algorithm (e.g., MAML)",
+          "Same skill initialization",
+          "Same hypernetwork architecture capacity",
+          "Same evaluation metric for task novelty"
+        ],
+        "falsifying_observation": "If the compositional agent's library size remains sublinear for all novelty levels (no threshold detected) or if performance drops significantly (e.g., >5%) below the threshold, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The compositional agent's library size grows sublinearly for novelty levels below θ and linearly for levels above θ.",
+          "The baseline agent's library size grows linearly across all novelty levels.",
+          "Average performance of the compositional agent is not significantly worse than baseline in either regime."
+        ],
+        "rejects_hypothesis": [
+          "The compositional agent's library size grows sublinearly for all novelty levels (no threshold).",
+          "The compositional agent's library size grows linearly for all novelty levels (no effect).",
+          "The compositional agent's performance drops sharply above a certain novelty level without corresponding change in growth rate."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or performance degrades systematically, the assumption that hypernetwork composition can adapt to any novelty level without bloat is incorrect.",
+        "assumption_to_revise": "Assumption: Hypernetwork-based composition is sufficiently expressive to capture task-specific skills without requiring many additional parameters, regardless of task novelty.",
+        "next_question": "How does the capacity of the hypernetwork (e.g., number of basis functions) interact with task novelty to determine the threshold for bloat? Does increasing hypernetwork capacity raise or eliminate the threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+          "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+        },
+        {
+          "name": "Lifelong learning agent",
+          "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+          "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+          "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+          "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+          "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+        },
+        {
+          "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+          "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+          "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+          },
+          {
+            "name": "reuse_effectiveness",
+            "role": "input",
+            "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "mediator",
+            "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Total number of skills stored, representing skill-library bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "skill_granularity",
+            "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+          },
+          {
+            "step": "2",
+            "source": "reuse_effectiveness",
+            "relation": "decreases",
+            "target": "skill_granularity",
+            "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+          },
+          {
+            "step": "3",
+            "source": "skill_granularity",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate reuse mechanism",
+            "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+          },
+          {
+            "bottleneck": "High task diversity",
+            "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "More specific skills reduce interference between tasks but increase library size; more general skills improve reuse but risk negative transfer and task conflict.",
+        "derived_from": [
+          "Skill",
+          "Skill-library bloat",
+          "core_tradeoffs"
+        ],
+        "why_it_matters": "This tradeoff determines whether skill libraries grow unboundedly or remain manageable; balancing it is critical for lifelong learning efficiency.",
+        "what_existing_methods_may_miss": "Existing methods often optimize for either specificity or generality without considering dynamic adjustment based on task similarity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of reuse effectiveness where skill-library growth undergoes a phase transition from linear to bounded?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identification of a phase transition boundary that determines whether skill libraries grow unboundedly or stabilize."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of reuse effectiveness (θ_c) such that for reuse effectiveness < θ_c, library size grows linearly with tasks (O(T)), and for reuse effectiveness > θ_c, library size converges to a finite bound.",
+        "predicted_effect": "When reuse effectiveness exceeds θ_c, library size plateaus; when below, it grows linearly."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a lifelong learning simulation with sequential tasks, vary a hyperparameter controlling reuse effectiveness (e.g., adaptation rate or composition flexibility) across values from 0 to 1 in fine steps. For each value, run 10 trials with a fixed task sequence of increasing novelty and record library size after T=100 tasks. Plot library size vs. reuse effectiveness and detect a sharp transition (e.g., using a change point detection algorithm).",
+        "independent_variables": [
+          "reuse_effectiveness (continuous hyperparameter, e.g., 0.0 to 1.0)"
+        ],
+        "dependent_variables": [
+          "library_size (number of skills after T tasks)",
+          "growth_rate (slope of library size vs. tasks in log-log space)"
+        ],
+        "controls": [
+          "task sequence identical across runs",
+          "same number of tasks (T=100)",
+          "same skill representation (neural network modules)",
+          "same learning algorithm except for reuse mechanism",
+          "seed for reproducibility"
+        ],
+        "falsifying_observation": "Library size grows linearly with tasks for all values of reuse effectiveness, or the library size vs. reuse effectiveness curve is smooth with no abrupt transition."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library size plateaus above a critical reuse effectiveness θ_c.",
+          "Below θ_c, library size grows linearly with tasks.",
+          "A sharp change in the slope of library size vs. reuse effectiveness is observed at θ_c."
+        ],
+        "rejects_hypothesis": [
+          "Library size continues to grow linearly even at maximum reuse effectiveness.",
+          "No sharp transition; library size decreases gradually but remains unbounded."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If library size remains linear or no sharp transition exists, the hypothesis of a phase transition is rejected.",
+        "assumption_to_revise": "The assumption that reuse effectiveness alone can cause a phase transition; task diversity or skill granularity may also be critical factors.",
+        "next_question": "How does task diversity interact with reuse effectiveness to determine the growth regime of skill libraries?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+          "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+        },
+        {
+          "name": "Lifelong learning agent",
+          "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+          "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+          "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+          "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+          "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+        },
+        {
+          "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+          "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+          "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+          },
+          {
+            "name": "reuse_effectiveness",
+            "role": "input",
+            "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "mediator",
+            "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Total number of skills stored, representing skill-library bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "skill_granularity",
+            "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+          },
+          {
+            "step": "2",
+            "source": "reuse_effectiveness",
+            "relation": "decreases",
+            "target": "skill_granularity",
+            "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+          },
+          {
+            "step": "3",
+            "source": "skill_granularity",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate reuse mechanism",
+            "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+          },
+          {
+            "bottleneck": "High task diversity",
+            "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "More specific skills reduce interference between tasks but increase library size; more general skills improve reuse but risk negative transfer and task conflict.",
+        "derived_from": [
+          "Skill",
+          "Skill-library bloat",
+          "core_tradeoffs"
+        ],
+        "why_it_matters": "This tradeoff determines whether skill libraries grow unboundedly or remain manageable; balancing it is critical for lifelong learning efficiency.",
+        "what_existing_methods_may_miss": "Existing methods often optimize for either specificity or generality without considering dynamic adjustment based on task similarity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical threshold of task novelty rate does the skill library growth transition from bounded to unbounded under optimal dynamic granularity adjustment?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identification of a phase transition threshold in skill library growth, enabling predictive bounds for lifelong learning systems."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold τ such that for task novelty rates below τ, dynamic skill granularity adjustment yields bounded library size (sublinear growth) over an unbounded sequence of tasks, while for rates above τ, library growth becomes linear with the number of tasks, regardless of granularity adjustment.",
+        "predicted_effect": "Library size grows sublinearly for novelty rate < τ and linearly for novelty rate > τ, with a sharp transition at τ."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated lifelong learning environment (e.g., MiniGrid with parametrically controllable task novelty), vary the novelty rate by controlling the proportion of tasks drawn from novel clusters vs. revisiting previously seen clusters. For each novelty rate, train an agent that dynamically adjusts skill granularity based on task similarity. Measure library size after every 10 tasks up to 200 tasks. Use piecewise linear regression to detect a change in growth slope. Repeat for multiple runs.",
+        "independent_variables": [
+          "Task novelty rate (fraction of tasks that are from new clusters, e.g., 0.1 to 0.9 in steps of 0.1)"
+        ],
+        "dependent_variables": [
+          "Library size after each evaluation point",
+          "Growth slope (linear vs sublinear) determined via segmented regression"
+        ],
+        "controls": [
+          "Same task embedding method (e.g., feature extractor trained on all tasks)",
+          "Same base skill representation and update rule",
+          "Same dynamic adjustment algorithm (e.g., threshold-based merge/split based on cosine similarity)",
+          "Fixed random seed for task sequence generation"
+        ],
+        "falsifying_observation": "If no significant change in growth slope is detected across the tested novelty rates (i.e., library growth remains linear for all rates or sublinear for all rates), or if the transition point τ cannot be identified with confidence intervals < 0.1, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low novelty rates (e.g., <0.3), library growth is sublinear (logarithmic or polynomial with exponent <1).",
+          "At high novelty rates (e.g., >0.7), library growth is linear or near-linear.",
+          "A clear change-point is detected via segmented regression with R^2 > 0.9 and confidence intervals on τ less than 0.1.",
+          "Dynamic adjustment outperforms both fixed baselines in terms of library size at low novelty rates and does not degrade interference."
+        ],
+        "rejects_hypothesis": [
+          "No statistically significant change in growth slope across novelty rates.",
+          "Growth is always linear even at low novelty, or always sublinear even at high novelty.",
+          "Cannot locate a threshold τ with reasonable precision.",
+          "Dynamic adjustment never improves over the fixed specific baseline in terms of bloat."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or the phase transition is not sharp, the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that task novelty rate alone controls the phase transition may be insufficient; other factors such as task similarity distribution shape or interference constraints may interact.",
+        "next_question": "Does the structure of task similarity (e.g., cluster coherence, overlap) modulate the threshold τ for bloat in lifelong learning?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable policy or behavior module that an agent learns to solve a subtask, often parameterized as a neural network or function approximator.",
+          "why_primitive": "Skills are the atomic building blocks of the skill library; understanding bloat requires a precise definition of what constitutes a skill."
+        },
+        {
+          "name": "Lifelong learning agent",
+          "definition": "An agent that sequentially learns multiple tasks without forgetting previously acquired knowledge, often reusing or adapting skills.",
+          "why_primitive": "The phenomenon of skill-library bloat is inherently tied to the lifelong learning setting where tasks arrive over time."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The unbounded or excessive growth of the number of skills stored by an agent over the course of lifelong learning, leading to storage, retrieval, and scalability issues.",
+          "why_primitive": "Bloat is the central phenomenon to be explained; defining it precisely is the first step in analyzing its causes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct, immutable parameter sets (e.g., separate neural network weights) rather than being composed or merged.",
+          "rationale": "Most lifelong learning systems store skills as separate modules to prevent catastrophic forgetting and enable reuse.",
+          "possible_failure": "If skills are compositional or shared across tasks, bloat may be mitigated, and the cause may differ."
+        },
+        {
+          "assumption": "The agent encounters an infinite or unbounded sequence of tasks, each requiring potentially novel knowledge.",
+          "rationale": "Bloat becomes problematic only when the number of tasks is large; in finite settings, bounded libraries are achievable.",
+          "possible_failure": "If tasks are repeated or highly similar, bloat may not occur; the assumption ensures that bloat is a persistent challenge."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which new tasks differ from previously learned tasks; high novelty encourages creation of new skills."
+          },
+          {
+            "name": "reuse_effectiveness",
+            "role": "input",
+            "description": "Agent's ability to adapt or compose existing skills to solve new tasks, reducing the need for new skills."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "mediator",
+            "description": "Fineness of skill specialization; high granularity (specific skills) leads to more total skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Total number of skills stored, representing skill-library bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "skill_granularity",
+            "explanation": "Higher task novelty drives the agent to learn more specialized skills to avoid interference."
+          },
+          {
+            "step": "2",
+            "source": "reuse_effectiveness",
+            "relation": "decreases",
+            "target": "skill_granularity",
+            "explanation": "Effective reuse mechanisms allow the agent to rely on broader, more general skills, reducing the need for fine-grained specialization."
+          },
+          {
+            "step": "3",
+            "source": "skill_granularity",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Finer granularity (more specialized skills) directly inflates the total number of skills in the library."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate reuse mechanism",
+            "why_it_matters": "Without effective reuse, each novel task triggers a new skill, leading to linear growth with the number of tasks; bloat becomes unbounded."
+          },
+          {
+            "bottleneck": "High task diversity",
+            "why_it_matters": "If tasks are all distinct, the agent cannot rely on similarity to reuse skills, forcing specialization and bloat even with good reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents is driven by the interaction between task novelty and the agent's reuse effectiveness. High novelty encourages fine-grained skill specialization, while poor reuse mechanisms fail to counteract this trend. The resulting high skill granularity directly expands the library size, leading to unbounded growth as tasks accumulate."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "High task novelty encourages specialization, increasing skill granularity; effective reuse mechanisms encourage generality, decreasing granularity. The balance between novelty and reuse effectiveness determines bloat.",
+        "derived_from": [
+          "Lifelong learning agent",
+          "mechanism_model"
+        ],
+        "why_it_matters": "Understanding this interaction is key to predicting when bloat will occur and designing agents that adapt their specialization dynamically.",
+        "what_existing_methods_may_miss": "Many lifelong learning methods focus on either novelty detection or reuse in isolation, without jointly optimizing the tradeoff.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What threshold of task novelty relative to reuse effectiveness triggers unbounded skill-library bloat in lifelong-learning agents?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identification of a critical phase transition in skill-library growth, enabling prediction of unbounded bloat."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ratio R_c such that if task novelty / reuse effectiveness exceeds R_c, the skill-library size grows super-linearly (unbounded) over tasks; otherwise, it converges to a finite bound.",
+        "predicted_effect": "A sharp phase transition in growth rate at a specific ratio, with exponential divergence above threshold and saturation below."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong-learning agent with modular skills across a sequence of tasks. Systematically vary task novelty (e.g., parameter distance between consecutive task distributions) and reuse effectiveness (e.g., transfer success rate) in a 2D grid. For each condition, measure library size over 100 tasks and compute growth curvature. Fit a model to detect a threshold ratio where growth changes from bounded to unbounded.",
+        "independent_variables": [
+          "task novelty (e.g., L2 distance between task parameter means)",
+          "reuse effectiveness (e.g., fraction of successful skill transfers)"
+        ],
+        "dependent_variables": [
+          "library size vs. task index",
+          "growth curvature (second derivative) to detect phase transition"
+        ],
+        "controls": [
+          "same agent architecture (e.g., policy network size)",
+          "same task sequence length (100 tasks)",
+          "same base learning algorithm (e.g., gradient-based fine-tuning)",
+          "same skill creation threshold (e.g., similarity < 0.8 triggers new skill)"
+        ],
+        "falsifying_observation": "No sharp threshold is observed; growth rate changes smoothly with the ratio, or growth never becomes super-linear regardless of ratio."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library size grows linearly or converges when task novelty/reuse effectiveness < R_c.",
+          "Library size grows super-linearly (e.g., exponential or quadratic) when ratio > R_c.",
+          "The transition occurs at a well-defined R_c that is robust across different task distributions."
+        ],
+        "rejects_hypothesis": [
+          "Growth rate changes gradually with ratio, with no clear phase transition.",
+          "Library size always converges even at high novelty and low reuse effectiveness.",
+          "Library size grows super-linearly even at low ratios, suggesting other causes."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (growth varies smoothly or always unbounded), then the hypothesis of a simple ratio threshold is false.",
+        "assumption_to_revise": "Assumption that skill granularity mediates the relationship linearly may be incorrect; interference or skill merging could create non-monotonic effects.",
+        "next_question": "How does skill interference or overlap moderate the relationship between task novelty and library growth, potentially creating multiple regimes?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold τ such that for task novelty rates below τ, dynamic skill granularity adjustment yields bounded library size (sublinear growth) over an unbounded sequence of tasks, while for rates above τ, library growth becomes linear with the number of tasks, regardless of granularity adjustment.",
+      "independent_variables": [
+        "Task novelty rate (fraction of tasks from new clusters, e.g., 0.1 to 0.9 in steps of 0.1)"
+      ],
+      "dependent_variables": [
+        "Library size after each evaluation point (every 10 tasks up to 200 tasks)",
+        "Growth slope (linear vs sublinear) determined via segmented regression"
+      ],
+      "controlled_variables": [
+        "Same task embedding method (e.g., feature extractor trained on all tasks)",
+        "Same base skill representation and update rule",
+        "Same dynamic adjustment algorithm (threshold-based merge/split based on cosine similarity)",
+        "Fixed random seed for task sequence generation",
+        "Same environment (e.g., MiniGrid with parametrically controllable task novelty)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed specific (no reuse)",
+          "description": "Agent always learns a new skill for each new task, never reusing or merging skills."
+        },
+        {
+          "name": "Fixed general (full reuse)",
+          "description": "Agent always attempts to reuse the most similar existing skill without specialization."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "Total number of distinct skills stored in the library after each evaluation point."
+        },
+        {
+          "name": "Growth slope",
+          "definition": "Slope of library size vs. number of tasks, estimated via segmented regression to detect change points."
+        }
+      ],
+      "expected_result": "At low novelty rates (e.g., <0.3), library growth is sublinear (logarithmic or polynomial with exponent <1). At high novelty rates (e.g., >0.7), library growth is linear or near-linear. A clear change-point is detected via segmented regression with R^2 > 0.9 and confidence intervals on τ less than 0.1.",
+      "falsifying_result": "No statistically significant change in growth slope across novelty rates (i.e., library growth remains linear for all rates or sublinear for all rates), or the transition point τ cannot be identified with confidence intervals < 0.1.",
+      "minimum_viable_experiment": "Simulate a lifelong learning environment (e.g., MiniGrid) with parametrically controllable task novelty. Vary the novelty rate from 0.1 to 0.9 in steps of 0.1. For each rate, train an agent that dynamically adjusts skill granularity based on task similarity. Measure library size every 10 tasks up to 200 tasks. Use piecewise linear regression to detect a change in growth slope. Repeat for multiple runs.",
+      "risks_and_confounds": [
+        "Task order effects: Sequence of tasks may influence growth even at same novelty rate; use multiple random seeds and average.",
+        "Choice of similarity threshold: May affect the dynamics; threshold should be fixed or optimized per rate.",
+        "Environment complexity: Simplified grid world may not capture real-world bloat; but sufficient for minimal test.",
+        "Number of tasks (200) may be insufficient to observe asymptotic behavior; but minimal experiment requires minimal scale."
+      ]
+    },
+    {
+      "hypothesis": "Hypernetwork-based composition prevents skill-library bloat only when the average task novelty remains below a critical threshold θ; above θ, library size grows linearly with tasks, similar to immutable storage.",
+      "independent_variables": [
+        "Representation type: immutable vs compositional (hypernetwork)",
+        "Average task novelty (quantified by distance metric between task distributions)"
+      ],
+      "dependent_variables": [
+        "Library size (number of unique skills)",
+        "Library growth rate (slope over tasks)",
+        "Average task performance (accuracy) across all tasks"
+      ],
+      "controlled_variables": [
+        "Same task sequence length",
+        "Same learning algorithm (e.g., MAML)",
+        "Same skill initialization",
+        "Same hypernetwork architecture capacity",
+        "Same evaluation metric for task novelty"
+      ],
+      "baselines": [
+        {
+          "name": "Immutable skill library agent",
+          "description": "Standard lifelong learning agent that stores each new skill as a separate immutable parameter set."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "The total number of unique skills stored in the agent's library after training on a fixed number of tasks."
+        },
+        {
+          "name": "Library growth rate",
+          "definition": "The slope of library size as a function of the number of tasks, measured over the training sequence."
+        },
+        {
+          "name": "Average performance",
+          "definition": "Mean task accuracy across all tasks after training, evaluated on held-out test sets."
+        }
+      ],
+      "expected_result": "The compositional agent's library size grows sublinearly for novelty levels below θ and linearly for levels above θ. The baseline agent's library size grows linearly across all novelty levels. Average performance of the compositional agent is not significantly worse than baseline in either regime.",
+      "falsifying_result": "If the compositional agent's library size remains sublinear for all novelty levels (no threshold detected) or if performance drops significantly (e.g., >5%) below the threshold, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Compare two lifelong learning agents (immutable baseline and hypernetwork composition) on a sequence of tasks with controlled novelty levels. Vary the average pairwise task novelty (e.g., measured by cosine distance between task embeddings) across multiple runs, from low (similar tasks) to high (dissimilar). Train each agent on a fixed number of tasks and measure the final library size and growth rate. Identify the novelty level where the compositional agent's library size growth changes from sublinear to linear.",
+      "risks_and_confounds": [
+        "Hypernetwork capacity may be insufficient to capture necessary skills, confounding bloat effect.",
+        "Task novelty measurement may be inaccurate or not reflect true dissimilarity.",
+        "Performance trade-off may occur (e.g., lower bloat but worse accuracy) masking the true threshold.",
+        "Randomness in training and task sampling may require multiple seeds to ensure reliable results.",
+        "Choice of learning algorithm (e.g., MAML) may interact with representation type."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ratio R_c such that if task novelty / reuse effectiveness exceeds R_c, the skill-library size grows super-linearly (unbounded) over tasks; otherwise, it converges to a finite bound.",
+      "independent_variables": [
+        "task novelty (e.g., L2 distance between consecutive task distribution means)",
+        "reuse effectiveness (e.g., probability of successful skill transfer)"
+      ],
+      "dependent_variables": [
+        "library size after each task",
+        "growth curvature (second derivative of library size vs. task index)"
+      ],
+      "controlled_variables": [
+        "agent architecture (same policy network size and structure)",
+        "task sequence length (100 tasks)",
+        "base learning algorithm (gradient-based fine-tuning with fixed hyperparameters)",
+        "skill creation threshold (similarity < 0.8 triggers a new skill)"
+      ],
+      "baselines": [
+        {
+          "name": "No reuse",
+          "description": "Reuse effectiveness = 0; each task forces creation of a new skill regardless of novelty."
+        },
+        {
+          "name": "Full reuse",
+          "description": "Task novelty = 0; all tasks are identical, so no new skills needed."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Final library size",
+          "definition": "Number of skills stored after all 100 tasks."
+        },
+        {
+          "name": "Growth curvature",
+          "definition": "Second difference of library size sequence, averaged over tasks 50-100 to assess super-linearity."
+        },
+        {
+          "name": "Ratio value",
+          "definition": "task_novelty / reuse_effectiveness for each experimental condition."
+        }
+      ],
+      "expected_result": "Library size converges to a finite bound when the ratio is below a critical threshold R_c, and grows super-linearly (e.g., exponential or quadratic) when the ratio exceeds R_c. The transition occurs sharply at a specific ratio value that is consistent across different task distributions.",
+      "falsifying_result": "Library size grows smoothly with the ratio without a clear phase transition, or growth is always bounded regardless of the ratio, or growth is always super-linear even at low ratios.",
+      "minimum_viable_experiment": "Simulate a lifelong-learning agent with modular skills across a 2D grid of task novelty (5 levels) and reuse effectiveness (5 levels) for a total of 25 conditions, each with 10 random seeds. For each condition, run 100 tasks and record library size after each task. Use a piecewise linear regression or change-point detection to identify if there is a threshold ratio where growth behavior changes from sub-linear to super-linear. If the threshold is found and robust across seeds, the hypothesis is supported.",
+      "risks_and_confounds": [
+        "Stochasticity in task generation and agent learning may obscure a sharp threshold; need sufficient repetitions.",
+        "Choice of skill creation threshold may interact with novelty and reuse; should test sensitivity.",
+        "If the agent architecture or learning algorithm implicitly limits library growth, the hypothesis may be falsely falsified.",
+        "Task novelty operationalization (e.g., L2 distance) may not capture all aspects; consider alternative definitions."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold of reuse effectiveness (θ_c) such that for reuse effectiveness < θ_c, library size grows linearly with tasks (O(T)), and for reuse effectiveness > θ_c, library size converges to a finite bound.",
+      "independent_variables": [
+        "reuse_effectiveness (continuous, e.g., 0.0 to 1.0)"
+      ],
+      "dependent_variables": [
+        "library_size (number of skills after T=100 tasks)",
+        "growth_rate (slope of library size vs. tasks)"
+      ],
+      "controlled_variables": [
+        "Fixed task sequence of increasing novelty (same order across trials)",
+        "Number of tasks T=100",
+        "Skill representation: neural network modules of identical architecture",
+        "Learning algorithm identical except for reuse mechanism",
+        "Random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "No reuse",
+          "description": "Reuse effectiveness set to 0; agent never reuses skills, always creates new ones."
+        },
+        {
+          "name": "Perfect reuse",
+          "description": "Reuse effectiveness set to 1; agent can perfectly adapt any skill to any task, no new skills created."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "library_size",
+          "definition": "Total number of distinct skills stored after all tasks."
+        },
+        {
+          "name": "growth_rate",
+          "definition": "Slope of linear fit to library size vs. number of tasks (log-log scale)."
+        }
+      ],
+      "expected_result": "Library size plateaus above a critical reuse effectiveness θ_c; below θ_c, library size grows linearly with tasks. A sharp transition in the growth rate is observed at θ_c.",
+      "falsifying_result": "Library size grows linearly with tasks for all values of reuse effectiveness, or library size decreases smoothly without a sharp transition.",
+      "minimum_viable_experiment": "Run a lifelong learning simulation with 100 sequentially presented tasks of varying novelty. For each value of reuse effectiveness (sampled in fine steps from 0 to 1), repeat 10 trials with different seeds, measuring library size after every 10 tasks. Analyze library size vs. reuse effectiveness to detect a change point or phase transition using regression or change point detection.",
+      "risks_and_confounds": [
+        "Task novelty definition and ordering may influence results; control by using the same sequence across all trials.",
+        "Choice of reuse effectiveness operationalization (e.g., adaptation rate vs. composition flexibility) may affect threshold; use a consistent definition.",
+        "Number of tasks T=100 may be insufficient to observe plateau; increase if necessary.",
+        "Stochasticity in learning may obscure transition; use sufficient trials and statistical testing."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical task novelty level, determined by the agent's reuse capacity (e.g., maximum number of tasks a single skill can cover), above which the skill library grows linearly with the number of tasks regardless of the reuse mechanism; below this threshold, sublinear growth is achievable.",
+      "independent_variables": [
+        "Task novelty (1 - cosine similarity between consecutive task distributions)"
+      ],
+      "dependent_variables": [
+        "Library size growth rate (library size / number of tasks)"
+      ],
+      "controlled_variables": [
+        "Same agent architecture and learning algorithm (e.g., EWC)",
+        "Same skill representation (immutable, separate networks)",
+        "Same task order and number of tasks (e.g., 50 tasks)"
+      ],
+      "baselines": [
+        {
+          "name": "No reuse baseline",
+          "description": "Agent creates a new skill for every task, resulting in linear growth (growth rate = 1)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library growth rate",
+          "definition": "Ratio of number of skills stored to number of tasks encountered after each task, averaged over the last 10 tasks."
+        }
+      ],
+      "expected_result": "Library growth rate remains below 0.5 for task similarity > 0.6 (low novelty), then jumps to near 1.0 for similarity < 0.4 (high novelty), indicating a clear threshold.",
+      "falsifying_result": "Library growth rate increases linearly with novelty without any abrupt transition, or does not exceed 0.8 even at highest novelty.",
+      "minimum_viable_experiment": "Train a lifelong-learning agent (e.g., with EWC) on a sequence of 50 tasks, where each task is a supervised classification problem with randomly drawn class means. Control task novelty by setting the cosine similarity between consecutive task distributions (e.g., vary similarity from 0.9 down to 0.1 in steps of 0.1). After each task, measure library size (number of distinct skills stored). Compute growth rate as library size divided by number of tasks. Repeat 5 runs per similarity level. Identify if there exists a similarity threshold where growth rate changes from sublinear (growth rate < 0.8) to linear (growth rate ≈ 1.0).",
+      "risks_and_confounds": [
+        "The cosine similarity may not fully capture task novelty if tasks have high-dimensional distributions.",
+        "The agent's reuse capacity is implicitly set by architecture; we do not directly control it.",
+        "The number of tasks (50) may be insufficient to observe asymptotic behavior; consider extending to 100 or more if resources allow."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a first-principles analysis of skill-library bloat in lifelong-learning agents, decomposing the problem into primitive definitions (skill, lifelong learning agent, bloat) and assumptions (immutable skills, unbounded tasks). It proposes a causal mechanism where task novelty increases skill granularity, reuse effectiveness decreases it, and granularity drives library size. Five certificate hypotheses predict phase transitions in library growth under different conditions (task novelty rate, reuse effectiveness, hypernetwork composition, etc.), each with a minimal decisive test. The work is well-structured, logically sound, and offers testable predictions that could advance understanding of bloat.",
+    "strengths": [
+      "Clear first-principles derivation with explicit primitives, assumptions, and causal mechanism.",
+      "Novel focus on phase transitions and thresholds in skill-library growth, moving beyond mere description.",
+      "Well-designed minimal decisive experiments with proper controls, baselines (fixed specific, fixed general, no reuse, full reuse), and falsifiable hypotheses.",
+      "Tensions (e.g., specificity vs. generality, immutability vs. composition) are grounded in the mechanism and lead to concrete research questions.",
+      "High formal quality: falsifiability scores 5/5 across certificates, and experimentability is 5/5."
+    ],
+    "weaknesses": [
+      "Operationalization of key variables (e.g., reuse effectiveness, task novelty) is left somewhat abstract; concrete metrics (e.g., transfer success rate, cosine distance) are mentioned but not validated for robustness.",
+      "The experiments assume relatively short task sequences (50-200 tasks); asymptotic behavior may require longer horizons, and resource constraints are not discussed.",
+      "The mechanism model simplifies the interplay (e.g., assumes linear causal chain); interference or skill merging could introduce non-monotonic effects not captured.",
+      "Some baselines (e.g., random skill pruning or regularized library size) are missing and could provide additional comparison.",
+      "The work is primarily theoretical; no empirical validation is provided, which limits confidence."
+    ],
+    "questions": [
+      "How sensitive are the predicted phase transitions to the choice of task similarity metric (cosine vs. other distances)?",
+      "Could the proposed experiments be conducted on standard lifelong learning benchmarks (e.g., MiniGrid, Atari) to demonstrate practical significance?",
+      "What is the computational cost of the hypernetwork-based composition test, and does it scale to large skill libraries?",
+      "Is the critical ratio hypothesis (R_c) robust to different definitions of reuse effectiveness (e.g., fine-tuning vs. compositional adaptation)?"
+    ],
+    "missing_baselines": [
+      "A baseline with skill pruning or regularized library size (e.g., keep only top-k skills) to isolate the effect of retention vs. creation.",
+      "A baseline that uses a fixed, pre-trained universal policy without specialization.",
+      "For the hypernetwork experiment, a baseline with a shared parameter subspace (e.g., soft-parameter sharing) could be included."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Oversimplified mechanism model",
+    "root_cause": "The mechanism model assumes a linear causal chain (task_novelty → skill_granularity → library_size) without considering non-linear interactions, feedback loops, or emergent phenomena such as skill competition or interference that could lead to non-monotonic library growth.",
+    "violated_principle": "Mechanism models should account for potential non-linearities, feedback loops, and emergent behaviors that may arise from interactions between variables.",
+    "new_or_updated_principle": "Incorporate non-linear and feedback effects in mechanism models for skill-library bloat: explicitly model interactions between task_novelty and reuse_effectiveness, consider how skill_granularity might affect future task_novelty (e.g., through skill composition), and allow for phase transitions or saturation effects to emerge from the dynamics.",
+    "new_or_updated_skill": "Nonlinear mechanism modeling for skill-library dynamics: ability to construct and analyze mechanism models that include interaction terms, feedback loops, and non-linear dependencies (e.g., using system of differential equations or agent-based simulations) to capture complex growth patterns.",
+    "regression_test": "Run a simulation of a lifelong-learning agent where task_novelty and reuse_effectiveness are varied in a 2D grid (5x5 levels, 10 seeds each). Fit both a linear model (library_size ~ task_novelty + reuse_effectiveness) and a non-linear model (including interaction term task_novelty * reuse_effectiveness and quadratic terms). The non-linear model must achieve significantly lower AIC (ΔAIC > 10) and at least 15% lower mean squared error on held-out data (20% of conditions) to pass the test, ensuring that non-linear effects are essential for prediction."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "At what critical threshold of task novelty rate does the skill library growth transition from bounded to unbounded under optimal dynamic granularity adjustment?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical task-novelty threshold beyond which hypernetwork-based composition fails to prevent skill-library bloat in lifelong learning agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What threshold of task novelty relative to reuse effectiveness triggers unbounded skill-library bloat in lifelong-learning agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of reuse effectiveness where skill-library growth undergoes a phase transition from linear to bounded?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of task novelty does skill-library bloat become unavoidable regardless of reuse effectiveness in lifelong-learning agents?",
+        "original_suggestions": [
+          "Improve primitive-to-question traceability to at least 4/5.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

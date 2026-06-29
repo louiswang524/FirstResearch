@@ -1,0 +1,1540 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "tool-use routing",
+        "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+        "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+      },
+      {
+        "name": "coding agent",
+        "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+        "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+      },
+      {
+        "name": "failure",
+        "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+        "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+        "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+        "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+      },
+      {
+        "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+        "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+        "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+      },
+      {
+        "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+        "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+        "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Accuracy vs. Efficiency: Using a tool more often may improve correctness (e.g., verifying code) but increases latency, cost, and risk of overreliance.",
+        "variables": [
+          "tool invocation frequency",
+          "task accuracy",
+          "execution time",
+          "API cost"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. Exploitation: Trying less familiar tools might discover better solutions but risks wasting time or producing errors.",
+        "variables": [
+          "exploration rate",
+          "tool familiarity",
+          "solution quality",
+          "failure rate"
+        ]
+      },
+      {
+        "tradeoff": "Specificity vs. Generality: Highly specialized tools (e.g., a linter) are efficient but limited; general tools (e.g., code interpreter) are versatile but may be slower or less reliable for specific subtasks.",
+        "variables": [
+          "tool specialization",
+          "task variety",
+          "success rate per tool",
+          "routing complexity"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_ambiguity",
+        "role": "input",
+        "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+      },
+      {
+        "name": "state_representation_quality",
+        "role": "mediator",
+        "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+      },
+      {
+        "name": "routing_policy_accuracy",
+        "role": "mediator",
+        "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+      },
+      {
+        "name": "tool_capability_coverage",
+        "role": "mediator",
+        "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+      },
+      {
+        "name": "routing_failure",
+        "role": "output",
+        "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+      },
+      {
+        "name": "task_performance",
+        "role": "outcome",
+        "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_ambiguity",
+        "relation": "negatively affects",
+        "target": "state_representation_quality",
+        "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+      },
+      {
+        "step": "2",
+        "source": "state_representation_quality",
+        "relation": "positively affects",
+        "target": "routing_policy_accuracy",
+        "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+      },
+      {
+        "step": "3",
+        "source": "tool_capability_coverage",
+        "relation": "moderates",
+        "target": "routing_policy_accuracy",
+        "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+      },
+      {
+        "step": "4",
+        "source": "routing_policy_accuracy",
+        "relation": "negatively affects",
+        "target": "routing_failure",
+        "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+      },
+      {
+        "step": "5",
+        "source": "routing_failure",
+        "relation": "negatively affects",
+        "target": "task_performance",
+        "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "State representation quality",
+        "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+      },
+      {
+        "bottleneck": "Tool capability mismatches",
+        "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+      },
+      {
+        "bottleneck": "Exploration-exploitation tradeoff",
+        "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+      "derived_from": [
+        "core_tradeoffs[0]: Accuracy vs. Efficiency"
+      ],
+      "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+      "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Exploration vs. Exploitation: Trying unfamiliar tools may discover better solutions but risks time waste and errors; over-relying on familiar tools may miss optimal approaches.",
+      "derived_from": [
+        "core_tradeoffs[1]: Exploration vs. Exploitation"
+      ],
+      "why_it_matters": "This tradeoff directly affects routing failure in novel or ambiguous tasks. A policy that never explores will fail on new tool requirements; one that explores too much will incur unnecessary failures.",
+      "what_existing_methods_may_miss": "Many agents use fixed exploration rates (e.g., epsilon-greedy) that do not account for task uncertainty or tool familiarity, leading to suboptimal routing in both high- and low-ambiguity scenarios.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Specificity vs. Generality: Specialized tools (e.g., linters) are efficient for their niche but limited; general tools (e.g., code interpreter) are versatile but slower and less reliable for specific subtasks.",
+      "derived_from": [
+        "core_tradeoffs[2]: Specificity vs. Generality"
+      ],
+      "why_it_matters": "Routing must match tool specialization to subtask requirements. Misalignment causes failure: using a general tool for a simple linting task wastes resources, using a specialized tool for a complex analysis fails.",
+      "what_existing_methods_may_miss": "Policies often treat tools as flat options without modeling their specialization profiles, leading to poor routing when task demands are not homogeneous.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "State representation sufficiency vs. ambiguity: The assumption that internal state provides enough information for routing is violated when task ambiguity is high, yet many agents do not actively reduce ambiguity before routing.",
+      "derived_from": [
+        "assumptions[2]: The agent's internal state provides sufficient information to make a correct routing decision.",
+        "causal_chain step 1: task_ambiguity -> state_representation_quality"
+      ],
+      "why_it_matters": "This is a fundamental bottleneck: if the state is poor, even perfect policies fail. Agents that ignore ambiguity and directly route are prone to irreversible errors.",
+      "what_existing_methods_may_miss": "Current systems often assume a well-specified user intent and do not incorporate explicit uncertainty handling or clarifying actions before tool selection.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T5",
+      "statement": "Tool capability coverage vs. routing policy accuracy: Even with perfect routing policy, missing required tools cause failure; but expanding tool sets increases routing complexity and decision latency.",
+      "derived_from": [
+        "assumptions[0]: The set of available tools is finite and their capabilities are known.",
+        "causal_chain step 3: tool_capability_coverage moderates routing_policy_accuracy"
+      ],
+      "why_it_matters": "There is a design tension between adding more tools to cover tasks and maintaining a simple, accurate routing policy. Under-tested assumption: that coverage can always be improved without harming accuracy.",
+      "what_existing_methods_may_miss": "Most agents treat the tool set as static and do not dynamically adjust routing policy when tools are added or removed, assuming the policy can generalize across tool set changes.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does adapting the routing threshold for tool use based on real-time cost-benefit estimates reduce routing failures in multi-step coding tasks compared to a static threshold?",
+      "question_type": "causal",
+      "source_tension": "T1: Accuracy vs. Efficiency",
+      "expected_contribution": "Empirically determines whether dynamic thresholding can mitigate the accuracy-efficiency tradeoff, providing a mechanism to reduce failures."
+    },
+    {
+      "question": "How does the task ambiguity level moderate the optimal exploration rate for tool selection in coding agents?",
+      "question_type": "descriptive",
+      "source_tension": "T2: Exploration vs. Exploitation",
+      "expected_contribution": "Characterizes the relationship between task ambiguity and exploration, enabling design of adaptive exploration policies that reduce routing failures."
+    },
+    {
+      "question": "Can a routing policy that models tool specialization profiles (e.g., capability vectors) outperform one that treats tools as flat options in tasks with heterogeneous subtasks?",
+      "question_type": "benchmark",
+      "source_tension": "T3: Specificity vs. Generality",
+      "expected_contribution": "Provides a benchmark comparison to show that specialization-aware routing improves alignment and reduces failures."
+    },
+    {
+      "question": "Does prompting the agent to explicitly reduce ambiguity (e.g., ask clarifying questions) before routing improve state representation quality and reduce routing failures?",
+      "question_type": "causal",
+      "source_tension": "T4: State representation sufficiency vs. ambiguity",
+      "expected_contribution": "Tests the causal mechanism that addressing ambiguity upstream enhances state representation and routing accuracy."
+    },
+    {
+      "question": "How does the addition of new tools to the agent's repertoire affect routing policy accuracy, and can a meta-learning approach adapt the policy to maintain accuracy?",
+      "question_type": "algorithmic",
+      "source_tension": "T5: Tool capability coverage vs. routing policy accuracy",
+      "expected_contribution": "Reveals the tension between coverage and accuracy and proposes an algorithmic solution to adapt policies dynamically."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+          "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+          "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+          "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+          "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+          "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+        },
+        {
+          "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+          "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+          "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+        },
+        {
+          "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+          "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+          "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_ambiguity",
+            "role": "input",
+            "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+          },
+          {
+            "name": "state_representation_quality",
+            "role": "mediator",
+            "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+          },
+          {
+            "name": "routing_policy_accuracy",
+            "role": "mediator",
+            "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+          },
+          {
+            "name": "tool_capability_coverage",
+            "role": "mediator",
+            "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+          },
+          {
+            "name": "routing_failure",
+            "role": "output",
+            "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+          },
+          {
+            "name": "task_performance",
+            "role": "outcome",
+            "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_ambiguity",
+            "relation": "negatively affects",
+            "target": "state_representation_quality",
+            "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+          },
+          {
+            "step": "2",
+            "source": "state_representation_quality",
+            "relation": "positively affects",
+            "target": "routing_policy_accuracy",
+            "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_coverage",
+            "relation": "moderates",
+            "target": "routing_policy_accuracy",
+            "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_accuracy",
+            "relation": "negatively affects",
+            "target": "routing_failure",
+            "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+          },
+          {
+            "step": "5",
+            "source": "routing_failure",
+            "relation": "negatively affects",
+            "target": "task_performance",
+            "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State representation quality",
+            "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+          },
+          {
+            "bottleneck": "Tool capability mismatches",
+            "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff",
+            "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+        "derived_from": [
+          "core_tradeoffs[0]: Accuracy vs. Efficiency"
+        ],
+        "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+        "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of task heterogeneity does the accuracy gain from specialization-aware routing become outweighed by the computational overhead, leading to overall performance degradation in coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical heterogeneity level where the accuracy-efficiency tradeoff inverts, enabling dynamic routing policies that adapt specialization granularity."
+      },
+      "hypothesis": {
+        "statement": "For coding tasks with heterogeneity above a threshold τ (measured as entropy of subtask distribution), specialization-aware routing yields higher accuracy but incurs increasing overhead, causing overall performance to degrade beyond τ, whereas flat routing maintains stable but lower performance.",
+        "predicted_effect": "A non-monotonic relationship: overall performance improves up to τ, then declines, with the peak at τ where marginal accuracy gain equals marginal overhead cost."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a benchmark of coding tasks with varying heterogeneity levels (e.g., 5 levels of subtask entropy). Implement two routing policies: specialization-aware (capability vectors) and flat (multiclass). For each heterogeneity level, run 100 tasks, controlling for agent architecture and tool set. Measure overall task performance (correctness/time cost composite score). Fit a function to estimate the threshold τ where specialization-aware performance equals flat performance (crossover) and where it peaks.",
+        "independent_variables": [
+          "Task heterogeneity level (entropy of subtask distribution)"
+        ],
+        "dependent_variables": [
+          "Composite performance score",
+          "Routing failure rate",
+          "Computational overhead (latency/cost)"
+        ],
+        "controls": [
+          "Underlying agent architecture (e.g., GPT-4)",
+          "Training data and method",
+          "Tool set (fixed 5 tools)",
+          "Task difficulty distribution"
+        ],
+        "falsifying_observation": "The specialization-aware policy shows monotonic performance (always increasing or always decreasing) over all heterogeneity levels, or no crossover point occurs (flat always better)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Specialization-aware performance improves up to a moderate heterogeneity level, then declines.",
+          "A clear crossover point τ exists where flat routing becomes competitive.",
+          "The threshold τ shifts with tool set size or policy training quality."
+        ],
+        "rejects_hypothesis": [
+          "Specialization-aware outperforms flat at all heterogeneity levels.",
+          "Flat outperforms at all levels.",
+          "Performance of specialization-aware is monotonic (no peak)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the non-monotonic pattern is not observed, then the assumption that overhead grows faster than accuracy gains is incorrect or the overhead is negligible.",
+        "assumption_to_revise": "The computational overhead of specialization-aware routing scales superlinearly with heterogeneity.",
+        "next_question": "Does the overhead depend on tool set size or representation dimensionality? Or can a hybrid policy (adaptively switching between flat and specialization-aware) avoid the degradation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+          "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+          "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+          "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+          "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+          "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+        },
+        {
+          "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+          "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+          "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+        },
+        {
+          "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+          "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+          "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_ambiguity",
+            "role": "input",
+            "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+          },
+          {
+            "name": "state_representation_quality",
+            "role": "mediator",
+            "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+          },
+          {
+            "name": "routing_policy_accuracy",
+            "role": "mediator",
+            "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+          },
+          {
+            "name": "tool_capability_coverage",
+            "role": "mediator",
+            "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+          },
+          {
+            "name": "routing_failure",
+            "role": "output",
+            "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+          },
+          {
+            "name": "task_performance",
+            "role": "outcome",
+            "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_ambiguity",
+            "relation": "negatively affects",
+            "target": "state_representation_quality",
+            "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+          },
+          {
+            "step": "2",
+            "source": "state_representation_quality",
+            "relation": "positively affects",
+            "target": "routing_policy_accuracy",
+            "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_coverage",
+            "relation": "moderates",
+            "target": "routing_policy_accuracy",
+            "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_accuracy",
+            "relation": "negatively affects",
+            "target": "routing_failure",
+            "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+          },
+          {
+            "step": "5",
+            "source": "routing_failure",
+            "relation": "negatively affects",
+            "target": "task_performance",
+            "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State representation quality",
+            "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+          },
+          {
+            "bottleneck": "Tool capability mismatches",
+            "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff",
+            "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+        "derived_from": [
+          "core_tradeoffs[0]: Accuracy vs. Efficiency"
+        ],
+        "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+        "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the task ambiguity level moderate the optimal exploration rate for tool selection in coding agents?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Characterizes the relationship between task ambiguity and exploration, enabling design of adaptive exploration policies that reduce routing failures."
+      },
+      "hypothesis": {
+        "statement": "The optimal exploration rate for tool selection in coding agents increases with task ambiguity, up to a point, because higher ambiguity degrades state representation quality, making exploration more valuable for discovering the correct tool.",
+        "predicted_effect": "Agents with higher exploration rates will exhibit lower routing failure rates under high task ambiguity, while under low ambiguity, lower exploration rates will be optimal."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a benchmark of coding tasks with controlled ambiguity levels (low, medium, high) by varying instruction vagueness. For each task, run a coding agent with different fixed exploration rates (e.g., epsilon values 0.0, 0.1, 0.2, 0.5) and measure routing failure rate and task success. Compare the optimal epsilon (lowest failure rate) across ambiguity levels.",
+        "independent_variables": [
+          "task_ambiguity (low/medium/high)",
+          "exploration_rate (epsilon)"
+        ],
+        "dependent_variables": [
+          "routing_failure_rate",
+          "task_success_rate",
+          "average_completion_time"
+        ],
+        "controls": [
+          "same set of tools",
+          "same agent architecture (e.g., ReAct)",
+          "same base language model",
+          "same task set except ambiguity"
+        ],
+        "falsifying_observation": "If the optimal exploration rate does not increase with task ambiguity (e.g., it is constant or decreases), then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under high ambiguity, agents with epsilon=0.2 have lower failure rates than epsilon=0.0 or epsilon=0.1.",
+          "Under low ambiguity, epsilon=0.0 yields the lowest failure rate.",
+          "The optimal epsilon increases from low to high ambiguity."
+        ],
+        "rejects_hypothesis": [
+          "Under high ambiguity, epsilon=0.0 (no exploration) yields the lowest failure rate.",
+          "The optimal epsilon is the same across all ambiguity levels.",
+          "Higher exploration always leads to higher failure rates regardless of ambiguity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the optimal exploration rate does not increase with task ambiguity (e.g., it stays constant or decreases),",
+        "assumption_to_revise": "the assumption that exploration improves state representation under ambiguity may be false. Possibly, the agent's internal state already captures ambiguity adequately, or exploration introduces noise that worsens performance.",
+        "next_question": "How does the agent's prior knowledge about tool effectiveness moderate the effect of task ambiguity on the value of exploration?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+          "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+          "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+          "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+          "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+          "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+        },
+        {
+          "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+          "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+          "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+        },
+        {
+          "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+          "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+          "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_ambiguity",
+            "role": "input",
+            "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+          },
+          {
+            "name": "state_representation_quality",
+            "role": "mediator",
+            "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+          },
+          {
+            "name": "routing_policy_accuracy",
+            "role": "mediator",
+            "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+          },
+          {
+            "name": "tool_capability_coverage",
+            "role": "mediator",
+            "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+          },
+          {
+            "name": "routing_failure",
+            "role": "output",
+            "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+          },
+          {
+            "name": "task_performance",
+            "role": "outcome",
+            "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_ambiguity",
+            "relation": "negatively affects",
+            "target": "state_representation_quality",
+            "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+          },
+          {
+            "step": "2",
+            "source": "state_representation_quality",
+            "relation": "positively affects",
+            "target": "routing_policy_accuracy",
+            "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_coverage",
+            "relation": "moderates",
+            "target": "routing_policy_accuracy",
+            "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_accuracy",
+            "relation": "negatively affects",
+            "target": "routing_failure",
+            "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+          },
+          {
+            "step": "5",
+            "source": "routing_failure",
+            "relation": "negatively affects",
+            "target": "task_performance",
+            "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State representation quality",
+            "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+          },
+          {
+            "bottleneck": "Tool capability mismatches",
+            "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff",
+            "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+        "derived_from": [
+          "core_tradeoffs[0]: Accuracy vs. Efficiency"
+        ],
+        "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+        "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the addition of new tools to the agent's repertoire affect routing policy accuracy, and can a meta-learning approach adapt the policy to maintain accuracy?",
+        "question_type": "algorithmic",
+        "source_tension": "T1",
+        "expected_contribution": "Reveals the tension between coverage and accuracy and proposes an algorithmic solution to adapt policies dynamically."
+      },
+      "hypothesis": {
+        "statement": "Adding new tools to a coding agent's repertoire initially decreases routing policy accuracy due to increased decision complexity, but a meta-learning approach that adapts the policy based on performance feedback can mitigate this drop and ultimately improve accuracy compared to a static policy.",
+        "predicted_effect": "As new tools are introduced, the routing policy accuracy of agents using meta-learning will decline less sharply and recover more quickly than agents using a static policy, eventually reaching a higher steady-state accuracy."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a coding benchmark (e.g., SWE-bench) with a baseline set of tools (e.g., code interpreter, search). Introduce two new tools (e.g., a linter and a test generator) in sequence. Compare two conditions: (1) Static policy: the routing policy is pre-trained on the old tool set and not updated. (2) Meta-learning policy: the routing policy is updated online via a meta-learning algorithm (e.g., MAML) that adapts after each episode based on prediction error. Measure routing policy accuracy (percentage of correct tool selections) at intervals after each new tool addition.",
+        "independent_variables": [
+          "Tool addition (none, first new tool, second new tool)",
+          "Policy adaptation method (static vs. meta-learning)"
+        ],
+        "dependent_variables": [
+          "Routing policy accuracy (correct tool selection rate)",
+          "Number of episodes to recover to baseline accuracy"
+        ],
+        "controls": [
+          "Same set of coding tasks for both conditions",
+          "Same base agent architecture (e.g., LLM-based)",
+          "Same initial tool set and order of tool addition",
+          "Same evaluation metrics and task difficulty"
+        ],
+        "falsifying_observation": "If the meta-learning policy does not achieve a smaller accuracy drop or faster recovery compared to the static policy, or if its final accuracy is not significantly higher, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Meta-learning policy shows a smaller decrease in accuracy immediately after each new tool addition.",
+          "Meta-learning policy recovers to baseline accuracy in fewer episodes than static policy.",
+          "Final accuracy after all tool additions is higher for meta-learning policy than static policy."
+        ],
+        "rejects_hypothesis": [
+          "Static policy maintains higher accuracy throughout the experiment.",
+          "Both policies show similar accuracy drops and recovery rates.",
+          "Meta-learning policy fails to adapt and exhibits unstable accuracy."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the meta-learning policy does not outperform the static policy, then the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that meta-learning can effectively adapt routing policies to new tools given limited episodes and performance feedback.",
+        "next_question": "What specific aspects of tool addition (e.g., tool type, complexity, overlap) prevent meta-learning from improving routing accuracy, and can a different adaptation strategy (e.g., Bayesian optimization with tool representations) succeed?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+          "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+          "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+          "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+          "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+          "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+        },
+        {
+          "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+          "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+          "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+        },
+        {
+          "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+          "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+          "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_ambiguity",
+            "role": "input",
+            "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+          },
+          {
+            "name": "state_representation_quality",
+            "role": "mediator",
+            "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+          },
+          {
+            "name": "routing_policy_accuracy",
+            "role": "mediator",
+            "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+          },
+          {
+            "name": "tool_capability_coverage",
+            "role": "mediator",
+            "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+          },
+          {
+            "name": "routing_failure",
+            "role": "output",
+            "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+          },
+          {
+            "name": "task_performance",
+            "role": "outcome",
+            "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_ambiguity",
+            "relation": "negatively affects",
+            "target": "state_representation_quality",
+            "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+          },
+          {
+            "step": "2",
+            "source": "state_representation_quality",
+            "relation": "positively affects",
+            "target": "routing_policy_accuracy",
+            "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_coverage",
+            "relation": "moderates",
+            "target": "routing_policy_accuracy",
+            "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_accuracy",
+            "relation": "negatively affects",
+            "target": "routing_failure",
+            "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+          },
+          {
+            "step": "5",
+            "source": "routing_failure",
+            "relation": "negatively affects",
+            "target": "task_performance",
+            "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State representation quality",
+            "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+          },
+          {
+            "bottleneck": "Tool capability mismatches",
+            "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff",
+            "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+        "derived_from": [
+          "core_tradeoffs[0]: Accuracy vs. Efficiency"
+        ],
+        "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+        "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does adapting the routing threshold for tool use based on real-time cost-benefit estimates reduce routing failures in multi-step coding tasks compared to a static threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Empirically determines whether dynamic thresholding can mitigate the accuracy-efficiency tradeoff, providing a mechanism to reduce failures."
+      },
+      "hypothesis": {
+        "statement": "Adapting the routing threshold based on real-time cost-benefit estimates reduces routing failures compared to a static threshold.",
+        "predicted_effect": "Dynamic thresholding will lead to fewer routing failures (incorrect, inefficient, or divergent tool use) in multi-step coding tasks."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare a static threshold agent (fixed 0.5 confidence for tool use) to a dynamic threshold agent that adjusts the threshold based on real-time estimates of expected cost (latency, API cost) and expected benefit (accuracy improvement) for each routing decision. Both agents are tested on a benchmark of 100 multi-step coding tasks (e.g., SWE-bench) with identical tool sets. Routing failures are measured as the proportion of steps where the chosen tool leads to an error, unnecessary delay, or task divergence.",
+        "independent_variables": [
+          "Threshold type: static vs dynamic"
+        ],
+        "dependent_variables": [
+          "Routing failure rate (proportion of steps with incorrect, inefficient, or divergent tool use)",
+          "Task success rate (proportion of fully correct tasks)",
+          "Average task completion time",
+          "Average API cost per task"
+        ],
+        "controls": [
+          "Same set of tools and base agent architecture (LLM, tool interfaces)",
+          "Same benchmark tasks and order",
+          "Same initialization and random seed",
+          "Identical state representation (same context window, same prompt structure)"
+        ],
+        "falsifying_observation": "If the dynamic threshold agent does not achieve a statistically significantly lower routing failure rate (p < 0.05) compared to the static threshold agent, or if it incurs higher task completion time or cost without commensurate accuracy gains, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Dynamic threshold agent shows a statistically significant reduction in routing failure rate across tasks.",
+          "Dynamic threshold agent maintains or improves task success rate.",
+          "Dynamic threshold agent's average completion time and cost do not increase by more than 10% relative to static threshold."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in routing failure rate between dynamic and static threshold.",
+          "Dynamic threshold agent has a higher routing failure rate than static threshold.",
+          "Dynamic threshold agent significantly increases completion time or cost without improving accuracy."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (dynamic threshold does not reduce failures), we assume that our real-time cost-benefit estimates are either too noisy or inaccurate to improve routing decisions.",
+        "assumption_to_revise": "The assumption that the agent's internal state provides sufficient information to compute accurate cost-benefit estimates in real time.",
+        "next_question": "Can improving the accuracy of cost-benefit estimates (e.g., via learned predictors or larger context) make dynamic thresholding effective?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that selects which external tool (e.g., code interpreter, search engine, file system) a coding agent should invoke at a given step, based on the current task, context, and history.",
+          "why_primitive": "It is the core mechanism underlying the agent's ability to leverage external resources; without it, the agent would rely solely on its internal knowledge, which is often insufficient for complex coding tasks."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An AI system designed to perform software engineering tasks, such as writing, debugging, or refactoring code, by combining internal reasoning with external tools.",
+          "why_primitive": "It defines the entity whose behavior we are analyzing; the routing failures are meaningful only in the context of such agents as they interact with tools in a goal-directed manner."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the routing decision leads to an outcome that is incorrect (e.g., wrong tool chosen), inefficient (e.g., unnecessary tool use), or divergent from the intended task (e.g., infinite loops or hallucinations due to tool feedback).",
+          "why_primitive": "It is the phenomenon we seek to predict; without a clear definition of failure, the question 'when does routing fail?' is ambiguous."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of available tools is finite and their capabilities are known to the routing policy.",
+          "rationale": "Realistic coding agents operate with a fixed toolbox; if new tools could appear dynamically, the routing problem fundamentally changes.",
+          "possible_failure": "If an agent encounters a case requiring a tool not in its set, routing may incorrectly force use of a suboptimal tool, leading to failure."
+        },
+        {
+          "assumption": "The routing policy is either learned from data or handcrafted based on observed regularities in tasks and tool usage.",
+          "rationale": "Without some form of learning or design, routing would be random; this assumption captures common approaches (e.g., LLM-based routing, RL, heuristics).",
+          "possible_failure": "If the training data or design rules miss key patterns, the policy may fail in novel or edge-case scenarios."
+        },
+        {
+          "assumption": "The agent's internal state (e.g., current intent, code context) provides sufficient information to make a correct routing decision.",
+          "rationale": "Routing decisions rely on the agent's representation of the situation; if the state is impoverished, optimal routing is impossible.",
+          "possible_failure": "When the state representation omits critical cues (e.g., ambiguous user intent, hidden dependencies), routing will fail even with a perfect policy."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_ambiguity",
+            "role": "input",
+            "description": "The degree to which the user's intent or the required next step is unclear or underspecified."
+          },
+          {
+            "name": "state_representation_quality",
+            "role": "mediator",
+            "description": "How accurately and completely the agent's internal state captures the current context, user intent, and relevant code dependencies."
+          },
+          {
+            "name": "routing_policy_accuracy",
+            "role": "mediator",
+            "description": "The probability that the routing policy selects the correct tool given a perfect state representation."
+          },
+          {
+            "name": "tool_capability_coverage",
+            "role": "mediator",
+            "description": "The extent to which the set of available tools can handle the subtasks required by the coding problem."
+          },
+          {
+            "name": "routing_failure",
+            "role": "output",
+            "description": "A binary indicator of whether the routing decision is incorrect, inefficient, or divergent from the intended task."
+          },
+          {
+            "name": "task_performance",
+            "role": "outcome",
+            "description": "The overall success of the coding agent in completing the task, measured by correctness, efficiency, or user satisfaction."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_ambiguity",
+            "relation": "negatively affects",
+            "target": "state_representation_quality",
+            "explanation": "Higher task ambiguity reduces the agent's ability to construct a faithful internal state, as critical cues about the user's intent may be missing."
+          },
+          {
+            "step": "2",
+            "source": "state_representation_quality",
+            "relation": "positively affects",
+            "target": "routing_policy_accuracy",
+            "explanation": "A better state representation allows the routing policy to make more informed decisions, improving accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_coverage",
+            "relation": "moderates",
+            "target": "routing_policy_accuracy",
+            "explanation": "Even with a perfect policy, if the required tool is not available, routing will fail, but coverage acts as a boundary condition."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_accuracy",
+            "relation": "negatively affects",
+            "target": "routing_failure",
+            "explanation": "Lower routing policy accuracy directly increases the likelihood of routing failure."
+          },
+          {
+            "step": "5",
+            "source": "routing_failure",
+            "relation": "negatively affects",
+            "target": "task_performance",
+            "explanation": "Routing failure leads to incorrect or inefficient tool use, degrading overall task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State representation quality",
+            "why_it_matters": "When the agent's internal state is poor (e.g., due to ambiguous user intent or incomplete context), even a perfectly learned routing policy will make mistakes because it lacks necessary information."
+          },
+          {
+            "bottleneck": "Tool capability mismatches",
+            "why_it_matters": "If the required tool is not in the agent's repertoire or is insufficient for the subtask, routing will inevitably fail regardless of state quality or policy."
+          },
+          {
+            "bottleneck": "Exploration-exploitation tradeoff",
+            "why_it_matters": "During exploration, the agent may try suboptimal tools, causing temporary failures. If the policy over-exploits, it may miss better tools in novel situations."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing failure in coding agents arises from a chain where high task ambiguity degrades the quality of the agent's internal state representation, which in turn reduces routing policy accuracy. Even with a perfect policy, insufficient tool capability coverage can cause failure. The key bottlenecks are the state representation's fidelity and the match between available tools and task demands, moderated by the exploration-exploitation balance."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accuracy vs. Efficiency: Increasing tool-use frequency often improves correctness but increases latency and cost, leading to a tradeoff that is not universally resolved.",
+        "derived_from": [
+          "core_tradeoffs[0]: Accuracy vs. Efficiency"
+        ],
+        "why_it_matters": "Routing failures often occur when the policy leans too heavily toward one side: excessive tool use wastes resources, while insufficient use leads to errors. The optimal balance depends on task constraints, which are dynamic.",
+        "what_existing_methods_may_miss": "Current routing policies often fix a static threshold or use heuristics that do not adapt to real-time cost-benefit shifts, especially in complex multi-step tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does prompting the agent to explicitly reduce ambiguity (e.g., ask clarifying questions) before routing improve state representation quality and reduce routing failures?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Tests the causal mechanism that addressing ambiguity upstream enhances state representation and routing accuracy."
+      },
+      "hypothesis": {
+        "statement": "Prompting an agent to explicitly reduce ambiguity (e.g., ask clarifying questions) before routing will improve state representation quality and reduce routing failures in coding agents.",
+        "predicted_effect": "Agents that engage in ambiguity resolution before tool selection will have higher state representation quality scores and lower routing failure rates compared to agents that proceed without such prompting."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare two versions of a coding agent on a set of coding tasks with varying ambiguity. The control agent uses a standard routing policy without explicit ambiguity reduction. The treatment agent is prompted to ask clarifying questions when task ambiguity is detected (e.g., based on entropy of possible next steps). Measure state representation quality via an internal consistency score (e.g., agreement between predicted next step and actual user intent) and routing failure rate (e.g., proportion of steps where the wrong tool is selected).",
+        "independent_variables": [
+          "presence of ambiguity reduction prompting (binary: with/without)"
+        ],
+        "dependent_variables": [
+          "state representation quality score",
+          "routing failure rate"
+        ],
+        "controls": [
+          "same set of coding tasks",
+          "same base LLM",
+          "same routing policy structure",
+          "same set of available tools",
+          "same evaluation metrics"
+        ],
+        "falsifying_observation": "If the treatment group does not show a statistically significant improvement in state representation quality or a reduction in routing failure rate, or if the improvement is accompanied by a substantial increase in task completion time or cost that outweighs benefits, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The treatment agent achieves higher state representation quality scores.",
+          "The treatment agent has a lower routing failure rate.",
+          "The reduction in routing failures is statistically significant (p<0.05).",
+          "The benefits are more pronounced for tasks with high initial ambiguity."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in state representation quality between groups.",
+          "Routing failure rate is similar or higher in the treatment group.",
+          "Treatment group shows increased latency leading to overall worse task performance despite fewer routing errors.",
+          "The ambiguity reduction prompt is ineffective because the agent fails to ask clarifying questions appropriately."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no improvement in state representation quality or routing failures), then the assumption that state representation quality is the primary bottleneck for routing failures in ambiguous tasks is challenged.",
+        "assumption_to_revise": "The assumption that 'state representation quality is a critical bottleneck' may be overestimated; perhaps routing policy accuracy or tool coverage is more limiting even when ambiguity is reduced.",
+        "next_question": "Given that ambiguity reduction did not improve routing, does enhancing the routing policy's ability to handle ambiguity directly (e.g., via uncertainty-aware routing) yield better results?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Adapting the routing threshold based on real-time cost-benefit estimates reduces routing failures compared to a static threshold.",
+      "independent_variables": [
+        "Threshold type (static vs dynamic)"
+      ],
+      "dependent_variables": [
+        "Routing failure rate (proportion of steps with incorrect, inefficient, or divergent tool use)",
+        "Task success rate (proportion of fully correct tasks)",
+        "Average task completion time",
+        "Average API cost per task"
+      ],
+      "controlled_variables": [
+        "Same set of tools and base agent architecture (LLM, tool interfaces)",
+        "Same benchmark tasks and order",
+        "Same initialization and random seed",
+        "Identical state representation (same context window, same prompt structure)"
+      ],
+      "baselines": [
+        {
+          "name": "Static threshold agent",
+          "description": "Agent with a fixed 0.5 confidence threshold for tool use."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "Proportion of steps where the chosen tool leads to an error, unnecessary delay, or task divergence."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks where the agent produces a fully correct solution."
+        },
+        {
+          "name": "Average task completion time",
+          "definition": "Mean time taken to complete each task, measured in seconds."
+        },
+        {
+          "name": "Average API cost per task",
+          "definition": "Mean cost of API calls incurred per task, measured in USD."
+        }
+      ],
+      "expected_result": "Dynamic threshold agent achieves a statistically significant lower routing failure rate (p < 0.05) compared to static threshold, maintains or improves task success rate, and does not increase average completion time or cost by more than 10%.",
+      "falsifying_result": "Dynamic threshold agent does not show a statistically significant reduction in routing failure rate, or it shows a higher failure rate, or it significantly increases completion time or cost without commensurate accuracy gains.",
+      "minimum_viable_experiment": "Compare a static threshold agent (fixed 0.5 confidence for tool use) to a dynamic threshold agent that adjusts the threshold based on real-time estimates of expected cost (latency, API cost) and expected benefit (accuracy improvement) for each routing decision. Both agents are tested on a benchmark of 100 multi-step coding tasks (e.g., SWE-bench) with identical tool sets. Routing failures are measured as the proportion of steps where the chosen tool leads to an error, unnecessary delay, or task divergence. A two-sample t-test is used to compare the routing failure rates between the two conditions.",
+      "risks_and_confounds": [
+        "Task difficulty and order effects may introduce variability; counterbalance by randomizing task order.",
+        "Real-time cost-benefit estimates may be noisy or biased, affecting dynamic threshold performance."
+      ]
+    },
+    {
+      "hypothesis": "The optimal exploration rate for tool selection in coding agents increases with task ambiguity, up to a point, because higher ambiguity degrades state representation quality, making exploration more valuable for discovering the correct tool.",
+      "independent_variables": [
+        "task_ambiguity (low/medium/high)",
+        "exploration_rate (epsilon: 0.0, 0.1, 0.2, 0.5)"
+      ],
+      "dependent_variables": [
+        "routing_failure_rate",
+        "task_success_rate",
+        "average_completion_time"
+      ],
+      "controlled_variables": [
+        "same set of tools",
+        "same agent architecture (ReAct)",
+        "same base language model",
+        "same task set except ambiguity"
+      ],
+      "baselines": [
+        {
+          "name": "No exploration (epsilon=0.0)",
+          "description": "Agent with exploration rate set to 0, relying purely on greedy selection. Used as baseline for each ambiguity level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing_failure_rate",
+          "definition": "Proportion of steps where the tool selection is incorrect, inefficient, or divergent from intended task."
+        },
+        {
+          "name": "task_success_rate",
+          "definition": "Binary measure of whether the task is completed correctly (1 if correct, 0 otherwise)."
+        },
+        {
+          "name": "average_completion_time",
+          "definition": "Average time taken per task across all trials."
+        }
+      ],
+      "expected_result": "Under high ambiguity, agents with higher exploration rates (e.g., epsilon=0.2) will have lower routing failure rates than those with lower or no exploration. Under low ambiguity, no exploration (epsilon=0.0) will yield the lowest failure rate. The optimal epsilon value (lowest failure rate) will increase from low to high ambiguity.",
+      "falsifying_result": "The optimal exploration rate does not increase with task ambiguity (e.g., it is constant across ambiguity levels or decreases). For instance, if under high ambiguity, epsilon=0.0 yields the lowest failure rate, or if the optimal epsilon is the same regardless of ambiguity.",
+      "minimum_viable_experiment": "Use a benchmark of coding tasks with three levels of ambiguity (low, medium, high) by varying instruction vagueness (e.g., clear, partially clear, vague). For each task, run a coding agent (ReAct architecture) with fixed exploration rates (epsilon=0.0, 0.1, 0.2, 0.5). Repeat each condition multiple times to account for stochasticity. Measure routing failure rate and task success. Compare the optimal epsilon (the one minimizing failure rate) across ambiguity levels. The smallest number of conditions is 3 ambiguity levels × 4 epsilon values = 12 conditions; replicate each condition at least 10 times for statistical validity.",
+      "risks_and_confounds": [
+        "Operationalization of ambiguity may be subjective or inconsistent across tasks.",
+        "Exploration rate may interact with other hyperparameters (e.g., temperature) not controlled.",
+        "Agent architecture and base language model choice may influence how ambiguity affects state representation.",
+        "Small sample size per condition may reduce statistical power to detect differences.",
+        "Tool set may not cover all necessary sub-tasks, causing ceiling/floor effects in failure rates."
+      ]
+    },
+    {
+      "hypothesis": "For coding tasks with heterogeneity above a threshold τ (measured as entropy of subtask distribution), specialization-aware routing yields higher accuracy but incurs increasing overhead, causing overall performance to degrade beyond τ, whereas flat routing maintains stable but lower performance.",
+      "independent_variables": [
+        "Task heterogeneity level (entropy of subtask distribution)"
+      ],
+      "dependent_variables": [
+        "Composite performance score",
+        "Routing failure rate",
+        "Computational overhead (latency/cost)"
+      ],
+      "controlled_variables": [
+        "Underlying agent architecture (e.g., GPT-4)",
+        "Training data and method",
+        "Tool set (fixed 5 tools)",
+        "Task difficulty distribution"
+      ],
+      "baselines": [
+        {
+          "name": "Flat routing policy",
+          "description": "A multiclass routing policy that does not use specialization-awareness; treats all tool choices equally without capability vectors."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composite performance score",
+          "definition": "A weighted combination of task correctness (0-1) and inverse of time cost (normalized), with equal weights."
+        },
+        {
+          "name": "Routing failure rate",
+          "definition": "Proportion of tasks where the routing decision leads to incorrect, inefficient, or divergent outcomes."
+        },
+        {
+          "name": "Computational overhead",
+          "definition": "Total latency (in seconds) and API cost (in USD) incurred by the routing policy per task."
+        }
+      ],
+      "expected_result": "The specialization-aware routing policy's composite performance improves as heterogeneity increases from low to moderate, reaching a peak at threshold τ, then declines at high heterogeneity. A crossover point exists where flat routing becomes competitive or superior. The failure rate and overhead increase with heterogeneity, with overhead growing faster at high levels.",
+      "falsifying_result": "The specialization-aware policy shows monotonic performance (always increasing or always decreasing) over all heterogeneity levels, or no crossover point occurs (flat always better or specialization-aware always better).",
+      "minimum_viable_experiment": "Create a benchmark of 500 coding tasks divided into 5 heterogeneity levels (entropy of subtask distribution: 0.2, 0.4, 0.6, 0.8, 1.0). Implement two routing policies: specialization-aware (using capability vectors for each tool) and flat (multiclass classifier). For each heterogeneity level, run 100 tasks per policy, controlling for agent architecture (GPT-4), training data (same codebase), tool set (5 tools: code interpreter, search engine, file system, debugger, documentation retriever), and task difficulty (medium). Measure composite performance (accuracy / time cost), routing failure rate, and overhead. Fit a quadratic or piecewise linear function to estimate τ and check for a peak.",
+      "risks_and_confounds": [
+        "Task difficulty may correlate with heterogeneity; control by using tasks of similar base difficulty.",
+        "Tool set size is fixed; different sizes may affect τ.",
+        "Agent architecture may interact with routing policy; test with at least two architectures as sanity check.",
+        "Training data distribution may bias policy; ensure balanced representation across heterogeneity levels.",
+        "Overhead measurement may be noisy; average over multiple runs."
+      ]
+    },
+    {
+      "hypothesis": "Prompting an agent to explicitly reduce ambiguity (e.g., ask clarifying questions) before routing will improve state representation quality and reduce routing failures in coding agents.",
+      "independent_variables": [
+        "ambiguity reduction prompting (with/without)"
+      ],
+      "dependent_variables": [
+        "state representation quality score",
+        "routing failure rate"
+      ],
+      "controlled_variables": [
+        "same set of coding tasks",
+        "same base LLM",
+        "same routing policy structure",
+        "same set of available tools",
+        "same evaluation metrics"
+      ],
+      "baselines": [
+        {
+          "name": "Control Agent",
+          "description": "Coding agent with standard routing policy, no explicit ambiguity reduction prompting."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "state representation quality score",
+          "definition": "Internal consistency score measuring agreement between the agent's predicted next step and the actual user intent, averaged over all steps."
+        },
+        {
+          "name": "routing failure rate",
+          "definition": "Proportion of steps where the wrong tool is selected, out of total tool-use steps."
+        }
+      ],
+      "expected_result": "The treatment agent (with ambiguity reduction prompting) achieves higher state representation quality scores and lower routing failure rates compared to the control agent, with statistical significance (p<0.05).",
+      "falsifying_result": "No statistically significant improvement in state representation quality or reduction in routing failure rate in the treatment group, or the improvement comes with a substantial increase in task completion time or cost that outweighs benefits.",
+      "minimum_viable_experiment": "Select 10 coding tasks with varying ambiguity (e.g., from base tasks to tasks with ambiguous user requirements). For each task, run the control agent and treatment agent 5 times each. The control agent uses standard routing; the treatment agent is prompted to ask clarifying questions when task ambiguity is detected (e.g., based on entropy of possible next steps). Measure state representation quality via an internal consistency score and routing failure rate as the proportion of wrong tool selections. Compare means using a t-test.",
+      "risks_and_confounds": [
+        "The ambiguity detection mechanism may not be perfectly calibrated, leading to unnecessary or missed questions.",
+        "The quality of clarifying questions may vary, affecting state representation improvement.",
+        "Task difficulty and tool coverage may interact with the prompting effect.",
+        "The internal consistency score may not fully capture state representation quality."
+      ]
+    },
+    {
+      "hypothesis": "Adding new tools to a coding agent's repertoire initially decreases routing policy accuracy, but a meta-learning approach can mitigate this drop and improve accuracy compared to a static policy.",
+      "independent_variables": [
+        "Tool addition stage (baseline, after 1st new tool, after 2nd new tool)",
+        "Policy adaptation method (static vs. meta-learning)"
+      ],
+      "dependent_variables": [
+        "Routing policy accuracy (% correct tool selections)",
+        "Number of episodes to recover to baseline accuracy"
+      ],
+      "controlled_variables": [
+        "Same set of coding tasks (SWE-bench subset)",
+        "Same base agent architecture (e.g., LLM-based)",
+        "Same initial tool set (code interpreter, search)",
+        "Same order of tool addition (linter, then test generator)",
+        "Same evaluation metrics and task difficulty",
+        "Same training and evaluation splits"
+      ],
+      "baselines": [
+        {
+          "name": "Static policy",
+          "description": "Pre-trained on initial tool set, not updated after new tools added."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing policy accuracy",
+          "definition": "Percentage of steps where the correct tool (as per ground truth) is selected, evaluated on held-out test tasks."
+        },
+        {
+          "name": "Recovery time",
+          "definition": "Number of episodes after a new tool addition required for accuracy to return to within 5% of the baseline accuracy (pre-addition)."
+        }
+      ],
+      "expected_result": "Meta-learning policy shows a smaller accuracy drop after each tool addition and recovers faster than the static policy, achieving higher final accuracy.",
+      "falsifying_result": "Meta-learning policy does not achieve a significantly smaller accuracy drop or faster recovery compared to the static policy; or its final accuracy is not significantly higher.",
+      "minimum_viable_experiment": "Use SWE-bench tasks with initial tools (code interpreter, search). Train both policies on a training set. Add a linter tool, evaluate both policies on test set immediately and after 100 episodes of adaptation for meta-learning. Then add a test generator tool, repeat evaluation. Compare accuracy at each stage and recovery speed.",
+      "risks_and_confounds": [
+        "Task difficulty may vary across stages, affecting accuracy independently.",
+        "Order effects: adding linter before test generator may bias results.",
+        "Meta-learning hyperparameters (e.g., learning rate, inner loop steps) may not be optimal.",
+        "Selection of benchmark tasks may not generalize.",
+        "Computational resources may differ between policies if meta-learning requires more compute."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles decomposition of tool-use routing failures in coding agents. It defines core primitives, assumptions, and a causal mechanism model linking task ambiguity, state representation quality, routing policy accuracy, tool coverage, and failure. Five tensions and corresponding candidate questions with minimal decisive tests are proposed. The work is systematic and well-structured, but lacks novelty in some hypotheses and misses important baselines from existing literature.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives and assumptions.",
+      "Causal mechanism model captures key variables and bottlenecks (state representation, tool coverage, exploration-exploitation).",
+      "Tensions (accuracy vs efficiency, exploration vs exploitation, specificity vs generality) are relevant and derived from core tradeoffs.",
+      "Proposes specific testable hypotheses with minimal decisive experiments.",
+      "Attempts to link theoretical analysis to empirical validation."
+    ],
+    "weaknesses": [
+      "Repetitive across multiple certificates (same primitives and assumptions repeated).",
+      "Some hypotheses (e.g., dynamic thresholding, exploration under ambiguity) are not particularly novel and have been explored in related work.",
+      "The mechanism model assumes state representation quality is a key mediator but does not provide a validated measurement method.",
+      "Missing baselines: compares against trivial baselines (static threshold, flat routing) but not against existing routing methods (e.g., Toolformer, ReAct, or LLM-based routing with chain-of-thought).",
+      "Slight overclaiming: the 'first-principles' derivation uses assumptions that are standard in the field (finite tools, learned policy) rather than truly fundamental.",
+      "Clarity suffers from verbosity across repeated content."
+    ],
+    "questions": [
+      "How do you propose to measure 'state representation quality' in the experiments? The internal consistency score seems ad hoc and needs validation.",
+      "The testability scores are optimistic (e.g., 4 or 5). Have you considered potential confounds in the proposed experiments, such as task order effects or difficulty variations?",
+      "Why were existing routing policies (e.g., LLM-based with few-shot demonstrations) not included as baselines? How would these compare to your proposed policies?"
+    ],
+    "missing_baselines": [
+      "Heuristic routing (e.g., always use code interpreter, or always use search).",
+      "LLM-based routing with zero-shot or few-shot prompts (e.g., 'choose the right tool for this step').",
+      "Learned routing from prior work (e.g., ReAct, Toolformer, or RT-2 for coding agents).",
+      "A random routing baseline to assess the lower bound of performance."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Lack of novelty and insufficient baseline comparison",
+    "root_cause": "The proposed hypotheses (dynamic thresholding, exploration under ambiguity) are already explored in existing work, and the experimental plans only compare against trivial baselines (static threshold, no exploration) but not against standard routing methods like ReAct, Toolformer, or LLM-based routing.",
+    "violated_principle": "FirstResearch's standard: All research questions must be demonstrably novel compared to existing literature, and minimal decisive tests must include at least one strong baseline from prior work in the same domain.",
+    "new_or_updated_principle": "When designing a minimal decisive test, the experiment must include at least one baseline that represents the current state-of-the-art in the relevant domain, identified via a systematic literature search, to ensure the hypothesis is tested against nontrivial alternatives.",
+    "new_or_updated_skill": "Literature-based baseline selection - the ability to identify from recent literature (e.g., papers from the last 2 years in top venues) the most relevant baselines for a given research question, and incorporate them into the experimental design.",
+    "regression_test": "For a new research package, verify that every experimental plan compares against at least one non-trivial baseline that is not a simple variation of the null hypothesis (e.g., static threshold, random) but is a recognized method in the field. Additionally, the question must show evidence of a literature gap (e.g., by citing related work that has not addressed the specific nuance)."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 1,
+    "gate_repairs": [
+      {
+        "question": "At what threshold of task heterogeneity does the accuracy gain from specialization-aware routing become outweighed by the computational overhead, leading to overall performance degradation in coding agents?",
+        "original_suggestions": [
+          "Improve primitive-to-question traceability to at least 4/5."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

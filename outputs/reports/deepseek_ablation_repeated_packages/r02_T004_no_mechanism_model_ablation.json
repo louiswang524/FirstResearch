@@ -1,0 +1,962 @@
+{
+  "topic": {
+    "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+    "topic_id": "T004",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: Can agent memory improve generalization or does it create retrieval interference?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Memory",
+        "definition": "A stored representation of past experiences, knowledge, or interactions that an LLM agent can access to guide its behavior in current or future tasks.",
+        "why_primitive": "Agent memory is the core mechanism under investigation; the entire research question revolves around its effects on performance, making it a foundational concept."
+      },
+      {
+        "name": "Generalization",
+        "definition": "The capacity of an agent to apply learned information or skills from past experiences to new, unseen situations that share some underlying structure or features.",
+        "why_primitive": "Generalization is the primary potential benefit of memory; understanding it is essential to evaluate whether memory improves agent performance broadly."
+      },
+      {
+        "name": "Retrieval Interference",
+        "definition": "The degradation of memory recall or application caused by competition or confusion among stored memories, leading to errors, slower retrieval, or inappropriate responses.",
+        "why_primitive": "Retrieval interference is the primary potential cost of memory; the research question explicitly contrasts it with generalization as a possible negative outcome."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Memory retrieval in LLM agents operates via similarity-based matching between the current context and stored memory items.",
+        "rationale": "Most practical agent memory systems (e.g., vector databases, key-value stores) rely on some form of similarity search (e.g., cosine similarity) to retrieve relevant memories. This assumption is consistent with common implementations.",
+        "possible_failure": "If memory retrieval uses alternative mechanisms (e.g., exact matching, symbolic reasoning, or attention over all memories), the nature of interference may differ fundamentally from similarity-based interference."
+      },
+      {
+        "assumption": "The agent's memory storage has a finite, bounded capacity, and the number of stored memories grows over time as the agent accumulates experience.",
+        "rationale": "Real systems have hardware or software limits on storage size; without a bound, the agent could store all experiences without saturation, making interference negligible. Thus, boundedness is a necessary condition for interference to arise.",
+        "possible_failure": "If memory is effectively unlimited or if the agent uses compression or forgetting strategies that mitigate capacity constraints, retrieval interference might not become a significant issue."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Generalization benefit vs. retrieval interference cost: Larger memories may improve generalization by providing more diverse examples, but they also increase the chance of retrieving irrelevant or conflicting information, degrading performance.",
+        "variables": [
+          "memory size",
+          "similarity threshold for retrieval",
+          "task diversity"
+        ]
+      },
+      {
+        "tradeoff": "Memory granularity vs. storage efficiency: Storing detailed episodic memories can capture nuances for generalization, but they consume more storage and may cause higher interference; storing compressed or abstracted memories reduces interference but may lose information needed for transfer.",
+        "variables": [
+          "level of detail",
+          "compression method",
+          "retrieval mechanism"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "topic condition",
+        "role": "input",
+        "description": "The observed condition in Can agent memory improve generalization or does it create retrieval interference?."
+      },
+      {
+        "name": "research outcome",
+        "role": "outcome",
+        "description": "The measured outcome or failure mode proposed by the research question."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+        "source": null,
+        "relation": null,
+        "target": null,
+        "explanation": null
+      }
+    ],
+    "bottlenecks": [],
+    "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "As memory size increases, the potential benefit of generalization through diverse examples competes with the increased probability of retrieval interference from irrelevant or conflicting memories.",
+      "derived_from": [
+        "core_tradeoffs[0]",
+        "Agent Memory",
+        "Generalization",
+        "Retrieval Interference"
+      ],
+      "why_it_matters": "This tradeoff directly addresses the core research question: whether agent memory leads to better generalization or causes interference. Characterizing this tension is essential for designing memory systems that maximize performance.",
+      "what_existing_methods_may_miss": "Existing evaluations often fix memory size or ignore interference dynamics, potentially overlooking the non-monotonic relationship between memory size and performance.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Storing detailed episodic memories improves generalization by preserving context, but at the cost of increased storage and higher retrieval interference; compressed or abstracted memories reduce interference but may lose information needed for transfer.",
+      "derived_from": [
+        "core_tradeoffs[1]"
+      ],
+      "why_it_matters": "Memory representation granularity is a key design choice that influences the generalization-interference balance. Understanding this tension helps optimize memory compression and retrieval strategies.",
+      "what_existing_methods_may_miss": "Most work uses fixed representation (e.g., raw text, embeddings) without systematically varying granularity, missing the optimal tradeoff point.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that memory retrieval operates via similarity-based matching may not hold if alternative mechanisms (e.g., exact matching, symbolic reasoning) are used, fundamentally altering the nature of interference.",
+      "derived_from": [
+        "assumptions[0]"
+      ],
+      "why_it_matters": "This assumption underlies most current agent memory implementations. If it is false, interference patterns could differ drastically, requiring new methods to predict and mitigate interference.",
+      "what_existing_methods_may_miss": "Current systems assume similarity-based retrieval; methods that rely on this assumption may fail when faced with alternative retrieval paradigms.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Bounded memory capacity is a necessary condition for retrieval interference to become significant, but if memory is effectively unlimited or agents employ forgetting/compression, interference may be negligible.",
+      "derived_from": [
+        "assumptions[1]"
+      ],
+      "why_it_matters": "The presence or absence of interference hinges on capacity limits. Understanding this assumption clarifies the conditions under which the generalization-interference tradeoff actually occurs.",
+      "what_existing_methods_may_miss": "Studies that do not control memory capacity or use unbounded stores may fail to observe interference, leading to overestimation of memory benefits.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing the memory size in an agent initially improve generalization but eventually degrade performance due to retrieval interference, following an inverted-U shaped curve?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Characterizes the non-monotonic relationship between memory size and performance, directly testing the generalization-interference tradeoff."
+    },
+    {
+      "question": "For a fixed memory size, does storing compressed representations compared to detailed episodic memories reduce retrieval interference without significantly harming generalization?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "Identifies the optimal memory representation granularity that balances interference and generalization."
+    },
+    {
+      "question": "If retrieval is based on exact matching instead of similarity, does the interference pattern change such that interference becomes minimal regardless of memory size?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Tests the robustness of the similarity-based retrieval assumption and reveals alternative interference dynamics."
+    },
+    {
+      "question": "In agents with effectively unlimited memory capacity, can we observe any significant retrieval interference, or does interference only become detectable when memory is bounded?",
+      "question_type": "descriptive",
+      "source_tension": "T4",
+      "expected_contribution": "Determines whether bounded capacity is a necessary condition for retrieval interference to manifest."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Memory",
+          "definition": "A stored representation of past experiences, knowledge, or interactions that an LLM agent can access to guide its behavior in current or future tasks.",
+          "why_primitive": "Agent memory is the core mechanism under investigation; the entire research question revolves around its effects on performance, making it a foundational concept."
+        },
+        {
+          "name": "Generalization",
+          "definition": "The capacity of an agent to apply learned information or skills from past experiences to new, unseen situations that share some underlying structure or features.",
+          "why_primitive": "Generalization is the primary potential benefit of memory; understanding it is essential to evaluate whether memory improves agent performance broadly."
+        },
+        {
+          "name": "Retrieval Interference",
+          "definition": "The degradation of memory recall or application caused by competition or confusion among stored memories, leading to errors, slower retrieval, or inappropriate responses.",
+          "why_primitive": "Retrieval interference is the primary potential cost of memory; the research question explicitly contrasts it with generalization as a possible negative outcome."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory retrieval in LLM agents operates via similarity-based matching between the current context and stored memory items.",
+          "rationale": "Most practical agent memory systems (e.g., vector databases, key-value stores) rely on some form of similarity search (e.g., cosine similarity) to retrieve relevant memories. This assumption is consistent with common implementations.",
+          "possible_failure": "If memory retrieval uses alternative mechanisms (e.g., exact matching, symbolic reasoning, or attention over all memories), the nature of interference may differ fundamentally from similarity-based interference."
+        },
+        {
+          "assumption": "The agent's memory storage has a finite, bounded capacity, and the number of stored memories grows over time as the agent accumulates experience.",
+          "rationale": "Real systems have hardware or software limits on storage size; without a bound, the agent could store all experiences without saturation, making interference negligible. Thus, boundedness is a necessary condition for interference to arise.",
+          "possible_failure": "If memory is effectively unlimited or if the agent uses compression or forgetting strategies that mitigate capacity constraints, retrieval interference might not become a significant issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in Can agent memory improve generalization or does it create retrieval interference?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "As memory size increases, the potential benefit of generalization through diverse examples competes with the increased probability of retrieval interference from irrelevant or conflicting memories.",
+        "derived_from": [
+          "core_tradeoffs[0]",
+          "Agent Memory",
+          "Generalization",
+          "Retrieval Interference"
+        ],
+        "why_it_matters": "This tradeoff directly addresses the core research question: whether agent memory leads to better generalization or causes interference. Characterizing this tension is essential for designing memory systems that maximize performance.",
+        "what_existing_methods_may_miss": "Existing evaluations often fix memory size or ignore interference dynamics, potentially overlooking the non-monotonic relationship between memory size and performance.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the peak in agent performance as memory size increases depend on the number of distinct task types, such that memory size becomes harmful only after exceeding the number of distinct task types, due to retrieval interference from conflicting memories?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp boundary condition—the number of distinct task types—that determines whether memory size helps or harms performance, transitioning from beneficial generalization to detrimental interference."
+      },
+      "hypothesis": {
+        "statement": "For an LLM agent with a memory system, task performance improves with memory size when the number of stored memories is less than or equal to the number of distinct task types in the training set, but degrades when memory size exceeds that threshold, due to retrieval of conflicting memories.",
+        "predicted_effect": "The peak in performance occurs at a memory size equal to the number of distinct task types (M_c = N_task_types). For memory sizes below M_c, performance increases; for sizes above M_c, performance decreases."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train an LLM agent on a set of tasks with varying number of distinct task types (e.g., 2, 4, 8 types). For each condition, vary the maximum memory size from small to large (e.g., 1, 2, 4, 8, 16, 32, 64). Hold all other factors constant (same LLM, retrieval mechanism, similarity threshold). Evaluate performance on a held-out set of test tasks that require generalization. Measure task success rate for each memory size and task type count.",
+        "independent_variables": [
+          "Memory size (number of stored memories)",
+          "Number of distinct task types in training set"
+        ],
+        "dependent_variables": [
+          "Task performance (success rate on test tasks)"
+        ],
+        "controls": [
+          "Agent architecture (same LLM and retrieval mechanism)",
+          "Retrieval similarity threshold (fixed, e.g., 0.7 cosine similarity)",
+          "Training procedure and data (same tasks but distinct types)",
+          "Test tasks (different from training but share underlying rules)",
+          "Number of training examples per task type (held constant)"
+        ],
+        "falsifying_observation": "If the peak performance does not occur near memory size equal to the number of task types (i.e., if performance increases monotonically, decreases monotonically, or peaks at a different ratio), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each number of task types N, performance peaks at memory size M = N.",
+          "For M < N, performance increases with M; for M > N, performance decreases.",
+          "The peak height does not significantly change with N, but the peak location shifts proportionally.",
+          "Qualitative analysis shows that beyond M=N, the fraction of retrieved conflicting memories increases sharply."
+        ],
+        "rejects_hypothesis": [
+          "Performance peaks at a memory size that does not depend on task type count (e.g., always at a fixed size).",
+          "Performance increases monotonically with memory size regardless of task types.",
+          "Performance decreases monotonically with memory size regardless of task types.",
+          "No consistent peak observed across different task type counts."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted peak at M=N_task_types is not observed (e.g., peak occurs elsewhere or no peak), the core hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that memory interference arises primarily from conflicting memories of distinct task types may be incorrect. Alternatively, the retrieval similarity threshold or memory representation may allow discrimination between stored memories beyond task type categories.",
+        "next_question": "Does the critical memory size depend on the retrieval similarity threshold or on the degree of overlap between task types? How does the shape of the performance curve change when task types share features?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Memory",
+          "definition": "A stored representation of past experiences, knowledge, or interactions that an LLM agent can access to guide its behavior in current or future tasks.",
+          "why_primitive": "Agent memory is the core mechanism under investigation; the entire research question revolves around its effects on performance, making it a foundational concept."
+        },
+        {
+          "name": "Generalization",
+          "definition": "The capacity of an agent to apply learned information or skills from past experiences to new, unseen situations that share some underlying structure or features.",
+          "why_primitive": "Generalization is the primary potential benefit of memory; understanding it is essential to evaluate whether memory improves agent performance broadly."
+        },
+        {
+          "name": "Retrieval Interference",
+          "definition": "The degradation of memory recall or application caused by competition or confusion among stored memories, leading to errors, slower retrieval, or inappropriate responses.",
+          "why_primitive": "Retrieval interference is the primary potential cost of memory; the research question explicitly contrasts it with generalization as a possible negative outcome."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory retrieval in LLM agents operates via similarity-based matching between the current context and stored memory items.",
+          "rationale": "Most practical agent memory systems (e.g., vector databases, key-value stores) rely on some form of similarity search (e.g., cosine similarity) to retrieve relevant memories. This assumption is consistent with common implementations.",
+          "possible_failure": "If memory retrieval uses alternative mechanisms (e.g., exact matching, symbolic reasoning, or attention over all memories), the nature of interference may differ fundamentally from similarity-based interference."
+        },
+        {
+          "assumption": "The agent's memory storage has a finite, bounded capacity, and the number of stored memories grows over time as the agent accumulates experience.",
+          "rationale": "Real systems have hardware or software limits on storage size; without a bound, the agent could store all experiences without saturation, making interference negligible. Thus, boundedness is a necessary condition for interference to arise.",
+          "possible_failure": "If memory is effectively unlimited or if the agent uses compression or forgetting strategies that mitigate capacity constraints, retrieval interference might not become a significant issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in Can agent memory improve generalization or does it create retrieval interference?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that memory retrieval operates via similarity-based matching may not hold if alternative mechanisms (e.g., exact matching, symbolic reasoning) are used, fundamentally altering the nature of interference.",
+        "derived_from": [
+          "assumptions[0]"
+        ],
+        "why_it_matters": "This assumption underlies most current agent memory implementations. If it is false, interference patterns could differ drastically, requiring new methods to predict and mitigate interference.",
+        "what_existing_methods_may_miss": "Current systems assume similarity-based retrieval; methods that rely on this assumption may fail when faced with alternative retrieval paradigms.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Under what conditions does exact matching retrieval eliminate retrieval interference, and is there a sharp memory size threshold (per-key density * buffer capacity) where interference abruptly appears?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in retrieval interference under exact matching, revealing a critical buffer size threshold that is absent in similarity-based retrieval."
+      },
+      "hypothesis": {
+        "statement": "Exact matching retrieval yields zero interference when the number of memories per distinct key is below the agent's output buffer capacity, but interference spikes abruptly above that threshold; similarity-based retrieval shows gradual interference increase with memory size regardless of per-key density.",
+        "predicted_effect": "Under exact matching, task accuracy remains perfect and interference (number of conflicting retrievals) is zero until memory per key exceeds buffer size, then accuracy drops sharply and interference jumps; under similarity, accuracy declines gradually and interference increases linearly with memory size."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement an LLM agent with a memory module supporting both exact and similarity-based retrieval. Create a synthetic task where each query has a unique key and retrieve memories with that key. Vary the number of memories stored per key (density) from 0 to 3 times the agent's output buffer size (e.g., buffer=5). Measure retrieval accuracy (whether the correct memory is used) and interference count (number of ties/collisions). For exact matching, expect a step function; for similarity, expect smooth degradation.",
+        "independent_variables": [
+          "retrieval method (exact vs. similarity)",
+          "memory density (number of memories per key, normalized by buffer size)"
+        ],
+        "dependent_variables": [
+          "retrieval accuracy",
+          "interference count (collisions per query)"
+        ],
+        "controls": [
+          "same agent architecture",
+          "same set of keys and query frequency",
+          "fixed total memory size (number of keys)",
+          "fixed output buffer size",
+          "constant retrieval top-k = buffer size"
+        ],
+        "falsifying_observation": "If under exact matching, interference appears below the buffer size threshold or if accuracy declines gradually (no step), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under exact matching, accuracy is 100% and interference is 0 for density < buffer size, then drops sharply at density = buffer size.",
+          "Under similarity, accuracy decreases gradually and interference increases linearly with density across the whole range.",
+          "The step change in exact matching occurs at the same density regardless of total memory size."
+        ],
+        "rejects_hypothesis": [
+          "Under exact matching, accuracy declines before density reaches buffer size.",
+          "Under exact matching, no sharp step is observed; instead smooth degradation similar to similarity.",
+          "Exact matching shows interference even at very low density."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If exact matching does not show a sharp threshold at the buffer capacity, then either buffer capacity is not the limiting factor or exact matching still allows interference from other sources (e.g., memory decay, noise).",
+        "assumption_to_revise": "The assumption that exact matching avoids interference until buffer overflow may be incorrect; perhaps interference arises from exact matches that are indistinguishable even without capacity pressure.",
+        "next_question": "What are the sources of interference under exact matching when density is below buffer capacity, and can memory organization (e.g., timestamps, recency) eliminate them?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Memory",
+          "definition": "A stored representation of past experiences, knowledge, or interactions that an LLM agent can access to guide its behavior in current or future tasks.",
+          "why_primitive": "Agent memory is the core mechanism under investigation; the entire research question revolves around its effects on performance, making it a foundational concept."
+        },
+        {
+          "name": "Generalization",
+          "definition": "The capacity of an agent to apply learned information or skills from past experiences to new, unseen situations that share some underlying structure or features.",
+          "why_primitive": "Generalization is the primary potential benefit of memory; understanding it is essential to evaluate whether memory improves agent performance broadly."
+        },
+        {
+          "name": "Retrieval Interference",
+          "definition": "The degradation of memory recall or application caused by competition or confusion among stored memories, leading to errors, slower retrieval, or inappropriate responses.",
+          "why_primitive": "Retrieval interference is the primary potential cost of memory; the research question explicitly contrasts it with generalization as a possible negative outcome."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory retrieval in LLM agents operates via similarity-based matching between the current context and stored memory items.",
+          "rationale": "Most practical agent memory systems (e.g., vector databases, key-value stores) rely on some form of similarity search (e.g., cosine similarity) to retrieve relevant memories. This assumption is consistent with common implementations.",
+          "possible_failure": "If memory retrieval uses alternative mechanisms (e.g., exact matching, symbolic reasoning, or attention over all memories), the nature of interference may differ fundamentally from similarity-based interference."
+        },
+        {
+          "assumption": "The agent's memory storage has a finite, bounded capacity, and the number of stored memories grows over time as the agent accumulates experience.",
+          "rationale": "Real systems have hardware or software limits on storage size; without a bound, the agent could store all experiences without saturation, making interference negligible. Thus, boundedness is a necessary condition for interference to arise.",
+          "possible_failure": "If memory is effectively unlimited or if the agent uses compression or forgetting strategies that mitigate capacity constraints, retrieval interference might not become a significant issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in Can agent memory improve generalization or does it create retrieval interference?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Storing detailed episodic memories improves generalization by preserving context, but at the cost of increased storage and higher retrieval interference; compressed or abstracted memories reduce interference but may lose information needed for transfer.",
+        "derived_from": [
+          "core_tradeoffs[1]"
+        ],
+        "why_it_matters": "Memory representation granularity is a key design choice that influences the generalization-interference balance. Understanding this tension helps optimize memory compression and retrieval strategies.",
+        "what_existing_methods_may_miss": "Most work uses fixed representation (e.g., raw text, embeddings) without systematically varying granularity, missing the optimal tradeoff point.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "For a fixed memory size, is there a critical compression ratio beyond which retrieval interference increases disproportionately, indicating a phase transition in the trade-off between interference and generalization?",
+        "question_type": "algorithmic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp boundary (phase transition) in the compression ratio that governs the generalization-interference balance, enabling optimal memory design."
+      },
+      "hypothesis": {
+        "statement": "For a fixed memory size, there exists a compression ratio threshold (e.g., when embedding dimensionality is reduced below the intrinsic task dimensionality) such that retrieval interference increases sharply but generalization accuracy remains within an acceptable margin (e.g., <5% drop from that at minimal compression).",
+        "predicted_effect": "Below the threshold, compression yields small interference changes; above it, interference grows rapidly while generalization degrades only gradually, revealing a phase transition."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement an LLM agent with a fixed memory size (e.g., 500 items). Use a set of tasks requiring generalization (e.g., few-shot classification of novel object categories from visual descriptions). Vary compression ratio by applying PCA to reduce embedding dimensionality from original (e.g., 1536) to a set of values: 1536, 1024, 512, 256, 128, 64, 32, 16, 8, 4. For each compression level, measure retrieval interference as average retrieval time per query and proportion of irrelevant retrieved memories (false positives). Measure generalization accuracy on held-out test sets. Plot both metrics as functions of compression ratio and identify the threshold where interference shows a knee or inflection point. Use statistical tests to confirm significant change.",
+        "independent_variables": [
+          "Compression ratio (embedding dimensionality after PCA)"
+        ],
+        "dependent_variables": [
+          "Retrieval interference (average retrieval time, false positive rate)",
+          "Generalization accuracy"
+        ],
+        "controls": [
+          "Fixed memory size (500 items)",
+          "Same training episodes and order",
+          "Same retrieval algorithm (cosine similarity)",
+          "Same LLM (GPT-4) and prompt template",
+          "Same task domain (virtual object classification)"
+        ],
+        "falsifying_observation": "If no clear threshold is observed (i.e., interference increases linearly or irregularly with compression, or generalization accuracy drops sharply before any interference increase), the hypothesis of a phase transition is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "There is a compression ratio range where retrieval interference remains low, followed by a sharp increase beyond a specific threshold.",
+          "Generalization accuracy does not drop more than 5% until after the interference threshold is crossed.",
+          "The threshold occurs at a compression ratio near the intrinsic task dimensionality (e.g., number of distinct features needed for classification)."
+        ],
+        "rejects_hypothesis": [
+          "Retrieval interference increases monotonically with compression without any sharp transition.",
+          "Generalization accuracy drops sharply before any significant increase in interference.",
+          "No consistent threshold across different task domains or memory sizes."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is found (i.e., interference increases gradually or generalisation suffers first), then the assumed sharp trade-off between interference and generalisation may be incorrect, or the fixed memory size may not be the limiting factor.",
+        "assumption_to_revise": "The assumption that compression primarily affects retrieval via similarity-based interference; instead, compression may primarily affect information content, causing a smooth decline in both metrics.",
+        "next_question": "Under what conditions does a phase transition appear? Alternatively, what is the exact functional form of the trade-off (e.g., logarithmic vs. exponential)?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Memory",
+          "definition": "A stored representation of past experiences, knowledge, or interactions that an LLM agent can access to guide its behavior in current or future tasks.",
+          "why_primitive": "Agent memory is the core mechanism under investigation; the entire research question revolves around its effects on performance, making it a foundational concept."
+        },
+        {
+          "name": "Generalization",
+          "definition": "The capacity of an agent to apply learned information or skills from past experiences to new, unseen situations that share some underlying structure or features.",
+          "why_primitive": "Generalization is the primary potential benefit of memory; understanding it is essential to evaluate whether memory improves agent performance broadly."
+        },
+        {
+          "name": "Retrieval Interference",
+          "definition": "The degradation of memory recall or application caused by competition or confusion among stored memories, leading to errors, slower retrieval, or inappropriate responses.",
+          "why_primitive": "Retrieval interference is the primary potential cost of memory; the research question explicitly contrasts it with generalization as a possible negative outcome."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory retrieval in LLM agents operates via similarity-based matching between the current context and stored memory items.",
+          "rationale": "Most practical agent memory systems (e.g., vector databases, key-value stores) rely on some form of similarity search (e.g., cosine similarity) to retrieve relevant memories. This assumption is consistent with common implementations.",
+          "possible_failure": "If memory retrieval uses alternative mechanisms (e.g., exact matching, symbolic reasoning, or attention over all memories), the nature of interference may differ fundamentally from similarity-based interference."
+        },
+        {
+          "assumption": "The agent's memory storage has a finite, bounded capacity, and the number of stored memories grows over time as the agent accumulates experience.",
+          "rationale": "Real systems have hardware or software limits on storage size; without a bound, the agent could store all experiences without saturation, making interference negligible. Thus, boundedness is a necessary condition for interference to arise.",
+          "possible_failure": "If memory is effectively unlimited or if the agent uses compression or forgetting strategies that mitigate capacity constraints, retrieval interference might not become a significant issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in Can agent memory improve generalization or does it create retrieval interference?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Bounded memory capacity is a necessary condition for retrieval interference to become significant, but if memory is effectively unlimited or agents employ forgetting/compression, interference may be negligible.",
+        "derived_from": [
+          "assumptions[1]"
+        ],
+        "why_it_matters": "The presence or absence of interference hinges on capacity limits. Understanding this assumption clarifies the conditions under which the generalization-interference tradeoff actually occurs.",
+        "what_existing_methods_may_miss": "Studies that do not control memory capacity or use unbounded stores may fail to observe interference, leading to overestimation of memory benefits.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is retrieval interference in LLM agents a step function of memory capacity, transitioning from negligible to significant at a specific threshold, or a continuous function of capacity?",
+        "question_type": "descriptive",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies whether there exists a critical capacity threshold that triggers a phase transition in retrieval interference, refining the boundedness assumption."
+      },
+      "hypothesis": {
+        "statement": "Retrieval interference exhibits a step-like increase when memory capacity falls below a critical threshold relative to the diversity of task contexts; above this threshold, interference is minimal.",
+        "predicted_effect": "Agents with capacity below the threshold show significantly higher interference (lower accuracy, slower retrieval) than those with capacity above, and the effect is not a linear function of capacity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use an LLM agent with a vector memory store across multiple capacity levels (e.g., 1, 10, 100, 1000, unlimited). Present a sequence of tasks with varying context diversity. Measure retrieval accuracy and latency. Compare performance across capacity levels to detect a sharp discontinuity.",
+        "independent_variables": [
+          "memory capacity (logarithmic scale: 1, 10, 100, 1000, unlimited)"
+        ],
+        "dependent_variables": [
+          "retrieval accuracy",
+          "retrieval latency",
+          "task success rate"
+        ],
+        "controls": [
+          "same task set",
+          "same similarity threshold (0.85 cosine)",
+          "same agent (GPT-4)",
+          "same memory encoding (text embeddings)"
+        ],
+        "falsifying_observation": "If performance degrades linearly with decreasing capacity without any sharp drop at a specific point, or if no discontinuity is observed across the capacity range, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Performance remains approximately constant for capacities above a certain threshold (e.g., 100), then drops sharply for capacities below that threshold.",
+          "The drop is statistically significant and not explainable by a linear trend."
+        ],
+        "rejects_hypothesis": [
+          "Performance decreases smoothly with decreasing capacity (e.g., logarithmic or linear decline).",
+          "No clear threshold is observed; interference is present even at unlimited capacity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed, then retrieval interference is a continuous function of capacity, and the assumption of a step-like transition is false.",
+        "assumption_to_revise": "The assumption that 'bounded capacity is necessary for interference' is refined: boundedness alone is insufficient; the relationship is continuous.",
+        "next_question": "What is the functional form of interference as a function of capacity, and what other factors (e.g., similarity distribution) modulate it?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "For an LLM agent with a memory system, task performance improves with memory size when the number of stored memories is less than or equal to the number of distinct task types in the training set, but degrades when memory size exceeds that threshold, due to retrieval of conflicting memories.",
+      "independent_variables": [
+        "Memory size (number of stored memories)",
+        "Number of distinct task types in training set"
+      ],
+      "dependent_variables": [
+        "Task performance (success rate on test tasks)"
+      ],
+      "controlled_variables": [
+        "Agent architecture (same LLM and retrieval mechanism)",
+        "Retrieval similarity threshold (fixed, e.g., 0.7 cosine similarity)",
+        "Training procedure and data (same tasks but distinct types)",
+        "Test tasks (different from training but share underlying rules)",
+        "Number of training examples per task type (held constant)"
+      ],
+      "baselines": [
+        {
+          "name": "No memory baseline",
+          "description": "Agent without any memory system, relying solely on the LLM's pre-trained knowledge."
+        },
+        {
+          "name": "Random memory baseline",
+          "description": "Agent with memory but retrieves random memories instead of similarity-based retrieval."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Percentage of test tasks completed successfully."
+        },
+        {
+          "name": "Retrieval conflict rate",
+          "definition": "Fraction of retrieved memories that belong to a different task type than the current task."
+        }
+      ],
+      "expected_result": "For each number of task types N, performance peaks at memory size M = N. For M < N, performance increases with M; for M > N, performance decreases. The peak location shifts proportionally with N.",
+      "falsifying_result": "The peak performance does not occur near memory size equal to the number of task types (e.g., performance increases monotonically, decreases monotonically, or peaks at a different ratio).",
+      "minimum_viable_experiment": "Train an LLM agent on a set of tasks with varying numbers of distinct task types (e.g., 2, 4, 8 types). For each condition, vary the maximum memory size from small to large (e.g., 1, 2, 4, 8, 16, 32, 64). Hold all other factors constant. Evaluate performance on a held-out set of test tasks that require generalization. Measure task success rate and retrieval conflict rate for each memory size and task type count.",
+      "risks_and_confounds": [
+        "The choice of retrieval similarity threshold may affect the onset of interference.",
+        "The degree of similarity or overlap between task types could influence the critical memory size.",
+        "The agent's underlying LLM may already have strong priors that affect generalization independent of memory.",
+        "Memory size may be confounded with total training examples if not carefully controlled.",
+        "The definition of distinct task types must be clear and non-overlapping to test the hypothesis."
+      ]
+    },
+    {
+      "hypothesis": "For a fixed memory size, there exists a compression ratio threshold (e.g., when embedding dimensionality is reduced below the intrinsic task dimensionality) such that retrieval interference increases sharply but generalization accuracy remains within an acceptable margin (e.g., <5% drop from that at minimal compression).",
+      "independent_variables": [
+        "Compression ratio (embedding dimensionality after PCA)"
+      ],
+      "dependent_variables": [
+        "Retrieval interference (average retrieval time, false positive rate)",
+        "Generalization accuracy"
+      ],
+      "controlled_variables": [
+        "Fixed memory size (500 items)",
+        "Same training episodes and order",
+        "Same retrieval algorithm (cosine similarity)",
+        "Same LLM (GPT-4) and prompt template",
+        "Same task domain (virtual object classification)"
+      ],
+      "baselines": [
+        {
+          "name": "No compression",
+          "description": "Full embedding dimensionality (e.g., 1536) without PCA compression."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average retrieval time",
+          "definition": "Mean time in milliseconds to retrieve a memory from the store per query."
+        },
+        {
+          "name": "False positive rate",
+          "definition": "Proportion of retrieved memories that are irrelevant to the current context."
+        },
+        {
+          "name": "Generalization accuracy",
+          "definition": "Percentage of correct classifications on held-out test tasks."
+        }
+      ],
+      "expected_result": "There is a compression ratio range where retrieval interference remains low, followed by a sharp increase beyond a specific threshold. Generalization accuracy does not drop more than 5% until after the interference threshold is crossed.",
+      "falsifying_result": "If no clear threshold is observed (i.e., interference increases linearly or irregularly with compression, or generalization accuracy drops sharply before any interference increase), the hypothesis of a phase transition is falsified.",
+      "minimum_viable_experiment": "Implement an LLM agent with a fixed memory size (e.g., 500 items). Use a set of tasks requiring generalization (e.g., few-shot classification of novel object categories from visual descriptions). Vary compression ratio by applying PCA to reduce embedding dimensionality from original (e.g., 1536) to a set of values: 1536, 1024, 512, 256, 128, 64, 32, 16, 8, 4. For each compression level, measure retrieval interference as average retrieval time per query and proportion of irrelevant retrieved memories (false positives). Measure generalization accuracy on held-out test sets. Plot both metrics as functions of compression ratio and identify the threshold where interference shows a knee or inflection point. Use statistical tests to confirm significant change.",
+      "risks_and_confounds": [
+        "PCA compression may not capture nonlinear structure; alternative compression methods (e.g., autoencoders) could yield different results.",
+        "The choice of task domain may limit generality; interference might be task-specific.",
+        "Fixed memory size may be insufficient to observe interference at high compression; larger memory could change threshold.",
+        "Retrieval algorithm simplicity (cosine similarity) may not reflect real agent behavior."
+      ]
+    },
+    {
+      "hypothesis": "Exact matching retrieval yields zero interference when the number of memories per distinct key is below the agent's output buffer capacity, but interference spikes abruptly above that threshold; similarity-based retrieval shows gradual interference increase with memory size regardless of per-key density.",
+      "independent_variables": [
+        "retrieval method (exact vs similarity)",
+        "memory density (number of memories per key normalized by buffer size)"
+      ],
+      "dependent_variables": [
+        "retrieval accuracy",
+        "interference count (collisions per query)"
+      ],
+      "controlled_variables": [
+        "same agent architecture",
+        "same set of keys and query frequency",
+        "fixed total memory size (number of keys)",
+        "fixed output buffer size",
+        "constant retrieval top-k = buffer size"
+      ],
+      "baselines": [
+        {
+          "name": "No Memory",
+          "description": "Agent without any memory storage; responses are based solely on its inherent knowledge. This establishes a baseline accuracy and interference-free performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Retrieval Accuracy",
+          "definition": "Proportion of queries where the retrieved memory output is the correct one for the given key."
+        },
+        {
+          "name": "Interference Count",
+          "definition": "Number of queries that result in multiple memories tied for retrieval, causing a collision or requiring tie-breaking."
+        }
+      ],
+      "expected_result": "For exact matching, accuracy remains 1.0 and interference count 0 for memory density < buffer size; then at density >= buffer size, accuracy drops to 0 (or low) and interference rises sharply. For similarity, accuracy decreases gradually and interference increases linearly with density over the entire range.",
+      "falsifying_result": "If exact matching shows accuracy decline or interference before density reaches buffer size, or if no sharp step is observed, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Implement a simplified LLM agent with a memory module that supports both exact and cosine-similarity retrieval. Use a synthetic task where each query has a unique key (e.g., integers 1 to 100). For each key, store a variable number of memory items (e.g., from 0 to 3 times the buffer size). Set buffer size to 5. Vary memory density by storing 0,1,2,3,4,5,6,... up to 15 memories per key. For each density, run 1000 queries with random keys (uniformly distributed across keys) and measure retrieval accuracy and interference count. Repeat for both retrieval methods. The total number of keys (total memory size) is fixed at 100. Ensure all other parameters are constant.",
+      "risks_and_confounds": [
+        "Order effects if memories are stored in a sequence; ensure random order.",
+        "The synthetic task may not reflect real-world interference; but for falsification it is sufficient.",
+        "The buffer size choice may be arbitrary; verify with different buffer sizes."
+      ]
+    },
+    {
+      "hypothesis": "Retrieval interference exhibits a step-like increase when memory capacity falls below a critical threshold relative to the diversity of task contexts; above this threshold, interference is minimal.",
+      "independent_variables": [
+        "memory capacity (log scale: 1, 10, 100, 1000, unlimited)"
+      ],
+      "dependent_variables": [
+        "retrieval accuracy",
+        "retrieval latency",
+        "task success rate"
+      ],
+      "controlled_variables": [
+        "same task set (fixed diversity)",
+        "same similarity threshold (0.85 cosine)",
+        "same agent (GPT-4)",
+        "same memory encoding (text embeddings)",
+        "same task environment"
+      ],
+      "baselines": [
+        {
+          "name": "No memory",
+          "description": "Agent without any memory retrieval capability."
+        },
+        {
+          "name": "Unlimited memory",
+          "description": "Agent with effectively unbounded memory capacity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "retrieval accuracy",
+          "definition": "Proportion of correct memory retrievals out of total retrieval attempts."
+        },
+        {
+          "name": "retrieval latency",
+          "definition": "Average time taken to retrieve a memory from the store."
+        },
+        {
+          "name": "task success rate",
+          "definition": "Proportion of tasks successfully completed by the agent."
+        }
+      ],
+      "expected_result": "Performance remains approximately constant for capacities above a certain threshold (e.g., 100), then drops sharply for capacities below that threshold. The drop is statistically significant and not explainable by a linear trend.",
+      "falsifying_result": "Performance decreases smoothly with decreasing capacity (e.g., logarithmic or linear decline) without any sharp discontinuity. Or no clear threshold is observed; interference is present even at unlimited capacity.",
+      "minimum_viable_experiment": "Run an LLM agent (GPT-4) with a vector memory store (e.g., FAISS) across 5 capacity levels (1, 10, 100, 1000, unlimited). Use a fixed set of 50 diverse task contexts (e.g., different customer support queries). For each capacity level, run the agent on all tasks, measure retrieval accuracy, latency, and task success. Compare the metrics across capacities using change point detection to identify any discontinuity.",
+      "risks_and_confounds": [
+        "Varying task difficulty across capacities due to random seed differences.",
+        "Retrieval latency may be affected by algorithm implementation, not just capacity.",
+        "Order effects if tasks are presented in same sequence across runs.",
+        "Choice of similarity threshold (0.85) may influence interference magnitude.",
+        "Limited capacity levels may miss the exact threshold location."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package investigates whether agent memory improves generalization or causes retrieval interference. It provides a rigorous first-principles decomposition, defines primitives and assumptions, identifies core tradeoffs, and proposes four well-structured experiments with clear hypotheses and falsifiable predictions. The work is strong overall, though the mechanism model is ablated and the assumptions may limit generality.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives and assumptions.",
+      "Identifies concrete tensions that directly address the research question.",
+      "Proposes experiments with tightly controlled variables, multiple baselines, and explicit falsification criteria.",
+      "High novelty: each experiment targets sharp boundary conditions or phase transitions.",
+      "All experiments are feasible with current LLM and retrieval systems.",
+      "Excellent falsifiability and experimentability scores."
+    ],
+    "weaknesses": [
+      "The mechanism model is explicitly ablated; no causal chain is constructed, weakening theoretical grounding.",
+      "Assumptions (similarity-based retrieval, bounded capacity) may not hold in all agent memory systems, limiting generality.",
+      "Experiments rely on synthetic or narrow task domains; generalizability to real-world scenarios is uncertain.",
+      "Some experiments may be computationally expensive (e.g., varying compression ratios across many LLM runs)."
+    ],
+    "questions": [
+      "How would the proposed experiments scale to task domains with continuous or overlapping task types rather than discrete categories?",
+      "Could the assumptions about similarity-based retrieval be relaxed to include hybrid retrieval mechanisms?",
+      "How sensitive are the predicted phase transitions to the choice of similarity threshold and retrieval top-k?"
+    ],
+    "missing_baselines": [
+      "Experiment 1 could benefit from a baseline where memory stores random examples instead of relevant ones.",
+      "Experiment 2 should include a baseline with random compression (e.g., random projection) to isolate the effect of informative compression.",
+      "Consider a baseline where memory retrieval is disabled but the agent still has access to a static dataset."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Mechanism_builder_ablation",
+    "root_cause": "The system skipped the mechanism construction step, passing a generic topic-to-outcome relation without causal modeling.",
+    "violated_principle": "Mechanisms must be built from primitives before tensions are derived.",
+    "new_or_updated_principle": "Mechanisms must be built from primitives before tensions are derived. The causal chain should include explicit steps linking primitive definitions to observed outcomes.",
+    "new_or_updated_skill": "Causal chain construction: ability to trace a concrete causal path from primitive definitions through assumptions to an observed outcome.",
+    "regression_test": "Given a research question, the system must produce a mechanism model with a causal chain of at least three steps before generating tensions. If mechanism_summary contains 'ablation' or no causal chain, the package is rejected."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Does the peak in agent performance as memory size increases depend on the number of distinct task types, such that memory size becomes harmful only after exceeding the number of distinct task types, due to retrieval interference from conflicting memories?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "For a fixed memory size, is there a critical compression ratio beyond which retrieval interference increases disproportionately, indicating a phase transition in the trade-off between interference and generalization?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Under what conditions does exact matching retrieval eliminate retrieval interference, and is there a sharp memory size threshold (per-key density * buffer capacity) where interference abruptly appears?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is retrieval interference in LLM agents a step function of memory capacity, transitioning from negligible to significant at a specific threshold, or a continuous function of capacity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": false,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_mechanism_model_ablation",
+    "ablation": "mechanism_builder_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

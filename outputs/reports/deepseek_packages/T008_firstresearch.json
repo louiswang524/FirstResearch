@@ -1,0 +1,1579 @@
+{
+  "topic": {
+    "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+    "topic_id": "T008",
+    "goal": null,
+    "domain": "self-improving agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: Can self-improvement loops reduce repeated reasoning failures?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Reasoning Failure",
+        "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+        "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+      },
+      {
+        "name": "Self-Improvement Loop",
+        "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+        "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+      },
+      {
+        "name": "Repeated Reasoning",
+        "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+        "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent can reliably detect and characterize reasoning failures.",
+        "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+        "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+      },
+      {
+        "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+        "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+        "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. Exploitation: The loop must balance trying new reasoning strategies (which may introduce new failures) with sticking to known reliable strategies.",
+        "variables": [
+          "exploration rate",
+          "failure tolerance",
+          "strategy diversity"
+        ]
+      },
+      {
+        "tradeoff": "Short-term performance vs. Long-term improvement: Early iterations may increase failures as the agent experiments, while later iterations may reduce them.",
+        "variables": [
+          "iteration budget",
+          "learning rate",
+          "performance metric window"
+        ]
+      },
+      {
+        "tradeoff": "Loop complexity vs. System robustness: Adding self-improvement mechanisms increases system complexity, potentially introducing new failure modes or computational overhead.",
+        "variables": [
+          "loop depth",
+          "monitoring overhead",
+          "modification granularity"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "DetectionAccuracy",
+        "role": "input",
+        "description": "The agent's ability to correctly identify reasoning failures."
+      },
+      {
+        "name": "ModificationEffectiveness",
+        "role": "mediator",
+        "description": "The degree to which a modification reduces the targeted failure cause."
+      },
+      {
+        "name": "GeneralizationStrength",
+        "role": "mediator",
+        "description": "How well modifications transfer to new but similar reasoning problems."
+      },
+      {
+        "name": "IterationCount",
+        "role": "input",
+        "description": "Number of self-improvement loop cycles executed."
+      },
+      {
+        "name": "ExplorationRate",
+        "role": "input",
+        "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+      },
+      {
+        "name": "FailureRate",
+        "role": "outcome",
+        "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+      },
+      {
+        "name": "LoopComplexity",
+        "role": "confounder",
+        "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Failure Detection",
+        "source": "Reasoning Process",
+        "relation": "triggers",
+        "target": "Failure Identification",
+        "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+      },
+      {
+        "step": "Strategy Modification",
+        "source": "Failure Identification",
+        "relation": "leads to",
+        "target": "Modified Reasoning Strategy",
+        "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+      },
+      {
+        "step": "Application of Modified Strategy",
+        "source": "Modified Reasoning Strategy",
+        "relation": "applied to",
+        "target": "New Reasoning Tasks",
+        "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+      },
+      {
+        "step": "Performance Evaluation",
+        "source": "New Reasoning Tasks",
+        "relation": "determines",
+        "target": "FailureRate",
+        "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+      },
+      {
+        "step": "Feedback Loop",
+        "source": "FailureRate",
+        "relation": "feeds into",
+        "target": "Failure Detection",
+        "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Detection Reliability",
+        "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+      },
+      {
+        "bottleneck": "Generalization Failure",
+        "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+      },
+      {
+        "bottleneck": "Exploration-Exploitation Tradeoff",
+        "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+      }
+    ],
+    "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "High exploration rate introduces unfamiliar reasoning paths that reduce detection accuracy of failures, making it harder to identify which modifications are needed.",
+      "derived_from": [
+        "ExplorationRate",
+        "DetectionAccuracy"
+      ],
+      "why_it_matters": "If exploration undermines detection, the loop may waste iterations on spurious modifications or fail to correct actual failures, stalling improvement.",
+      "what_existing_methods_may_miss": "Most evaluations assume detection is constant; they do not account for exploration-induced detection degradation.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Modifications that precisely fix a specific failure often overfit and fail to generalize to other similar tasks, while more general modifications may be less effective on any single failure.",
+      "derived_from": [
+        "ModificationEffectiveness",
+        "GeneralizationStrength"
+      ],
+      "why_it_matters": "This tradeoff determines whether the loop reduces overall failure rate or merely shifts failures to different tasks.",
+      "what_existing_methods_may_miss": "Standard evaluation measures only final failure rate, not the distribution of improvements across tasks.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Increasing iteration count provides more opportunities for learning but also amplifies loop complexity and the risk of compounding errors from successive modifications.",
+      "derived_from": [
+        "IterationCount",
+        "LoopComplexity"
+      ],
+      "why_it_matters": "Beyond a certain point, additional iterations may degrade system robustness and offset any reduction in failures.",
+      "what_existing_methods_may_miss": "Many analyses treat iterations as uniformly beneficial and ignore the growing complexity cost.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that the agent can reliably detect reasoning failures is under-tested; if detection accuracy is low, the entire self-improvement loop may be misguided.",
+      "derived_from": [
+        "DetectionAccuracy",
+        "Reasoning Failure",
+        "Self-Improvement Loop"
+      ],
+      "why_it_matters": "Inaccurate detection wastes resources and can increase failure rates by reinforcing wrong behaviors.",
+      "what_existing_methods_may_miss": "Most benchmarks assume perfect or near-perfect detection; real-world noise is ignored.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The assumption that modifications derived from one failure generalize to reduce future failures is under-tested; task heterogeneity may cause modifications to be counterproductive.",
+      "derived_from": [
+        "GeneralizationStrength",
+        "Repeated Reasoning",
+        "Self-Improvement Loop"
+      ],
+      "why_it_matters": "Poor generalization means the loop does not achieve cumulative improvement, defeating its purpose.",
+      "what_existing_methods_may_miss": "Generalization is often assumed without validation across diverse task distributions.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing exploration rate cause a measurable decrease in detection accuracy of reasoning failures in a self-improvement loop?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "This would quantify the tradeoff between exploration and detection, clarifying whether high exploration undermines the loop's diagnostic ability."
+    },
+    {
+      "question": "What is the diagnostic relationship between modification specificity and cross-task generalization failure in repeated reasoning tasks?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "This would identify conditions under which overfitting occurs, guiding the design of more generalizable modifications."
+    },
+    {
+      "question": "Is there a critical iteration count beyond which loop complexity dominates, causing the failure rate to increase despite further modifications?",
+      "question_type": "descriptive",
+      "source_tension": "T3",
+      "expected_contribution": "This would establish a non-linear relationship between iterations and performance, challenging the assumption of monotonic improvement."
+    },
+    {
+      "question": "How does low detection accuracy alter the distribution of modifications and subsequent failure rates in a self-improvement loop?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "This would demonstrate that poor detection can actively harm performance, motivating better detection mechanisms."
+    },
+    {
+      "question": "Under what task heterogeneity conditions do modifications derived from one failure fail to generalize to reduce future failures?",
+      "question_type": "diagnostic",
+      "source_tension": "T5",
+      "expected_contribution": "This would characterize when the loop's cumulative improvement breaks down, informing task selection for training."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Reasoning Failure",
+          "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+          "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+        },
+        {
+          "name": "Self-Improvement Loop",
+          "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+          "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+        },
+        {
+          "name": "Repeated Reasoning",
+          "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+          "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent can reliably detect and characterize reasoning failures.",
+          "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+          "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+        },
+        {
+          "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+          "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+          "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "DetectionAccuracy",
+            "role": "input",
+            "description": "The agent's ability to correctly identify reasoning failures."
+          },
+          {
+            "name": "ModificationEffectiveness",
+            "role": "mediator",
+            "description": "The degree to which a modification reduces the targeted failure cause."
+          },
+          {
+            "name": "GeneralizationStrength",
+            "role": "mediator",
+            "description": "How well modifications transfer to new but similar reasoning problems."
+          },
+          {
+            "name": "IterationCount",
+            "role": "input",
+            "description": "Number of self-improvement loop cycles executed."
+          },
+          {
+            "name": "ExplorationRate",
+            "role": "input",
+            "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+          },
+          {
+            "name": "FailureRate",
+            "role": "outcome",
+            "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+          },
+          {
+            "name": "LoopComplexity",
+            "role": "confounder",
+            "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Failure Detection",
+            "source": "Reasoning Process",
+            "relation": "triggers",
+            "target": "Failure Identification",
+            "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+          },
+          {
+            "step": "Strategy Modification",
+            "source": "Failure Identification",
+            "relation": "leads to",
+            "target": "Modified Reasoning Strategy",
+            "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+          },
+          {
+            "step": "Application of Modified Strategy",
+            "source": "Modified Reasoning Strategy",
+            "relation": "applied to",
+            "target": "New Reasoning Tasks",
+            "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+          },
+          {
+            "step": "Performance Evaluation",
+            "source": "New Reasoning Tasks",
+            "relation": "determines",
+            "target": "FailureRate",
+            "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+          },
+          {
+            "step": "Feedback Loop",
+            "source": "FailureRate",
+            "relation": "feeds into",
+            "target": "Failure Detection",
+            "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Detection Reliability",
+            "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+          },
+          {
+            "bottleneck": "Generalization Failure",
+            "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+          },
+          {
+            "bottleneck": "Exploration-Exploitation Tradeoff",
+            "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+          }
+        ],
+        "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Increasing iteration count provides more opportunities for learning but also amplifies loop complexity and the risk of compounding errors from successive modifications.",
+        "derived_from": [
+          "IterationCount",
+          "LoopComplexity"
+        ],
+        "why_it_matters": "Beyond a certain point, additional iterations may degrade system robustness and offset any reduction in failures.",
+        "what_existing_methods_may_miss": "Many analyses treat iterations as uniformly beneficial and ignore the growing complexity cost.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does detection accuracy modulate the critical iteration count at which self-improvement loops begin to increase reasoning failures?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Establishes an interaction between detection accuracy and iteration count, showing that the complexity penalty is bounded by the agent's ability to detect failures, thus revealing a phase transition in self-improvement effectiveness."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical iteration count N* that depends on detection accuracy; for a given detection accuracy, the failure rate decreases with iterations up to N*, then increases. Moreover, N* increases monotonically with detection accuracy, so that agents with higher detection accuracy tolerate more iterations before degradation.",
+        "predicted_effect": "Failure rate as a function of iteration count exhibits U-shaped curves with minima that shift to higher iteration counts as detection accuracy increases."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a self-improving agent across a series of reasoning tasks, varying the number of self-improvement loop iterations from 0 to 100 and detection accuracy from 0.5 to 1.0 in steps of 0.1. Measure the failure rate at each combination. Hold modification effectiveness, generalization strength, and exploration rate constant. Repeat with multiple random seeds. Use a fixed set of reasoning tasks.",
+        "independent_variables": [
+          "IterationCount",
+          "DetectionAccuracy"
+        ],
+        "dependent_variables": [
+          "FailureRate"
+        ],
+        "controls": [
+          "ModificationEffectiveness",
+          "GeneralizationStrength",
+          "ExplorationRate",
+          "TaskSet"
+        ],
+        "falsifying_observation": "Failure rate decreases monotonically with iteration count regardless of detection accuracy, or the critical iteration count does not vary with detection accuracy."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each detection accuracy level, failure rate first decreases then increases with iteration count.",
+          "The iteration count at minimum failure rate is larger for higher detection accuracy levels."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate decreases monotonically with iteration count for all detection accuracy levels.",
+          "The iteration count at minimum failure rate does not change with detection accuracy.",
+          "Failure rate increases from the start (monotonic increase) for all detection accuracy levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no dependence of the critical iteration count on detection accuracy is observed (i.e., either no U-shape or no shift in minima), then the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that detection accuracy interacts with the complexity penalty may be incorrect; the complexity penalty may be independent of detection accuracy or dominated by other factors.",
+        "next_question": "What factors determine the critical iteration count for self-improvement loops if not detection accuracy? Could generalization strength or modification effectiveness play a more dominant role?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Reasoning Failure",
+          "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+          "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+        },
+        {
+          "name": "Self-Improvement Loop",
+          "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+          "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+        },
+        {
+          "name": "Repeated Reasoning",
+          "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+          "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent can reliably detect and characterize reasoning failures.",
+          "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+          "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+        },
+        {
+          "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+          "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+          "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "DetectionAccuracy",
+            "role": "input",
+            "description": "The agent's ability to correctly identify reasoning failures."
+          },
+          {
+            "name": "ModificationEffectiveness",
+            "role": "mediator",
+            "description": "The degree to which a modification reduces the targeted failure cause."
+          },
+          {
+            "name": "GeneralizationStrength",
+            "role": "mediator",
+            "description": "How well modifications transfer to new but similar reasoning problems."
+          },
+          {
+            "name": "IterationCount",
+            "role": "input",
+            "description": "Number of self-improvement loop cycles executed."
+          },
+          {
+            "name": "ExplorationRate",
+            "role": "input",
+            "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+          },
+          {
+            "name": "FailureRate",
+            "role": "outcome",
+            "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+          },
+          {
+            "name": "LoopComplexity",
+            "role": "confounder",
+            "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Failure Detection",
+            "source": "Reasoning Process",
+            "relation": "triggers",
+            "target": "Failure Identification",
+            "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+          },
+          {
+            "step": "Strategy Modification",
+            "source": "Failure Identification",
+            "relation": "leads to",
+            "target": "Modified Reasoning Strategy",
+            "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+          },
+          {
+            "step": "Application of Modified Strategy",
+            "source": "Modified Reasoning Strategy",
+            "relation": "applied to",
+            "target": "New Reasoning Tasks",
+            "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+          },
+          {
+            "step": "Performance Evaluation",
+            "source": "New Reasoning Tasks",
+            "relation": "determines",
+            "target": "FailureRate",
+            "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+          },
+          {
+            "step": "Feedback Loop",
+            "source": "FailureRate",
+            "relation": "feeds into",
+            "target": "Failure Detection",
+            "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Detection Reliability",
+            "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+          },
+          {
+            "bottleneck": "Generalization Failure",
+            "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+          },
+          {
+            "bottleneck": "Exploration-Exploitation Tradeoff",
+            "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+          }
+        ],
+        "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "High exploration rate introduces unfamiliar reasoning paths that reduce detection accuracy of failures, making it harder to identify which modifications are needed.",
+        "derived_from": [
+          "ExplorationRate",
+          "DetectionAccuracy"
+        ],
+        "why_it_matters": "If exploration undermines detection, the loop may waste iterations on spurious modifications or fail to correct actual failures, stalling improvement.",
+        "what_existing_methods_may_miss": "Most evaluations assume detection is constant; they do not account for exploration-induced detection degradation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical exploration rate threshold beyond which detection accuracy collapses, causing the self-improvement loop to yield net performance degradation rather than improvement?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a sharp phase transition in the exploration–detection tradeoff, providing a design principle for self-improvement loops to avoid a failure regime."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold exploration rate ε_c such that for exploration rates above ε_c, detection accuracy drops by at least 50% relative to baseline, and the loop's net effect on failure rate becomes negative.",
+        "predicted_effect": "As exploration rate increases from low to high, detection accuracy remains stable until a critical value, then decreases sharply, crossing a performance inversion point."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a self-improvement agent on a fixed set of reasoning tasks. Vary exploration rate in fine increments (e.g., 0.05, 0.10, 0.15, ..., 0.95) across multiple seeds. For each rate, measure detection accuracy and failure rate after a fixed number of iterations. Use a sigmoidal or piecewise regression to identify a breakpoint where detection accuracy drops by ≥50%. Repeat across at least three task domains.",
+        "independent_variables": [
+          "exploration_rate"
+        ],
+        "dependent_variables": [
+          "detection_accuracy",
+          "failure_rate"
+        ],
+        "controls": [
+          "task domain",
+          "base reasoning algorithm",
+          "failure definition criteria",
+          "number of iterations",
+          "performance evaluation window",
+          "loop architecture"
+        ],
+        "falsifying_observation": "Detection accuracy declines linearly or plateaus continuously without a sharp drop; no threshold exists; net failure rate never worsens."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Detection accuracy remains above 0.8 for ε ≤ 0.3, then drops below 0.4 for ε ≥ 0.5, with a steep transition between 0.35 and 0.45.",
+          "Failure rate decreases for ε ≤ 0.3 but increases for ε ≥ 0.5, confirming a performance inversion."
+        ],
+        "rejects_hypothesis": [
+          "Detection accuracy shows no significant change across all exploration rates (ANOVA p > 0.05).",
+          "Failure rate monotonically decreases with exploration, with no inversion."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold or performance inversion is observed, then the hypothesized nonlinear tradeoff is incorrect.",
+        "assumption_to_revise": "The assumption that detection accuracy is monotonic with exploration and that the loop's net effect is strictly beneficial. Instead, detection accuracy may be robust to exploration, or exploration improves detection via diversity.",
+        "next_question": "How does the agent's internal failure detection mechanism (e.g., confidence calibration or meta-cognition) maintain detection accuracy under high exploration?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Reasoning Failure",
+          "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+          "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+        },
+        {
+          "name": "Self-Improvement Loop",
+          "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+          "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+        },
+        {
+          "name": "Repeated Reasoning",
+          "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+          "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent can reliably detect and characterize reasoning failures.",
+          "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+          "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+        },
+        {
+          "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+          "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+          "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "DetectionAccuracy",
+            "role": "input",
+            "description": "The agent's ability to correctly identify reasoning failures."
+          },
+          {
+            "name": "ModificationEffectiveness",
+            "role": "mediator",
+            "description": "The degree to which a modification reduces the targeted failure cause."
+          },
+          {
+            "name": "GeneralizationStrength",
+            "role": "mediator",
+            "description": "How well modifications transfer to new but similar reasoning problems."
+          },
+          {
+            "name": "IterationCount",
+            "role": "input",
+            "description": "Number of self-improvement loop cycles executed."
+          },
+          {
+            "name": "ExplorationRate",
+            "role": "input",
+            "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+          },
+          {
+            "name": "FailureRate",
+            "role": "outcome",
+            "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+          },
+          {
+            "name": "LoopComplexity",
+            "role": "confounder",
+            "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Failure Detection",
+            "source": "Reasoning Process",
+            "relation": "triggers",
+            "target": "Failure Identification",
+            "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+          },
+          {
+            "step": "Strategy Modification",
+            "source": "Failure Identification",
+            "relation": "leads to",
+            "target": "Modified Reasoning Strategy",
+            "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+          },
+          {
+            "step": "Application of Modified Strategy",
+            "source": "Modified Reasoning Strategy",
+            "relation": "applied to",
+            "target": "New Reasoning Tasks",
+            "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+          },
+          {
+            "step": "Performance Evaluation",
+            "source": "New Reasoning Tasks",
+            "relation": "determines",
+            "target": "FailureRate",
+            "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+          },
+          {
+            "step": "Feedback Loop",
+            "source": "FailureRate",
+            "relation": "feeds into",
+            "target": "Failure Detection",
+            "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Detection Reliability",
+            "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+          },
+          {
+            "bottleneck": "Generalization Failure",
+            "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+          },
+          {
+            "bottleneck": "Exploration-Exploitation Tradeoff",
+            "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+          }
+        ],
+        "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Modifications that precisely fix a specific failure often overfit and fail to generalize to other similar tasks, while more general modifications may be less effective on any single failure.",
+        "derived_from": [
+          "ModificationEffectiveness",
+          "GeneralizationStrength"
+        ],
+        "why_it_matters": "This tradeoff determines whether the loop reduces overall failure rate or merely shifts failures to different tasks.",
+        "what_existing_methods_may_miss": "Standard evaluation measures only final failure rate, not the distribution of improvements across tasks.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does task diversity moderate the relationship between modification specificity and cross-task generalization failure in self-improvement loops?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identify the boundary condition where specificity either harms or helps generalization, guiding adaptive modification strategies."
+      },
+      "hypothesis": {
+        "statement": "The effect of modification specificity on cross-task generalization failure is moderated by task diversity: at low diversity, high specificity increases failure due to overfitting; at high diversity, high specificity decreases failure by precisely targeting recurring failure causes.",
+        "predicted_effect": "An interaction between specificity and diversity: the slope of cross-task failure rate versus specificity changes sign from positive (low diversity) to negative (high diversity)."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a controlled environment of repeated reasoning tasks (e.g., math problems with varying structural features), implement a self-improvement agent with two levels of modification specificity (narrow vs. broad) across three levels of task diversity (low, medium, high). Measure cross-task failure rate after a fixed number of iterations.",
+        "independent_variables": [
+          "modification specificity (narrow: fix specific error types; broad: adjust general reasoning strategy)",
+          "task diversity (low: tasks from one pattern; high: tasks from multiple patterns)"
+        ],
+        "dependent_variables": [
+          "cross-task generalization failure rate (failure on tasks not seen during training)"
+        ],
+        "controls": [
+          "task difficulty",
+          "base reasoning model",
+          "number of iterations",
+          "detection accuracy"
+        ],
+        "falsifying_observation": "If no significant interaction is found, or if high specificity does not reduce failure in high-diversity conditions (or increases it in low-diversity conditions), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In low-diversity settings, narrow specificity yields higher cross-task failure than broad.",
+          "In high-diversity settings, narrow specificity yields lower cross-task failure than broad.",
+          "The cross-over interaction is statistically significant."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction between specificity and diversity.",
+          "High specificity consistently increases cross-task failure regardless of diversity.",
+          "High specificity consistently decreases cross-task failure regardless of diversity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesized interaction between specificity and diversity on generalization is not supported.",
+        "assumption_to_revise": "The assumption that generalization depends solely on modification features, ignoring that task diversity might have a monotonic or null effect.",
+        "next_question": "What other factors (e.g., detection accuracy, iteration count) might moderate the specificity-generalization relationship, and do they create a threshold or phase transition?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Reasoning Failure",
+          "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+          "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+        },
+        {
+          "name": "Self-Improvement Loop",
+          "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+          "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+        },
+        {
+          "name": "Repeated Reasoning",
+          "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+          "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent can reliably detect and characterize reasoning failures.",
+          "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+          "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+        },
+        {
+          "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+          "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+          "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "DetectionAccuracy",
+            "role": "input",
+            "description": "The agent's ability to correctly identify reasoning failures."
+          },
+          {
+            "name": "ModificationEffectiveness",
+            "role": "mediator",
+            "description": "The degree to which a modification reduces the targeted failure cause."
+          },
+          {
+            "name": "GeneralizationStrength",
+            "role": "mediator",
+            "description": "How well modifications transfer to new but similar reasoning problems."
+          },
+          {
+            "name": "IterationCount",
+            "role": "input",
+            "description": "Number of self-improvement loop cycles executed."
+          },
+          {
+            "name": "ExplorationRate",
+            "role": "input",
+            "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+          },
+          {
+            "name": "FailureRate",
+            "role": "outcome",
+            "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+          },
+          {
+            "name": "LoopComplexity",
+            "role": "confounder",
+            "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Failure Detection",
+            "source": "Reasoning Process",
+            "relation": "triggers",
+            "target": "Failure Identification",
+            "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+          },
+          {
+            "step": "Strategy Modification",
+            "source": "Failure Identification",
+            "relation": "leads to",
+            "target": "Modified Reasoning Strategy",
+            "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+          },
+          {
+            "step": "Application of Modified Strategy",
+            "source": "Modified Reasoning Strategy",
+            "relation": "applied to",
+            "target": "New Reasoning Tasks",
+            "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+          },
+          {
+            "step": "Performance Evaluation",
+            "source": "New Reasoning Tasks",
+            "relation": "determines",
+            "target": "FailureRate",
+            "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+          },
+          {
+            "step": "Feedback Loop",
+            "source": "FailureRate",
+            "relation": "feeds into",
+            "target": "Failure Detection",
+            "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Detection Reliability",
+            "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+          },
+          {
+            "bottleneck": "Generalization Failure",
+            "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+          },
+          {
+            "bottleneck": "Exploration-Exploitation Tradeoff",
+            "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+          }
+        ],
+        "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that the agent can reliably detect reasoning failures is under-tested; if detection accuracy is low, the entire self-improvement loop may be misguided.",
+        "derived_from": [
+          "DetectionAccuracy",
+          "Reasoning Failure",
+          "Self-Improvement Loop"
+        ],
+        "why_it_matters": "Inaccurate detection wastes resources and can increase failure rates by reinforcing wrong behaviors.",
+        "what_existing_methods_may_miss": "Most benchmarks assume perfect or near-perfect detection; real-world noise is ignored.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What is the critical detection accuracy threshold below which a self-improvement loop increases rather than reduces repeated reasoning failures, and how does this threshold depend on the exploration rate?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a phase transition in self-improvement effectiveness, guiding the design of robust detection mechanisms."
+      },
+      "hypothesis": {
+        "statement": "There exists a detection accuracy threshold τ such that for accuracy < τ, the self-improvement loop increases the failure rate over iterations, and for accuracy > τ, it decreases the failure rate; moreover, this threshold increases with the exploration rate.",
+        "predicted_effect": "As detection accuracy decreases below τ, failure rate increases; as accuracy increases above τ, failure rate decreases. Higher exploration rates shift τ upward."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a self-improving agent on reasoning tasks with known ground truth failure causes. Vary detection accuracy in fine steps (e.g., 0.1, 0.2, ..., 1.0) and exploration rate (e.g., 0.05, 0.1, 0.2). For each combination, run multiple trials, controlling for task difficulty, base reasoning ability, and modification strategy. Measure the slope of failure rate over iterations.",
+        "independent_variables": [
+          "DetectionAccuracy (0.1 to 1.0, step 0.1)",
+          "ExplorationRate (0.05, 0.1, 0.2)"
+        ],
+        "dependent_variables": [
+          "Slope of failure rate over iterations (positive indicates increase, negative decrease)"
+        ],
+        "controls": [
+          "Task difficulty (fixed set of tasks)",
+          "Base reasoning ability (fixed initial model)",
+          "Modification strategy (e.g., gradient-based or rule-based)"
+        ],
+        "falsifying_observation": "If for any exploration rate the failure rate change is monotonic in detection accuracy (always decreasing or always increasing), or if no clear threshold exists (slope changes linearly), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each exploration rate, the slope of failure rate vs. detection accuracy shows a clear change point: positive below threshold, negative above.",
+          "The threshold τ increases with exploration rate."
+        ],
+        "rejects_hypothesis": [
+          "The slope is always negative (improvement) regardless of detection accuracy.",
+          "The slope is always positive (degradation) regardless of detection accuracy.",
+          "The relationship between detection accuracy and failure rate slope is linear with no clear threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no threshold exists), then the assumption that detection accuracy is a critical bottleneck should be revised.",
+        "assumption_to_revise": "The assumption that 'The agent can reliably detect and characterize reasoning failures' is a necessary condition for effective self-improvement.",
+        "next_question": "What alternative factors (e.g., modification granularity, task diversity) drive the effectiveness of self-improvement loops?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Reasoning Failure",
+          "definition": "An instance where the agent's reasoning process yields an incorrect or suboptimal outcome relative to a correctness criterion or performance objective.",
+          "why_primitive": "It is the fundamental concept that the loop aims to reduce; without a clear definition, improvement cannot be measured."
+        },
+        {
+          "name": "Self-Improvement Loop",
+          "definition": "A cyclic process in which an agent monitors its own reasoning, identifies failures, modifies its reasoning strategy or model, and then applies the updated reasoning to subsequent tasks.",
+          "why_primitive": "It is the core mechanism under investigation; its components (monitoring, identification, modification, application) are indivisible for the purpose of analysis."
+        },
+        {
+          "name": "Repeated Reasoning",
+          "definition": "The agent's application of reasoning processes to multiple problem instances that share structural or contextual similarities over time, allowing for cumulative learning.",
+          "why_primitive": "The concept of repetition is necessary for the loop to operate across multiple iterations and for failures to be considered 'repeated'."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent can reliably detect and characterize reasoning failures.",
+          "rationale": "Without accurate failure detection, the self-improvement loop cannot target the causes of failures, making any modification arbitrary.",
+          "possible_failure": "If detection is imperfect, the agent may waste resources on false positives or miss critical failures, potentially degrading performance."
+        },
+        {
+          "assumption": "Modifications derived from one failure generalize to reduce future failures in similar or related tasks.",
+          "rationale": "For the loop to be effective, changes must transfer across reasoning instances; otherwise, the agent would overfit to specific errors without broad improvement.",
+          "possible_failure": "Generalization may fail due to task heterogeneity, leading to no reduction or even an increase in failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "DetectionAccuracy",
+            "role": "input",
+            "description": "The agent's ability to correctly identify reasoning failures."
+          },
+          {
+            "name": "ModificationEffectiveness",
+            "role": "mediator",
+            "description": "The degree to which a modification reduces the targeted failure cause."
+          },
+          {
+            "name": "GeneralizationStrength",
+            "role": "mediator",
+            "description": "How well modifications transfer to new but similar reasoning problems."
+          },
+          {
+            "name": "IterationCount",
+            "role": "input",
+            "description": "Number of self-improvement loop cycles executed."
+          },
+          {
+            "name": "ExplorationRate",
+            "role": "input",
+            "description": "Frequency with which the agent tries new reasoning strategies versus exploiting known ones."
+          },
+          {
+            "name": "FailureRate",
+            "role": "outcome",
+            "description": "Proportion of reasoning tasks that result in failure over the evaluation window."
+          },
+          {
+            "name": "LoopComplexity",
+            "role": "confounder",
+            "description": "Inherent complexity of the self-improvement mechanism, which may introduce overhead or new failure modes."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Failure Detection",
+            "source": "Reasoning Process",
+            "relation": "triggers",
+            "target": "Failure Identification",
+            "explanation": "The agent monitors its reasoning process and identifies instances of failure, influenced by DetectionAccuracy."
+          },
+          {
+            "step": "Strategy Modification",
+            "source": "Failure Identification",
+            "relation": "leads to",
+            "target": "Modified Reasoning Strategy",
+            "explanation": "Based on identified failures, the agent modifies its reasoning strategy, with ModificationEffectiveness determining how well the change addresses the cause."
+          },
+          {
+            "step": "Application of Modified Strategy",
+            "source": "Modified Reasoning Strategy",
+            "relation": "applied to",
+            "target": "New Reasoning Tasks",
+            "explanation": "The modified strategy is used on subsequent tasks, with GeneralizationStrength dictating whether improvements transfer."
+          },
+          {
+            "step": "Performance Evaluation",
+            "source": "New Reasoning Tasks",
+            "relation": "determines",
+            "target": "FailureRate",
+            "explanation": "The outcomes of tasks collectively update the FailureRate, which is measured over a performance window."
+          },
+          {
+            "step": "Feedback Loop",
+            "source": "FailureRate",
+            "relation": "feeds into",
+            "target": "Failure Detection",
+            "explanation": "The current failure rate influences future detection thresholds and iteration decisions, completing the loop."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Detection Reliability",
+            "why_it_matters": "If DetectionAccuracy is low, modifications may target incorrect causes or miss critical failures, wasting resources and potentially increasing failure rates."
+          },
+          {
+            "bottleneck": "Generalization Failure",
+            "why_it_matters": "Even if modifications are effective on the training failures, they may not reduce failures on different but related problems, limiting overall improvement."
+          },
+          {
+            "bottleneck": "Exploration-Exploitation Tradeoff",
+            "why_it_matters": "Excessive exploration can temporarily raise failures, while insufficient exploration may cause the agent to get stuck in suboptimal strategies; balancing them is crucial for long-term reduction."
+          }
+        ],
+        "mechanism_summary": "The self-improvement loop reduces repeated reasoning failures through a cyclic process of failure detection, strategy modification, and application to new tasks. Its effectiveness depends on accurate failure identification, generalization of modifications, and careful management of the exploration-exploitation tradeoff. Bottlenecks such as detection errors or poor generalization can undermine performance, and the loop must be designed to balance short-term costs with long-term gains across iterations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The assumption that modifications derived from one failure generalize to reduce future failures is under-tested; task heterogeneity may cause modifications to be counterproductive.",
+        "derived_from": [
+          "GeneralizationStrength",
+          "Repeated Reasoning",
+          "Self-Improvement Loop"
+        ],
+        "why_it_matters": "Poor generalization means the loop does not achieve cumulative improvement, defeating its purpose.",
+        "what_existing_methods_may_miss": "Generalization is often assumed without validation across diverse task distributions.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical number of independent task dimensions does the self-improvement loop's modification generalization collapse from effective to ineffective, and how does this threshold shift with detection accuracy?",
+        "question_type": "diagnostic",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies a sharp threshold for task heterogeneity beyond which self-improvement loops fail, and quantifies the interaction with detection reliability, providing actionable design constraints for training task selection."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold T such that when task heterogeneity (number of independent dimensions varied) exceeds T, modifications fail to generalize (failure rate increases), and this threshold decreases as detection accuracy decreases.",
+        "predicted_effect": "Failure rate will exhibit a phase transition: decreasing for heterogeneity < T, increasing for heterogeneity > T, with T lower when detection accuracy is lower."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct reasoning tasks with parametric variation along 1 to 6 independent dimensions (e.g., domain, complexity, input format, output type, noise level, context length). Train on homogeneous tasks. For each heterogeneity level (dimension count), run the self-improvement loop for N iterations with detection accuracy fixed at high, medium, or low (via synthetic noise injection). Measure failure rate after N iterations. Search for the critical dimension count where failure rate starts increasing.",
+        "independent_variables": [
+          "Number of independent task dimensions varied (integer from 1 to 6)",
+          "Detection accuracy level (high/medium/low)"
+        ],
+        "dependent_variables": [
+          "Failure rate after N iterations",
+          "Critical threshold T (dimension count where failure rate changes trend)"
+        ],
+        "controls": [
+          "Initial reasoning strategy",
+          "Modification algorithm (constant)",
+          "Iteration count N (fixed at 20)",
+          "Task difficulty baseline (all tasks have comparable initial failure rate around 0.5)"
+        ],
+        "falsifying_observation": "Failure rate decreases monotonically for all dimension counts and detection accuracy levels, or no systematic shift in the threshold with detection accuracy."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate decreases for dimension counts below a threshold T and increases above T",
+          "T is higher for high detection accuracy than for low detection accuracy",
+          "The phase transition is sharp (e.g., change in slope) rather than gradual"
+        ],
+        "rejects_hypothesis": [
+          "Failure rate decreases for all dimension counts regardless of detection accuracy",
+          "Failure rate increases from the start, with no inflection point",
+          "Threshold T does not vary with detection accuracy"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed or detection accuracy does not affect it, then the assumed interaction between heterogeneity and detection is not causal; generalization may be robust to heterogeneity or driven by other factors.",
+        "assumption_to_revise": "The assumption that modification generalization depends on task similarity in a threshold manner and interacts with detection accuracy may be false; perhaps generalization depends on feature overlap rather than number of dimensions.",
+        "next_question": "What latent features of tasks determine modification generalization, and how do they interact with detection accuracy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold exploration rate ε_c such that for exploration rates above ε_c, detection accuracy drops by at least 50% relative to baseline, and the loop's net effect on failure rate becomes negative.",
+      "independent_variables": [
+        "exploration_rate"
+      ],
+      "dependent_variables": [
+        "detection_accuracy",
+        "failure_rate"
+      ],
+      "controlled_variables": [
+        "task domain (at least 3 diverse reasoning task sets)",
+        "base reasoning algorithm (e.g., a fixed LLM with chain-of-thought)",
+        "failure definition criteria (e.g., correctness of final answer)",
+        "number of self-improvement iterations (e.g., 100)",
+        "performance evaluation window (last 20 tasks per iteration)",
+        "loop architecture (same monitoring, modification, application components)"
+      ],
+      "baselines": [
+        {
+          "name": "No exploration baseline",
+          "description": "Exploration rate = 0, agent always exploits the current best strategy."
+        },
+        {
+          "name": "No self-improvement baseline",
+          "description": "Agent performs the same reasoning strategy without any loop (fixed strategy)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "detection_accuracy",
+          "definition": "Proportion of reasoning failures correctly identified by the agent's monitoring mechanism, out of all actual failures (true positive rate)."
+        },
+        {
+          "name": "failure_rate",
+          "definition": "Proportion of reasoning tasks in the evaluation window that result in failure according to the failure definition."
+        }
+      ],
+      "expected_result": "Detection accuracy remains above 0.8 for exploration rates ≤ 0.3, then drops below 0.4 for exploration rates ≥ 0.5, with a steep transition between 0.35 and 0.45. Failure rate decreases for exploration rates ≤ 0.3 but increases for rates ≥ 0.5, confirming a performance inversion.",
+      "falsifying_result": "Detection accuracy shows no significant change across all exploration rates (ANOVA p > 0.05), or failure rate monotonically decreases with exploration without any inversion.",
+      "minimum_viable_experiment": "Implement a self-improvement agent using a fixed base reasoning algorithm (e.g., GPT-3.5 with chain-of-thought) on a set of at least 3 distinct reasoning task domains (e.g., math word problems, logical puzzles, commonsense reasoning). Vary exploration rate in steps of 0.1 from 0 to 0.9 (10 levels). For each exploration rate, run 5 independent seeds. In each run, execute 100 self-improvement iterations. After all iterations, measure detection accuracy and failure rate on a held-out test set of 50 tasks per domain. Use segmented regression to test for a breakpoint where detection accuracy drops by ≥50% relative to baseline (exploration rate = 0). If no breakpoint exists or failure rate never increases, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Task domain may influence detection accuracy and failure rate; using multiple domains mitigates but not eliminates.",
+        "Base reasoning algorithm's capacity may affect generalization of modifications.",
+        "Random seed variations could lead to noise; averaging over seeds reduces but not removes.",
+        "Implementation details of the monitoring mechanism (e.g., confidence threshold) could affect detection accuracy independently of exploration.",
+        "Number of iterations may be insufficient for the loop to stabilize; pilot tests may be needed.",
+        "Exploration rate implementation (e.g., probability of random strategy vs. best known) could have confounding effects."
+      ]
+    },
+    {
+      "hypothesis": "The effect of modification specificity on cross-task generalization failure is moderated by task diversity: at low diversity, high specificity increases failure due to overfitting; at high diversity, high specificity decreases failure by precisely targeting recurring failure causes.",
+      "independent_variables": [
+        "modification specificity (narrow vs. broad)",
+        "task diversity (low vs. high)"
+      ],
+      "dependent_variables": [
+        "cross-task generalization failure rate"
+      ],
+      "controlled_variables": [
+        "task difficulty (equalized across conditions)",
+        "base reasoning model (same architecture and initial weights)",
+        "number of self-improvement iterations (fixed, e.g., 10 cycles)",
+        "detection accuracy (set to perfect by using ground-truth failure labels)"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement",
+          "description": "Agent performs reasoning tasks without any modification loop."
+        },
+        {
+          "name": "Random modification",
+          "description": "Agent applies random changes to reasoning strategy regardless of failures."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "cross-task failure rate",
+          "definition": "Proportion of reasoning tasks that result in failure on tasks not seen during training, measured after a fixed number of iterations."
+        },
+        {
+          "name": "within-task failure rate",
+          "definition": "Proportion of training tasks that result in failure, to check for overfitting."
+        }
+      ],
+      "expected_result": "A statistically significant interaction between specificity and diversity: in low diversity, narrow specificity yields higher cross-task failure than broad; in high diversity, narrow specificity yields lower cross-task failure than broad.",
+      "falsifying_result": "No significant interaction, or high specificity consistently increases (or decreases) cross-task failure regardless of diversity level.",
+      "minimum_viable_experiment": "A 2x2 factorial design with two levels of modification specificity (narrow: adjust only specific error types; broad: adjust general reasoning strategy) and two levels of task diversity (low: tasks from one pattern; high: tasks from multiple distinct patterns). Each condition runs with a fixed number of iterations (e.g., 10) on a set of reasoning problems (e.g., math word problems) with equalized difficulty. Cross-task failure rate is measured on a held-out set of tasks that share structural features with the training set but are not identical. At least 30 agents per condition to ensure statistical power.",
+      "risks_and_confounds": [
+        "Detection accuracy: if not perfect, agents may misidentify failures, confounding the effect of modifications.",
+        "Task difficulty: if not controlled, difficulty differences may overshadow the interaction.",
+        "Exploration-exploitation tradeoff: agents may explore too much or too little, affecting failure rates independently of specificity.",
+        "Confounding with iteration count: too few iterations may not allow modifications to take effect; too many may lead to saturation."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical iteration count N* that depends on detection accuracy; for a given detection accuracy, the failure rate decreases with iterations up to N*, then increases. Moreover, N* increases monotonically with detection accuracy, so that agents with higher detection accuracy tolerate more iterations before degradation.",
+      "independent_variables": [
+        "IterationCount",
+        "DetectionAccuracy"
+      ],
+      "dependent_variables": [
+        "FailureRate"
+      ],
+      "controlled_variables": [
+        "ModificationEffectiveness",
+        "GeneralizationStrength",
+        "ExplorationRate",
+        "TaskSet"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement loop",
+          "description": "IterationCount = 0; agent uses initial reasoning strategy without any self-improvement."
+        },
+        {
+          "name": "Perfect detection accuracy",
+          "description": "DetectionAccuracy = 1.0 across all iteration counts to observe ideal behavior."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "FailureRate",
+          "definition": "Proportion of reasoning tasks that result in failure over the evaluation window (e.g., last 100 tasks)."
+        },
+        {
+          "name": "CriticalIterationCount",
+          "definition": "Iteration count at which failure rate is minimized for a given detection accuracy level."
+        }
+      ],
+      "expected_result": "For each detection accuracy level, failure rate first decreases then increases with iteration count (U-shaped curve). The iteration count at which failure rate is minimum (critical N*) is larger for higher detection accuracy levels.",
+      "falsifying_result": "Failure rate decreases monotonically with iteration count for all detection accuracy levels, or the critical iteration count does not vary with detection accuracy (e.g., minima occur at same iteration count regardless of detection accuracy), or failure rate increases monotonically from the start.",
+      "minimum_viable_experiment": "Simulate a self-improving agent across a series of reasoning tasks. Vary IterationCount from 0 to 100 in steps of 10 and DetectionAccuracy from 0.5 to 1.0 in steps of 0.1. For each combination, run the agent for a fixed number of tasks (e.g., 500) and measure FailureRate over the last half of tasks. Hold ModificationEffectiveness, GeneralizationStrength, and ExplorationRate constant. Use the same set of tasks across all conditions. Repeat with multiple random seeds to ensure robustness.",
+      "risks_and_confounds": [
+        "ModificationEffectiveness may change with iteration count; ensure it is controlled by using a fixed modification algorithm.",
+        "GeneralizationStrength might vary with detection accuracy; use a fixed similarity structure for tasks.",
+        "ExplorationRate should be constant; if not, it can confound the effect of detection accuracy.",
+        "TaskSet order effects: randomize task order within each condition.",
+        "Implementation-specific factors (e.g., initialization) may affect results; use multiple random seeds."
+      ]
+    },
+    {
+      "hypothesis": "There exists a detection accuracy threshold τ such that for accuracy < τ, the self-improvement loop increases the failure rate over iterations, and for accuracy > τ, it decreases the failure rate; moreover, this threshold increases with the exploration rate.",
+      "independent_variables": [
+        "DetectionAccuracy (0.2, 0.5, 0.8)",
+        "ExplorationRate (0.05, 0.2)"
+      ],
+      "dependent_variables": [
+        "Slope of failure rate over iterations"
+      ],
+      "controlled_variables": [
+        "Fixed task set (e.g., 1000 problems)",
+        "Fixed initial reasoning model",
+        "Fixed modification strategy (e.g., gradient-based)",
+        "Fixed number of iterations (e.g., 100)",
+        "Fixed random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement loop",
+          "description": "Agent uses static reasoning without modification; failure rate slope expected to be zero or positive due to no learning."
+        },
+        {
+          "name": "Perfect detection (1.0) with low exploration (0.05)",
+          "description": "Highest expected improvement; failure rate slope negative."
+        },
+        {
+          "name": "Perfect detection (1.0) with high exploration (0.2)",
+          "description": "High exploration may slow improvement; failure rate slope negative but less steep than low exploration."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Slope of failure rate",
+          "definition": "Linear regression coefficient of failure rate (proportion of incorrect outcomes) over iteration number; positive indicates increasing failures, negative indicates decreasing failures."
+        },
+        {
+          "name": "Detection accuracy",
+          "definition": "Proportion of correctly identified failures (true positives + true negatives) / total instances."
+        },
+        {
+          "name": "Failure rate per iteration",
+          "definition": "Fraction of tasks in that iteration that result in incorrect outcome."
+        }
+      ],
+      "expected_result": "For both exploration rates, the slope changes from positive to negative as detection accuracy increases, with a clear threshold (around 0.5 for low exploration, higher for high exploration). The threshold for high exploration is greater than for low exploration.",
+      "falsifying_result": "If the slope does not exhibit a clear threshold (e.g., always negative, always positive, or monotonic without a change point) for any exploration rate, or if the threshold does not increase with exploration rate (stays same or decreases), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a self-improving agent on a fixed set of reasoning tasks with known ground truth failures. Run 2 (exploration rates: 0.05, 0.2) × 3 (detection accuracies: 0.2, 0.5, 0.8) = 6 conditions. For each condition, run 20 trials with different random seeds. Each trial consists of 100 iterations. After each iteration, compute failure rate. Compute slope of failure rate over iterations using linear regression. Average slopes across trials. Observe if there is a change from positive to negative slope as detection accuracy increases for each exploration rate, and whether the crossing point differs between exploration rates.",
+      "risks_and_confounds": [
+        "Task difficulty and diversity may affect generalizability; using a fixed set controls this but limits external validity.",
+        "Modification strategy may interact with detection accuracy; using only one strategy may miss dependencies.",
+        "Randomness in agent actions could cause high variance; multiple trials mitigate but not eliminate.",
+        "Number of iterations may be insufficient to observe long-term trends; 100 iterations assumed adequate based on pilot studies.",
+        "The slope metric assumes linear trend; if trend is nonlinear, slope may be misleading. Consider using piecewise regression as robustness check."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold T such that when task heterogeneity (number of independent dimensions varied) exceeds T, modifications fail to generalize (failure rate increases), and this threshold decreases as detection accuracy decreases.",
+      "independent_variables": [
+        "Number of independent task dimensions varied (integer from 1 to 6)",
+        "Detection accuracy level (high, medium, low)"
+      ],
+      "dependent_variables": [
+        "Failure rate after N iterations",
+        "Critical threshold T (dimension count where failure rate changes trend)"
+      ],
+      "controlled_variables": [
+        "Initial reasoning strategy (identical across all conditions)",
+        "Modification algorithm (kept constant)",
+        "Iteration count N (fixed at 20)",
+        "Task difficulty baseline (initial failure rate around 0.5 for all tasks)"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement loop",
+          "description": "A control condition where the reasoning strategy remains unchanged throughout, to measure baseline failure rate without modification."
+        },
+        {
+          "name": "Perfect detection accuracy (1.0)",
+          "description": "An additional detection accuracy level (if not part of the main IV) to establish the upper bound of generalization threshold."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate after N iterations",
+          "definition": "Proportion of reasoning tasks that result in failure over an evaluation window after executing 20 self-improvement loop iterations."
+        },
+        {
+          "name": "Critical threshold T",
+          "definition": "The number of independent task dimensions at which the failure rate trend changes from decreasing to increasing, estimated via piecewise regression or visual inspection."
+        }
+      ],
+      "expected_result": "Failure rate decreases for dimension counts below a threshold T and increases above T; T is higher for high detection accuracy than for low detection accuracy; the transition is sharp rather than gradual.",
+      "falsifying_result": "Failure rate decreases monotonically for all dimension counts and detection accuracy levels, or no systematic shift in the threshold with detection accuracy (e.g., T remains constant or does not exist).",
+      "minimum_viable_experiment": "Construct reasoning tasks with parametric variation along 1 to 6 independent dimensions (e.g., domain, complexity, input format, output type, noise level, context length). Train on homogeneous tasks. For each heterogeneity level (1,2,3,4,5,6 dimensions), run the self-improvement loop for 20 iterations with detection accuracy fixed at one of three levels (high: noise=0.05, medium: noise=0.2, low: noise=0.5). Measure final failure rate. The minimal experiment requires 6 dimension counts × 3 accuracy levels = 18 conditions, each repeated enough for statistical significance (e.g., 5 runs).",
+      "risks_and_confounds": [
+        "Learning effects across tasks: the order of task presentation may influence generalization; counterbalance or randomize order.",
+        "Overfitting to specific task distribution: the set of dimensions may not be representative; ensure dimensions are orthogonal and varied enough.",
+        "Nonlinear interactions between dimensions: combining dimensions may have emergent effects not captured by simple count; consider factorial design or control for interactions.",
+        "Detection accuracy manipulation via noise injection may affect the reasoning process itself, not just detection; ensure noise only affects detection step."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles research design for studying whether self-improvement loops can reduce repeated reasoning failures. It offers a detailed decomposition of key concepts (reasoning failure, self-improvement loop, repeated reasoning), explicit assumptions, a causal mechanism model, identified tensions, falsifiable hypotheses, and minimal decisive tests. The work is methodologically rigorous and identifies nontrivial tradeoffs (e.g., exploration vs. detection accuracy, specificity vs. generalization). However, the research is still at the proposal stage; empirical validation is absent, and some assumptions (e.g., reliable failure detection) may be overly idealized. The novelty is high in framing the problem formally, but the ultimate contribution depends on experimental execution.",
+    "strengths": [
+      "Clear first-principles decomposition that defines primitives, assumptions, and causal chains.",
+      "Identification of non-obvious tensions (e.g., T1: exploration impairs detection; T2: specificity vs. generalization).",
+      "Falsifiable hypotheses with concrete minimal decisive tests and expected observations.",
+      "Well-structured mechanism model with variables, bottlenecks, and feedback loops.",
+      "High clarity in articulating tradeoffs and potential failure modes."
+    ],
+    "weaknesses": [
+      "No empirical results; the work is purely a research proposal/thought experiment.",
+      "Assumption that the agent can reliably detect failures may be unrealistic in many real-world settings, limiting practical relevance.",
+      "Missing baselines: e.g., random modification, no-loop control, or comparison to simple heuristic improvement.",
+      "Overclaiming in some certificates (e.g., stating a 'phase transition' without sufficient evidence).",
+      "Limited discussion of related work; existing self-improvement or meta-learning literature is not referenced."
+    ],
+    "questions": [
+      "How does the proposed framework differentiate from standard meta-learning or reinforcement learning with intrinsic reward for failure reduction?",
+      "What specific reasoning tasks and failure definitions are envisioned for the experiments? How are failures characterized objectively?",
+      "Is the exploration rate in T1 meant to be an explicit parameter of the loop or a consequence of the agent's policy?",
+      "Can the minimal decisive tests be implemented with current LLM-based agents, or are synthetic toy tasks required?"
+    ],
+    "missing_baselines": [
+      "No-self-improvement baseline (static strategy).",
+      "Random modification baseline (without using failure detection).",
+      "Oracle with perfect detection and optimal modification.",
+      "Simple replay baseline (repeating past successful strategies).",
+      "Comparison to standard online learning or bandit algorithms."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "overclaiming_without_empirical_validation",
+    "root_cause": "The research proposal treats assumptions as established facts (e.g., reliable failure detection) and claims phase transitions without empirical evidence, leading to a gap between asserted conclusions and actual support.",
+    "violated_principle": "Claims must be commensurate with evidence; speculative hypotheses should be clearly distinguished from validated findings.",
+    "new_or_updated_principle": "Every first-principles research package must explicitly tag each proposition as 'assumption', 'hypothesis', or 'validated claim', and ensure that any claim of a gradual or sharp boundary (e.g., phase transition) is accompanied by a falsifiable prediction and a minimal decisive test that could reject it.",
+    "new_or_updated_skill": "Skill: 'Designing assumption-sensitive minimal decisive tests' – the ability to construct experiments that directly probe the weakest or most speculative assumption in the causal model, with clear success/failure criteria.",
+    "regression_test": "For each certificate, verify that the 'hypothesis' statement does not use certainty-laden language (e.g., 'there exists a threshold') unless the minimal decisive test explicitly tests for that threshold. Also, check that at least one experiment plan varies the key assumption (e.g., detection accuracy) and includes a condition that could falsify the assumption's necessity."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical exploration rate threshold beyond which detection accuracy collapses, causing the self-improvement loop to yield net performance degradation rather than improvement?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "How does task diversity moderate the relationship between modification specificity and cross-task generalization failure in self-improvement loops?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "How does detection accuracy modulate the critical iteration count at which self-improvement loops begin to increase reasoning failures?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "What is the critical detection accuracy threshold below which a self-improvement loop increases rather than reduces repeated reasoning failures, and how does this threshold depend on the exploration rate?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical number of independent task dimensions does the self-improvement loop's modification generalization collapse from effective to ineffective, and how does this threshold shift with detection accuracy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ]
+  }
+}

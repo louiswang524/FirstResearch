@@ -1,0 +1,1787 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool-use routing",
+        "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+        "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+      },
+      {
+        "name": "Coding agent",
+        "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+        "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+      },
+      {
+        "name": "Failure",
+        "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+        "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+        "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+        "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+      },
+      {
+        "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+        "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+        "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. exploitation in routing policy learning",
+        "variables": [
+          "exploration rate",
+          "learning iterations",
+          "task novelty"
+        ]
+      },
+      {
+        "tradeoff": "Specificity vs. generality of tools",
+        "variables": [
+          "tool specialization",
+          "task diversity",
+          "routing complexity"
+        ]
+      },
+      {
+        "tradeoff": "Complexity vs. interpretability of the routing policy",
+        "variables": [
+          "policy depth",
+          "number of rules",
+          "debugging ease"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree of novelty in the coding task relative to past experiences."
+      },
+      {
+        "name": "task_diversity",
+        "role": "input",
+        "description": "Variety of different tasks the agent encounters."
+      },
+      {
+        "name": "tool_specialization",
+        "role": "input",
+        "description": "How specialized each tool is for narrow vs broad functions."
+      },
+      {
+        "name": "exploration_rate",
+        "role": "mediator",
+        "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+      },
+      {
+        "name": "learning_iterations",
+        "role": "mediator",
+        "description": "Number of training or adaptation steps for the routing policy."
+      },
+      {
+        "name": "routing_complexity",
+        "role": "mediator",
+        "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+      },
+      {
+        "name": "policy_depth",
+        "role": "mediator",
+        "description": "Depth of decision tree or layers in the routing policy."
+      },
+      {
+        "name": "number_of_rules",
+        "role": "mediator",
+        "description": "Count of explicit rules in a rule-based routing policy."
+      },
+      {
+        "name": "routing_quality",
+        "role": "output",
+        "description": "Correctness and efficiency of tool-use routing decisions."
+      },
+      {
+        "name": "failure",
+        "role": "outcome",
+        "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": null,
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "exploration_rate",
+        "explanation": "High novelty requires more exploration to discover effective tool usage."
+      },
+      {
+        "step": null,
+        "source": "task_diversity",
+        "relation": "increases",
+        "target": "exploration_rate",
+        "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+      },
+      {
+        "step": null,
+        "source": "tool_specialization",
+        "relation": "increases",
+        "target": "routing_complexity",
+        "explanation": "More specialized tools demand a more nuanced routing policy."
+      },
+      {
+        "step": null,
+        "source": "exploration_rate",
+        "relation": "affects",
+        "target": "routing_quality",
+        "explanation": "Too much exploration wastes resources; too little misses better tools."
+      },
+      {
+        "step": null,
+        "source": "learning_iterations",
+        "relation": "affects",
+        "target": "routing_quality",
+        "explanation": "More iterations can improve quality but risk overfitting."
+      },
+      {
+        "step": null,
+        "source": "routing_complexity",
+        "relation": "affects",
+        "target": "routing_quality",
+        "explanation": "Overly complex policies may be brittle and hard to debug."
+      },
+      {
+        "step": null,
+        "source": "policy_depth",
+        "relation": "increases",
+        "target": "routing_complexity",
+        "explanation": "Deeper policies add more parameters to tune."
+      },
+      {
+        "step": null,
+        "source": "number_of_rules",
+        "relation": "increases",
+        "target": "routing_complexity",
+        "explanation": "More rules increase the chance of conflicts and errors."
+      },
+      {
+        "step": null,
+        "source": "routing_quality",
+        "relation": "determines",
+        "target": "failure",
+        "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+        "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+      },
+      {
+        "bottleneck": "Policy complexity growing faster than debuggability",
+        "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+      },
+      {
+        "bottleneck": "Mismatch between tool specialization and task requirements",
+        "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The routing policy must balance exploring new tool actions and exploiting known effective ones, but high task novelty and diversity push for exploration while limited learning iterations require exploitation.",
+      "derived_from": [
+        "core_tradeoffs: Exploration vs. exploitation in routing policy learning",
+        "causal_chain: exploration_rate affects routing_quality"
+      ],
+      "why_it_matters": "Without proper balance, the agent either wastes time exploring or fails to adapt to new tasks.",
+      "what_existing_methods_may_miss": "Existing methods often assume a fixed exploration schedule, missing the dynamic adjustment needed for varying novelty.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Specialized tools improve performance on specific tasks but increase routing complexity and may fail on diverse tasks.",
+      "derived_from": [
+        "core_tradeoffs: Specificity vs. generality of tools",
+        "bottleneck: Mismatch between tool specialization and task requirements"
+      ],
+      "why_it_matters": "Agent may lack appropriate tool for novel tasks or incur high routing overhead.",
+      "what_existing_methods_may_miss": "Many benchmarks use fixed tool sets, ignoring the impact of tool specialization on generalization.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Complex routing policies (deep, many rules) can achieve higher accuracy but become brittle and hard to debug.",
+      "derived_from": [
+        "core_tradeoffs: Complexity vs. interpretability of the routing policy",
+        "causal_chain: policy_depth increases routing_complexity",
+        "causal_chain: number_of_rules increases routing_complexity"
+      ],
+      "why_it_matters": "Debugging failures becomes difficult, leading to systematic errors that are hard to trace.",
+      "what_existing_methods_may_miss": "Evaluation often focuses on accuracy, not debuggability; failures in complex policies are rarely analyzed.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that tools have stable capabilities may be violated in practice, causing routing decisions based on outdated models.",
+      "derived_from": [
+        "assumptions: The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces."
+      ],
+      "why_it_matters": "Real-world tools update, leading to brittle policies that fail when tool behavior changes.",
+      "what_existing_methods_may_miss": "Most research assumes static tool environments; dynamic changes are understudied.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The assumption that the routing mechanism maximizes a known objective may be false if the objective is misaligned with user goals or too complex to optimize.",
+      "derived_from": [
+        "assumptions: The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted."
+      ],
+      "why_it_matters": "Agent may optimize wrong metrics, leading to failures even when routing is 'optimal' by the proxy objective.",
+      "what_existing_methods_may_miss": "Many systems assume a clear objective; in practice, user goals are multi-faceted and hard to specify.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the optimal exploration rate in routing policy vary as a function of task novelty and diversity in coding agents?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Provides a dynamic scheduling rule for exploration-exploitation balance, improving adaptation to varying task conditions."
+    },
+    {
+      "question": "Does increasing tool specialization improve routing quality for a narrow task set but degrade performance on diverse tasks?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the tradeoff between tool specificity and generality, guiding tool set design."
+    },
+    {
+      "question": "What is the relationship between routing policy depth and the frequency of systematic errors that are hard to debug?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Establishes a metric for debuggability, enabling simpler policy design without sacrificing accuracy."
+    },
+    {
+      "question": "How does the routing policy's failure rate change when tool capabilities are dynamically updated, compared to a static tool environment?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Identifies robustness gaps in current routing methods under real-world tool changes."
+    },
+    {
+      "question": "Can a routing policy that maximizes task completion rate simultaneously achieve low user dissatisfaction when user goals are multi-faceted?",
+      "question_type": "benchmark",
+      "source_tension": "T5",
+      "expected_contribution": "Highlights misalignment risks and motivates multi-objective optimization for routing policies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+        },
+        {
+          "name": "Coding agent",
+          "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+          "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+        },
+        {
+          "name": "Failure",
+          "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+          "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+          "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+          "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+        },
+        {
+          "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+          "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+          "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree of novelty in the coding task relative to past experiences."
+          },
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of different tasks the agent encounters."
+          },
+          {
+            "name": "tool_specialization",
+            "role": "input",
+            "description": "How specialized each tool is for narrow vs broad functions."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "mediator",
+            "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+          },
+          {
+            "name": "learning_iterations",
+            "role": "mediator",
+            "description": "Number of training or adaptation steps for the routing policy."
+          },
+          {
+            "name": "routing_complexity",
+            "role": "mediator",
+            "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+          },
+          {
+            "name": "policy_depth",
+            "role": "mediator",
+            "description": "Depth of decision tree or layers in the routing policy."
+          },
+          {
+            "name": "number_of_rules",
+            "role": "mediator",
+            "description": "Count of explicit rules in a rule-based routing policy."
+          },
+          {
+            "name": "routing_quality",
+            "role": "output",
+            "description": "Correctness and efficiency of tool-use routing decisions."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "High novelty requires more exploration to discover effective tool usage."
+          },
+          {
+            "step": null,
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+          },
+          {
+            "step": null,
+            "source": "tool_specialization",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More specialized tools demand a more nuanced routing policy."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Too much exploration wastes resources; too little misses better tools."
+          },
+          {
+            "step": null,
+            "source": "learning_iterations",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "More iterations can improve quality but risk overfitting."
+          },
+          {
+            "step": null,
+            "source": "routing_complexity",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Overly complex policies may be brittle and hard to debug."
+          },
+          {
+            "step": null,
+            "source": "policy_depth",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "Deeper policies add more parameters to tune."
+          },
+          {
+            "step": null,
+            "source": "number_of_rules",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More rules increase the chance of conflicts and errors."
+          },
+          {
+            "step": null,
+            "source": "routing_quality",
+            "relation": "determines",
+            "target": "failure",
+            "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+            "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+          },
+          {
+            "bottleneck": "Policy complexity growing faster than debuggability",
+            "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+          },
+          {
+            "bottleneck": "Mismatch between tool specialization and task requirements",
+            "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Complex routing policies (deep, many rules) can achieve higher accuracy but become brittle and hard to debug.",
+        "derived_from": [
+          "core_tradeoffs: Complexity vs. interpretability of the routing policy",
+          "causal_chain: policy_depth increases routing_complexity",
+          "causal_chain: number_of_rules increases routing_complexity"
+        ],
+        "why_it_matters": "Debugging failures becomes difficult, leading to systematic errors that are hard to trace.",
+        "what_existing_methods_may_miss": "Evaluation often focuses on accuracy, not debuggability; failures in complex policies are rarely analyzed.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "When does increasing routing policy depth in coding agents cause tool-use routing failures that become undebuggable?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a critical depth threshold beyond which routing failures become systematic and undecomposable, guiding simpler and more interpretable policy design."
+      },
+      "hypothesis": {
+        "statement": "When policy depth exceeds 5, the rate of systematic, unidentifiable tool-use routing failures increases by at least 2x compared to depth ≤5, and above depth 7, nearly all failures become undebuggable.",
+        "predicted_effect": "There is a sharp phase transition in the proportion of routing failures that cannot be traced to a single cause as depth crosses the threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with a rule-based routing policy. Vary policy depth (1, 3, 5, 7, 9) while keeping the number of rules constant at 20. Test on 1000 diverse coding tasks from SWE-bench and a hand-crafted set of 200 tasks designed to trigger routing decisions. Record the proportion of tasks that fail (incorrect/cost-inefficient) and among those, the proportion whose root cause cannot be identified by a human debugger within 5 minutes. Also measure the average debug time for identified failures. Control for tool set, exploration rate (fixed at 0.1), and learning iterations (none—static policy).",
+        "independent_variables": [
+          "policy_depth"
+        ],
+        "dependent_variables": [
+          "proportion_of_routing_failures",
+          "proportion_of_failures_that_are_undebuggable",
+          "average_debug_time_for_identifiable_failures"
+        ],
+        "controls": [
+          "number_of_rules",
+          "tool_set",
+          "task_diversity",
+          "exploration_rate",
+          "learning_iterations"
+        ],
+        "falsifying_observation": "No sharp increase in undebuggable failure proportion at depth 5 or 7; instead, a gradual linear increase or no increase."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The proportion of undebuggable failures is less than 10% for depth ≤5 and jumps to over 40% for depth >5.",
+          "Average debug time for identifiable failures exceeds 3 minutes for depth >5, vs. <1 minute for depth ≤5."
+        ],
+        "rejects_hypothesis": [
+          "Undebuggable failure proportion remains below 20% for all depths.",
+          "No significant difference in debug time across depths.",
+          "Depth 9 shows lower undebuggable proportion than depth 7."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold effect is observed, we will test for an interaction between policy depth and rule count, and consider non-monotonic relationships.",
+        "assumption_to_revise": "The assumption that depth monotonically increases routing failure undebuggability; instead, a U-shaped or moderated relationship may exist.",
+        "next_question": "How does the number of decision rules interact with policy depth to determine routing failure debuggability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+        },
+        {
+          "name": "Coding agent",
+          "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+          "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+        },
+        {
+          "name": "Failure",
+          "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+          "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+          "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+          "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+        },
+        {
+          "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+          "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+          "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree of novelty in the coding task relative to past experiences."
+          },
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of different tasks the agent encounters."
+          },
+          {
+            "name": "tool_specialization",
+            "role": "input",
+            "description": "How specialized each tool is for narrow vs broad functions."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "mediator",
+            "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+          },
+          {
+            "name": "learning_iterations",
+            "role": "mediator",
+            "description": "Number of training or adaptation steps for the routing policy."
+          },
+          {
+            "name": "routing_complexity",
+            "role": "mediator",
+            "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+          },
+          {
+            "name": "policy_depth",
+            "role": "mediator",
+            "description": "Depth of decision tree or layers in the routing policy."
+          },
+          {
+            "name": "number_of_rules",
+            "role": "mediator",
+            "description": "Count of explicit rules in a rule-based routing policy."
+          },
+          {
+            "name": "routing_quality",
+            "role": "output",
+            "description": "Correctness and efficiency of tool-use routing decisions."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "High novelty requires more exploration to discover effective tool usage."
+          },
+          {
+            "step": null,
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+          },
+          {
+            "step": null,
+            "source": "tool_specialization",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More specialized tools demand a more nuanced routing policy."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Too much exploration wastes resources; too little misses better tools."
+          },
+          {
+            "step": null,
+            "source": "learning_iterations",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "More iterations can improve quality but risk overfitting."
+          },
+          {
+            "step": null,
+            "source": "routing_complexity",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Overly complex policies may be brittle and hard to debug."
+          },
+          {
+            "step": null,
+            "source": "policy_depth",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "Deeper policies add more parameters to tune."
+          },
+          {
+            "step": null,
+            "source": "number_of_rules",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More rules increase the chance of conflicts and errors."
+          },
+          {
+            "step": null,
+            "source": "routing_quality",
+            "relation": "determines",
+            "target": "failure",
+            "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+            "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+          },
+          {
+            "bottleneck": "Policy complexity growing faster than debuggability",
+            "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+          },
+          {
+            "bottleneck": "Mismatch between tool specialization and task requirements",
+            "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The assumption that the routing mechanism maximizes a known objective may be false if the objective is misaligned with user goals or too complex to optimize.",
+        "derived_from": [
+          "assumptions: The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted."
+        ],
+        "why_it_matters": "Agent may optimize wrong metrics, leading to failures even when routing is 'optimal' by the proxy objective.",
+        "what_existing_methods_may_miss": "Many systems assume a clear objective; in practice, user goals are multi-faceted and hard to specify.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Under what combination of task novelty and task diversity does the exploration-exploitation tradeoff in tool-use routing cause failure in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies a sharp boundary condition where routing policies fail due to misaligned exploration, providing a diagnostic for when to adapt routing strategies."
+      },
+      "hypothesis": {
+        "statement": "For a fixed set of tools, there exists a critical novelty-diversity threshold above which any routing policy that does not dynamically adjust its exploration rate will cause failure (incorrect code or excessive tool calls) in more than 50% of tasks.",
+        "predicted_effect": "Failure rate jumps from below 20% to above 50% at the threshold, indicating a phase transition in routing viability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a coding agent with a static rule-based routing policy on a set of coding tasks varying in novelty (low/medium/high) and diversity (low/high). Measure failure rate (incorrect output or >5 tool calls beyond optimal) for each combination. Repeat with a policy that adapts exploration rate based on recent success.",
+        "independent_variables": [
+          "task novelty (low, medium, high)",
+          "task diversity (low, high)"
+        ],
+        "dependent_variables": [
+          "failure rate (proportion of tasks with incorrect output or excessive tool calls)"
+        ],
+        "controls": [
+          "same tool set (code interpreter, web search, file editor)",
+          "same coding agent architecture (LLM + tool interface)",
+          "same task set size per condition",
+          "same evaluation metric for correctness"
+        ],
+        "falsifying_observation": "The failure rate remains below 50% for all novelty-diversity combinations with the static policy."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low novelty and low diversity, failure rate < 20%.",
+          "At high novelty and high diversity, failure rate > 50% with static policy but < 30% with adaptive policy.",
+          "Clear threshold observed where failure rate jumps sharply (e.g., from 25% to 65%)."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate never exceeds 50% for any condition with static policy.",
+          "Static and adaptive policies yield similar failure rates across all conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed (failure rate remains low across conditions), then the primary driver of failure is not the exploration-exploitation tradeoff but another factor such as tool capability limitations.",
+        "assumption_to_revise": "The assumption that the exploration rate must adapt to task novelty and diversity to avoid failure.",
+        "next_question": "Under what conditions of tool specialization and task complexity does tool capability mismatch (rather than policy adaptation) cause routing failure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+        },
+        {
+          "name": "Coding agent",
+          "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+          "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+        },
+        {
+          "name": "Failure",
+          "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+          "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+          "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+          "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+        },
+        {
+          "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+          "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+          "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree of novelty in the coding task relative to past experiences."
+          },
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of different tasks the agent encounters."
+          },
+          {
+            "name": "tool_specialization",
+            "role": "input",
+            "description": "How specialized each tool is for narrow vs broad functions."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "mediator",
+            "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+          },
+          {
+            "name": "learning_iterations",
+            "role": "mediator",
+            "description": "Number of training or adaptation steps for the routing policy."
+          },
+          {
+            "name": "routing_complexity",
+            "role": "mediator",
+            "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+          },
+          {
+            "name": "policy_depth",
+            "role": "mediator",
+            "description": "Depth of decision tree or layers in the routing policy."
+          },
+          {
+            "name": "number_of_rules",
+            "role": "mediator",
+            "description": "Count of explicit rules in a rule-based routing policy."
+          },
+          {
+            "name": "routing_quality",
+            "role": "output",
+            "description": "Correctness and efficiency of tool-use routing decisions."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "High novelty requires more exploration to discover effective tool usage."
+          },
+          {
+            "step": null,
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+          },
+          {
+            "step": null,
+            "source": "tool_specialization",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More specialized tools demand a more nuanced routing policy."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Too much exploration wastes resources; too little misses better tools."
+          },
+          {
+            "step": null,
+            "source": "learning_iterations",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "More iterations can improve quality but risk overfitting."
+          },
+          {
+            "step": null,
+            "source": "routing_complexity",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Overly complex policies may be brittle and hard to debug."
+          },
+          {
+            "step": null,
+            "source": "policy_depth",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "Deeper policies add more parameters to tune."
+          },
+          {
+            "step": null,
+            "source": "number_of_rules",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More rules increase the chance of conflicts and errors."
+          },
+          {
+            "step": null,
+            "source": "routing_quality",
+            "relation": "determines",
+            "target": "failure",
+            "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+            "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+          },
+          {
+            "bottleneck": "Policy complexity growing faster than debuggability",
+            "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+          },
+          {
+            "bottleneck": "Mismatch between tool specialization and task requirements",
+            "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The routing policy must balance exploring new tool actions and exploiting known effective ones, but high task novelty and diversity push for exploration while limited learning iterations require exploitation.",
+        "derived_from": [
+          "core_tradeoffs: Exploration vs. exploitation in routing policy learning",
+          "causal_chain: exploration_rate affects routing_quality"
+        ],
+        "why_it_matters": "Without proper balance, the agent either wastes time exploring or fails to adapt to new tasks.",
+        "what_existing_methods_may_miss": "Existing methods often assume a fixed exploration schedule, missing the dynamic adjustment needed for varying novelty.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the optimal exploration rate in routing policy vary as a function of task novelty and diversity in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Provides a dynamic scheduling rule for exploration-exploitation balance, improving adaptation to varying task conditions."
+      },
+      "hypothesis": {
+        "statement": "The optimal exploration rate (epsilon) in a coding agent's routing policy increases with both task novelty and task diversity, but with diminishing returns when both are high, such that the relationship is subadditive.",
+        "predicted_effect": "Higher task novelty and diversity each independently increase the optimal exploration rate, but the combined effect is less than the sum of individual effects, leading to a plateau at extreme levels."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a configurable exploration rate (epsilon) in a bandit-like environment with a set of coding tools. Generate tasks parametrically varying in novelty (low vs high) and diversity (low vs high). Measure task success rate and efficiency across a grid of epsilon values. Identify the epsilon that maximizes a composite score for each (novelty, diversity) combination.",
+        "independent_variables": [
+          "task_novelty (low/high)",
+          "task_diversity (low/high)",
+          "exploration_rate (continuous, e.g., 0.0 to 1.0 with step 0.1)"
+        ],
+        "dependent_variables": [
+          "routing_quality (task success rate, inverse of number of tool calls, correctness score)",
+          "composite_score (weighted sum of success and efficiency)"
+        ],
+        "controls": [
+          "same tool set (e.g., code interpreter, web search, file system)",
+          "same learning algorithm (e.g., Q-learning with fixed learning rate)",
+          "fixed number of learning iterations (e.g., 1000 per task)",
+          "same policy initialization"
+        ],
+        "falsifying_observation": "If the optimal exploration rate does not increase with both novelty and diversity, or if it decreases for high values, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low novelty and low diversity, optimal epsilon is low (e.g., 0.1).",
+          "For high novelty or high diversity, optimal epsilon shifts higher (e.g., 0.3-0.5).",
+          "For both high, optimal epsilon is high but not as high as sum (e.g., 0.6, not 0.8)."
+        ],
+        "rejects_hypothesis": [
+          "Optimal epsilon is independent of novelty/diversity.",
+          "Optimal epsilon decreases with increasing novelty.",
+          "Optimal epsilon increases monotonically but additively (no subadditivity)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (e.g., optimal exploration rate does not increase as predicted), then we reject the assumption that exploration rate alone mediates the effect.",
+        "assumption_to_revise": "The assumption that exploration rate is a free, uncorrelated parameter - it may actually interact with tool specialization or policy complexity.",
+        "next_question": "How does tool specialization moderate the effect of task novelty on optimal exploration rate in coding agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+        },
+        {
+          "name": "Coding agent",
+          "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+          "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+        },
+        {
+          "name": "Failure",
+          "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+          "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+          "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+          "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+        },
+        {
+          "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+          "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+          "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree of novelty in the coding task relative to past experiences."
+          },
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of different tasks the agent encounters."
+          },
+          {
+            "name": "tool_specialization",
+            "role": "input",
+            "description": "How specialized each tool is for narrow vs broad functions."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "mediator",
+            "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+          },
+          {
+            "name": "learning_iterations",
+            "role": "mediator",
+            "description": "Number of training or adaptation steps for the routing policy."
+          },
+          {
+            "name": "routing_complexity",
+            "role": "mediator",
+            "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+          },
+          {
+            "name": "policy_depth",
+            "role": "mediator",
+            "description": "Depth of decision tree or layers in the routing policy."
+          },
+          {
+            "name": "number_of_rules",
+            "role": "mediator",
+            "description": "Count of explicit rules in a rule-based routing policy."
+          },
+          {
+            "name": "routing_quality",
+            "role": "output",
+            "description": "Correctness and efficiency of tool-use routing decisions."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "High novelty requires more exploration to discover effective tool usage."
+          },
+          {
+            "step": null,
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+          },
+          {
+            "step": null,
+            "source": "tool_specialization",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More specialized tools demand a more nuanced routing policy."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Too much exploration wastes resources; too little misses better tools."
+          },
+          {
+            "step": null,
+            "source": "learning_iterations",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "More iterations can improve quality but risk overfitting."
+          },
+          {
+            "step": null,
+            "source": "routing_complexity",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Overly complex policies may be brittle and hard to debug."
+          },
+          {
+            "step": null,
+            "source": "policy_depth",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "Deeper policies add more parameters to tune."
+          },
+          {
+            "step": null,
+            "source": "number_of_rules",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More rules increase the chance of conflicts and errors."
+          },
+          {
+            "step": null,
+            "source": "routing_quality",
+            "relation": "determines",
+            "target": "failure",
+            "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+            "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+          },
+          {
+            "bottleneck": "Policy complexity growing faster than debuggability",
+            "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+          },
+          {
+            "bottleneck": "Mismatch between tool specialization and task requirements",
+            "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Specialized tools improve performance on specific tasks but increase routing complexity and may fail on diverse tasks.",
+        "derived_from": [
+          "core_tradeoffs: Specificity vs. generality of tools",
+          "bottleneck: Mismatch between tool specialization and task requirements"
+        ],
+        "why_it_matters": "Agent may lack appropriate tool for novel tasks or incur high routing overhead.",
+        "what_existing_methods_may_miss": "Many benchmarks use fixed tool sets, ignoring the impact of tool specialization on generalization.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does increasing tool specialization improve routing quality for a narrow task set but degrade performance on diverse tasks?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Quantifies the tradeoff between tool specificity and generality, guiding tool set design."
+      },
+      "hypothesis": {
+        "statement": "Increasing tool specialization improves routing quality for a narrow task set but degrades performance on diverse tasks.",
+        "predicted_effect": "For narrow tasks, specialized tools yield higher routing quality (correctness and efficiency) compared to general tools. For diverse tasks, specialized tools yield lower routing quality."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare two coding agents: one with highly specialized tools (each tool designed for a specific subtask) and one with general-purpose tools (each tool capable of multiple subtasks). Both agents are tested on two task sets: a narrow set (tasks closely matching tool specializations) and a diverse set (tasks requiring varied tool usage). Routing quality is measured as task completion rate and average number of tool calls.",
+        "independent_variables": [
+          "tool_specialization (high vs low)",
+          "task_diversity (narrow vs diverse)"
+        ],
+        "dependent_variables": [
+          "routing_quality (completion rate, efficiency)"
+        ],
+        "controls": [
+          "same base agent architecture",
+          "same learning algorithm (if any)",
+          "same task complexity distribution",
+          "same evaluation metric"
+        ],
+        "falsifying_observation": "If the specialized agent outperforms (or matches) the general agent on both narrow and diverse tasks, or if the general agent outperforms on narrow tasks, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Specialized agent achieves higher completion rate and fewer tool calls than general agent on narrow tasks.",
+          "General agent achieves higher completion rate and fewer tool calls than specialized agent on diverse tasks."
+        ],
+        "rejects_hypothesis": [
+          "Specialized agent outperforms general agent on both narrow and diverse tasks.",
+          "General agent outperforms specialized agent on both task sets.",
+          "No significant difference in performance between agents on either task set."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., specialized tools do not improve narrow task performance or do not degrade diverse task performance),",
+        "assumption_to_revise": "The assumption that tool specialization directly and monotonically affects routing quality via routing complexity may be incomplete; other factors such as tool interface overhead or policy learning dynamics might dominate.",
+        "next_question": "How does tool specialization interact with routing policy complexity to affect performance on diverse tasks?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision process by which a coding agent selects which tool (e.g., code interpreter, web search, file system) to invoke for a given subtask, including the timing and sequence of tool calls.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent allocates computational resources to achieve its coding goals, and its failure directly impacts overall agent performance."
+        },
+        {
+          "name": "Coding agent",
+          "definition": "An AI system that generates, modifies, or analyzes source code, typically leveraging multiple tools (e.g., LLMs, interpreters, search engines) and a routing policy to combine them.",
+          "why_primitive": "It is the entity under study; its architecture and objectives define the context in which routing failures occur."
+        },
+        {
+          "name": "Failure",
+          "definition": "A situation where the agent's output deviates from the expected correct outcome (e.g., incorrect code, unmet user intent) or the process is inefficient (e.g., excessive tool calls, timeouts) preventing successful task completion.",
+          "why_primitive": "It provides the metric for evaluating routing success and is essential for identifying when and why routing breaks down."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces.",
+          "rationale": "Without stable tool properties, routing decisions become impossible to analyze systematically because the environment changes unpredictably.",
+          "possible_failure": "If tools are updated or have non-deterministic behavior, the routing policy may fail due to mismatch between assumed and actual tool behavior."
+        },
+        {
+          "assumption": "The routing mechanism is designed to maximize a known objective function (e.g., task completion rate, correctness, or efficiency) and can be learned or hand-crafted.",
+          "rationale": "This assumption grounds the analysis in optimization theory and allows us to reason about tradeoffs and failure modes.",
+          "possible_failure": "If the objective is misaligned with user goals or is too complex to optimize, the routing may optimize for the wrong metrics, leading to failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree of novelty in the coding task relative to past experiences."
+          },
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of different tasks the agent encounters."
+          },
+          {
+            "name": "tool_specialization",
+            "role": "input",
+            "description": "How specialized each tool is for narrow vs broad functions."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "mediator",
+            "description": "Tendency of the routing policy to try new tools or actions instead of exploiting known ones."
+          },
+          {
+            "name": "learning_iterations",
+            "role": "mediator",
+            "description": "Number of training or adaptation steps for the routing policy."
+          },
+          {
+            "name": "routing_complexity",
+            "role": "mediator",
+            "description": "Complexity of the routing policy, e.g., number of rules or decision depth."
+          },
+          {
+            "name": "policy_depth",
+            "role": "mediator",
+            "description": "Depth of decision tree or layers in the routing policy."
+          },
+          {
+            "name": "number_of_rules",
+            "role": "mediator",
+            "description": "Count of explicit rules in a rule-based routing policy."
+          },
+          {
+            "name": "routing_quality",
+            "role": "output",
+            "description": "Correctness and efficiency of tool-use routing decisions."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Whether the coding agent fails to produce correct code or completes task inefficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "High novelty requires more exploration to discover effective tool usage."
+          },
+          {
+            "step": null,
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "exploration_rate",
+            "explanation": "Diverse tasks prevent convergence to a single policy, needing exploration."
+          },
+          {
+            "step": null,
+            "source": "tool_specialization",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More specialized tools demand a more nuanced routing policy."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Too much exploration wastes resources; too little misses better tools."
+          },
+          {
+            "step": null,
+            "source": "learning_iterations",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "More iterations can improve quality but risk overfitting."
+          },
+          {
+            "step": null,
+            "source": "routing_complexity",
+            "relation": "affects",
+            "target": "routing_quality",
+            "explanation": "Overly complex policies may be brittle and hard to debug."
+          },
+          {
+            "step": null,
+            "source": "policy_depth",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "Deeper policies add more parameters to tune."
+          },
+          {
+            "step": null,
+            "source": "number_of_rules",
+            "relation": "increases",
+            "target": "routing_complexity",
+            "explanation": "More rules increase the chance of conflicts and errors."
+          },
+          {
+            "step": null,
+            "source": "routing_quality",
+            "relation": "determines",
+            "target": "failure",
+            "explanation": "Low routing quality leads to incorrect tool choices or inefficiency, causing failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Exploration-exploitation tradeoff under high task novelty/diversity",
+            "why_it_matters": "Without proper balancing, the agent either wastes time exploring or fails to adapt to new tasks."
+          },
+          {
+            "bottleneck": "Policy complexity growing faster than debuggability",
+            "why_it_matters": "Complex routing policies become difficult to interpret and fix, leading to systematic errors."
+          },
+          {
+            "bottleneck": "Mismatch between tool specialization and task requirements",
+            "why_it_matters": "Specialized tools may not cover diverse tasks, causing routing to fail when no tool fits."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the policy's exploration-exploitation balance is misaligned with task novelty and diversity, when policy complexity outpaces debuggability, or when tool specialization mismatches task requirements. These factors degrade routing quality, leading to incorrect or inefficient tool choices and eventual agent failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that tools have stable capabilities may be violated in practice, causing routing decisions based on outdated models.",
+        "derived_from": [
+          "assumptions: The coding agent has access to a fixed set of tools with well-defined and stable capabilities and interfaces."
+        ],
+        "why_it_matters": "Real-world tools update, leading to brittle policies that fail when tool behavior changes.",
+        "what_existing_methods_may_miss": "Most research assumes static tool environments; dynamic changes are understudied.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "How does the routing policy's failure rate change when tool capabilities are dynamically updated, compared to a static tool environment?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies robustness gaps in current routing methods under real-world tool changes."
+      },
+      "hypothesis": {
+        "statement": "The failure rate of tool-use routing policies increases when tool capabilities are dynamically updated compared to a static tool environment.",
+        "predicted_effect": "Dynamic updates cause the routing policy to make incorrect decisions based on outdated models, leading to a higher failure rate."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare the failure rate of a rule-based and a learned routing policy on a set of coding tasks under two conditions: static tool capabilities (no changes) and dynamic tool capabilities (tool functions are randomly changed every few tasks).",
+        "independent_variables": [
+          "tool environment type (static vs dynamic)"
+        ],
+        "dependent_variables": [
+          "failure rate (proportion of tasks where agent output is incorrect or inefficient)"
+        ],
+        "controls": [
+          "same set of coding tasks",
+          "same initial routing policy",
+          "same number of tools",
+          "same task novelty and diversity"
+        ],
+        "falsifying_observation": "If there is no statistically significant increase in failure rate in the dynamic condition compared to the static condition."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate is significantly higher in the dynamic tool environment.",
+          "The routing policy makes more tool selection errors (e.g., calls a tool that no longer performs the required function) in the dynamic setting.",
+          "Task completion times increase more in the dynamic setting due to incorrect tool choices."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate is not significantly different between static and dynamic environments.",
+          "The routing policy adapts quickly, resulting in similar or even lower failure rates in the dynamic setting.",
+          "Dynamic updates do not affect routing quality, possibly because the policy is robust to changes."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesis is not supported: dynamic tool updates do not significantly increase failure rate.",
+        "assumption_to_revise": "The assumption that tools have stable capabilities is necessary for routing policy effectiveness. Instead, routing policies may be inherently robust to small changes.",
+        "next_question": "Under what conditions do dynamic tool updates cause routing failures? Specifically, how does the magnitude or frequency of updates affect failure rate?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The optimal exploration rate (epsilon) in a coding agent's routing policy increases with both task novelty and task diversity, but with diminishing returns when both are high, such that the relationship is subadditive.",
+      "independent_variables": [
+        "task_novelty (low=0, high=1)",
+        "task_diversity (low=0, high=1)",
+        "exploration_rate (epsilon: 0.0, 0.3, 0.5, 0.7, 1.0)"
+      ],
+      "dependent_variables": [
+        "composite_score (weighted sum of task success rate and inverse of number of tool calls)"
+      ],
+      "controlled_variables": [
+        "same tool set (code interpreter, web search, file system)",
+        "same learning algorithm (Q-learning with learning rate 0.1)",
+        "fixed number of learning iterations per task (1000)",
+        "same policy initialization (uniform action values)"
+      ],
+      "baselines": [
+        {
+          "name": "Random routing",
+          "description": "Agent selects tools uniformly at random regardless of state."
+        },
+        {
+          "name": "Greedy routing (epsilon=0)",
+          "description": "Agent always selects the tool with highest estimated value."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "task_success_rate",
+          "definition": "Proportion of tasks completed with correct output."
+        },
+        {
+          "name": "tool_call_efficiency",
+          "definition": "Inverse of the average number of tool calls per task (capped at max calls)."
+        },
+        {
+          "name": "composite_score",
+          "definition": "0.7 * task_success_rate + 0.3 * tool_call_efficiency."
+        }
+      ],
+      "expected_result": "Optimal epsilon will be higher for high novelty or high diversity conditions than for low novelty/low diversity. For both high, optimal epsilon will be higher than either alone but less than the sum of the individual increases (subadditive). For example, low/low: epsilon=0.1; high/low: 0.5; low/high: 0.5; high/high: 0.6 (not 0.9).",
+      "falsifying_result": "If the optimal epsilon does not increase with novelty or diversity (e.g., remains at 0.1), or if it increases additively (e.g., high/high optimal epsilon equals 0.1+(0.5-0.1)+(0.5-0.1)=0.9), or if it decreases at extreme levels, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a coding agent with a configurable epsilon. Define 4 task conditions: (low novelty, low diversity), (low, high), (high, low), (high, high). For each condition, run the agent for 1000 learning iterations per epsilon level (5 levels). Measure composite score after learning. Identify epsilon with highest composite score. Compare across conditions.",
+      "risks_and_confounds": [
+        "Tool specialization may interact with exploration, altering optimal epsilon.",
+        "Limited range of novelty and diversity may not capture full behavior.",
+        "Composite score weighting may affect which epsilon is optimal.",
+        "Learning algorithm choice (Q-learning) may not generalize to others."
+      ]
+    },
+    {
+      "hypothesis": "Increasing tool specialization improves routing quality for a narrow task set but degrades performance on diverse tasks.",
+      "independent_variables": [
+        "tool_specialization (high vs low)",
+        "task_diversity (narrow vs diverse)"
+      ],
+      "dependent_variables": [
+        "routing_quality (completion rate, efficiency)"
+      ],
+      "controlled_variables": [
+        "same base agent architecture",
+        "same learning algorithm (if any)",
+        "same task complexity distribution",
+        "same evaluation metric"
+      ],
+      "baselines": [
+        {
+          "name": "General-purpose tool agent",
+          "description": "Agent equipped with tools that are each capable of multiple subtasks (low specialization)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task completion rate",
+          "definition": "Fraction of tasks where the agent produces correct code or meets user intent within a time limit."
+        },
+        {
+          "name": "Average number of tool calls",
+          "definition": "Mean count of tool invocations per task, measuring efficiency."
+        }
+      ],
+      "expected_result": "Specialized agent achieves higher completion rate and fewer tool calls than general agent on narrow tasks; general agent achieves higher completion rate and fewer tool calls than specialized agent on diverse tasks.",
+      "falsifying_result": "If specialized agent outperforms or matches general agent on both narrow and diverse tasks, or if general agent outperforms specialized agent on narrow tasks, or if no significant difference is observed between agents on either task set.",
+      "minimum_viable_experiment": "Compare two coding agents: one with highly specialized tools (each tool designed for a specific subtask) and one with general-purpose tools (each tool capable of multiple subtasks). Both agents are tested on two task sets: a narrow set (tasks closely matching tool specializations) and a diverse set (tasks requiring varied tool usage). Routing quality is measured as task completion rate and average number of tool calls.",
+      "risks_and_confounds": [
+        "Potential differences in tool interface overhead between specialized and general tools.",
+        "Interaction between tool specialization and the agent's learning algorithm may confound results.",
+        "Task novelty and difficulty variation within narrow/diverse sets could skew results if not properly balanced."
+      ]
+    },
+    {
+      "hypothesis": "When policy depth exceeds 5, the rate of systematic, unidentifiable tool-use routing failures increases by at least 2x compared to depth ≤5, and above depth 7, nearly all failures become undebuggable.",
+      "independent_variables": [
+        "policy_depth"
+      ],
+      "dependent_variables": [
+        "proportion_of_routing_failures",
+        "proportion_of_failures_that_are_undebuggable",
+        "average_debug_time_for_identifiable_failures"
+      ],
+      "controlled_variables": [
+        "number_of_rules (20)",
+        "tool_set (identical set)",
+        "task_diversity (fixed set: 1000 SWE-bench + 200 hand-crafted)",
+        "exploration_rate (0.1)",
+        "learning_iterations (0, static policy)"
+      ],
+      "baselines": [
+        {
+          "name": "Simple policy (depth=1)",
+          "description": "A rule-based routing policy with depth 1 (one-level decision tree) and 20 rules."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing_failure_rate",
+          "definition": "Proportion of tasks where the agent's output is incorrect (code does not pass tests or does not meet user intent) or cost-inefficient (tool calls exceed a threshold relative to optimal)."
+        },
+        {
+          "name": "undebuggable_failure_rate",
+          "definition": "Among failed tasks, proportion for which a human debugger cannot identify the root cause of the failure within 5 minutes."
+        },
+        {
+          "name": "average_debug_time",
+          "definition": "Average time (in minutes) spent by a human debugger to identify the root cause of identifiable failures."
+        }
+      ],
+      "expected_result": "The proportion of undebuggable failures is below 10% for depths ≤5 and jumps to above 40% for depths >5. Additionally, average debug time for identifiable failures exceeds 3 minutes for depths >5, compared to less than 1 minute for depths ≤5.",
+      "falsifying_result": "No sharp increase in undebuggable failure proportion at depth 5 or 7; instead, a gradual linear increase or no increase across all depths. Alternatively, if the undebuggable proportion remains below 20% for all depths, or if depth 9 shows lower undebuggable proportion than depth 7.",
+      "minimum_viable_experiment": "Implement a coding agent with a rule-based routing policy. Vary policy depth across five levels (1, 3, 5, 7, 9) while keeping the number of rules constant at 20 and exploration rate at 0.1. Test on a dataset of 1200 coding tasks (1000 from SWE-bench plus 200 hand-crafted tasks designed to trigger routing decisions). For each depth, record the proportion of tasks that fail and, among failures, the proportion that are undebuggable (root cause not identifiable by a human debugger within 5 minutes) as well as the average debug time for identifiable failures. Use a static policy (no learning) to isolate depth effects.",
+      "risks_and_confounds": [
+        "Task selection bias: the hand-crafted tasks may inadvertently favor certain depths.",
+        "Human debugger variability: different debuggers may have different skill levels; use multiple debuggers and average results.",
+        "Interaction with rule count: depth effect may depend on number of rules; fixed at 20 to control.",
+        "Exploration rate fixed at 0.1; results might differ with other rates.",
+        "Static policy may not generalize to learned policies; but it isolates the effect of depth."
+      ]
+    },
+    {
+      "hypothesis": "The failure rate of tool-use routing policies increases when tool capabilities are dynamically updated compared to a static tool environment.",
+      "independent_variables": [
+        "tool environment type (static vs dynamic)"
+      ],
+      "dependent_variables": [
+        "failure rate (proportion of tasks where agent output is incorrect or inefficient)"
+      ],
+      "controlled_variables": [
+        "same set of coding tasks",
+        "same initial routing policy (a learned policy, e.g., a reinforcement learning based router)",
+        "same number of tools (e.g., 3: code interpreter, web search, file system)",
+        "same task novelty and diversity (tasks sampled from a fixed benchmark)",
+        "same number of tasks per condition (e.g., 100 tasks each)"
+      ],
+      "baselines": [
+        {
+          "name": "Static tool environment",
+          "description": "Tool capabilities remain unchanged throughout the experiment. This serves as the baseline condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure_rate",
+          "definition": "Proportion of tasks where the agent produces incorrect code or fails to meet efficiency criteria (e.g., excessive tool calls or timeout)."
+        },
+        {
+          "name": "tool_selection_error_rate",
+          "definition": "Proportion of tool calls where the chosen tool does not have the required capability to perform the subtask."
+        },
+        {
+          "name": "average_completion_time",
+          "definition": "Average time taken to complete each task (or timeout)."
+        }
+      ],
+      "expected_result": "The failure rate in the dynamic condition is significantly higher (p < 0.05) than in the static condition. Additionally, tool selection error rate and completion time are also higher in the dynamic condition.",
+      "falsifying_result": "There is no statistically significant difference in failure rate between the static and dynamic conditions, or the failure rate is lower in the dynamic condition.",
+      "minimum_viable_experiment": "Implement a coding agent with a fixed learned routing policy (e.g., trained via reinforcement learning on a set of coding tasks) and a fixed set of 3 tools (code interpreter, web search, file system) with well-defined capabilities. Create two conditions: (1) Static: tool capabilities remain constant throughout. (2) Dynamic: after every 20 tasks, randomly swap the core function of one tool with another (e.g., the code interpreter's function changes to that of web search, etc.). Run the agent on the same 100 coding tasks (sampled from a benchmark like HumanEval or MBPP) in each condition. Measure failure rate (proportion of tasks where code is incorrect or completion time exceeds a threshold), tool selection error rate, and average completion time. Use a statistical test (e.g., chi-squared for failure rate, t-test for times) to compare conditions. The experiment is considered minimal because it uses a single routing policy and a simple binary manipulation of tool capabilities, requiring only two runs (static and dynamic) with 100 tasks each.",
+      "risks_and_confounds": [
+        "Task selection bias: the specific tasks may favor or disfavor certain tool capabilities. Use a diverse, pre-defined benchmark.",
+        "Magnitude of tool updates: random swapping may be too extreme or too subtle. Pre-test to ensure updates are meaningful but not catastrophic.",
+        "Learned policy adaptation: if the policy is trained online, it may adapt to changes; use a fixed policy (trained only on static environment) to isolate effect.",
+        "Order effects: run static and dynamic conditions in randomized order or use blocking.",
+        "Definition of failure: subjectivity in code correctness. Use automated tests from the benchmark."
+      ]
+    },
+    {
+      "hypothesis": "For a fixed set of tools, there exists a critical novelty-diversity threshold above which any routing policy that does not dynamically adjust its exploration rate will cause failure (incorrect code or excessive tool calls) in more than 50% of tasks.",
+      "independent_variables": [
+        "task novelty (low, high)",
+        "task diversity (low, high)"
+      ],
+      "dependent_variables": [
+        "failure rate"
+      ],
+      "controlled_variables": [
+        "same tool set (code interpreter, web search, file editor)",
+        "same coding agent architecture (LLM + tool interface)",
+        "same number of tasks per condition (e.g., 20 tasks each)",
+        "same evaluation metric for correctness"
+      ],
+      "baselines": [
+        {
+          "name": "Adaptive routing policy",
+          "description": "A routing policy that dynamically adjusts exploration rate based on recent success."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure rate",
+          "definition": "Proportion of tasks where the agent produces incorrect code or uses more than 5 tool calls beyond the optimal number (determined by expert)."
+        }
+      ],
+      "expected_result": "With the static policy, the failure rate is below 20% for low novelty/low diversity and above 50% for high novelty/high diversity. With the adaptive policy, failure rate remains below 30% for all conditions.",
+      "falsifying_result": "The static policy failure rate does not exceed 50% for any combination of novelty and diversity, OR the adaptive policy shows similar failure rates to the static policy across conditions.",
+      "minimum_viable_experiment": "Use a single coding agent (e.g., GPT-4 with tool interface) with two routing policies: a static rule-based policy (e.g., always use code interpreter for coding, web search for info) and an adaptive policy that adjusts exploration rate (e.g., epsilon-greedy with decreasing epsilon). Create 20 coding tasks for each of four conditions: low novelty/low diversity, low novelty/high diversity, high novelty/low diversity, high novelty/high diversity. Novelty is defined as similarity to training tasks; diversity as variation in required tools. Run each policy on each task and measure failure rate.",
+      "risks_and_confounds": [
+        "Task novelty and diversity are subjective; need clear operational definitions.",
+        "Optimal number of tool calls may vary per task; using a fixed threshold (e.g., +5) may be biased.",
+        "Agent may fail due to tool limitations, not routing policy; ensure tools capable for all tasks.",
+        "Order effects; randomize task order.",
+        "Small sample size per condition may not detect threshold; use enough tasks (e.g., 20) to get sufficient power."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of tool-use routing failures in coding agents, deriving mechanisms, tensions, and testable hypotheses. It provides detailed experiment plans with controls and falsifying observations.",
+    "strengths": [
+      "Strong theoretical grounding with clear primitive definitions and assumptions.",
+      "Detailed causal chain and mechanism model that captures key variables and bottlenecks.",
+      "Well-identified tensions that lead to falsifiable hypotheses.",
+      "Experiment plans include specific independent/dependent variables, controls, and falsification criteria.",
+      "Acknowledges limitations and proposes failure-update rules for hypothesis rejection."
+    ],
+    "weaknesses": [
+      "Some assumptions (e.g., fixed tool capabilities, known objective) may not hold in realistic settings, limiting external validity.",
+      "Overclaiming in certain hypotheses, such as precise thresholds (e.g., 'depth > 5 leads to 2x increase'), which may be hard to confirm without extensive empirical evidence.",
+      "Missing baselines in some experiments: e.g., Experiment 1 does not compare against a uniform random policy; Experiment 3 only includes depth=1 as baseline, ignoring other policy types.",
+      "The novelty is moderate: exploration-exploitation tradeoffs are well-studied; the application to coding agents is specific but not radically new.",
+      "Experiments rely heavily on synthetic or controlled environments, and real-world deployment scenarios may introduce confounds not addressed."
+    ],
+    "questions": [
+      "How do the proposed interventions account for interactions between multiple tensions (e.g., both policy depth and tool specialization)?",
+      "Could the experiments be replicated on real-world coding benchmarks like SWE-bench to strengthen ecological validity?"
+    ],
+    "missing_baselines": [
+      "Experiment 1 (optimal exploration rate): Should include a uniform random policy as a baseline, not just random and greedy.",
+      "Experiment 3 (policy depth): Compare with an adaptive policy that adjusts depth based on complexity, not just fixed depths.",
+      "Experiment 4 (dynamic tool capabilities): Include a baseline where the agent continuously retrains its policy after tool changes."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Overclaiming with insufficient empirical grounding",
+    "root_cause": "The research package proposed precise thresholds (e.g., depth > 5 leads to 2x increase in failures) without adequate empirical support and omitted necessary baselines (e.g., random routing, adaptive policies) that would allow proper falsification.",
+    "violated_principle": "Hypotheses must be minimally falsifiable and include appropriate baselines and controls to isolate causal effects.",
+    "new_or_updated_principle": "All hypotheses in tool-use routing research must include explicit falsification criteria, at least one baseline comparison (e.g., random routing, static environment), and controls for known confounds such as tool specialization and policy learning dynamics.",
+    "new_or_updated_skill": "Designing controlled experiments with baseline comparisons and realistic tool environments: ability to identify and implement appropriate baselines (random, greedy, adaptive), control for tool specialization and task diversity, and use automated metrics for failure and debuggability.",
+    "regression_test": "For any experiment on tool-use routing, ensure that at least one baseline (e.g., random routing) is included and that the dependent variables (failure rate, debuggability) are measured against a static tool environment control. The experiment must have a clear falsifying observation defined before execution."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 2,
+    "gate_repairs": [
+      {
+        "question": "When does increasing routing policy depth in coding agents cause tool-use routing failures that become undebuggable?",
+        "original_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Under what combination of task novelty and task diversity does the exploration-exploitation tradeoff in tool-use routing cause failure in coding agents?",
+        "original_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

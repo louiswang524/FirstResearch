@@ -1,0 +1,1125 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Action",
+        "definition": "An indivisible unit of agent output that can be observed and recorded, such as a tool call or a sentence generated.",
+        "why_primitive": "Actions are the atomic building blocks of any agent process; they cannot be meaningfully subdivided without losing their behavioral significance."
+      },
+      {
+        "name": "Trace",
+        "definition": "A finite sequence of actions in temporal order, representing the actual process executed by the agent.",
+        "why_primitive": "A trace is the fundamental representation of a process as a linear record; it is the primary object of measurement."
+      },
+      {
+        "name": "Script",
+        "definition": "A predefined template or set of rules specifying allowed actions and their order for a canonical desired process.",
+        "why_primitive": "A script defines the standard against which fidelity is measured; without it, there is no reference for correctness."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent's entire process is fully observable and can be captured as a trace without loss.",
+        "rationale": "Measurement requires complete access to the process; any unobserved action would make fidelity assessment partial or impossible.",
+        "possible_failure": "In practice, LLM agents may have internal reasoning steps (e.g., chain-of-thought) that are not emitted, leading to incomplete traces."
+      },
+      {
+        "assumption": "There exists a single, unambiguous correct script for a given task that all agents should follow.",
+        "rationale": "Without a clear standard, comparing fidelity across agents or runs is meaningless; the script must be agreed upon beforehand.",
+        "possible_failure": "Many tasks admit multiple valid processes; forcing a single script may unfairly penalize correct but different approaches."
+      },
+      {
+        "assumption": "Fidelity can be quantified by a deterministic comparison between the trace and the script.",
+        "rationale": "A quantitative metric allows objective, repeatable evaluation, which is necessary for scientific comparison.",
+        "possible_failure": "Some aspects of process fidelity (e.g., reasoning quality) may be qualitative and not reducible to a single numeric score."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity vs. Feasibility: Fine-grained actions (e.g., individual tokens) allow precise fidelity measurement but are expensive to define and compare; coarse-grained actions (e.g., tools used) are easier but may miss critical deviations.",
+        "variables": [
+          "action granularity",
+          "measurement cost",
+          "measurement precision"
+        ]
+      },
+      {
+        "tradeoff": "Completeness vs. Flexibility: A strict script ensures all required steps are followed but breaks if the agent takes an alternate valid path; a loose script tolerates variation but may overlook important protocol violations.",
+        "variables": [
+          "script strictness",
+          "coverage of valid processes",
+          "false positives"
+        ]
+      },
+      {
+        "tradeoff": "Automated Metrics vs. Human Judgment: Automated metrics are consistent and scalable but may fail to capture nuanced fidelity (e.g., tone, safety); human evaluators can assess subtle aspects but are slow, expensive, and subjective.",
+        "variables": [
+          "automation",
+          "scalability",
+          "nuance capture"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Script",
+        "role": "input",
+        "description": "Predefined canonical process specifying allowed actions and their order."
+      },
+      {
+        "name": "Agent Actions",
+        "role": "input",
+        "description": "Observable actions taken by the agent during task execution."
+      },
+      {
+        "name": "Trace",
+        "role": "mediator",
+        "description": "Temporal sequence of actions recorded from the agent."
+      },
+      {
+        "name": "Action Granularity",
+        "role": "confounder",
+        "description": "Level of detail at which actions are defined (e.g., token vs tool call)."
+      },
+      {
+        "name": "Script Strictness",
+        "role": "confounder",
+        "description": "Degree to which the script allows variation from the canonical sequence."
+      },
+      {
+        "name": "Measurement Method",
+        "role": "confounder",
+        "description": "Whether fidelity is assessed via automated comparison or human judgment."
+      },
+      {
+        "name": "Fidelity Score",
+        "role": "outcome",
+        "description": "Quantitative measure of how well the trace matches the script."
+      },
+      {
+        "name": "Evaluation Reliability",
+        "role": "outcome",
+        "description": "Consistency and validity of the fidelity measurement."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Script",
+        "relation": "defines",
+        "target": "Allowed Actions and Order",
+        "explanation": "The script provides the standard against which fidelity is measured."
+      },
+      {
+        "step": "2",
+        "source": "Agent Actions",
+        "relation": "recorded as",
+        "target": "Trace",
+        "explanation": "Agent's observable actions are captured in temporal order."
+      },
+      {
+        "step": "3",
+        "source": "Trace",
+        "relation": "compared with",
+        "target": "Script",
+        "explanation": "A comparison algorithm (automated or human) evaluates the trace against the script."
+      },
+      {
+        "step": "4",
+        "source": "Comparison Result",
+        "relation": "yields",
+        "target": "Fidelity Score",
+        "explanation": "The degree of match produces a numeric score."
+      },
+      {
+        "step": "5",
+        "source": "Action Granularity",
+        "relation": "moderates",
+        "target": "Comparison Result",
+        "explanation": "Finer granularity may detect more deviations but also increase noise."
+      },
+      {
+        "step": "6",
+        "source": "Script Strictness",
+        "relation": "moderates",
+        "target": "Comparison Result",
+        "explanation": "Stricter scripts penalize any deviation, while loose scripts tolerate variation."
+      },
+      {
+        "step": "7",
+        "source": "Measurement Method",
+        "relation": "moderates",
+        "target": "Evaluation Reliability",
+        "explanation": "Automated methods are scalable but may miss nuances; human judgment captures subtlety but is subjective."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Incomplete observability",
+        "why_it_matters": "Assumption of full observability may fail if internal reasoning (e.g., chain-of-thought) is not emitted, leading to incomplete traces and inaccurate fidelity scores."
+      },
+      {
+        "bottleneck": "Single script ambiguity",
+        "why_it_matters": "Assuming one correct script ignores multiple valid processes, potentially penalizing correct alternative strategies."
+      },
+      {
+        "bottleneck": "Quantification of qualitative aspects",
+        "why_it_matters": "Fidelity metrics may ignore qualitative dimensions (e.g., safety, tone) that require human judgment, limiting automation."
+      },
+      {
+        "bottleneck": "Tradeoff between granularity and feasibility",
+        "why_it_matters": "Fine-grained actions improve precision but increase definition and comparison costs; coarse actions risk missing critical deviations."
+      }
+    ],
+    "mechanism_summary": "Agent process fidelity is measured by comparing the observed trace of agent actions against a predefined script. The resulting fidelity score is influenced by action granularity, script strictness, and measurement method (automated vs. human). Key bottlenecks include incomplete observability of internal steps, reliance on a single canonical script, difficulty quantifying qualitative aspects, and the granularity-feasibility tradeoff. This mechanism provides a structured way to evaluate how closely an agent follows a desired process, but its validity depends on assumptions that may not hold in all scenarios."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that the agent's entire process is fully observable contradicts the reality that internal reasoning steps (e.g., chain-of-thought) are often not emitted, leading to incomplete traces. Thus, fidelity measurement based solely on observable actions may miss crucial process aspects.",
+      "derived_from": [
+        "primitive_definitions: Trace",
+        "assumptions: full observability",
+        "bottlenecks: incomplete observability"
+      ],
+      "why_it_matters": "Incomplete traces can produce misleadingly high fidelity scores if internal deviations are unobserved, or low scores if extra internal steps are beneficial.",
+      "what_existing_methods_may_miss": "Methods that only compare observable actions may ignore the quality of internal reasoning, which is critical for tasks requiring careful thought.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The reliance on a single, unambiguous script as the standard for fidelity clashes with the reality that many tasks admit multiple valid solution processes. Enforcing one script may penalize correct but different approaches, leading to unfair or incomplete fidelity evaluation.",
+      "derived_from": [
+        "assumptions: single correct script",
+        "core_tradeoffs: completeness vs. flexibility"
+      ],
+      "why_it_matters": "If the script is too narrow, agents that use creative but valid strategies will be scored poorly, discouraging innovation.",
+      "what_existing_methods_may_miss": "Existing fidelity metrics often assume a fixed script without considering task equivalence under different processes.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The drive to quantify fidelity via a deterministic comparison conflicts with the qualitative nature of some process aspects (e.g., safety, tone, reasoning quality). Automated metrics are scalable but may fail to capture these nuanced dimensions, while human judgment introduces subjectivity and cost.",
+      "derived_from": [
+        "assumptions: fidelity quantifiable",
+        "core_tradeoffs: automated metrics vs. human judgment",
+        "bottlenecks: quantification of qualitative aspects"
+      ],
+      "why_it_matters": "Over-reliance on automated metrics may lead to agents optimizing for the metric rather than true process fidelity, potentially ignoring safety or ethical considerations.",
+      "what_existing_methods_may_miss": "Methods that only use automated comparison miss qualitative aspects that require human interpretation.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the omission of internal reasoning steps (e.g., chain-of-thought) from the observable trace affect the measured fidelity score compared to a ground-truth that includes those steps?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the bias in fidelity metrics due to incomplete observability and determine conditions under which the omission significantly distorts scores."
+    },
+    {
+      "question": "To what extent does the strictness of a canonical script influence the fidelity scores of agents that use valid alternative solution strategies?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Provide guidelines for setting script flexibility to avoid penalizing valid but non-canonical processes."
+    },
+    {
+      "question": "Can an automated fidelity metric that incorporates a human-in-the-loop for qualitative dimensions (e.g., safety, tone) achieve higher evaluation reliability than a fully automated metric while maintaining scalability?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Design and evaluate a hybrid metric that balances automated efficiency with human judgment for qualitative aspects."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Action",
+          "definition": "An indivisible unit of agent output that can be observed and recorded, such as a tool call or a sentence generated.",
+          "why_primitive": "Actions are the atomic building blocks of any agent process; they cannot be meaningfully subdivided without losing their behavioral significance."
+        },
+        {
+          "name": "Trace",
+          "definition": "A finite sequence of actions in temporal order, representing the actual process executed by the agent.",
+          "why_primitive": "A trace is the fundamental representation of a process as a linear record; it is the primary object of measurement."
+        },
+        {
+          "name": "Script",
+          "definition": "A predefined template or set of rules specifying allowed actions and their order for a canonical desired process.",
+          "why_primitive": "A script defines the standard against which fidelity is measured; without it, there is no reference for correctness."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's entire process is fully observable and can be captured as a trace without loss.",
+          "rationale": "Measurement requires complete access to the process; any unobserved action would make fidelity assessment partial or impossible.",
+          "possible_failure": "In practice, LLM agents may have internal reasoning steps (e.g., chain-of-thought) that are not emitted, leading to incomplete traces."
+        },
+        {
+          "assumption": "There exists a single, unambiguous correct script for a given task that all agents should follow.",
+          "rationale": "Without a clear standard, comparing fidelity across agents or runs is meaningless; the script must be agreed upon beforehand.",
+          "possible_failure": "Many tasks admit multiple valid processes; forcing a single script may unfairly penalize correct but different approaches."
+        },
+        {
+          "assumption": "Fidelity can be quantified by a deterministic comparison between the trace and the script.",
+          "rationale": "A quantitative metric allows objective, repeatable evaluation, which is necessary for scientific comparison.",
+          "possible_failure": "Some aspects of process fidelity (e.g., reasoning quality) may be qualitative and not reducible to a single numeric score."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Script",
+            "role": "input",
+            "description": "Predefined canonical process specifying allowed actions and their order."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "Observable actions taken by the agent during task execution."
+          },
+          {
+            "name": "Trace",
+            "role": "mediator",
+            "description": "Temporal sequence of actions recorded from the agent."
+          },
+          {
+            "name": "Action Granularity",
+            "role": "confounder",
+            "description": "Level of detail at which actions are defined (e.g., token vs tool call)."
+          },
+          {
+            "name": "Script Strictness",
+            "role": "confounder",
+            "description": "Degree to which the script allows variation from the canonical sequence."
+          },
+          {
+            "name": "Measurement Method",
+            "role": "confounder",
+            "description": "Whether fidelity is assessed via automated comparison or human judgment."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "outcome",
+            "description": "Quantitative measure of how well the trace matches the script."
+          },
+          {
+            "name": "Evaluation Reliability",
+            "role": "outcome",
+            "description": "Consistency and validity of the fidelity measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Script",
+            "relation": "defines",
+            "target": "Allowed Actions and Order",
+            "explanation": "The script provides the standard against which fidelity is measured."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "recorded as",
+            "target": "Trace",
+            "explanation": "Agent's observable actions are captured in temporal order."
+          },
+          {
+            "step": "3",
+            "source": "Trace",
+            "relation": "compared with",
+            "target": "Script",
+            "explanation": "A comparison algorithm (automated or human) evaluates the trace against the script."
+          },
+          {
+            "step": "4",
+            "source": "Comparison Result",
+            "relation": "yields",
+            "target": "Fidelity Score",
+            "explanation": "The degree of match produces a numeric score."
+          },
+          {
+            "step": "5",
+            "source": "Action Granularity",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Finer granularity may detect more deviations but also increase noise."
+          },
+          {
+            "step": "6",
+            "source": "Script Strictness",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Stricter scripts penalize any deviation, while loose scripts tolerate variation."
+          },
+          {
+            "step": "7",
+            "source": "Measurement Method",
+            "relation": "moderates",
+            "target": "Evaluation Reliability",
+            "explanation": "Automated methods are scalable but may miss nuances; human judgment captures subtlety but is subjective."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete observability",
+            "why_it_matters": "Assumption of full observability may fail if internal reasoning (e.g., chain-of-thought) is not emitted, leading to incomplete traces and inaccurate fidelity scores."
+          },
+          {
+            "bottleneck": "Single script ambiguity",
+            "why_it_matters": "Assuming one correct script ignores multiple valid processes, potentially penalizing correct alternative strategies."
+          },
+          {
+            "bottleneck": "Quantification of qualitative aspects",
+            "why_it_matters": "Fidelity metrics may ignore qualitative dimensions (e.g., safety, tone) that require human judgment, limiting automation."
+          },
+          {
+            "bottleneck": "Tradeoff between granularity and feasibility",
+            "why_it_matters": "Fine-grained actions improve precision but increase definition and comparison costs; coarse actions risk missing critical deviations."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by comparing the observed trace of agent actions against a predefined script. The resulting fidelity score is influenced by action granularity, script strictness, and measurement method (automated vs. human). Key bottlenecks include incomplete observability of internal steps, reliance on a single canonical script, difficulty quantifying qualitative aspects, and the granularity-feasibility tradeoff. This mechanism provides a structured way to evaluate how closely an agent follows a desired process, but its validity depends on assumptions that may not hold in all scenarios."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that the agent's entire process is fully observable contradicts the reality that internal reasoning steps (e.g., chain-of-thought) are often not emitted, leading to incomplete traces. Thus, fidelity measurement based solely on observable actions may miss crucial process aspects.",
+        "derived_from": [
+          "primitive_definitions: Trace",
+          "assumptions: full observability",
+          "bottlenecks: incomplete observability"
+        ],
+        "why_it_matters": "Incomplete traces can produce misleadingly high fidelity scores if internal deviations are unobserved, or low scores if extra internal steps are beneficial.",
+        "what_existing_methods_may_miss": "Methods that only compare observable actions may ignore the quality of internal reasoning, which is critical for tasks requiring careful thought.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the threshold of task complexity (measured by number of required internal reasoning steps) above which omitting internal reasoning steps from the trace leads to a significant overestimation of process fidelity?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a critical complexity threshold that demarcates when fidelity measurements are biased by incomplete observability, providing a practical guide for when to include internal reasoning in fidelity assessment."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of task complexity (number of required internal reasoning steps) such that for tasks below the threshold, the omission of internal reasoning steps does not significantly bias fidelity scores, but above the threshold, fidelity scores are significantly inflated compared to a full-trace baseline.",
+        "predicted_effect": "The difference between observable-only and full-trace fidelity scores will be negligible for simple tasks and become increasingly positive as complexity crosses a threshold, revealing a phase transition in the bias."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of reasoning tasks with a script specifying only observable tool calls and final answer, while requiring varying numbers of internal reasoning steps (1 to 10). Use a fixed LLM agent to execute each task, capturing both observable actions and internal reasoning (by prompting to output reasoning). Compute fidelity scores using only observable trace vs. full trace (including reasoning) against respective scripts. Plot the score difference against task complexity and identify the smallest complexity level where the difference is statistically significant (p < 0.05, two-tailed t-test, Bonferroni corrected).",
+        "independent_variables": [
+          "Task complexity: number of required internal reasoning steps (1, 2, 3, ..., 10)"
+        ],
+        "dependent_variables": [
+          "Fidelity score difference: observable-only fidelity score minus full-trace fidelity score"
+        ],
+        "controls": [
+          "LLM agent model (same for all tasks)",
+          "Script structure (fixed format, only observable steps scripted)",
+          "Number of tasks per complexity level (at least 30)",
+          "Temperature (set to 0 for deterministic output)"
+        ],
+        "falsifying_observation": "If no complexity level yields a statistically significant difference after correction, or if the difference is significant even at the lowest complexity level (1 step), then the threshold hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For tasks with low complexity (e.g., 1–3 steps), fidelity score differences are small and not statistically significant.",
+          "Starting from a specific complexity level (e.g., 5 steps), differences become positive and statistically significant, increasing with complexity."
+        ],
+        "rejects_hypothesis": [
+          "Differences are significant across all complexity levels, including simple tasks.",
+          "No complexity level yields a significant difference after correction."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or the effect is present at all complexity levels, then the assumption that internal reasoning steps are universally important for fidelity is not supported; perhaps their relevance depends on other factors.",
+        "assumption_to_revise": "The assumption that internal reasoning steps are always relevant to process fidelity may be replaced by the assumption that their relevance is task-dependent, requiring additional features beyond complexity.",
+        "next_question": "What other task features (e.g., reasoning type, plan branching) determine whether internal steps should be included in fidelity measurement?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Action",
+          "definition": "An indivisible unit of agent output that can be observed and recorded, such as a tool call or a sentence generated.",
+          "why_primitive": "Actions are the atomic building blocks of any agent process; they cannot be meaningfully subdivided without losing their behavioral significance."
+        },
+        {
+          "name": "Trace",
+          "definition": "A finite sequence of actions in temporal order, representing the actual process executed by the agent.",
+          "why_primitive": "A trace is the fundamental representation of a process as a linear record; it is the primary object of measurement."
+        },
+        {
+          "name": "Script",
+          "definition": "A predefined template or set of rules specifying allowed actions and their order for a canonical desired process.",
+          "why_primitive": "A script defines the standard against which fidelity is measured; without it, there is no reference for correctness."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's entire process is fully observable and can be captured as a trace without loss.",
+          "rationale": "Measurement requires complete access to the process; any unobserved action would make fidelity assessment partial or impossible.",
+          "possible_failure": "In practice, LLM agents may have internal reasoning steps (e.g., chain-of-thought) that are not emitted, leading to incomplete traces."
+        },
+        {
+          "assumption": "There exists a single, unambiguous correct script for a given task that all agents should follow.",
+          "rationale": "Without a clear standard, comparing fidelity across agents or runs is meaningless; the script must be agreed upon beforehand.",
+          "possible_failure": "Many tasks admit multiple valid processes; forcing a single script may unfairly penalize correct but different approaches."
+        },
+        {
+          "assumption": "Fidelity can be quantified by a deterministic comparison between the trace and the script.",
+          "rationale": "A quantitative metric allows objective, repeatable evaluation, which is necessary for scientific comparison.",
+          "possible_failure": "Some aspects of process fidelity (e.g., reasoning quality) may be qualitative and not reducible to a single numeric score."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Script",
+            "role": "input",
+            "description": "Predefined canonical process specifying allowed actions and their order."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "Observable actions taken by the agent during task execution."
+          },
+          {
+            "name": "Trace",
+            "role": "mediator",
+            "description": "Temporal sequence of actions recorded from the agent."
+          },
+          {
+            "name": "Action Granularity",
+            "role": "confounder",
+            "description": "Level of detail at which actions are defined (e.g., token vs tool call)."
+          },
+          {
+            "name": "Script Strictness",
+            "role": "confounder",
+            "description": "Degree to which the script allows variation from the canonical sequence."
+          },
+          {
+            "name": "Measurement Method",
+            "role": "confounder",
+            "description": "Whether fidelity is assessed via automated comparison or human judgment."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "outcome",
+            "description": "Quantitative measure of how well the trace matches the script."
+          },
+          {
+            "name": "Evaluation Reliability",
+            "role": "outcome",
+            "description": "Consistency and validity of the fidelity measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Script",
+            "relation": "defines",
+            "target": "Allowed Actions and Order",
+            "explanation": "The script provides the standard against which fidelity is measured."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "recorded as",
+            "target": "Trace",
+            "explanation": "Agent's observable actions are captured in temporal order."
+          },
+          {
+            "step": "3",
+            "source": "Trace",
+            "relation": "compared with",
+            "target": "Script",
+            "explanation": "A comparison algorithm (automated or human) evaluates the trace against the script."
+          },
+          {
+            "step": "4",
+            "source": "Comparison Result",
+            "relation": "yields",
+            "target": "Fidelity Score",
+            "explanation": "The degree of match produces a numeric score."
+          },
+          {
+            "step": "5",
+            "source": "Action Granularity",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Finer granularity may detect more deviations but also increase noise."
+          },
+          {
+            "step": "6",
+            "source": "Script Strictness",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Stricter scripts penalize any deviation, while loose scripts tolerate variation."
+          },
+          {
+            "step": "7",
+            "source": "Measurement Method",
+            "relation": "moderates",
+            "target": "Evaluation Reliability",
+            "explanation": "Automated methods are scalable but may miss nuances; human judgment captures subtlety but is subjective."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete observability",
+            "why_it_matters": "Assumption of full observability may fail if internal reasoning (e.g., chain-of-thought) is not emitted, leading to incomplete traces and inaccurate fidelity scores."
+          },
+          {
+            "bottleneck": "Single script ambiguity",
+            "why_it_matters": "Assuming one correct script ignores multiple valid processes, potentially penalizing correct alternative strategies."
+          },
+          {
+            "bottleneck": "Quantification of qualitative aspects",
+            "why_it_matters": "Fidelity metrics may ignore qualitative dimensions (e.g., safety, tone) that require human judgment, limiting automation."
+          },
+          {
+            "bottleneck": "Tradeoff between granularity and feasibility",
+            "why_it_matters": "Fine-grained actions improve precision but increase definition and comparison costs; coarse actions risk missing critical deviations."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by comparing the observed trace of agent actions against a predefined script. The resulting fidelity score is influenced by action granularity, script strictness, and measurement method (automated vs. human). Key bottlenecks include incomplete observability of internal steps, reliance on a single canonical script, difficulty quantifying qualitative aspects, and the granularity-feasibility tradeoff. This mechanism provides a structured way to evaluate how closely an agent follows a desired process, but its validity depends on assumptions that may not hold in all scenarios."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The reliance on a single, unambiguous script as the standard for fidelity clashes with the reality that many tasks admit multiple valid solution processes. Enforcing one script may penalize correct but different approaches, leading to unfair or incomplete fidelity evaluation.",
+        "derived_from": [
+          "assumptions: single correct script",
+          "core_tradeoffs: completeness vs. flexibility"
+        ],
+        "why_it_matters": "If the script is too narrow, agents that use creative but valid strategies will be scored poorly, discouraging innovation.",
+        "what_existing_methods_may_miss": "Existing fidelity metrics often assume a fixed script without considering task equivalence under different processes.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of script strictness beyond which valid alternative solution strategies are systematically penalized in agent process fidelity scores?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a phase transition in fidelity evaluation: a strictness threshold that, once crossed, categorically excludes non-canonical strategies, providing a principled guideline for setting script flexibility."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of script strictness (e.g., proportion of allowed deviations) such that above this threshold, the fidelity scores of agents using valid alternative strategies are significantly lower than those using the canonical strategy, while below the threshold they are comparable.",
+        "predicted_effect": "Fidelity scores for alternative strategies will follow a step-function: high and similar to canonical below the threshold, then drop sharply above it."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Design a task (e.g., travel booking) with a canonical script and one valid alternative strategy. Define script strictness as the fraction of steps in the canonical script that must be exactly matched in order (e.g., 0.0 = no order requirement, 0.5 = half steps must match, 1.0 = full order). Vary strictness across at least 5 levels (e.g., 0.0, 0.25, 0.5, 0.75, 1.0). For each level, run agents with canonical and alternative strategies (10 trials each). Compute fidelity score as sequence alignment similarity. Plot mean fidelity vs. strictness for both strategies and identify if a discontinuity exists.",
+        "independent_variables": [
+          "script strictness (continuous: 0.0 to 1.0 in steps of 0.25)",
+          "agent strategy (canonical vs. alternative)"
+        ],
+        "dependent_variables": [
+          "fidelity score (0-1, e.g., normalized edit distance)"
+        ],
+        "controls": [
+          "same task",
+          "same action granularity (e.g., tool calls)",
+          "same measurement method (automated sequence alignment)",
+          "same agent base model"
+        ],
+        "falsifying_observation": "If fidelity scores for alternative strategies decrease linearly with strictness instead of dropping abruptly at a threshold, or if no significant difference between the two strategies at any strictness level, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Fidelity scores for alternative strategies remain high (~ canonical) for strictness levels below a critical value (e.g., <=0.5), then drop significantly above that threshold.",
+          "The drop is abrupt, resembling a step function, and is consistent across multiple trials and task instances.",
+          "Canonical strategy scores remain high across all strictness levels."
+        ],
+        "rejects_hypothesis": [
+          "No threshold observed: alternative strategy scores decrease monotonically with strictness.",
+          "Alternative strategy scores are always similar to canonical even at high strictness (e.g., strictness does not penalize them).",
+          "The pattern is non-monotonic or inconsistent."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (and instead a linear or flat relationship), then the hypothesis of a phase transition is rejected. The mechanism may be that strictness effects are additive or negligible, not categorical.",
+        "assumption_to_revise": "The assumption that script strictness has a nonlinear, threshold-driven effect on fidelity should be replaced with a continuous or null model.",
+        "next_question": "How does script strictness interact with other factors (e.g., task complexity, action granularity) to produce continuous fidelity penalties for alternative strategies?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Action",
+          "definition": "An indivisible unit of agent output that can be observed and recorded, such as a tool call or a sentence generated.",
+          "why_primitive": "Actions are the atomic building blocks of any agent process; they cannot be meaningfully subdivided without losing their behavioral significance."
+        },
+        {
+          "name": "Trace",
+          "definition": "A finite sequence of actions in temporal order, representing the actual process executed by the agent.",
+          "why_primitive": "A trace is the fundamental representation of a process as a linear record; it is the primary object of measurement."
+        },
+        {
+          "name": "Script",
+          "definition": "A predefined template or set of rules specifying allowed actions and their order for a canonical desired process.",
+          "why_primitive": "A script defines the standard against which fidelity is measured; without it, there is no reference for correctness."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's entire process is fully observable and can be captured as a trace without loss.",
+          "rationale": "Measurement requires complete access to the process; any unobserved action would make fidelity assessment partial or impossible.",
+          "possible_failure": "In practice, LLM agents may have internal reasoning steps (e.g., chain-of-thought) that are not emitted, leading to incomplete traces."
+        },
+        {
+          "assumption": "There exists a single, unambiguous correct script for a given task that all agents should follow.",
+          "rationale": "Without a clear standard, comparing fidelity across agents or runs is meaningless; the script must be agreed upon beforehand.",
+          "possible_failure": "Many tasks admit multiple valid processes; forcing a single script may unfairly penalize correct but different approaches."
+        },
+        {
+          "assumption": "Fidelity can be quantified by a deterministic comparison between the trace and the script.",
+          "rationale": "A quantitative metric allows objective, repeatable evaluation, which is necessary for scientific comparison.",
+          "possible_failure": "Some aspects of process fidelity (e.g., reasoning quality) may be qualitative and not reducible to a single numeric score."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Script",
+            "role": "input",
+            "description": "Predefined canonical process specifying allowed actions and their order."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "Observable actions taken by the agent during task execution."
+          },
+          {
+            "name": "Trace",
+            "role": "mediator",
+            "description": "Temporal sequence of actions recorded from the agent."
+          },
+          {
+            "name": "Action Granularity",
+            "role": "confounder",
+            "description": "Level of detail at which actions are defined (e.g., token vs tool call)."
+          },
+          {
+            "name": "Script Strictness",
+            "role": "confounder",
+            "description": "Degree to which the script allows variation from the canonical sequence."
+          },
+          {
+            "name": "Measurement Method",
+            "role": "confounder",
+            "description": "Whether fidelity is assessed via automated comparison or human judgment."
+          },
+          {
+            "name": "Fidelity Score",
+            "role": "outcome",
+            "description": "Quantitative measure of how well the trace matches the script."
+          },
+          {
+            "name": "Evaluation Reliability",
+            "role": "outcome",
+            "description": "Consistency and validity of the fidelity measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Script",
+            "relation": "defines",
+            "target": "Allowed Actions and Order",
+            "explanation": "The script provides the standard against which fidelity is measured."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "recorded as",
+            "target": "Trace",
+            "explanation": "Agent's observable actions are captured in temporal order."
+          },
+          {
+            "step": "3",
+            "source": "Trace",
+            "relation": "compared with",
+            "target": "Script",
+            "explanation": "A comparison algorithm (automated or human) evaluates the trace against the script."
+          },
+          {
+            "step": "4",
+            "source": "Comparison Result",
+            "relation": "yields",
+            "target": "Fidelity Score",
+            "explanation": "The degree of match produces a numeric score."
+          },
+          {
+            "step": "5",
+            "source": "Action Granularity",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Finer granularity may detect more deviations but also increase noise."
+          },
+          {
+            "step": "6",
+            "source": "Script Strictness",
+            "relation": "moderates",
+            "target": "Comparison Result",
+            "explanation": "Stricter scripts penalize any deviation, while loose scripts tolerate variation."
+          },
+          {
+            "step": "7",
+            "source": "Measurement Method",
+            "relation": "moderates",
+            "target": "Evaluation Reliability",
+            "explanation": "Automated methods are scalable but may miss nuances; human judgment captures subtlety but is subjective."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete observability",
+            "why_it_matters": "Assumption of full observability may fail if internal reasoning (e.g., chain-of-thought) is not emitted, leading to incomplete traces and inaccurate fidelity scores."
+          },
+          {
+            "bottleneck": "Single script ambiguity",
+            "why_it_matters": "Assuming one correct script ignores multiple valid processes, potentially penalizing correct alternative strategies."
+          },
+          {
+            "bottleneck": "Quantification of qualitative aspects",
+            "why_it_matters": "Fidelity metrics may ignore qualitative dimensions (e.g., safety, tone) that require human judgment, limiting automation."
+          },
+          {
+            "bottleneck": "Tradeoff between granularity and feasibility",
+            "why_it_matters": "Fine-grained actions improve precision but increase definition and comparison costs; coarse actions risk missing critical deviations."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by comparing the observed trace of agent actions against a predefined script. The resulting fidelity score is influenced by action granularity, script strictness, and measurement method (automated vs. human). Key bottlenecks include incomplete observability of internal steps, reliance on a single canonical script, difficulty quantifying qualitative aspects, and the granularity-feasibility tradeoff. This mechanism provides a structured way to evaluate how closely an agent follows a desired process, but its validity depends on assumptions that may not hold in all scenarios."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The drive to quantify fidelity via a deterministic comparison conflicts with the qualitative nature of some process aspects (e.g., safety, tone, reasoning quality). Automated metrics are scalable but may fail to capture these nuanced dimensions, while human judgment introduces subjectivity and cost.",
+        "derived_from": [
+          "assumptions: fidelity quantifiable",
+          "core_tradeoffs: automated metrics vs. human judgment",
+          "bottlenecks: quantification of qualitative aspects"
+        ],
+        "why_it_matters": "Over-reliance on automated metrics may lead to agents optimizing for the metric rather than true process fidelity, potentially ignoring safety or ethical considerations.",
+        "what_existing_methods_may_miss": "Methods that only use automated comparison miss qualitative aspects that require human interpretation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of qualitative action density (proportion of actions requiring human judgment) does a hybrid fidelity metric significantly outperform a fully automated metric in evaluation reliability for agent process fidelity?",
+        "question_type": "descriptive",
+        "source_tension": "T3",
+        "expected_contribution": "Identify the critical density threshold where hybrid metrics become necessary, providing a principled guide for when to invest in human-in-the-loop evaluation."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical density threshold D_c such that for tasks with qualitative action density > D_c, a hybrid fidelity metric achieves evaluation reliability (Spearman correlation with expert consensus) > 0.8 and significantly higher (p<0.05) than a fully automated metric, while for density ≤ D_c, the automated metric achieves reliability > 0.7 and the hybrid does not significantly improve reliability.",
+        "predicted_effect": "The hybrid metric's reliability advantage over the automated metric increases monotonically with qualitative action density, with a sharp inflection point near D_c."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select 50 agent traces from tasks (e.g., customer service, content moderation) across six levels of qualitative action density: 0%, 20%, 40%, 60%, 80%, and 100% of actions requiring human judgment (e.g., safety, tone). For each trace, compute reliability using three metrics: (A) fully automated edit-distance based on action sequences, (B) hybrid metric (automated comparison + human review of qualitative actions sampled at 10% rate), and (C) fully human evaluation (amortized). Measure evaluation reliability as Spearman correlation between each metric and expert consensus (averaged from 3 experts). Conduct statistical tests (paired t-tests) to identify the lowest density at which hybrid reliability > 0.8 and hybrid significantly outperforms automated (p<0.05). Repeat with different random samples to assess stability.",
+        "independent_variables": [
+          "Qualitative action density (0%, 20%, 40%, 60%, 80%, 100%)",
+          "Metric type (automated, hybrid, human)"
+        ],
+        "dependent_variables": [
+          "Evaluation reliability (Spearman correlation with expert consensus)",
+          "Scalability (average time per trace, average cost per trace)"
+        ],
+        "controls": [
+          "Same task instructions and scripts for all traces",
+          "Same definitions of qualitative dimensions (safety, tone)",
+          "Same expert panel for ground truth",
+          "Fixed hybrid sampling rate (10% of traces for human review)"
+        ],
+        "falsifying_observation": "If no density threshold D_c exists where hybrid reliability > 0.8 and hybrid significantly outperforms automated (p<0.05), i.e., either hybrid never significantly outperforms automated at any density, or hybrid significantly outperforms even at 0% density, then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For densities ≤ 40%, automated and hybrid reliability are similar (e.g., 0.72 vs 0.75, p>0.05).",
+          "For densities ≥ 60%, hybrid reliability exceeds 0.8 and is significantly higher than automated (e.g., 0.85 vs 0.60, p<0.05).",
+          "Fully human metric shows reliability ~0.85 but with 50-100x time/cost, confirming hybrid scalability advantage."
+        ],
+        "rejects_hypothesis": [
+          "Hybrid metric does not significantly outperform automated at any density (all p>0.05).",
+          "Hybrid metric significantly outperforms automated even at 0% density (p<0.05), indicating no threshold effect.",
+          "Hybrid metric never reaches reliability > 0.8 even at high densities, suggesting human sampling is insufficient."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold D_c is found, then the assumption that human judgment is only beneficial for qualitative actions may be flawed. Possibly human feedback enhances reliability even for purely automated actions (e.g., by catching edge cases).",
+        "assumption_to_revise": "Assumption #3: 'Fidelity can be quantified by a deterministic comparison.' Specifically, the sub-assumption that human input only matters for qualitative dimensions and does not improve reliability for quantitative dimensions.",
+        "next_question": "What mechanisms (e.g., structured rating scales, targeted safety flags) could make human input more cost-effective than automated metrics even for non-qualitative aspects?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical threshold of task complexity (number of required internal reasoning steps) such that for tasks below the threshold, the omission of internal reasoning steps does not significantly bias fidelity scores, but above the threshold, fidelity scores are significantly inflated compared to a full-trace baseline.",
+      "independent_variables": [
+        "Task complexity: number of required internal reasoning steps (1, 2, 3, ..., 10)"
+      ],
+      "dependent_variables": [
+        "Fidelity score difference: observable-only fidelity score minus full-trace fidelity score"
+      ],
+      "controlled_variables": [
+        "LLM agent model (same for all tasks)",
+        "Script structure (fixed format, only observable steps scripted)",
+        "Number of tasks per complexity level (at least 30)",
+        "Temperature (set to 0 for deterministic output)"
+      ],
+      "baselines": [
+        {
+          "name": "Full-trace fidelity",
+          "description": "Fidelity score computed using all actions including internal reasoning steps."
+        },
+        {
+          "name": "Observable-only fidelity",
+          "description": "Fidelity score computed using only observable actions (tool calls, final answer)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity score difference",
+          "definition": "Difference between observable-only fidelity score and full-trace fidelity score for each task."
+        }
+      ],
+      "expected_result": "For tasks with low complexity (e.g., 1–3 steps), fidelity score differences are small and not statistically significant; starting from a specific complexity level (e.g., 5 steps), differences become positive and statistically significant, increasing with complexity.",
+      "falsifying_result": "If no complexity level yields a statistically significant difference after Bonferroni correction, or if the difference is significant even at the lowest complexity level (1 step), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct a set of reasoning tasks with a script specifying only observable tool calls and final answer, while requiring varying numbers of internal reasoning steps (1 to 10). Use a fixed LLM agent to execute each task, capturing both observable actions and internal reasoning (by prompting to output reasoning). Compute fidelity scores using only observable trace vs. full trace (including reasoning) against respective scripts. Plot the score difference against task complexity and identify the smallest complexity level where the difference is statistically significant (p < 0.05, two-tailed t-test, Bonferroni corrected).",
+      "risks_and_confounds": [
+        "Internal reasoning may not be fully or accurately captured even when prompted, potentially confounding the full-trace baseline.",
+        "Task complexity may not be solely determined by the number of reasoning steps; other factors (e.g., step interdependence, branching) could influence bias.",
+        "Script design (e.g., granularity of observable actions) may affect sensitivity to deviations, potentially masking or exaggerating differences.",
+        "Statistical power may be insufficient at each complexity level; use at least 30 trials per level as specified."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold of script strictness such that above this threshold, fidelity scores of agents using valid alternative strategies are significantly lower than those using the canonical strategy, while below the threshold they are comparable.",
+      "independent_variables": [
+        "script_strictness (0.0 to 1.0 in steps of 0.25)",
+        "agent_strategy (canonical vs. alternative)"
+      ],
+      "dependent_variables": [
+        "fidelity_score (0-1, normalized edit distance)"
+      ],
+      "controlled_variables": [
+        "same task (e.g., travel booking)",
+        "same action granularity (tool calls)",
+        "same measurement method (automated sequence alignment)",
+        "same base agent model"
+      ],
+      "baselines": [
+        {
+          "name": "canonical strategy",
+          "description": "The predefined script-following agent strategy across all strictness levels."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Sequence Alignment Fidelity",
+          "definition": "Normalized edit distance between observed trace and script, ranging 0 to 1 where 1 is exact match."
+        }
+      ],
+      "expected_result": "Fidelity scores for alternative strategies will show a step-function: high and comparable to canonical below a strictness threshold, then drop sharply above the threshold.",
+      "falsifying_result": "If the fidelity scores for alternative strategies decrease linearly with strictness or remain comparable to canonical at all levels, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Design a travel booking task with a canonical script and one valid alternative strategy. Define script strictness as the fraction of steps in the canonical script that must be exactly matched in order. Vary strictness across 5 levels: 0.0, 0.25, 0.5, 0.75, 1.0. For each level, run agents with canonical and alternative strategies (10 trials each). Compute fidelity score as normalized edit distance. Plot mean fidelity vs. strictness for both strategies and identify if a discontinuity exists.",
+      "risks_and_confounds": []
+    },
+    {
+      "hypothesis": "There exists a critical density threshold D_c such that for tasks with qualitative action density > D_c, a hybrid fidelity metric achieves evaluation reliability (Spearman correlation with expert consensus) > 0.8 and significantly higher (p<0.05) than a fully automated metric, while for density ≤ D_c, the automated metric achieves reliability > 0.7 and the hybrid does not significantly improve reliability.",
+      "independent_variables": [
+        "Qualitative action density (0% and 100%)",
+        "Metric type (automated, hybrid)"
+      ],
+      "dependent_variables": [
+        "Evaluation reliability (Spearman correlation with expert consensus)",
+        "Scalability (average time per trace, average cost per trace)"
+      ],
+      "controlled_variables": [
+        "Same task instructions and scripts for all traces",
+        "Same definitions of qualitative dimensions (safety, tone)",
+        "Same expert panel for ground truth (3 experts)",
+        "Fixed hybrid sampling rate (10% of traces for human review)"
+      ],
+      "baselines": [
+        {
+          "name": "Fully automated metric",
+          "description": "Edit-distance based comparison of action sequences without human input."
+        },
+        {
+          "name": "Fully human evaluation",
+          "description": "Human experts evaluate each trace against the script, producing a fidelity score."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Automated",
+          "definition": "Spearman correlation between automated edit-distance scores and expert consensus (average of 3 experts)."
+        },
+        {
+          "name": "Hybrid",
+          "definition": "Automated comparison plus human review of a random 10% sample of qualitative actions; overall score combines automated and human-reviewed components."
+        },
+        {
+          "name": "Human",
+          "definition": "Average of fidelity scores from 3 human experts."
+        }
+      ],
+      "expected_result": "For 0% density, automated reliability > 0.7 and hybrid does not significantly outperform (p>0.05). For 100% density, hybrid reliability > 0.8 and significantly outperforms automated (p<0.05).",
+      "falsifying_result": "If at 0% density hybrid significantly outperforms automated (p<0.05) OR at 100% density hybrid does not significantly outperform automated (p>0.05) OR hybrid reliability ≤ 0.8 at 100% density, then the hypothesis is rejected.",
+      "minimum_viable_experiment": "Select 20 agent traces from tasks with 0% qualitative action density (all actions deterministic) and 20 traces from tasks with 100% density (every action requires human judgment, e.g., safety decisions). For each trace, compute reliability (Spearman correlation with expert consensus) for the automated and hybrid metrics. Use paired t-tests to compare hybrid vs automated correlation coefficients at each density. Repeat with different random samples of 10 traces per density to test stability. The experiment requires only two densities, thus minimizing resources while being sufficient to detect the threshold effect.",
+      "risks_and_confounds": [
+        "Small sample size (20 per density) may reduce statistical power; however, the hypothesis predicts large effect sizes (e.g., Δ > 0.2 in correlation), so 20 pairs per condition may suffice for α=0.05 at 80% power if effect is large.",
+        "Expert consensus may be noisy; using average of 3 experts helps mitigate.",
+        "Choice of qualitative dimensions (safety, tone) may not be representative of all qualitative aspects.",
+        "Hybrid sampling rate fixed at 10%; different rates could affect outcome."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles decomposition of agent process fidelity measurement, identifying tensions and proposing three threshold-based experiments. The work is well-structured and the identification of phase transitions is novel. However, the experiments are limited in scale and scope, and the assumptions may restrict real-world applicability. Missing baselines from process-oriented metrics weaken the evaluation.",
+    "strengths": [
+      "Clear first-principles derivation of action, trace, and script as primitives.",
+      "Well-defined tensions that capture fundamental tradeoffs in fidelity measurement.",
+      "Experiments are tightly coupled to hypotheses and designed to be falsifiable.",
+      "Novel focus on threshold effects and phase transitions in measurement design."
+    ],
+    "weaknesses": [
+      "Strong assumptions (full observability, single correct script) limit generalizability.",
+      "Experiments rely on synthetic tasks and small sample sizes (e.g., 30 trials per complexity level).",
+      "Only one alternative strategy tested in the script strictness experiment; more diversity needed.",
+      "No comparison to existing process fidelity metrics from workflow mining or agent evaluation.",
+      "Hybrid metric experiment uses only one sampling rate (10%); sensitivity not analyzed."
+    ],
+    "questions": [
+      "How do the proposed fidelity metrics compare quantitatively to established process-oriented measures like edit distance normalized by path length or precision/recall of task steps?",
+      "What is the impact of prompt variability on the observed fidelity scores, and how robust are the thresholds to different model families?",
+      "Can the internal reasoning steps be reliably captured without altering agent behavior (e.g., via prompting)?"
+    ],
+    "missing_baselines": [
+      "No inclusion of state-of-the-art process fidelity metrics from the workflow mining literature (e.g., graph edit distance, trace alignment).",
+      "Lack of comparison to simpler baselines like exact match or sequence alignment without threshold tuning.",
+      "Alternative explanations for observed biases (e.g., action granularity effects) are not controlled."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "overgeneralization_from_narrow_assumptions",
+    "root_cause": "The research built a mechanism model on strong assumptions (full observability, single correct script) that are often violated in real-world LLM agent tasks, leading to limited applicability and potentially misleading conclusions.",
+    "violated_principle": "First-principles decompositions must be robust to violations of their core assumptions; conclusions about measurement methods should be validated across a range of realistic scenarios, not just idealized ones.",
+    "new_or_updated_principle": "When measuring agent process fidelity from first principles, explicitly model the uncertainty from incomplete observability and multiple valid scripts, and design experiments that test the sensitivity of conclusions to these relaxations.",
+    "new_or_updated_skill": "Skill: Constructing and testing threshold hypotheses in measurement design. Identify candidate thresholds (e.g., task complexity, script strictness, qualitative density) that demarcate regimes where different measurement approaches are valid, and design experiments with sufficient baseline comparisons (e.g., existing workflow metrics) to establish practical significance.",
+    "regression_test": "Regression test: Given a research package on agent process fidelity, verify that the proposed experiments include at least one baseline comparison to an established metric (e.g., graph edit distance, trace alignment) and that the conclusions explicitly discuss the impact of relaxing the full-observability and single-script assumptions. If these are missing, flag as insufficiently grounded."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "What is the threshold of task complexity (measured by number of required internal reasoning steps) above which omitting internal reasoning steps from the trace leads to a significant overestimation of process fidelity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of script strictness beyond which valid alternative solution strategies are systematically penalized in agent process fidelity scores?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of qualitative action density (proportion of actions requiring human judgment) does a hybrid fidelity metric significantly outperform a fully automated metric in evaluation reliability for agent process fidelity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

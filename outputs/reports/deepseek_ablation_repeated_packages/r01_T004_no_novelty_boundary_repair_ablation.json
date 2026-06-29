@@ -1,0 +1,1389 @@
+{
+  "topic": {
+    "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+    "topic_id": "T004",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: Can agent memory improve generalization or does it create retrieval interference?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "agent memory",
+        "definition": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent.",
+        "why_primitive": "It is the core component under investigation; without it, the question of its effect on generalization or interference is meaningless."
+      },
+      {
+        "name": "generalization",
+        "definition": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data.",
+        "why_primitive": "It is a fundamental goal of learning systems; evaluating memory requires a measure of how well performance transfers beyond memorized instances."
+      },
+      {
+        "name": "retrieval interference",
+        "definition": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task.",
+        "why_primitive": "It captures the potential downside of memory; without it, the tradeoff with generalization would not exist."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Memory storage is finite and context-dependent; not all experiences can be stored perfectly.",
+        "rationale": "Realistic systems have limited capacity; context dependency arises because memories are encoded relative to the current state.",
+        "possible_failure": "If storage were infinite and context-insensitive, interference would be trivial and generalization could always be improved."
+      },
+      {
+        "assumption": "Retrieval is based on similarity or relevance between the current query and stored memories.",
+        "rationale": "Most memory architectures (e.g., key-value stores, attention) rely on some form of proximity measure.",
+        "possible_failure": "If retrieval were perfect and always returned exactly the needed memory, there would be no interference."
+      },
+      {
+        "assumption": "Memory updates can introduce changes that alter previously stored information (e.g., overwriting, consolidation).",
+        "rationale": "Learning often involves updating parameters or memory entries, which can cause forgetting or distortion.",
+        "possible_failure": "If memory were static and immutable, interference would be purely a retrieval problem, not a storage one."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Specificity vs. generality of stored representations",
+        "variables": [
+          "level of abstraction in memory encoding",
+          "granularity of experience storage"
+        ]
+      },
+      {
+        "tradeoff": "Memory capacity vs. retrieval efficiency",
+        "variables": [
+          "number of stored items",
+          "indexing/computation cost for retrieval"
+        ]
+      },
+      {
+        "tradeoff": "Memory consolidation vs. susceptibility to interference",
+        "variables": [
+          "frequency of memory updates",
+          "strength of prior memories"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "agent_memory",
+        "role": "input",
+        "description": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent."
+      },
+      {
+        "name": "generalization",
+        "role": "outcome",
+        "description": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data."
+      },
+      {
+        "name": "retrieval_interference",
+        "role": "outcome",
+        "description": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task."
+      },
+      {
+        "name": "memory_capacity",
+        "role": "mediator",
+        "description": "The maximum number of items or experiences that can be stored in agent memory."
+      },
+      {
+        "name": "context_dependency",
+        "role": "mediator",
+        "description": "The degree to which memory encoding and retrieval depend on the context of the experience."
+      },
+      {
+        "name": "similarity_retrieval",
+        "role": "mediator",
+        "description": "The retrieval mechanism that selects memories based on similarity or relevance to the current query."
+      },
+      {
+        "name": "memory_update_frequency",
+        "role": "mediator",
+        "description": "How often stored memories are modified, overwritten, or consolidated."
+      },
+      {
+        "name": "abstraction_level",
+        "role": "mediator",
+        "description": "The level of detail or abstraction at which experiences are stored (e.g., specific vs. general patterns)."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Storage",
+        "source": "agent_memory",
+        "relation": "encodes",
+        "target": "memory_capacity",
+        "explanation": "Agent memory stores experiences, limited by capacity."
+      },
+      {
+        "step": "Encoding quality",
+        "source": "context_dependency",
+        "relation": "moderates",
+        "target": "stored memories",
+        "explanation": "Context-dependent encoding can make memories more specific or more general."
+      },
+      {
+        "step": "Retrieval",
+        "source": "similarity_retrieval",
+        "relation": "selects from",
+        "target": "stored memories",
+        "explanation": "Retrieval uses similarity to the current query to fetch memories."
+      },
+      {
+        "step": "Outcome A",
+        "source": "retrieved memories",
+        "relation": "if relevant, improves",
+        "target": "generalization",
+        "explanation": "Relevant past experiences help the agent apply knowledge to new tasks."
+      },
+      {
+        "step": "Outcome B",
+        "source": "retrieved memories",
+        "relation": "if irrelevant or conflicting, causes",
+        "target": "retrieval_interference",
+        "explanation": "Irrelevant or conflicting memories degrade current task performance."
+      },
+      {
+        "step": "Update",
+        "source": "memory_update_frequency",
+        "relation": "changes",
+        "target": "stored memories",
+        "explanation": "Frequent updates risk overwriting useful information, causing interference."
+      },
+      {
+        "step": "Abstraction",
+        "source": "abstraction_level",
+        "relation": "influences",
+        "target": "generalization vs. interference",
+        "explanation": "Higher abstraction may improve generalization but lose specificity; lower abstraction increases interference risk."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Limited memory capacity",
+        "why_it_matters": "Finite storage forces the agent to prioritize which experiences to keep, potentially discarding important information or retaining too many specific instances that cause interference."
+      },
+      {
+        "bottleneck": "Ambiguity in similarity retrieval",
+        "why_it_matters": "Retrieving based on similarity may return memories that are superficially similar but irrelevant or misleading, directly causing retrieval interference."
+      },
+      {
+        "bottleneck": "Memory update conflicts",
+        "why_it_matters": "Updating or consolidating memories can overwrite prior useful information or create conflicting representations, harming both generalization and inducing interference."
+      }
+    ],
+    "mechanism_summary": "Agent memory can improve generalization by providing relevant past experiences that inform current decisions, but it simultaneously risks retrieval interference when stored memories are overly specific, conflicting, or irrelevant. The net effect depends on a tradeoff among memory capacity, context encoding, retrieval precision, abstraction level, and update dynamics. Balancing these factors determines whether memory aids generalization or creates interference."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Storing memories at a high level of abstraction may improve generalization across diverse tasks but risks losing crucial details necessary for accurate performance on specific tasks, leading to retrieval interference when fine-grained information is needed.",
+      "derived_from": [
+        "abstraction_level",
+        "generalization",
+        "retrieval_interference"
+      ],
+      "why_it_matters": "This tension captures the fundamental tradeoff in representation learning: how to encode memories that are both general and specific enough to support transfer while avoiding harmful interference.",
+      "what_existing_methods_may_miss": "Existing methods often fix the granularity of memory (e.g., storing raw examples or high-level summaries) without dynamically adjusting abstraction based on task demands.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Increasing memory capacity allows storing more experiences, which can enhance generalization by providing a richer set of examples, but it also increases retrieval computation and the chance of retrieving irrelevant memories, causing interference.",
+      "derived_from": [
+        "memory_capacity",
+        "similarity_retrieval",
+        "generalization",
+        "retrieval_interference"
+      ],
+      "why_it_matters": "This tension is critical for scaling memory systems; practical systems must balance storing enough information to be useful while keeping retrieval fast and accurate.",
+      "what_existing_methods_may_miss": "Current methods often ignore retrieval cost when increasing capacity, assuming unlimited resources. They may miss the tradeoff between storage size and retrieval precision.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Frequent memory updates (learning new information) can overwrite old but valuable memories, causing forgetting and interference; infrequent updates may preserve old memories but prevent adaptation to new patterns, harming generalization.",
+      "derived_from": [
+        "memory_update_frequency",
+        "retrieval_interference",
+        "generalization"
+      ],
+      "why_it_matters": "This tension underlies the stability-plasticity dilemma in continual learning; it determines how well the agent can retain useful knowledge while incorporating new information.",
+      "what_existing_methods_may_miss": "Standard approaches often use fixed update rates or naive memory replay, missing the nuanced tradeoff between preserving past knowledge and acquiring new skills.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Memories encoded heavily context-dependent may be more accurately retrieved in similar contexts but fail to transfer to novel contexts, limiting generalization; context-independent memories transfer better but risk interference from irrelevant associations.",
+      "derived_from": [
+        "context_dependency",
+        "generalization",
+        "retrieval_interference"
+      ],
+      "why_it_matters": "This tension highlights the role of context in memory, a key factor in generalization and interference that is often overlooked in simple memory models.",
+      "what_existing_methods_may_miss": "Many memory models assume context-free encoding or fixed context similarity, missing the adaptive potential of context-dependent storage for balancing specificity and transfer.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying the abstraction level of stored memories affect the tradeoff between generalization and retrieval interference in LLM agents on a set of diverse tasks with varying granularity requirements?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Provide empirical evidence on the optimal abstraction level that minimizes interference while maximizing generalization across tasks."
+    },
+    {
+      "question": "As memory capacity increases, does the probability of retrieval interference increase due to retrieving irrelevant memories, and can this interference be mitigated by a similarity threshold mechanism?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Determine if there is a capacity threshold beyond which interference dominates, and propose a retrieval filtering technique."
+    },
+    {
+      "question": "Under what schedule of memory updates (e.g., adaptive vs fixed) does an LLM agent achieve the best balance between retaining old knowledge (minimizing forgetting) and adapting to new tasks (maximizing generalization)?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Identify an update policy that optimizes stability-plasticity tradeoff."
+    },
+    {
+      "question": "Does encoding memories with varying degrees of context dependency improve generalization in novel contexts while reducing interference in familiar contexts, compared to context-free encoding?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Show that adaptive context encoding can outperform fixed encoding on tasks with varying context similarity."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "agent memory",
+          "definition": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent.",
+          "why_primitive": "It is the core component under investigation; without it, the question of its effect on generalization or interference is meaningless."
+        },
+        {
+          "name": "generalization",
+          "definition": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data.",
+          "why_primitive": "It is a fundamental goal of learning systems; evaluating memory requires a measure of how well performance transfers beyond memorized instances."
+        },
+        {
+          "name": "retrieval interference",
+          "definition": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task.",
+          "why_primitive": "It captures the potential downside of memory; without it, the tradeoff with generalization would not exist."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory storage is finite and context-dependent; not all experiences can be stored perfectly.",
+          "rationale": "Realistic systems have limited capacity; context dependency arises because memories are encoded relative to the current state.",
+          "possible_failure": "If storage were infinite and context-insensitive, interference would be trivial and generalization could always be improved."
+        },
+        {
+          "assumption": "Retrieval is based on similarity or relevance between the current query and stored memories.",
+          "rationale": "Most memory architectures (e.g., key-value stores, attention) rely on some form of proximity measure.",
+          "possible_failure": "If retrieval were perfect and always returned exactly the needed memory, there would be no interference."
+        },
+        {
+          "assumption": "Memory updates can introduce changes that alter previously stored information (e.g., overwriting, consolidation).",
+          "rationale": "Learning often involves updating parameters or memory entries, which can cause forgetting or distortion.",
+          "possible_failure": "If memory were static and immutable, interference would be purely a retrieval problem, not a storage one."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_memory",
+            "role": "input",
+            "description": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent."
+          },
+          {
+            "name": "generalization",
+            "role": "outcome",
+            "description": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data."
+          },
+          {
+            "name": "retrieval_interference",
+            "role": "outcome",
+            "description": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "mediator",
+            "description": "The maximum number of items or experiences that can be stored in agent memory."
+          },
+          {
+            "name": "context_dependency",
+            "role": "mediator",
+            "description": "The degree to which memory encoding and retrieval depend on the context of the experience."
+          },
+          {
+            "name": "similarity_retrieval",
+            "role": "mediator",
+            "description": "The retrieval mechanism that selects memories based on similarity or relevance to the current query."
+          },
+          {
+            "name": "memory_update_frequency",
+            "role": "mediator",
+            "description": "How often stored memories are modified, overwritten, or consolidated."
+          },
+          {
+            "name": "abstraction_level",
+            "role": "mediator",
+            "description": "The level of detail or abstraction at which experiences are stored (e.g., specific vs. general patterns)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Storage",
+            "source": "agent_memory",
+            "relation": "encodes",
+            "target": "memory_capacity",
+            "explanation": "Agent memory stores experiences, limited by capacity."
+          },
+          {
+            "step": "Encoding quality",
+            "source": "context_dependency",
+            "relation": "moderates",
+            "target": "stored memories",
+            "explanation": "Context-dependent encoding can make memories more specific or more general."
+          },
+          {
+            "step": "Retrieval",
+            "source": "similarity_retrieval",
+            "relation": "selects from",
+            "target": "stored memories",
+            "explanation": "Retrieval uses similarity to the current query to fetch memories."
+          },
+          {
+            "step": "Outcome A",
+            "source": "retrieved memories",
+            "relation": "if relevant, improves",
+            "target": "generalization",
+            "explanation": "Relevant past experiences help the agent apply knowledge to new tasks."
+          },
+          {
+            "step": "Outcome B",
+            "source": "retrieved memories",
+            "relation": "if irrelevant or conflicting, causes",
+            "target": "retrieval_interference",
+            "explanation": "Irrelevant or conflicting memories degrade current task performance."
+          },
+          {
+            "step": "Update",
+            "source": "memory_update_frequency",
+            "relation": "changes",
+            "target": "stored memories",
+            "explanation": "Frequent updates risk overwriting useful information, causing interference."
+          },
+          {
+            "step": "Abstraction",
+            "source": "abstraction_level",
+            "relation": "influences",
+            "target": "generalization vs. interference",
+            "explanation": "Higher abstraction may improve generalization but lose specificity; lower abstraction increases interference risk."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Finite storage forces the agent to prioritize which experiences to keep, potentially discarding important information or retaining too many specific instances that cause interference."
+          },
+          {
+            "bottleneck": "Ambiguity in similarity retrieval",
+            "why_it_matters": "Retrieving based on similarity may return memories that are superficially similar but irrelevant or misleading, directly causing retrieval interference."
+          },
+          {
+            "bottleneck": "Memory update conflicts",
+            "why_it_matters": "Updating or consolidating memories can overwrite prior useful information or create conflicting representations, harming both generalization and inducing interference."
+          }
+        ],
+        "mechanism_summary": "Agent memory can improve generalization by providing relevant past experiences that inform current decisions, but it simultaneously risks retrieval interference when stored memories are overly specific, conflicting, or irrelevant. The net effect depends on a tradeoff among memory capacity, context encoding, retrieval precision, abstraction level, and update dynamics. Balancing these factors determines whether memory aids generalization or creates interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Storing memories at a high level of abstraction may improve generalization across diverse tasks but risks losing crucial details necessary for accurate performance on specific tasks, leading to retrieval interference when fine-grained information is needed.",
+        "derived_from": [
+          "abstraction_level",
+          "generalization",
+          "retrieval_interference"
+        ],
+        "why_it_matters": "This tension captures the fundamental tradeoff in representation learning: how to encode memories that are both general and specific enough to support transfer while avoiding harmful interference.",
+        "what_existing_methods_may_miss": "Existing methods often fix the granularity of memory (e.g., storing raw examples or high-level summaries) without dynamically adjusting abstraction based on task demands.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does varying the abstraction level of stored memories affect the tradeoff between generalization and retrieval interference in LLM agents on a set of diverse tasks with varying granularity requirements?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Provide empirical evidence on the optimal abstraction level that minimizes interference while maximizing generalization across tasks."
+      },
+      "hypothesis": {
+        "statement": "In LLM agents, varying the abstraction level of stored memories produces a non-monotonic effect on generalization and retrieval interference: intermediate abstraction levels maximize generalization while minimizing interference, whereas both very low (specific) and very high (abstract) abstraction levels degrade generalization and increase interference.",
+        "predicted_effect": "For a set of diverse tasks with varying granularity requirements, generalization performance will follow an inverted U-shape as abstraction increases, and retrieval interference will follow a U-shape, with an optimal abstraction level balancing specificity and generality."
+      },
+      "minimal_decisive_test": {
+        "experiment": "We will build an LLM agent with a memory module that stores experiences (task instances) at three abstraction levels: raw text (low abstraction), structured summaries (medium abstraction), and high-level principles (high abstraction). The agent is tested on a suite of tasks, each having both specific and general variants. We measure generalization as accuracy on unseen tasks and interference as the rate of incorrect retrievals or performance degradation due to irrelevant memories.",
+        "independent_variables": [
+          "abstraction level of stored memories (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "generalization accuracy on unseen tasks",
+          "retrieval interference rate (proportion of trials where retrieved memory degrades performance)"
+        ],
+        "controls": [
+          "same base LLM (e.g., GPT-3.5)",
+          "same set of training and test tasks",
+          "fixed memory capacity (number of stored items)",
+          "fixed retrieval mechanism (cosine similarity)",
+          "fixed memory update frequency (no updates after initial storage)"
+        ],
+        "falsifying_observation": "If generalization accuracy does not improve at any abstraction level relative to no memory, or if interference increases monotonically with abstraction, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Generalization accuracy is highest at the medium abstraction level and lower at both low and high abstraction levels.",
+          "Retrieval interference is lowest at the medium abstraction level and higher at both low and high abstraction levels.",
+          "The optimal abstraction level differs by task granularity: specific tasks benefit from low abstraction, general tasks from high abstraction, but medium abstraction balances both."
+        ],
+        "rejects_hypothesis": [
+          "Generalization accuracy does not differ significantly across abstraction levels.",
+          "Generalization accuracy improves monotonically with abstraction (no decrease at high abstraction).",
+          "Interference increases monotonically with abstraction (no U-shape).",
+          "Interference is always high regardless of abstraction level."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted non-monotonic relationship is not observed, e.g., generalization is always highest at the lowest abstraction level or interference never decreases, then the hypothesis is rejected.",
+        "assumption_to_revise": "Assumption: Abstraction level is the primary mediator of the tradeoff. If the data show that other factors (e.g., memory capacity, retrieval mechanism) dominate, then these factors must be incorporated into a revised model.",
+        "next_question": "How does memory capacity interact with abstraction level to affect generalization and interference, and can dynamic adjustment of abstraction based on task context resolve the tradeoff?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "agent memory",
+          "definition": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent.",
+          "why_primitive": "It is the core component under investigation; without it, the question of its effect on generalization or interference is meaningless."
+        },
+        {
+          "name": "generalization",
+          "definition": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data.",
+          "why_primitive": "It is a fundamental goal of learning systems; evaluating memory requires a measure of how well performance transfers beyond memorized instances."
+        },
+        {
+          "name": "retrieval interference",
+          "definition": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task.",
+          "why_primitive": "It captures the potential downside of memory; without it, the tradeoff with generalization would not exist."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory storage is finite and context-dependent; not all experiences can be stored perfectly.",
+          "rationale": "Realistic systems have limited capacity; context dependency arises because memories are encoded relative to the current state.",
+          "possible_failure": "If storage were infinite and context-insensitive, interference would be trivial and generalization could always be improved."
+        },
+        {
+          "assumption": "Retrieval is based on similarity or relevance between the current query and stored memories.",
+          "rationale": "Most memory architectures (e.g., key-value stores, attention) rely on some form of proximity measure.",
+          "possible_failure": "If retrieval were perfect and always returned exactly the needed memory, there would be no interference."
+        },
+        {
+          "assumption": "Memory updates can introduce changes that alter previously stored information (e.g., overwriting, consolidation).",
+          "rationale": "Learning often involves updating parameters or memory entries, which can cause forgetting or distortion.",
+          "possible_failure": "If memory were static and immutable, interference would be purely a retrieval problem, not a storage one."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_memory",
+            "role": "input",
+            "description": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent."
+          },
+          {
+            "name": "generalization",
+            "role": "outcome",
+            "description": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data."
+          },
+          {
+            "name": "retrieval_interference",
+            "role": "outcome",
+            "description": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "mediator",
+            "description": "The maximum number of items or experiences that can be stored in agent memory."
+          },
+          {
+            "name": "context_dependency",
+            "role": "mediator",
+            "description": "The degree to which memory encoding and retrieval depend on the context of the experience."
+          },
+          {
+            "name": "similarity_retrieval",
+            "role": "mediator",
+            "description": "The retrieval mechanism that selects memories based on similarity or relevance to the current query."
+          },
+          {
+            "name": "memory_update_frequency",
+            "role": "mediator",
+            "description": "How often stored memories are modified, overwritten, or consolidated."
+          },
+          {
+            "name": "abstraction_level",
+            "role": "mediator",
+            "description": "The level of detail or abstraction at which experiences are stored (e.g., specific vs. general patterns)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Storage",
+            "source": "agent_memory",
+            "relation": "encodes",
+            "target": "memory_capacity",
+            "explanation": "Agent memory stores experiences, limited by capacity."
+          },
+          {
+            "step": "Encoding quality",
+            "source": "context_dependency",
+            "relation": "moderates",
+            "target": "stored memories",
+            "explanation": "Context-dependent encoding can make memories more specific or more general."
+          },
+          {
+            "step": "Retrieval",
+            "source": "similarity_retrieval",
+            "relation": "selects from",
+            "target": "stored memories",
+            "explanation": "Retrieval uses similarity to the current query to fetch memories."
+          },
+          {
+            "step": "Outcome A",
+            "source": "retrieved memories",
+            "relation": "if relevant, improves",
+            "target": "generalization",
+            "explanation": "Relevant past experiences help the agent apply knowledge to new tasks."
+          },
+          {
+            "step": "Outcome B",
+            "source": "retrieved memories",
+            "relation": "if irrelevant or conflicting, causes",
+            "target": "retrieval_interference",
+            "explanation": "Irrelevant or conflicting memories degrade current task performance."
+          },
+          {
+            "step": "Update",
+            "source": "memory_update_frequency",
+            "relation": "changes",
+            "target": "stored memories",
+            "explanation": "Frequent updates risk overwriting useful information, causing interference."
+          },
+          {
+            "step": "Abstraction",
+            "source": "abstraction_level",
+            "relation": "influences",
+            "target": "generalization vs. interference",
+            "explanation": "Higher abstraction may improve generalization but lose specificity; lower abstraction increases interference risk."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Finite storage forces the agent to prioritize which experiences to keep, potentially discarding important information or retaining too many specific instances that cause interference."
+          },
+          {
+            "bottleneck": "Ambiguity in similarity retrieval",
+            "why_it_matters": "Retrieving based on similarity may return memories that are superficially similar but irrelevant or misleading, directly causing retrieval interference."
+          },
+          {
+            "bottleneck": "Memory update conflicts",
+            "why_it_matters": "Updating or consolidating memories can overwrite prior useful information or create conflicting representations, harming both generalization and inducing interference."
+          }
+        ],
+        "mechanism_summary": "Agent memory can improve generalization by providing relevant past experiences that inform current decisions, but it simultaneously risks retrieval interference when stored memories are overly specific, conflicting, or irrelevant. The net effect depends on a tradeoff among memory capacity, context encoding, retrieval precision, abstraction level, and update dynamics. Balancing these factors determines whether memory aids generalization or creates interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Frequent memory updates (learning new information) can overwrite old but valuable memories, causing forgetting and interference; infrequent updates may preserve old memories but prevent adaptation to new patterns, harming generalization.",
+        "derived_from": [
+          "memory_update_frequency",
+          "retrieval_interference",
+          "generalization"
+        ],
+        "why_it_matters": "This tension underlies the stability-plasticity dilemma in continual learning; it determines how well the agent can retain useful knowledge while incorporating new information.",
+        "what_existing_methods_may_miss": "Standard approaches often use fixed update rates or naive memory replay, missing the nuanced tradeoff between preserving past knowledge and acquiring new skills.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Under what schedule of memory updates (e.g., adaptive vs fixed) does an LLM agent achieve the best balance between retaining old knowledge (minimizing forgetting) and adapting to new tasks (maximizing generalization)?",
+        "question_type": "benchmark",
+        "source_tension": "T3",
+        "expected_contribution": "Identify an update policy that optimizes stability-plasticity tradeoff."
+      },
+      "hypothesis": {
+        "statement": "An adaptive memory update schedule that adjusts update frequency based on task novelty or retrieval success will achieve a better balance between retaining old knowledge (minimizing forgetting) and adapting to new tasks (maximizing generalization) compared to a fixed update schedule.",
+        "predicted_effect": "Under the adaptive schedule, the agent will exhibit higher average accuracy across a sequence of tasks and lower forgetting of previous tasks, relative to the fixed schedule."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a continual learning benchmark (e.g., a sequence of 10 NLP classification tasks) with an LLM agent equipped with a memory module. Implement two memory update policies: (1) fixed: update memory after every task with a constant learning rate; (2) adaptive: update memory only when the agent's prediction error on the current task exceeds a threshold, and with variable update strength proportional to error. Measure forgetting (accuracy drop on previously learned tasks) and generalization (final accuracy on a held-out new task) after the sequence.",
+        "independent_variables": [
+          "update schedule type (fixed vs adaptive)",
+          "threshold parameter for adaptive schedule"
+        ],
+        "dependent_variables": [
+          "average accuracy across all tasks",
+          "forgetting score (average accuracy drop on old tasks)",
+          "generalization accuracy on a new task"
+        ],
+        "controls": [
+          "same memory architecture",
+          "same set of tasks and order",
+          "same base LLM",
+          "same evaluation metrics"
+        ],
+        "falsifying_observation": "The adaptive schedule yields no statistically significant improvement in average accuracy or forgetting compared to the fixed schedule, or the fixed schedule performs better."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Adaptive schedule shows higher average accuracy across tasks.",
+          "Adaptive schedule shows lower forgetting (higher accuracy on old tasks).",
+          "Adaptive schedule shows better or comparable generalization on a new task."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference between adaptive and fixed schedules.",
+          "Fixed schedule outperforms adaptive on average accuracy.",
+          "Adaptive schedule leads to higher forgetting."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the adaptive schedule does not significantly outperform the fixed schedule in the stability-plasticity tradeoff, then the hypothesis that adaptivity per se is beneficial is not supported.",
+        "assumption_to_revise": "The assumption that update frequency is the primary lever for balancing retention and adaptation; instead, the content or method of memory updates (e.g., selective replay, consolidation) may be more critical.",
+        "next_question": "How does the content of memory updates (e.g., replay of diverse past experiences vs. selective storage of novel patterns) affect the balance between generalization and retrieval interference in LLM agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "agent memory",
+          "definition": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent.",
+          "why_primitive": "It is the core component under investigation; without it, the question of its effect on generalization or interference is meaningless."
+        },
+        {
+          "name": "generalization",
+          "definition": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data.",
+          "why_primitive": "It is a fundamental goal of learning systems; evaluating memory requires a measure of how well performance transfers beyond memorized instances."
+        },
+        {
+          "name": "retrieval interference",
+          "definition": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task.",
+          "why_primitive": "It captures the potential downside of memory; without it, the tradeoff with generalization would not exist."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory storage is finite and context-dependent; not all experiences can be stored perfectly.",
+          "rationale": "Realistic systems have limited capacity; context dependency arises because memories are encoded relative to the current state.",
+          "possible_failure": "If storage were infinite and context-insensitive, interference would be trivial and generalization could always be improved."
+        },
+        {
+          "assumption": "Retrieval is based on similarity or relevance between the current query and stored memories.",
+          "rationale": "Most memory architectures (e.g., key-value stores, attention) rely on some form of proximity measure.",
+          "possible_failure": "If retrieval were perfect and always returned exactly the needed memory, there would be no interference."
+        },
+        {
+          "assumption": "Memory updates can introduce changes that alter previously stored information (e.g., overwriting, consolidation).",
+          "rationale": "Learning often involves updating parameters or memory entries, which can cause forgetting or distortion.",
+          "possible_failure": "If memory were static and immutable, interference would be purely a retrieval problem, not a storage one."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_memory",
+            "role": "input",
+            "description": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent."
+          },
+          {
+            "name": "generalization",
+            "role": "outcome",
+            "description": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data."
+          },
+          {
+            "name": "retrieval_interference",
+            "role": "outcome",
+            "description": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "mediator",
+            "description": "The maximum number of items or experiences that can be stored in agent memory."
+          },
+          {
+            "name": "context_dependency",
+            "role": "mediator",
+            "description": "The degree to which memory encoding and retrieval depend on the context of the experience."
+          },
+          {
+            "name": "similarity_retrieval",
+            "role": "mediator",
+            "description": "The retrieval mechanism that selects memories based on similarity or relevance to the current query."
+          },
+          {
+            "name": "memory_update_frequency",
+            "role": "mediator",
+            "description": "How often stored memories are modified, overwritten, or consolidated."
+          },
+          {
+            "name": "abstraction_level",
+            "role": "mediator",
+            "description": "The level of detail or abstraction at which experiences are stored (e.g., specific vs. general patterns)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Storage",
+            "source": "agent_memory",
+            "relation": "encodes",
+            "target": "memory_capacity",
+            "explanation": "Agent memory stores experiences, limited by capacity."
+          },
+          {
+            "step": "Encoding quality",
+            "source": "context_dependency",
+            "relation": "moderates",
+            "target": "stored memories",
+            "explanation": "Context-dependent encoding can make memories more specific or more general."
+          },
+          {
+            "step": "Retrieval",
+            "source": "similarity_retrieval",
+            "relation": "selects from",
+            "target": "stored memories",
+            "explanation": "Retrieval uses similarity to the current query to fetch memories."
+          },
+          {
+            "step": "Outcome A",
+            "source": "retrieved memories",
+            "relation": "if relevant, improves",
+            "target": "generalization",
+            "explanation": "Relevant past experiences help the agent apply knowledge to new tasks."
+          },
+          {
+            "step": "Outcome B",
+            "source": "retrieved memories",
+            "relation": "if irrelevant or conflicting, causes",
+            "target": "retrieval_interference",
+            "explanation": "Irrelevant or conflicting memories degrade current task performance."
+          },
+          {
+            "step": "Update",
+            "source": "memory_update_frequency",
+            "relation": "changes",
+            "target": "stored memories",
+            "explanation": "Frequent updates risk overwriting useful information, causing interference."
+          },
+          {
+            "step": "Abstraction",
+            "source": "abstraction_level",
+            "relation": "influences",
+            "target": "generalization vs. interference",
+            "explanation": "Higher abstraction may improve generalization but lose specificity; lower abstraction increases interference risk."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Finite storage forces the agent to prioritize which experiences to keep, potentially discarding important information or retaining too many specific instances that cause interference."
+          },
+          {
+            "bottleneck": "Ambiguity in similarity retrieval",
+            "why_it_matters": "Retrieving based on similarity may return memories that are superficially similar but irrelevant or misleading, directly causing retrieval interference."
+          },
+          {
+            "bottleneck": "Memory update conflicts",
+            "why_it_matters": "Updating or consolidating memories can overwrite prior useful information or create conflicting representations, harming both generalization and inducing interference."
+          }
+        ],
+        "mechanism_summary": "Agent memory can improve generalization by providing relevant past experiences that inform current decisions, but it simultaneously risks retrieval interference when stored memories are overly specific, conflicting, or irrelevant. The net effect depends on a tradeoff among memory capacity, context encoding, retrieval precision, abstraction level, and update dynamics. Balancing these factors determines whether memory aids generalization or creates interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Increasing memory capacity allows storing more experiences, which can enhance generalization by providing a richer set of examples, but it also increases retrieval computation and the chance of retrieving irrelevant memories, causing interference.",
+        "derived_from": [
+          "memory_capacity",
+          "similarity_retrieval",
+          "generalization",
+          "retrieval_interference"
+        ],
+        "why_it_matters": "This tension is critical for scaling memory systems; practical systems must balance storing enough information to be useful while keeping retrieval fast and accurate.",
+        "what_existing_methods_may_miss": "Current methods often ignore retrieval cost when increasing capacity, assuming unlimited resources. They may miss the tradeoff between storage size and retrieval precision.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "As memory capacity increases, does the probability of retrieval interference increase due to retrieving irrelevant memories, and can this interference be mitigated by a similarity threshold mechanism?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Determine if there is a capacity threshold beyond which interference dominates, and propose a retrieval filtering technique."
+      },
+      "hypothesis": {
+        "statement": "As memory capacity increases, the probability of retrieval interference increases due to retrieving irrelevant memories, but this increase can be mitigated by applying a similarity threshold that filters out memories with low relevance.",
+        "predicted_effect": "Without a similarity threshold, interference probability grows with capacity; with a well-tuned threshold, interference remains low or increases more slowly, while generalization may still benefit from larger capacity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a synthetic dataset with controlled similarity between tasks. Train an LLM agent with a memory module that stores past episodes. Vary memory capacity (e.g., 10, 100, 1000 episodes) and similarity threshold for retrieval (e.g., cosine similarity > 0.9, 0.7, 0.5). Measure performance on new tasks (generalization) and on tasks that are similar to conflicting memories (interference).",
+        "independent_variables": [
+          "memory capacity",
+          "similarity threshold"
+        ],
+        "dependent_variables": [
+          "retrieval interference probability (performance drop on interference tasks)",
+          "generalization performance (accuracy on held-out tasks)"
+        ],
+        "controls": [
+          "same base LLM",
+          "same memory architecture",
+          "same training procedure",
+          "same task order",
+          "task difficulty"
+        ],
+        "falsifying_observation": "If increasing memory capacity does not lead to a statistically significant increase in retrieval interference when no threshold is applied, or if applying a similarity threshold does not reduce interference relative to no threshold at the same capacity, then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "As capacity increases, interference probability increases without threshold.",
+          "With a similarity threshold, interference probability increases more slowly or remains constant.",
+          "Generalization improves with capacity up to a point, and threshold preserves generalization while reducing interference."
+        ],
+        "rejects_hypothesis": [
+          "Interference probability does not increase with capacity (e.g., remains flat or decreases).",
+          "Similarity threshold does not reduce interference (or reduces it but also harms generalization significantly).",
+          "Threshold eliminates interference but also eliminates generalization benefits.",
+          "No effect of capacity on interference at any threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment shows no increase in interference with capacity or no mitigation by threshold, then the assumption that retrieval interference scales with capacity due to irrelevant memories may be incorrect.",
+        "assumption_to_revise": "Retrieval interference is primarily caused by retrieving irrelevant memories as capacity grows.",
+        "next_question": "Does the memory update mechanism (consolidation, overwriting) contribute more to interference than retrieval capacity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "agent memory",
+          "definition": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent.",
+          "why_primitive": "It is the core component under investigation; without it, the question of its effect on generalization or interference is meaningless."
+        },
+        {
+          "name": "generalization",
+          "definition": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data.",
+          "why_primitive": "It is a fundamental goal of learning systems; evaluating memory requires a measure of how well performance transfers beyond memorized instances."
+        },
+        {
+          "name": "retrieval interference",
+          "definition": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task.",
+          "why_primitive": "It captures the potential downside of memory; without it, the tradeoff with generalization would not exist."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory storage is finite and context-dependent; not all experiences can be stored perfectly.",
+          "rationale": "Realistic systems have limited capacity; context dependency arises because memories are encoded relative to the current state.",
+          "possible_failure": "If storage were infinite and context-insensitive, interference would be trivial and generalization could always be improved."
+        },
+        {
+          "assumption": "Retrieval is based on similarity or relevance between the current query and stored memories.",
+          "rationale": "Most memory architectures (e.g., key-value stores, attention) rely on some form of proximity measure.",
+          "possible_failure": "If retrieval were perfect and always returned exactly the needed memory, there would be no interference."
+        },
+        {
+          "assumption": "Memory updates can introduce changes that alter previously stored information (e.g., overwriting, consolidation).",
+          "rationale": "Learning often involves updating parameters or memory entries, which can cause forgetting or distortion.",
+          "possible_failure": "If memory were static and immutable, interference would be purely a retrieval problem, not a storage one."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_memory",
+            "role": "input",
+            "description": "The internal storage and retrieval mechanism that preserves past experiences, observations, or knowledge for future use by an LLM agent."
+          },
+          {
+            "name": "generalization",
+            "role": "outcome",
+            "description": "The ability to successfully apply learned information to unseen tasks, contexts, or inputs that differ from the training data."
+          },
+          {
+            "name": "retrieval_interference",
+            "role": "outcome",
+            "description": "The phenomenon where memory retrieval yields incorrect, conflicting, or irrelevant information that degrades performance on the current task."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "mediator",
+            "description": "The maximum number of items or experiences that can be stored in agent memory."
+          },
+          {
+            "name": "context_dependency",
+            "role": "mediator",
+            "description": "The degree to which memory encoding and retrieval depend on the context of the experience."
+          },
+          {
+            "name": "similarity_retrieval",
+            "role": "mediator",
+            "description": "The retrieval mechanism that selects memories based on similarity or relevance to the current query."
+          },
+          {
+            "name": "memory_update_frequency",
+            "role": "mediator",
+            "description": "How often stored memories are modified, overwritten, or consolidated."
+          },
+          {
+            "name": "abstraction_level",
+            "role": "mediator",
+            "description": "The level of detail or abstraction at which experiences are stored (e.g., specific vs. general patterns)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Storage",
+            "source": "agent_memory",
+            "relation": "encodes",
+            "target": "memory_capacity",
+            "explanation": "Agent memory stores experiences, limited by capacity."
+          },
+          {
+            "step": "Encoding quality",
+            "source": "context_dependency",
+            "relation": "moderates",
+            "target": "stored memories",
+            "explanation": "Context-dependent encoding can make memories more specific or more general."
+          },
+          {
+            "step": "Retrieval",
+            "source": "similarity_retrieval",
+            "relation": "selects from",
+            "target": "stored memories",
+            "explanation": "Retrieval uses similarity to the current query to fetch memories."
+          },
+          {
+            "step": "Outcome A",
+            "source": "retrieved memories",
+            "relation": "if relevant, improves",
+            "target": "generalization",
+            "explanation": "Relevant past experiences help the agent apply knowledge to new tasks."
+          },
+          {
+            "step": "Outcome B",
+            "source": "retrieved memories",
+            "relation": "if irrelevant or conflicting, causes",
+            "target": "retrieval_interference",
+            "explanation": "Irrelevant or conflicting memories degrade current task performance."
+          },
+          {
+            "step": "Update",
+            "source": "memory_update_frequency",
+            "relation": "changes",
+            "target": "stored memories",
+            "explanation": "Frequent updates risk overwriting useful information, causing interference."
+          },
+          {
+            "step": "Abstraction",
+            "source": "abstraction_level",
+            "relation": "influences",
+            "target": "generalization vs. interference",
+            "explanation": "Higher abstraction may improve generalization but lose specificity; lower abstraction increases interference risk."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Finite storage forces the agent to prioritize which experiences to keep, potentially discarding important information or retaining too many specific instances that cause interference."
+          },
+          {
+            "bottleneck": "Ambiguity in similarity retrieval",
+            "why_it_matters": "Retrieving based on similarity may return memories that are superficially similar but irrelevant or misleading, directly causing retrieval interference."
+          },
+          {
+            "bottleneck": "Memory update conflicts",
+            "why_it_matters": "Updating or consolidating memories can overwrite prior useful information or create conflicting representations, harming both generalization and inducing interference."
+          }
+        ],
+        "mechanism_summary": "Agent memory can improve generalization by providing relevant past experiences that inform current decisions, but it simultaneously risks retrieval interference when stored memories are overly specific, conflicting, or irrelevant. The net effect depends on a tradeoff among memory capacity, context encoding, retrieval precision, abstraction level, and update dynamics. Balancing these factors determines whether memory aids generalization or creates interference."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Memories encoded heavily context-dependent may be more accurately retrieved in similar contexts but fail to transfer to novel contexts, limiting generalization; context-independent memories transfer better but risk interference from irrelevant associations.",
+        "derived_from": [
+          "context_dependency",
+          "generalization",
+          "retrieval_interference"
+        ],
+        "why_it_matters": "This tension highlights the role of context in memory, a key factor in generalization and interference that is often overlooked in simple memory models.",
+        "what_existing_methods_may_miss": "Many memory models assume context-free encoding or fixed context similarity, missing the adaptive potential of context-dependent storage for balancing specificity and transfer.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does encoding memories with varying degrees of context dependency improve generalization in novel contexts while reducing interference in familiar contexts, compared to context-free encoding?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Show that adaptive context encoding can outperform fixed encoding on tasks with varying context similarity."
+      },
+      "hypothesis": {
+        "statement": "Encoding memories with varying degrees of context dependency (adaptive context encoding) improves generalization in novel contexts and reduces retrieval interference in familiar contexts compared to context-free encoding.",
+        "predicted_effect": "Adaptive context encoding will yield higher accuracy on novel task variants and lower error rates due to conflicting memories on familiar task variants relative to context-free encoding."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a suite of tasks where each task has a context (e.g., a scenario or environment). Train an LLM agent with a memory module that can encode memories with varying context dependency (e.g., via a learnable parameter controlling how much context is included). Baseline: context-free encoding (memory key is task identity only). Test on novel contexts (unseen context variations) and familiar contexts (same as training). Measure generalization accuracy and interference rate (e.g., proportion of errors caused by retrieving a memory from a different context that conflicts).",
+        "independent_variables": [
+          "Memory encoding type (adaptive context-dependent vs. context-free)"
+        ],
+        "dependent_variables": [
+          "Generalization accuracy on novel contexts",
+          "Interference rate on familiar contexts"
+        ],
+        "controls": [
+          "Same set of tasks and contexts across conditions",
+          "Equal number of training episodes",
+          "Fixed memory capacity",
+          "Same retrieval mechanism (e.g., nearest neighbor by similarity)"
+        ],
+        "falsifying_observation": "If adaptive context encoding does not yield significantly better generalization on novel contexts or does not reduce interference on familiar contexts compared to context-free encoding, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Adaptive context encoding shows statistically higher accuracy on novel contexts than context-free encoding.",
+          "Adaptive context encoding shows statistically lower interference rate on familiar contexts than context-free encoding."
+        ],
+        "rejects_hypothesis": [
+          "Adaptive context encoding performs similarly or worse than context-free encoding on novel contexts.",
+          "Adaptive context encoding shows similar or higher interference rate on familiar contexts compared to context-free encoding."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If adaptive context encoding does not outperform context-free encoding, we conclude that the assumed benefit of context-dependent encoding is not realized in this setup.",
+        "assumption_to_revise": "The assumption that context-dependent encoding can be adaptively tuned to balance specificity and generality may be false; perhaps the retrieval mechanism or capacity constraints overshadow the encoding effect.",
+        "next_question": "Does the benefit of context-dependent encoding depend on memory capacity or retrieval similarity threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "In LLM agents, varying the abstraction level of stored memories produces a non-monotonic effect on generalization and retrieval interference: intermediate abstraction levels maximize generalization while minimizing interference, whereas both very low (specific) and very high (abstract) abstraction levels degrade generalization and increase interference.",
+      "independent_variables": [
+        "abstraction level of stored memories (none, low, medium, high)"
+      ],
+      "dependent_variables": [
+        "generalization accuracy",
+        "retrieval interference rate"
+      ],
+      "controlled_variables": [
+        "base LLM (e.g., GPT-3.5)",
+        "task suite (fixed set of training and test tasks)",
+        "memory capacity (fixed number of stored items)",
+        "retrieval mechanism (cosine similarity)",
+        "memory update frequency (no updates after initial storage)"
+      ],
+      "baselines": [
+        {
+          "name": "No memory",
+          "description": "Agent without any memory module; acts purely on pre-trained knowledge."
+        },
+        {
+          "name": "Random memory (control)",
+          "description": "Agent with memory storing random irrelevant items to assess interference baseline."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "generalization accuracy",
+          "definition": "Proportion of correct responses on unseen task instances across all tasks."
+        },
+        {
+          "name": "retrieval interference rate",
+          "definition": "Proportion of trials where the retrieved memory leads to a worse performance compared to the no-memory baseline."
+        }
+      ],
+      "expected_result": "Generalization accuracy is highest at medium abstraction; retrieval interference rate is lowest at medium abstraction. Low and high abstraction yield lower generalization and higher interference.",
+      "falsifying_result": "If medium abstraction does not yield the best generalization or the least interference (e.g., monotonic increase or decrease, or no significant difference), the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use a single LLM agent with a memory module storing task exemplars at three abstraction levels (raw text for low, structured summaries for medium, high-level principles for high) plus a no-memory baseline. Test on a suite of two task types (one detailed, one general) with 50 training and 50 test instances each. Measure generalization accuracy and retrieval interference rate.",
+      "risks_and_confounds": [
+        "Task selection may bias results if tasks are not diverse enough in granularity requirements.",
+        "Fixed memory capacity may limit the effectiveness of low abstraction due to capacity constraints.",
+        "Cosine similarity retrieval may not be optimal for all abstraction levels.",
+        "The LLM's pre-training may already contain general knowledge, affecting baseline performance."
+      ]
+    },
+    {
+      "hypothesis": "As memory capacity increases, the probability of retrieval interference increases due to retrieving irrelevant memories, but this increase can be mitigated by applying a similarity threshold that filters out memories with low relevance.",
+      "independent_variables": [
+        "memory capacity (10 episodes vs 1000 episodes)",
+        "similarity threshold (none vs 0.7 cosine similarity)"
+      ],
+      "dependent_variables": [
+        "retrieval interference probability (error rate on interference tasks)",
+        "generalization accuracy (accuracy on held-out tasks)"
+      ],
+      "controlled_variables": [
+        "same base LLM (GPT-2 small)",
+        "same memory architecture (key-value store with cosine retrieval)",
+        "same training procedure (same number of episodes, same task sequences)",
+        "same task order (randomized across conditions)",
+        "task difficulty (controlled via synthetic dataset with known similarity)",
+        "similarity measure for retrieval (cosine similarity)",
+        "task types: training tasks, held-out generalization tasks, interference tasks"
+      ],
+      "baselines": [
+        {
+          "name": "No memory",
+          "description": "Agent without any memory module serving as baseline for generalization performance. Interference is not applicable."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Generalization accuracy",
+          "definition": "Accuracy on held-out tasks that are not similar to any stored memory."
+        },
+        {
+          "name": "Retrieval interference probability",
+          "definition": "Error rate on tasks that have a stored memory with high similarity but conflicting label, measured as proportion of such tasks where the agent fails."
+        }
+      ],
+      "expected_result": "When no similarity threshold is applied, retrieval interference probability is higher for large capacity (1000 episodes) than for small capacity (10 episodes). When a threshold of 0.7 cosine similarity is applied at large capacity, interference probability is lower than at large capacity without threshold, while generalization accuracy remains similar or improves. Generalization accuracy increases with capacity in both threshold conditions.",
+      "falsifying_result": "If retrieval interference probability at large capacity without threshold is not significantly higher than at small capacity without threshold, or if applying a threshold at large capacity does not significantly reduce interference probability compared to no threshold, or if applying a threshold significantly reduces generalization accuracy relative to no threshold at large capacity, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use a synthetic dataset of 1000 distinct tasks with controlled similarity relationships. Train an LLM agent (e.g., GPT-2) with a memory module that stores (input, output) pairs. Vary conditions: (1) memory capacity = 10 episodes, no similarity threshold; (2) memory capacity = 1000 episodes, no similarity threshold; (3) memory capacity = 1000 episodes, similarity threshold = 0.7 cosine similarity. Run 10 independent seeds per condition. Measure generalization accuracy on 100 held-out tasks and interference probability on 100 tasks designed to have conflicting memories. Compare using statistical tests.",
+      "risks_and_confounds": []
+    },
+    {
+      "hypothesis": "An adaptive memory update schedule that adjusts update frequency based on task novelty or retrieval success will achieve a better balance between retaining old knowledge (minimizing forgetting) and adapting to new tasks (maximizing generalization) compared to a fixed update schedule.",
+      "independent_variables": [
+        "update schedule type (fixed vs adaptive)"
+      ],
+      "dependent_variables": [
+        "average accuracy across tasks",
+        "forgetting score (accuracy drop on previously learned tasks)",
+        "generalization accuracy on a held-out new task"
+      ],
+      "controlled_variables": [
+        "same memory architecture",
+        "same set of tasks and order",
+        "same base LLM",
+        "same evaluation metrics"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed update schedule",
+          "description": "Update memory after every task with a constant learning rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average accuracy across tasks",
+          "definition": "Mean accuracy over all tasks in the sequence after training is complete."
+        },
+        {
+          "name": "Forgetting score",
+          "definition": "Average accuracy drop on tasks learned previously after each new task, computed as the difference in accuracy on each old task before and after learning the new task."
+        },
+        {
+          "name": "Generalization accuracy",
+          "definition": "Accuracy on a held-out new task not seen during the sequence."
+        }
+      ],
+      "expected_result": "The adaptive schedule shows higher average accuracy, lower forgetting, and comparable or better generalization accuracy compared to the fixed schedule.",
+      "falsifying_result": "No statistically significant improvement in average accuracy or forgetting for the adaptive schedule relative to the fixed schedule, or the fixed schedule performs significantly better on these metrics.",
+      "minimum_viable_experiment": "Use a continual learning benchmark with at least 2 tasks (e.g., two NLP classification tasks) and one held-out new task. Implement two memory update policies: (1) fixed: update memory after each task with a constant learning rate; (2) adaptive: update memory only when prediction error on the current task exceeds a threshold, with update strength proportional to error. Train the agent sequentially on task A then task B, measuring accuracy on task A after task B (forgetting) and accuracy on task C (generalization). Compare the metrics between the two schedules. The experiment is considered falsified if the adaptive schedule does not significantly outperform the fixed schedule on average accuracy and forgetting.",
+      "risks_and_confounds": [
+        "Task order and similarity may influence interference; counter by randomizing order across runs.",
+        "Threshold parameter choice could affect results; test with multiple thresholds or use a fixed reasonable threshold.",
+        "Memory architecture specifics might interact with update schedule; control by using same architecture.",
+        "Evaluation on a single held-out task may not capture generalization fully; use multiple held-out tasks if possible."
+      ]
+    },
+    {
+      "hypothesis": "Encoding memories with varying degrees of context dependency (adaptive context encoding) improves generalization in novel contexts and reduces retrieval interference in familiar contexts compared to context-free encoding.",
+      "independent_variables": [
+        "Memory encoding type (adaptive context-dependent vs. context-free)"
+      ],
+      "dependent_variables": [
+        "Generalization accuracy on novel contexts",
+        "Interference rate on familiar contexts"
+      ],
+      "controlled_variables": [
+        "Set of tasks and contexts",
+        "Number of training episodes",
+        "Memory capacity",
+        "Retrieval mechanism (e.g., nearest neighbor by similarity)"
+      ],
+      "baselines": [
+        {
+          "name": "Context-free encoding",
+          "description": "Memory key is task identity only, ignoring context."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Generalization accuracy",
+          "definition": "Proportion of correct responses on novel context tasks."
+        },
+        {
+          "name": "Interference rate",
+          "definition": "Proportion of errors caused by retrieving a memory from a different context that conflicts."
+        }
+      ],
+      "expected_result": "Adaptive context encoding shows statistically higher generalization accuracy on novel contexts and statistically lower interference rate on familiar contexts compared to context-free encoding.",
+      "falsifying_result": "Adaptive context encoding does not yield significantly better generalization on novel contexts OR does not significantly reduce interference on familiar contexts compared to context-free encoding.",
+      "minimum_viable_experiment": "Create a suite of tasks where each task has a context (e.g., a scenario or environment). Train an LLM agent with a memory module capable of encoding memories with varying context dependency via a learnable parameter. Baseline is context-free encoding. Test on novel contexts (unseen context variations) and familiar contexts (same as training). Measure generalization accuracy and interference rate.",
+      "risks_and_confounds": [
+        "Context similarity: if novel contexts are too similar to familiar ones, generalization may be trivial.",
+        "Task difficulty: tasks may vary in difficulty across conditions.",
+        "Memory capacity: if capacity is too large, interference may be dwarfed.",
+        "Retrieval mechanism: different similarity thresholds could affect results."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles analysis of the tradeoff between generalization and retrieval interference in agent memory for LLMs. It defines primitive terms, assumptions, and causal mechanisms, leading to four testable hypotheses and experiments. While the decomposition is clear and the experiments are falsifiable, the novelty is limited as similar ideas exist in memory-augmented networks and continual learning. The experiments are synthetic and lack realistic LLM agent tasks, and the baselines are insufficient, omitting comparisons to established memory architectures.",
+    "strengths": [
+      "Clear first-principles decomposition of agent memory, generalization, and retrieval interference.",
+      "Well-defined causal mechanism model with identifiable mediators and bottlenecks.",
+      "Falsifiable hypotheses with controlled experiments and explicit failure conditions.",
+      "Systematic derivation of tensions from primitives, leading to focused research questions."
+    ],
+    "weaknesses": [
+      "Limited novelty: the tradeoffs and mechanism are already well-studied in memory-augmented networks and continual learning (e.g., DNC, MERLIN).",
+      "Experiments rely on synthetic tasks and may not reflect the complexity of real LLM agent scenarios.",
+      "Baselines are weak: only 'no memory' and random memory are compared, missing established memory architectures like Differentiable Neural Computer or simple retrieval augmentation.",
+      "The first-principles derivation is more conceptual than mathematically rigorous; it does not derive quantitative bounds.",
+      "Potential overclaiming: the U-shaped prediction for abstraction level is plausible but lacks strong theoretical grounding.",
+      "The experiments control for capacity, retrieval, etc., but ignore the LLM's inherent in-context learning ability, which blurs the memory effect."
+    ],
+    "questions": [
+      "How does this work differ from existing memory-augmented neural networks that already balance specificity and generalization?",
+      "Why are synthetic tasks used instead of realistic LLM agent benchmarks like WebShop or ALFWorld?",
+      "How is 'retrieval interference' disentangled from the LLM's own parametric knowledge or in-context learning?",
+      "Could the similarity threshold experiment be confounded by the choice of cosine similarity as the only retrieval method?"
+    ],
+    "missing_baselines": [
+      "Differentiable Neural Computer (DNC) or Neural Turing Machine",
+      "Memory Networks (MemNN) with soft attention",
+      "Simple retrieval-augmented generation (RAG) without explicit memory module",
+      "Agent with context as memory (e.g., storing recent interactions in prompt)",
+      "Elastic Weight Consolidation (EWC) for stability-plasticity comparison"
+    ],
+    "score": 5,
+    "confidence": 3,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient mathematical rigor and missing baselines",
+    "root_cause": "The mechanism model is stated in natural language without formal equations, and the experiments omit comparisons to established memory architectures like DNC or RAG, making it unclear whether the proposed hypotheses are novel or practical.",
+    "violated_principle": "First-principles analysis must include formal mathematical models of the causal mechanisms, and experimental validation must include comparisons to state-of-the-art baselines.",
+    "new_or_updated_principle": "First-principles research in agent memory must formalize causal mechanisms using mathematical equations (e.g., defining generalization gain and interference cost as functions of capacity, abstraction, etc.) and must benchmark against at least one established memory architecture (e.g., Differentiable Neural Computer, retrieval-augmented generation) to demonstrate incremental contribution.",
+    "new_or_updated_skill": "Skill: Translate conceptual tradeoffs into mathematical models. Training: Researchers should derive closed-form expressions or simulation equations for key outcomes (e.g., generalization accuracy as a function of memory parameters) and verify them with computational experiments.",
+    "regression_test": "For any research package on agent memory, check that (1) the mechanism model includes at least one mathematical equation relating variables, (2) the experiment plans include at least one baseline comparison to an established memory system (e.g., DNC, MemNN, or RAG), and (3) the novelty score (via reviewer) is > 3 (or some threshold). If any condition fails, flag for revision."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T163600Z"
+  }
+}

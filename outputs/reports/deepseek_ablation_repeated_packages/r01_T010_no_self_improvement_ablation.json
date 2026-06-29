@@ -1,0 +1,1468 @@
+{
+  "topic": {
+    "topic": "When does retrieval help or hurt autonomous research agents?",
+    "topic_id": "T010",
+    "goal": null,
+    "domain": "auto research",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does retrieval help or hurt autonomous research agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Retrieval",
+        "definition": "The process of obtaining external information from a knowledge source (e.g., database, web) in response to a query.",
+        "why_primitive": "It is a fundamental operation that provides information beyond the agent's internal knowledge, and its costs and benefits are central to the research question."
+      },
+      {
+        "name": "Autonomous Research Agent",
+        "definition": "An AI system that independently performs research tasks—such as hypothesis generation, experiment design, and analysis—without human intervention.",
+        "why_primitive": "The agent's autonomy introduces unique constraints on how retrieval is used, as it must self-assess information needs and integrate retrieved information without external guidance."
+      },
+      {
+        "name": "Knowledge State",
+        "definition": "The internal representation of facts, hypotheses, and uncertainties held by the agent at a given time.",
+        "why_primitive": "The utility of retrieval depends on the current knowledge state: retrieval helps when the state is incomplete or uncertain, but may hurt when it conflicts with or confounds existing knowledge."
+      },
+      {
+        "name": "Relevance",
+        "definition": "The degree to which retrieved information is useful for the agent's current research task or subgoal.",
+        "why_primitive": "Relevance determines whether retrieval has a positive or negative impact; irrelevant information wastes resources and can mislead the agent."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Retrieval is a cost-incurring operation that consumes time and computational resources.",
+        "rationale": "Without this cost, retrieval would always be beneficial in expectation, but real-world systems have finite budgets.",
+        "possible_failure": "If retrieval were costless, the trade-off would vanish; the assumption grounds the analysis in realistic constraints."
+      },
+      {
+        "assumption": "The agent's internal knowledge is fallible and incomplete, so external information can improve its decisions.",
+        "rationale": "If the agent were omniscient, retrieval would never help; this assumption creates the potential for benefit.",
+        "possible_failure": "If the agent's internal knowledge is sufficient or external sources are unreliable, retrieval may harm by introducing noise or bias."
+      },
+      {
+        "assumption": "Retrieval results can be noisy, irrelevant, or contradictory, requiring integration and validation by the agent.",
+        "rationale": "Real retrieval systems return imperfect results; ignoring this leads to overestimating benefits.",
+        "possible_failure": "If retrieved information were always perfect, the only cost would be latency; imperfect retrieval introduces the risk of degradation."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Information sufficiency vs. information overload: Retrieval can fill knowledge gaps but may also overwhelm the agent with excess or contradictory data, degrading decision quality.",
+        "variables": [
+          "knowledge state completeness",
+          "retrieval result volume",
+          "agent's filtering capability"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. accuracy: Frequent retrieval improves accuracy by providing up-to-date information but slows down the research process, potentially reducing throughput.",
+        "variables": [
+          "retrieval latency",
+          "query frequency",
+          "task deadline"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. exploitation: Retrieval enables exploration of new knowledge but may distract from exploiting current promising directions, leading to premature termination or over-searching.",
+        "variables": [
+          "uncertainty level",
+          "cost of missing information",
+          "agent's exploration-exploitation parameter"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Retrieval_Usage",
+        "role": "input",
+        "description": "Binary variable indicating whether the agent performs a retrieval operation."
+      },
+      {
+        "name": "Knowledge_State_Completeness",
+        "role": "mediator",
+        "description": "Degree to which the agent's internal knowledge covers relevant facts after retrieval."
+      },
+      {
+        "name": "Retrieval_Relevance",
+        "role": "mediator",
+        "description": "Average relevance of retrieved information to the current research task."
+      },
+      {
+        "name": "Task_Accuracy",
+        "role": "output",
+        "description": "Correctness of the agent's research conclusions."
+      },
+      {
+        "name": "Time_To_Complete",
+        "role": "outcome",
+        "description": "Total time taken by the agent to finish the research task."
+      },
+      {
+        "name": "Retrieval_Cost",
+        "role": "confounder",
+        "description": "Latency and computational resources consumed by each retrieval operation."
+      },
+      {
+        "name": "Agent_Filtering_Ability",
+        "role": "confounder",
+        "description": "Capability of the agent to discard irrelevant or contradictory retrieved information."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Retrieval_Usage",
+        "source": "Agent's decision to retrieve",
+        "relation": "increases",
+        "target": "Knowledge_State_Completeness",
+        "explanation": "Retrieval adds external information, filling gaps in the agent's knowledge."
+      },
+      {
+        "step": null,
+        "source": "Retrieval_Usage",
+        "relation": "may decrease",
+        "target": "Retrieval_Relevance",
+        "explanation": "If retrieval returns noisy or off-topic results, relevance decreases."
+      },
+      {
+        "step": "Filtering and Integration",
+        "source": "Agent_Filtering_Ability",
+        "relation": "moderates",
+        "target": "Retrieval_Relevance",
+        "explanation": "Better filtering improves effective relevance of retrieved information."
+      },
+      {
+        "step": null,
+        "source": "Retrieval_Usage",
+        "relation": "increases",
+        "target": "Retrieval_Cost",
+        "explanation": "Each retrieval consumes time and compute resources."
+      },
+      {
+        "step": "Impact on Accuracy",
+        "source": "Knowledge_State_Completeness",
+        "relation": "increases",
+        "target": "Task_Accuracy",
+        "explanation": "More complete knowledge supports correct decisions."
+      },
+      {
+        "step": null,
+        "source": "Retrieval_Relevance",
+        "relation": "increases",
+        "target": "Task_Accuracy",
+        "explanation": "Relevant information directly improves decision quality."
+      },
+      {
+        "step": "Impact on Time",
+        "source": "Retrieval_Cost",
+        "relation": "increases",
+        "target": "Time_To_Complete",
+        "explanation": "Higher latency and resource use prolong the task."
+      },
+      {
+        "step": null,
+        "source": "Task_Accuracy",
+        "relation": "may be inversely related to",
+        "target": "Time_To_Complete",
+        "explanation": "More accurate results may require additional verification steps, increasing time."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Information overload",
+        "why_it_matters": "Excessive retrieval can overwhelm the agent's filtering capacity, reducing effective relevance and degrading accuracy."
+      },
+      {
+        "bottleneck": "Retrieval latency",
+        "why_it_matters": "High latency from frequent or expensive retrievals can slow the entire research process, reducing throughput."
+      },
+      {
+        "bottleneck": "Irrelevant or contradictory information",
+        "why_it_matters": "If retrieved information is irrelevant or contradicts the agent's knowledge, it misleads the agent and harms task accuracy."
+      }
+    ],
+    "mechanism_summary": "The net effect of retrieval on autonomous research agents depends on a trade-off between improved knowledge completeness and the costs of latency, irrelevant information, and information overload. Retrieval helps when the agent's knowledge state is incomplete and retrieval returns highly relevant information, leading to higher task accuracy. It hurts when retrieval is too costly, returns irrelevant or misleading information, or when the agent lacks filtering capacity to manage the incoming data, resulting in degraded accuracy and longer completion times. The mechanism is moderated by the agent's filtering ability and the inherent cost of retrieval operations."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Retrieval improves knowledge completeness but incurs cost and may introduce irrelevant or contradictory information; the net effect on task accuracy depends on the agent's filtering ability and the actual relevance, which are often unknown a priori.",
+      "derived_from": [
+        "Retrieval",
+        "Autonomous Research Agent",
+        "Assumption: retrieval cost",
+        "Assumption: retrieval results can be noisy",
+        "Tradeoff: Information sufficiency vs. overload"
+      ],
+      "why_it_matters": "This tension determines whether retrieval is beneficial or harmful in autonomous research. Without resolving it, agents may waste resources or produce unreliable conclusions.",
+      "what_existing_methods_may_miss": "Existing methods often assume retrieval is uniformly beneficial or only consider its latency cost, ignoring that low-relevance retrieval can actively mislead the agent.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The agent's filtering ability is critical to mitigate information overload, but this ability itself is constrained by the agent's computational resources and the volume of retrieved data, leading to a potential bottleneck where more retrieval degrades performance.",
+      "derived_from": [
+        "Autonomous Research Agent",
+        "Knowledge State",
+        "Assumption: retrieval results can be noisy",
+        "Bottleneck: Information overload",
+        "Variable: Agent_Filtering_Ability"
+      ],
+      "why_it_matters": "If the agent cannot effectively filter, retrieval may reduce task accuracy and increase time, negating its purpose. This tension highlights the need for robust filtering mechanisms.",
+      "what_existing_methods_may_miss": "Many agents use simple filtering like top-k selection, which fails if irrelevant results are ranked highly or if the agent's knowledge state misguides filtering.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Autonomous agents must self-assess when to retrieve, but their own knowledge state is fallible, so they may over-retrieve (wasting resources) or under-retrieve (missing critical information), creating a self-assessment paradox.",
+      "derived_from": [
+        "Autonomous Research Agent",
+        "Knowledge State",
+        "Assumption: internal knowledge is fallible and incomplete",
+        "Tradeoff: Exploration vs. exploitation"
+      ],
+      "why_it_matters": "This paradox undercuts the assumption that retrieval decisions can be made optimally based on the agent's current knowledge, as that knowledge may be misinformed.",
+      "what_existing_methods_may_miss": "Existing work often assumes agents have accurate uncertainty estimates, but in practice, overconfidence or underconfidence leads to poor retrieval timing.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Retrieval speeds up research by providing external information but also adds latency; the tradeoff between speed and accuracy is often not linear, and the optimal retrieval frequency depends on task deadlines and information utility, which are hard to quantify.",
+      "derived_from": [
+        "Retrieval",
+        "Assumption: retrieval is cost-incurring",
+        "Tradeoff: Speed vs. accuracy",
+        "Variable: Retrieval_Cost",
+        "Variable: Time_To_Complete"
+      ],
+      "why_it_matters": "This tension directly impacts throughput of autonomous research agents. Mistuning retrieval frequency can lead to either slow but accurate or fast but erroneous research.",
+      "what_existing_methods_may_miss": "Simple heuristics like retrieving every N steps ignore the dynamic interplay between knowledge gaps and cost. Adaptive strategies are needed but difficult to validate.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does retrieval relevance modulate the impact of retrieval usage on task accuracy in autonomous research agents?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Determines whether increasing retrieval is beneficial under different relevance conditions."
+    },
+    {
+      "question": "To what extent does the agent's filtering ability mediate the relationship between retrieval volume and task accuracy?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the bottleneck effect of filtering capacity."
+    },
+    {
+      "question": "Can a meta-cognitive module that estimates the agent's own knowledge uncertainty improve retrieval timing decisions compared to a fixed threshold strategy?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Proposes a method to resolve the self-assessment paradox."
+    },
+    {
+      "question": "Given a variable retrieval cost, what is the optimal retrieval frequency that maximizes task accuracy within a fixed time budget?",
+      "question_type": "benchmark",
+      "source_tension": "T4",
+      "expected_contribution": "Establishes a baseline for adaptive retrieval scheduling."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of obtaining external information from a knowledge source (e.g., database, web) in response to a query.",
+          "why_primitive": "It is a fundamental operation that provides information beyond the agent's internal knowledge, and its costs and benefits are central to the research question."
+        },
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that independently performs research tasks—such as hypothesis generation, experiment design, and analysis—without human intervention.",
+          "why_primitive": "The agent's autonomy introduces unique constraints on how retrieval is used, as it must self-assess information needs and integrate retrieved information without external guidance."
+        },
+        {
+          "name": "Knowledge State",
+          "definition": "The internal representation of facts, hypotheses, and uncertainties held by the agent at a given time.",
+          "why_primitive": "The utility of retrieval depends on the current knowledge state: retrieval helps when the state is incomplete or uncertain, but may hurt when it conflicts with or confounds existing knowledge."
+        },
+        {
+          "name": "Relevance",
+          "definition": "The degree to which retrieved information is useful for the agent's current research task or subgoal.",
+          "why_primitive": "Relevance determines whether retrieval has a positive or negative impact; irrelevant information wastes resources and can mislead the agent."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Retrieval is a cost-incurring operation that consumes time and computational resources.",
+          "rationale": "Without this cost, retrieval would always be beneficial in expectation, but real-world systems have finite budgets.",
+          "possible_failure": "If retrieval were costless, the trade-off would vanish; the assumption grounds the analysis in realistic constraints."
+        },
+        {
+          "assumption": "The agent's internal knowledge is fallible and incomplete, so external information can improve its decisions.",
+          "rationale": "If the agent were omniscient, retrieval would never help; this assumption creates the potential for benefit.",
+          "possible_failure": "If the agent's internal knowledge is sufficient or external sources are unreliable, retrieval may harm by introducing noise or bias."
+        },
+        {
+          "assumption": "Retrieval results can be noisy, irrelevant, or contradictory, requiring integration and validation by the agent.",
+          "rationale": "Real retrieval systems return imperfect results; ignoring this leads to overestimating benefits.",
+          "possible_failure": "If retrieved information were always perfect, the only cost would be latency; imperfect retrieval introduces the risk of degradation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Retrieval_Usage",
+            "role": "input",
+            "description": "Binary variable indicating whether the agent performs a retrieval operation."
+          },
+          {
+            "name": "Knowledge_State_Completeness",
+            "role": "mediator",
+            "description": "Degree to which the agent's internal knowledge covers relevant facts after retrieval."
+          },
+          {
+            "name": "Retrieval_Relevance",
+            "role": "mediator",
+            "description": "Average relevance of retrieved information to the current research task."
+          },
+          {
+            "name": "Task_Accuracy",
+            "role": "output",
+            "description": "Correctness of the agent's research conclusions."
+          },
+          {
+            "name": "Time_To_Complete",
+            "role": "outcome",
+            "description": "Total time taken by the agent to finish the research task."
+          },
+          {
+            "name": "Retrieval_Cost",
+            "role": "confounder",
+            "description": "Latency and computational resources consumed by each retrieval operation."
+          },
+          {
+            "name": "Agent_Filtering_Ability",
+            "role": "confounder",
+            "description": "Capability of the agent to discard irrelevant or contradictory retrieved information."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Retrieval_Usage",
+            "source": "Agent's decision to retrieve",
+            "relation": "increases",
+            "target": "Knowledge_State_Completeness",
+            "explanation": "Retrieval adds external information, filling gaps in the agent's knowledge."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "may decrease",
+            "target": "Retrieval_Relevance",
+            "explanation": "If retrieval returns noisy or off-topic results, relevance decreases."
+          },
+          {
+            "step": "Filtering and Integration",
+            "source": "Agent_Filtering_Ability",
+            "relation": "moderates",
+            "target": "Retrieval_Relevance",
+            "explanation": "Better filtering improves effective relevance of retrieved information."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "increases",
+            "target": "Retrieval_Cost",
+            "explanation": "Each retrieval consumes time and compute resources."
+          },
+          {
+            "step": "Impact on Accuracy",
+            "source": "Knowledge_State_Completeness",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "More complete knowledge supports correct decisions."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Relevance",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "Relevant information directly improves decision quality."
+          },
+          {
+            "step": "Impact on Time",
+            "source": "Retrieval_Cost",
+            "relation": "increases",
+            "target": "Time_To_Complete",
+            "explanation": "Higher latency and resource use prolong the task."
+          },
+          {
+            "step": null,
+            "source": "Task_Accuracy",
+            "relation": "may be inversely related to",
+            "target": "Time_To_Complete",
+            "explanation": "More accurate results may require additional verification steps, increasing time."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Information overload",
+            "why_it_matters": "Excessive retrieval can overwhelm the agent's filtering capacity, reducing effective relevance and degrading accuracy."
+          },
+          {
+            "bottleneck": "Retrieval latency",
+            "why_it_matters": "High latency from frequent or expensive retrievals can slow the entire research process, reducing throughput."
+          },
+          {
+            "bottleneck": "Irrelevant or contradictory information",
+            "why_it_matters": "If retrieved information is irrelevant or contradicts the agent's knowledge, it misleads the agent and harms task accuracy."
+          }
+        ],
+        "mechanism_summary": "The net effect of retrieval on autonomous research agents depends on a trade-off between improved knowledge completeness and the costs of latency, irrelevant information, and information overload. Retrieval helps when the agent's knowledge state is incomplete and retrieval returns highly relevant information, leading to higher task accuracy. It hurts when retrieval is too costly, returns irrelevant or misleading information, or when the agent lacks filtering capacity to manage the incoming data, resulting in degraded accuracy and longer completion times. The mechanism is moderated by the agent's filtering ability and the inherent cost of retrieval operations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Retrieval speeds up research by providing external information but also adds latency; the tradeoff between speed and accuracy is often not linear, and the optimal retrieval frequency depends on task deadlines and information utility, which are hard to quantify.",
+        "derived_from": [
+          "Retrieval",
+          "Assumption: retrieval is cost-incurring",
+          "Tradeoff: Speed vs. accuracy",
+          "Variable: Retrieval_Cost",
+          "Variable: Time_To_Complete"
+        ],
+        "why_it_matters": "This tension directly impacts throughput of autonomous research agents. Mistuning retrieval frequency can lead to either slow but accurate or fast but erroneous research.",
+        "what_existing_methods_may_miss": "Simple heuristics like retrieving every N steps ignore the dynamic interplay between knowledge gaps and cost. Adaptive strategies are needed but difficult to validate.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in retrieval noise that determines whether retrieval helps or hurts autonomous research agents, such that below the threshold retrieval always improves accuracy when a knowledge gap exists, and above it retrieval always degrades accuracy?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a sharp boundary condition for when retrieval is beneficial vs detrimental, enabling principled decisions to retrieve or not."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical retrieval noise level N* such that for retrieval noise N < N*, retrieval improves task accuracy whenever the agent's knowledge state is incomplete, and for N > N*, retrieval reduces accuracy regardless of knowledge completeness. The critical noise N* increases with agent filtering ability and decreases with retrieval cost.",
+        "predicted_effect": "Phase transition: accuracy with retrieval crosses accuracy without retrieval at a specific noise threshold, with a clear separation between beneficial and harmful regimes."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an autonomous research agent performing a series of research tasks. Vary retrieval noise (e.g., relevance of top-k results from 0 to 1), and for each noise level, compare task accuracy with retrieval allowed vs. retrieval disabled. Fix retrieval cost and agent filtering ability. Repeat for different filtering abilities and costs. Observe whether accuracy with retrieval exceeds without retrieval only below a sharp noise threshold.",
+        "independent_variables": [
+          "retrieval noise level",
+          "agent filtering ability",
+          "retrieval cost"
+        ],
+        "dependent_variables": [
+          "task accuracy (with retrieval)",
+          "task accuracy (without retrieval)",
+          "difference in accuracy"
+        ],
+        "controls": [
+          "task difficulty",
+          "initial knowledge state completeness",
+          "time budget"
+        ],
+        "falsifying_observation": "The accuracy difference does not exhibit a sharp transition; instead, it varies gradually across noise levels, or the sign of the effect is inconsistent with the predicted threshold (e.g., retrieval helps at high noise or hurts at low noise)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For a fixed filtering ability and cost, there exists a noise threshold where accuracy with retrieval crosses accuracy without retrieval.",
+          "Below the threshold, retrieval consistently yields higher accuracy when the agent has a knowledge gap.",
+          "Above the threshold, retrieval consistently yields lower accuracy.",
+          "The threshold shifts to higher noise when filtering ability increases.",
+          "The threshold shifts to lower noise when retrieval cost increases."
+        ],
+        "rejects_hypothesis": [
+          "No clear threshold; accuracy difference varies smoothly with noise.",
+          "Retrieval never helps or never hurts across all noise levels.",
+          "The effect of noise is reversed: retrieval helps at high noise and hurts at low noise.",
+          "The threshold does not move with filtering ability or cost."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, the hypothesis of a phase transition is falsified.",
+        "assumption_to_revise": "The assumption that retrieval noise is the dominant factor may be incorrect; perhaps cost or filtering ability are more continuous moderators, or the effect is task-dependent.",
+        "next_question": "How does the benefit of retrieval depend on the specific type of retrieval noise (e.g., irrelevant vs. contradictory information)? Is there a threshold for relevance rather than noise?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of obtaining external information from a knowledge source (e.g., database, web) in response to a query.",
+          "why_primitive": "It is a fundamental operation that provides information beyond the agent's internal knowledge, and its costs and benefits are central to the research question."
+        },
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that independently performs research tasks—such as hypothesis generation, experiment design, and analysis—without human intervention.",
+          "why_primitive": "The agent's autonomy introduces unique constraints on how retrieval is used, as it must self-assess information needs and integrate retrieved information without external guidance."
+        },
+        {
+          "name": "Knowledge State",
+          "definition": "The internal representation of facts, hypotheses, and uncertainties held by the agent at a given time.",
+          "why_primitive": "The utility of retrieval depends on the current knowledge state: retrieval helps when the state is incomplete or uncertain, but may hurt when it conflicts with or confounds existing knowledge."
+        },
+        {
+          "name": "Relevance",
+          "definition": "The degree to which retrieved information is useful for the agent's current research task or subgoal.",
+          "why_primitive": "Relevance determines whether retrieval has a positive or negative impact; irrelevant information wastes resources and can mislead the agent."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Retrieval is a cost-incurring operation that consumes time and computational resources.",
+          "rationale": "Without this cost, retrieval would always be beneficial in expectation, but real-world systems have finite budgets.",
+          "possible_failure": "If retrieval were costless, the trade-off would vanish; the assumption grounds the analysis in realistic constraints."
+        },
+        {
+          "assumption": "The agent's internal knowledge is fallible and incomplete, so external information can improve its decisions.",
+          "rationale": "If the agent were omniscient, retrieval would never help; this assumption creates the potential for benefit.",
+          "possible_failure": "If the agent's internal knowledge is sufficient or external sources are unreliable, retrieval may harm by introducing noise or bias."
+        },
+        {
+          "assumption": "Retrieval results can be noisy, irrelevant, or contradictory, requiring integration and validation by the agent.",
+          "rationale": "Real retrieval systems return imperfect results; ignoring this leads to overestimating benefits.",
+          "possible_failure": "If retrieved information were always perfect, the only cost would be latency; imperfect retrieval introduces the risk of degradation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Retrieval_Usage",
+            "role": "input",
+            "description": "Binary variable indicating whether the agent performs a retrieval operation."
+          },
+          {
+            "name": "Knowledge_State_Completeness",
+            "role": "mediator",
+            "description": "Degree to which the agent's internal knowledge covers relevant facts after retrieval."
+          },
+          {
+            "name": "Retrieval_Relevance",
+            "role": "mediator",
+            "description": "Average relevance of retrieved information to the current research task."
+          },
+          {
+            "name": "Task_Accuracy",
+            "role": "output",
+            "description": "Correctness of the agent's research conclusions."
+          },
+          {
+            "name": "Time_To_Complete",
+            "role": "outcome",
+            "description": "Total time taken by the agent to finish the research task."
+          },
+          {
+            "name": "Retrieval_Cost",
+            "role": "confounder",
+            "description": "Latency and computational resources consumed by each retrieval operation."
+          },
+          {
+            "name": "Agent_Filtering_Ability",
+            "role": "confounder",
+            "description": "Capability of the agent to discard irrelevant or contradictory retrieved information."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Retrieval_Usage",
+            "source": "Agent's decision to retrieve",
+            "relation": "increases",
+            "target": "Knowledge_State_Completeness",
+            "explanation": "Retrieval adds external information, filling gaps in the agent's knowledge."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "may decrease",
+            "target": "Retrieval_Relevance",
+            "explanation": "If retrieval returns noisy or off-topic results, relevance decreases."
+          },
+          {
+            "step": "Filtering and Integration",
+            "source": "Agent_Filtering_Ability",
+            "relation": "moderates",
+            "target": "Retrieval_Relevance",
+            "explanation": "Better filtering improves effective relevance of retrieved information."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "increases",
+            "target": "Retrieval_Cost",
+            "explanation": "Each retrieval consumes time and compute resources."
+          },
+          {
+            "step": "Impact on Accuracy",
+            "source": "Knowledge_State_Completeness",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "More complete knowledge supports correct decisions."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Relevance",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "Relevant information directly improves decision quality."
+          },
+          {
+            "step": "Impact on Time",
+            "source": "Retrieval_Cost",
+            "relation": "increases",
+            "target": "Time_To_Complete",
+            "explanation": "Higher latency and resource use prolong the task."
+          },
+          {
+            "step": null,
+            "source": "Task_Accuracy",
+            "relation": "may be inversely related to",
+            "target": "Time_To_Complete",
+            "explanation": "More accurate results may require additional verification steps, increasing time."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Information overload",
+            "why_it_matters": "Excessive retrieval can overwhelm the agent's filtering capacity, reducing effective relevance and degrading accuracy."
+          },
+          {
+            "bottleneck": "Retrieval latency",
+            "why_it_matters": "High latency from frequent or expensive retrievals can slow the entire research process, reducing throughput."
+          },
+          {
+            "bottleneck": "Irrelevant or contradictory information",
+            "why_it_matters": "If retrieved information is irrelevant or contradicts the agent's knowledge, it misleads the agent and harms task accuracy."
+          }
+        ],
+        "mechanism_summary": "The net effect of retrieval on autonomous research agents depends on a trade-off between improved knowledge completeness and the costs of latency, irrelevant information, and information overload. Retrieval helps when the agent's knowledge state is incomplete and retrieval returns highly relevant information, leading to higher task accuracy. It hurts when retrieval is too costly, returns irrelevant or misleading information, or when the agent lacks filtering capacity to manage the incoming data, resulting in degraded accuracy and longer completion times. The mechanism is moderated by the agent's filtering ability and the inherent cost of retrieval operations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The agent's filtering ability is critical to mitigate information overload, but this ability itself is constrained by the agent's computational resources and the volume of retrieved data, leading to a potential bottleneck where more retrieval degrades performance.",
+        "derived_from": [
+          "Autonomous Research Agent",
+          "Knowledge State",
+          "Assumption: retrieval results can be noisy",
+          "Bottleneck: Information overload",
+          "Variable: Agent_Filtering_Ability"
+        ],
+        "why_it_matters": "If the agent cannot effectively filter, retrieval may reduce task accuracy and increase time, negating its purpose. This tension highlights the need for robust filtering mechanisms.",
+        "what_existing_methods_may_miss": "Many agents use simple filtering like top-k selection, which fails if irrelevant results are ranked highly or if the agent's knowledge state misguides filtering.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what ratio of retrieval volume to filtering capacity does retrieval shift from helpful to harmful for autonomous research agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a phase transition boundary in the retrieval-accuracy relationship for autonomous research agents."
+      },
+      "hypothesis": {
+        "statement": "The effect of retrieval volume on task accuracy is non-monotonic and mediated by filtering capacity: there exists a critical ratio R such that below R, retrieval improves accuracy, while above R, retrieval degrades accuracy. The threshold R is larger when filtering capacity is higher.",
+        "predicted_effect": "A phase transition where accuracy first increases with retrieval volume then decreases, with the peak shifting right for higher filtering capacity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a research environment where autonomous agents perform a series of tasks (e.g., literature review, hypothesis generation). Systematically vary retrieval volume (0, 5, 10, 20, 50 queries per task) and filtering capacity (low: top-1, medium: top-5 with relevance filter, high: top-10 with advanced filtering). Measure task accuracy (e.g., F1 score on final output). Use change point detection to identify the retrieval volume where accuracy peaks or drops sharply for each filtering level.",
+        "independent_variables": [
+          "retrieval volume",
+          "filtering capacity"
+        ],
+        "dependent_variables": [
+          "task accuracy",
+          "critical retrieval threshold"
+        ],
+        "controls": [
+          "task difficulty",
+          "knowledge base size",
+          "retrieval source quality",
+          "agent architecture"
+        ],
+        "falsifying_observation": "If task accuracy is monotonic increasing or decreasing with retrieval volume for all filtering levels, or if there is no clearly identifiable threshold (change point) across filtering levels, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Accuracy initially increases with retrieval volume, then decreases, with a clear peak at a retrieval volume that depends on filtering capacity.",
+          "The peak occurs at a higher retrieval volume for higher filtering capacity.",
+          "Change point analysis identifies a statistically significant threshold for each filtering condition."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy monotonically increases (or decreases) with retrieval volume for all filtering levels.",
+          "The peak accuracy does not shift with filtering capacity.",
+          "No significant change point detected."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed (accuracy is monotonic or peaks at same volume regardless of filtering), then the assumption that filtering capacity creates a bottleneck causing a phase transition is incorrect. The mechanism may be linear or dominated by other factors.",
+        "assumption_to_revise": "The assumption that information overload leads to a sharp degradation beyond a critical retrieval volume should be revised. Instead, retrieval may have cumulative negative effects without a clear threshold.",
+        "next_question": "Does the trade-off between retrieval cost and accuracy improvement follow a simple additive model, or is there a continuous diminishing return?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of obtaining external information from a knowledge source (e.g., database, web) in response to a query.",
+          "why_primitive": "It is a fundamental operation that provides information beyond the agent's internal knowledge, and its costs and benefits are central to the research question."
+        },
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that independently performs research tasks—such as hypothesis generation, experiment design, and analysis—without human intervention.",
+          "why_primitive": "The agent's autonomy introduces unique constraints on how retrieval is used, as it must self-assess information needs and integrate retrieved information without external guidance."
+        },
+        {
+          "name": "Knowledge State",
+          "definition": "The internal representation of facts, hypotheses, and uncertainties held by the agent at a given time.",
+          "why_primitive": "The utility of retrieval depends on the current knowledge state: retrieval helps when the state is incomplete or uncertain, but may hurt when it conflicts with or confounds existing knowledge."
+        },
+        {
+          "name": "Relevance",
+          "definition": "The degree to which retrieved information is useful for the agent's current research task or subgoal.",
+          "why_primitive": "Relevance determines whether retrieval has a positive or negative impact; irrelevant information wastes resources and can mislead the agent."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Retrieval is a cost-incurring operation that consumes time and computational resources.",
+          "rationale": "Without this cost, retrieval would always be beneficial in expectation, but real-world systems have finite budgets.",
+          "possible_failure": "If retrieval were costless, the trade-off would vanish; the assumption grounds the analysis in realistic constraints."
+        },
+        {
+          "assumption": "The agent's internal knowledge is fallible and incomplete, so external information can improve its decisions.",
+          "rationale": "If the agent were omniscient, retrieval would never help; this assumption creates the potential for benefit.",
+          "possible_failure": "If the agent's internal knowledge is sufficient or external sources are unreliable, retrieval may harm by introducing noise or bias."
+        },
+        {
+          "assumption": "Retrieval results can be noisy, irrelevant, or contradictory, requiring integration and validation by the agent.",
+          "rationale": "Real retrieval systems return imperfect results; ignoring this leads to overestimating benefits.",
+          "possible_failure": "If retrieved information were always perfect, the only cost would be latency; imperfect retrieval introduces the risk of degradation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Retrieval_Usage",
+            "role": "input",
+            "description": "Binary variable indicating whether the agent performs a retrieval operation."
+          },
+          {
+            "name": "Knowledge_State_Completeness",
+            "role": "mediator",
+            "description": "Degree to which the agent's internal knowledge covers relevant facts after retrieval."
+          },
+          {
+            "name": "Retrieval_Relevance",
+            "role": "mediator",
+            "description": "Average relevance of retrieved information to the current research task."
+          },
+          {
+            "name": "Task_Accuracy",
+            "role": "output",
+            "description": "Correctness of the agent's research conclusions."
+          },
+          {
+            "name": "Time_To_Complete",
+            "role": "outcome",
+            "description": "Total time taken by the agent to finish the research task."
+          },
+          {
+            "name": "Retrieval_Cost",
+            "role": "confounder",
+            "description": "Latency and computational resources consumed by each retrieval operation."
+          },
+          {
+            "name": "Agent_Filtering_Ability",
+            "role": "confounder",
+            "description": "Capability of the agent to discard irrelevant or contradictory retrieved information."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Retrieval_Usage",
+            "source": "Agent's decision to retrieve",
+            "relation": "increases",
+            "target": "Knowledge_State_Completeness",
+            "explanation": "Retrieval adds external information, filling gaps in the agent's knowledge."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "may decrease",
+            "target": "Retrieval_Relevance",
+            "explanation": "If retrieval returns noisy or off-topic results, relevance decreases."
+          },
+          {
+            "step": "Filtering and Integration",
+            "source": "Agent_Filtering_Ability",
+            "relation": "moderates",
+            "target": "Retrieval_Relevance",
+            "explanation": "Better filtering improves effective relevance of retrieved information."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "increases",
+            "target": "Retrieval_Cost",
+            "explanation": "Each retrieval consumes time and compute resources."
+          },
+          {
+            "step": "Impact on Accuracy",
+            "source": "Knowledge_State_Completeness",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "More complete knowledge supports correct decisions."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Relevance",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "Relevant information directly improves decision quality."
+          },
+          {
+            "step": "Impact on Time",
+            "source": "Retrieval_Cost",
+            "relation": "increases",
+            "target": "Time_To_Complete",
+            "explanation": "Higher latency and resource use prolong the task."
+          },
+          {
+            "step": null,
+            "source": "Task_Accuracy",
+            "relation": "may be inversely related to",
+            "target": "Time_To_Complete",
+            "explanation": "More accurate results may require additional verification steps, increasing time."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Information overload",
+            "why_it_matters": "Excessive retrieval can overwhelm the agent's filtering capacity, reducing effective relevance and degrading accuracy."
+          },
+          {
+            "bottleneck": "Retrieval latency",
+            "why_it_matters": "High latency from frequent or expensive retrievals can slow the entire research process, reducing throughput."
+          },
+          {
+            "bottleneck": "Irrelevant or contradictory information",
+            "why_it_matters": "If retrieved information is irrelevant or contradicts the agent's knowledge, it misleads the agent and harms task accuracy."
+          }
+        ],
+        "mechanism_summary": "The net effect of retrieval on autonomous research agents depends on a trade-off between improved knowledge completeness and the costs of latency, irrelevant information, and information overload. Retrieval helps when the agent's knowledge state is incomplete and retrieval returns highly relevant information, leading to higher task accuracy. It hurts when retrieval is too costly, returns irrelevant or misleading information, or when the agent lacks filtering capacity to manage the incoming data, resulting in degraded accuracy and longer completion times. The mechanism is moderated by the agent's filtering ability and the inherent cost of retrieval operations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Autonomous agents must self-assess when to retrieve, but their own knowledge state is fallible, so they may over-retrieve (wasting resources) or under-retrieve (missing critical information), creating a self-assessment paradox.",
+        "derived_from": [
+          "Autonomous Research Agent",
+          "Knowledge State",
+          "Assumption: internal knowledge is fallible and incomplete",
+          "Tradeoff: Exploration vs. exploitation"
+        ],
+        "why_it_matters": "This paradox undercuts the assumption that retrieval decisions can be made optimally based on the agent's current knowledge, as that knowledge may be misinformed.",
+        "what_existing_methods_may_miss": "Existing work often assumes agents have accurate uncertainty estimates, but in practice, overconfidence or underconfidence leads to poor retrieval timing.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What threshold of retrieval precision (ratio of relevant to irrelevant retrieved information) determines whether retrieval helps or hurts an autonomous research agent's task accuracy, and does this threshold shift with the agent's initial knowledge coherence?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a sharp boundary condition (precision threshold) that predicts when retrieval is beneficial, and characterizes its dependence on the agent's internal knowledge state, resolving the self-assessment paradox."
+      },
+      "hypothesis": {
+        "statement": "There exists a retrieval precision threshold P* such that if the precision of retrieved information exceeds P*, retrieval improves task accuracy; otherwise, it hurts. Moreover, P* decreases as the agent's initial knowledge coherence (internal consistency and completeness) increases.",
+        "predicted_effect": "Higher retrieval precision improves accuracy above threshold; higher initial coherence lowers the threshold, making retrieval more beneficial even at lower precision."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate autonomous research agents on a set of fact-checking tasks with controlled initial knowledge states (low, medium, high coherence). For each task, vary retrieval precision by adjusting the proportion of relevant vs. irrelevant documents returned (e.g., 0.2, 0.4, 0.6, 0.8, 1.0). Measure task accuracy (correctness of final answer) and identify the precision at which accuracy significantly improves relative to no retrieval.",
+        "independent_variables": [
+          "retrieval precision (ratio of relevant to total retrieved documents)",
+          "initial knowledge coherence (low/medium/high)"
+        ],
+        "dependent_variables": [
+          "task accuracy"
+        ],
+        "controls": [
+          "task difficulty",
+          "retrieval source quality (noise distribution)",
+          "agent's filtering ability (fixed)",
+          "number of retrievals allowed (fixed at 1 per task for clean threshold measurement)"
+        ],
+        "falsifying_observation": "If no monotonic relationship between precision and accuracy is observed, or if the threshold does not vary with initial coherence (or varies in the opposite direction), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Task accuracy increases sharply beyond a certain precision threshold for each coherence level.",
+          "The threshold precision P* is lower for agents with higher initial knowledge coherence.",
+          "Below the threshold, retrieval either has no effect or reduces accuracy; above it, accuracy improves."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy improves linearly with precision without any clear threshold.",
+          "The threshold is the same across all coherence levels.",
+          "Higher coherence leads to a higher threshold (opposite direction)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis fails, it suggests that the precision threshold is not a sufficient condition for retrieval benefit, or that coherence does not moderate the effect as predicted.",
+        "assumption_to_revise": "Assumption that retrieval precision (relevance ratio) is the key determinant of benefit; other factors like information novelty or agent's processing capacity may dominate.",
+        "next_question": "How does the agent's filtering ability or the novelty of retrieved information interact with precision to determine retrieval's net effect on accuracy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of obtaining external information from a knowledge source (e.g., database, web) in response to a query.",
+          "why_primitive": "It is a fundamental operation that provides information beyond the agent's internal knowledge, and its costs and benefits are central to the research question."
+        },
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that independently performs research tasks—such as hypothesis generation, experiment design, and analysis—without human intervention.",
+          "why_primitive": "The agent's autonomy introduces unique constraints on how retrieval is used, as it must self-assess information needs and integrate retrieved information without external guidance."
+        },
+        {
+          "name": "Knowledge State",
+          "definition": "The internal representation of facts, hypotheses, and uncertainties held by the agent at a given time.",
+          "why_primitive": "The utility of retrieval depends on the current knowledge state: retrieval helps when the state is incomplete or uncertain, but may hurt when it conflicts with or confounds existing knowledge."
+        },
+        {
+          "name": "Relevance",
+          "definition": "The degree to which retrieved information is useful for the agent's current research task or subgoal.",
+          "why_primitive": "Relevance determines whether retrieval has a positive or negative impact; irrelevant information wastes resources and can mislead the agent."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Retrieval is a cost-incurring operation that consumes time and computational resources.",
+          "rationale": "Without this cost, retrieval would always be beneficial in expectation, but real-world systems have finite budgets.",
+          "possible_failure": "If retrieval were costless, the trade-off would vanish; the assumption grounds the analysis in realistic constraints."
+        },
+        {
+          "assumption": "The agent's internal knowledge is fallible and incomplete, so external information can improve its decisions.",
+          "rationale": "If the agent were omniscient, retrieval would never help; this assumption creates the potential for benefit.",
+          "possible_failure": "If the agent's internal knowledge is sufficient or external sources are unreliable, retrieval may harm by introducing noise or bias."
+        },
+        {
+          "assumption": "Retrieval results can be noisy, irrelevant, or contradictory, requiring integration and validation by the agent.",
+          "rationale": "Real retrieval systems return imperfect results; ignoring this leads to overestimating benefits.",
+          "possible_failure": "If retrieved information were always perfect, the only cost would be latency; imperfect retrieval introduces the risk of degradation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Retrieval_Usage",
+            "role": "input",
+            "description": "Binary variable indicating whether the agent performs a retrieval operation."
+          },
+          {
+            "name": "Knowledge_State_Completeness",
+            "role": "mediator",
+            "description": "Degree to which the agent's internal knowledge covers relevant facts after retrieval."
+          },
+          {
+            "name": "Retrieval_Relevance",
+            "role": "mediator",
+            "description": "Average relevance of retrieved information to the current research task."
+          },
+          {
+            "name": "Task_Accuracy",
+            "role": "output",
+            "description": "Correctness of the agent's research conclusions."
+          },
+          {
+            "name": "Time_To_Complete",
+            "role": "outcome",
+            "description": "Total time taken by the agent to finish the research task."
+          },
+          {
+            "name": "Retrieval_Cost",
+            "role": "confounder",
+            "description": "Latency and computational resources consumed by each retrieval operation."
+          },
+          {
+            "name": "Agent_Filtering_Ability",
+            "role": "confounder",
+            "description": "Capability of the agent to discard irrelevant or contradictory retrieved information."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Retrieval_Usage",
+            "source": "Agent's decision to retrieve",
+            "relation": "increases",
+            "target": "Knowledge_State_Completeness",
+            "explanation": "Retrieval adds external information, filling gaps in the agent's knowledge."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "may decrease",
+            "target": "Retrieval_Relevance",
+            "explanation": "If retrieval returns noisy or off-topic results, relevance decreases."
+          },
+          {
+            "step": "Filtering and Integration",
+            "source": "Agent_Filtering_Ability",
+            "relation": "moderates",
+            "target": "Retrieval_Relevance",
+            "explanation": "Better filtering improves effective relevance of retrieved information."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Usage",
+            "relation": "increases",
+            "target": "Retrieval_Cost",
+            "explanation": "Each retrieval consumes time and compute resources."
+          },
+          {
+            "step": "Impact on Accuracy",
+            "source": "Knowledge_State_Completeness",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "More complete knowledge supports correct decisions."
+          },
+          {
+            "step": null,
+            "source": "Retrieval_Relevance",
+            "relation": "increases",
+            "target": "Task_Accuracy",
+            "explanation": "Relevant information directly improves decision quality."
+          },
+          {
+            "step": "Impact on Time",
+            "source": "Retrieval_Cost",
+            "relation": "increases",
+            "target": "Time_To_Complete",
+            "explanation": "Higher latency and resource use prolong the task."
+          },
+          {
+            "step": null,
+            "source": "Task_Accuracy",
+            "relation": "may be inversely related to",
+            "target": "Time_To_Complete",
+            "explanation": "More accurate results may require additional verification steps, increasing time."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Information overload",
+            "why_it_matters": "Excessive retrieval can overwhelm the agent's filtering capacity, reducing effective relevance and degrading accuracy."
+          },
+          {
+            "bottleneck": "Retrieval latency",
+            "why_it_matters": "High latency from frequent or expensive retrievals can slow the entire research process, reducing throughput."
+          },
+          {
+            "bottleneck": "Irrelevant or contradictory information",
+            "why_it_matters": "If retrieved information is irrelevant or contradicts the agent's knowledge, it misleads the agent and harms task accuracy."
+          }
+        ],
+        "mechanism_summary": "The net effect of retrieval on autonomous research agents depends on a trade-off between improved knowledge completeness and the costs of latency, irrelevant information, and information overload. Retrieval helps when the agent's knowledge state is incomplete and retrieval returns highly relevant information, leading to higher task accuracy. It hurts when retrieval is too costly, returns irrelevant or misleading information, or when the agent lacks filtering capacity to manage the incoming data, resulting in degraded accuracy and longer completion times. The mechanism is moderated by the agent's filtering ability and the inherent cost of retrieval operations."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Retrieval improves knowledge completeness but incurs cost and may introduce irrelevant or contradictory information; the net effect on task accuracy depends on the agent's filtering ability and the actual relevance, which are often unknown a priori.",
+        "derived_from": [
+          "Retrieval",
+          "Autonomous Research Agent",
+          "Assumption: retrieval cost",
+          "Assumption: retrieval results can be noisy",
+          "Tradeoff: Information sufficiency vs. overload"
+        ],
+        "why_it_matters": "This tension determines whether retrieval is beneficial or harmful in autonomous research. Without resolving it, agents may waste resources or produce unreliable conclusions.",
+        "what_existing_methods_may_miss": "Existing methods often assume retrieval is uniformly beneficial or only consider its latency cost, ignoring that low-relevance retrieval can actively mislead the agent.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical threshold of retrieval precision below which retrieval usage decreases task accuracy, and above which it increases task accuracy, in autonomous research agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise boundary condition (threshold) that determines whether retrieval is beneficial or harmful, enabling better design of retrieval policies."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold (T) of retrieval precision such that for precision > T, retrieval usage significantly improves task accuracy of autonomous research agents; for precision < T, retrieval usage significantly degrades task accuracy. Moreover, the threshold T is lower for agents with higher filtering ability.",
+        "predicted_effect": "The effect of retrieval usage on task accuracy changes sign at a specific precision level, and this threshold is moderated by filtering ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a controlled experiment with an autonomous research agent performing a literature-based hypothesis generation task. Vary retrieval usage (on/off) and retrieval precision at 5 levels: 0.0, 0.3, 0.6, 0.9, 1.0 (precision = proportion of retrieved documents that are relevant). Agent filtering ability is held constant at a moderate level (default). Task accuracy is measured by human-expert ratings of generated hypotheses. Use a binary search-like procedure across precision levels to locate the threshold where the net effect of retrieval on accuracy changes from negative to positive. Perform statistical tests (e.g., segmented regression) to confirm the threshold.",
+        "independent_variables": [
+          "Retrieval usage (binary: on/off)",
+          "Retrieval precision (continuous: 0.0 to 1.0, sampled at 5 levels)"
+        ],
+        "dependent_variables": [
+          "Task accuracy (expert-rated correctness score of hypotheses, 0-100)"
+        ],
+        "controls": [
+          "Agent architecture (same model, same parameters)",
+          "Task difficulty (fixed set of tasks)",
+          "Retrieval cost (fixed, e.g., 1 second simulated delay per retrieval)",
+          "Agent's filtering ability (fixed at a moderate level using a standard relevance filter)",
+          "Corpus size and quality (pre-curated document sets with known relevance labels)"
+        ],
+        "falsifying_observation": "If the agent's task accuracy with retrieval is significantly higher than without retrieval across all precision levels (including 0.0), or if it is lower across all levels (including 1.0), then the existence of a threshold is falsified. Also, if the sign change occurs but the threshold is not statistically significant, the hypothesis is not supported."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At high precision (e.g., 0.9, 1.0), retrieval usage yields statistically significant improvement in accuracy compared to no retrieval.",
+          "At low precision (e.g., 0.0, 0.3), retrieval usage yields statistically significant decrease in accuracy compared to no retrieval.",
+          "A statistically significant changepoint in the accuracy-precision curve is identified, with the threshold T between 0.3 and 0.9."
+        ],
+        "rejects_hypothesis": [
+          "Retrieval usage improves accuracy across all precision levels, with no negative effect at low precision.",
+          "Retrieval usage degrades accuracy across all precision levels, with no positive effect at high precision.",
+          "The accuracy-precision relationship is linear with no sign change.",
+          "The threshold estimate has wide confidence intervals that include both low and high precision, indicating no clear boundary."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., no threshold exists, or the threshold is not moderated by filtering ability), then the assumption that retrieval precision alone is the key modulator is called into question.",
+        "assumption_to_revise": "The assumption that precision is the dominant factor; instead, other information attributes (e.g., novelty, timeliness) or agent characteristics (e.g., knowledge state completeness) may create the threshold.",
+        "next_question": "Do other attributes of retrieved information (such as novelty or contradiction degree) create boundary conditions for the benefit of retrieval, and how do they interact with precision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical threshold (T) of retrieval precision such that for precision > T, retrieval usage significantly improves task accuracy of autonomous research agents; for precision < T, retrieval usage significantly degrades task accuracy. Moreover, the threshold T is lower for agents with higher filtering ability.",
+      "independent_variables": [
+        "Retrieval usage (binary: on/off)",
+        "Retrieval precision (5 levels: 0.0, 0.3, 0.6, 0.9, 1.0)"
+      ],
+      "dependent_variables": [
+        "Task accuracy (expert-rated correctness score of hypotheses, 0-100)"
+      ],
+      "controlled_variables": [
+        "Agent architecture (same model, same parameters)",
+        "Task difficulty (fixed set of tasks)",
+        "Retrieval cost (fixed, e.g., 1 second simulated delay per retrieval)",
+        "Agent's filtering ability (fixed at a moderate level using a standard relevance filter)",
+        "Corpus size and quality (pre-curated document sets with known relevance labels)"
+      ],
+      "baselines": [
+        {
+          "name": "No Retrieval",
+          "description": "Agent performs the task without any retrieval operations."
+        },
+        {
+          "name": "Chance-Level Accuracy",
+          "description": "Expected accuracy if hypotheses are generated randomly, serving as a lower bound."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task Accuracy Score",
+          "definition": "Average correctness score (0-100) assigned by human experts to generated hypotheses, with higher scores indicating better alignment with ground truth."
+        }
+      ],
+      "expected_result": "At high precision (0.9, 1.0), retrieval usage yields statistically significant improvement in accuracy compared to no retrieval. At low precision (0.0, 0.3), retrieval usage yields statistically significant decrease in accuracy compared to no retrieval. A statistically significant changepoint in the accuracy-precision curve is identified, with the threshold T between 0.3 and 0.9.",
+      "falsifying_result": "If the agent's task accuracy with retrieval is significantly higher than without retrieval across all precision levels (including 0.0), or if it is lower across all levels (including 1.0), then the existence of a threshold is falsified. Also, if the sign change occurs but the threshold is not statistically significant, the hypothesis is not supported.",
+      "minimum_viable_experiment": "Conduct a controlled experiment with an autonomous research agent performing a literature-based hypothesis generation task. Vary retrieval usage (on/off) and retrieval precision at 5 levels: 0.0, 0.3, 0.6, 0.9, 1.0. Agent filtering ability is held constant at a moderate level. Task accuracy is measured by human-expert ratings of generated hypotheses. Use segmented regression to detect a changepoint in the effect of precision on accuracy. Perform statistical tests (e.g., t-tests comparing retrieval vs. no retrieval at each precision level) to confirm sign change.",
+      "risks_and_confounds": [
+        "Subjectivity in expert ratings of hypothesis correctness; use multiple raters and inter-rater reliability checks.",
+        "Task difficulty may not be perfectly uniform; counterbalance tasks across conditions.",
+        "Filtering ability fixed at one level; future experiments should vary it to test the moderation part of the hypothesis.",
+        "Precision manipulation may not perfectly represent real-world relevance; use synthetic data with known relevance labels.",
+        "Retrieval cost fixed; if real cost varies, it could interact with precision."
+      ]
+    },
+    {
+      "hypothesis": "The effect of retrieval volume on task accuracy is non-monotonic and mediated by filtering capacity: there exists a critical ratio R such that below R, retrieval improves accuracy, while above R, retrieval degrades accuracy. The threshold R is larger when filtering capacity is higher.",
+      "independent_variables": [
+        "retrieval volume (queries per task): 0, 10, 50",
+        "filtering capacity: low (top-1), high (top-10 with relevance filter)"
+      ],
+      "dependent_variables": [
+        "task accuracy (F1 score on final output)"
+      ],
+      "controlled_variables": [
+        "task difficulty (same set of tasks across conditions)",
+        "knowledge base size (fixed)",
+        "retrieval source quality (same corpus)",
+        "agent architecture (identical except for filtering mechanism)",
+        "random seed (for reproducibility)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent performs task without any retrieval (retrieval volume = 0)."
+        },
+        {
+          "name": "Low filtering with no retrieval",
+          "description": "Same as no retrieval, but for low filtering capacity condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task accuracy",
+          "definition": "F1 score computed on the final output of the agent compared to ground truth answers."
+        },
+        {
+          "name": "Critical retrieval threshold",
+          "definition": "The retrieval volume at which task accuracy peaks or starts to decline, identified via change point detection."
+        }
+      ],
+      "expected_result": "For each filtering capacity, task accuracy initially increases with retrieval volume, then decreases after a peak. The peak occurs at a higher retrieval volume for high filtering capacity than for low filtering capacity.",
+      "falsifying_result": "Task accuracy is monotonic (either always increasing or always decreasing) with retrieval volume for both filtering capacities, or the peak accuracy occurs at the same retrieval volume regardless of filtering capacity.",
+      "minimum_viable_experiment": "Simulate 30 autonomous research agents (10 per retrieval volume per filtering condition) performing a fixed set of research tasks (e.g., 5 tasks). Use a simple retrieval system with controlled relevance distribution. Vary retrieval volume (0, 10, 50 queries per task) and filtering capacity (low: keep top-1, high: keep top-10 with a relevance filter). Measure F1 score on final outputs. Use change point detection to find the threshold for each filtering condition. If a clear non-monotonic pattern is observed and the threshold differs between filtering conditions, the hypothesis is supported; otherwise, it is falsified.",
+      "risks_and_confounds": [
+        "Task difficulty variation may affect accuracy independently; use the same tasks across all conditions.",
+        "Retrieval relevance distribution may not be realistic; synthetic controls can ensure known relevance.",
+        "Agent's filtering ability implementation may not capture real-world complexity; use a simple rule-based filter.",
+        "Randomness in retrieval results; average over multiple runs per condition."
+      ]
+    },
+    {
+      "hypothesis": "There exists a retrieval precision threshold P* such that if the precision of retrieved information exceeds P*, retrieval improves task accuracy; otherwise, it hurts. Moreover, P* decreases as the agent's initial knowledge coherence increases.",
+      "independent_variables": [
+        "retrieval precision (ratio of relevant to total retrieved documents)",
+        "initial knowledge coherence (low, high)"
+      ],
+      "dependent_variables": [
+        "task accuracy"
+      ],
+      "controlled_variables": [
+        "task difficulty (constant)",
+        "retrieval source quality (noise distribution fixed)",
+        "agent's filtering ability (fixed)",
+        "number of retrievals per task (1)",
+        "task type (fact-checking)",
+        "knowledge domain (same across trials)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent performs the task without any retrieval, relying solely on its initial knowledge. Provides baseline accuracy for each coherence level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task accuracy",
+          "definition": "Proportion of tasks where the agent's final answer is correct, averaged over multiple tasks per condition."
+        }
+      ],
+      "expected_result": "For agents with low initial coherence, accuracy will be low at low precision (e.g., 0.2) and improve sharply at some threshold precision (e.g., around 0.6-0.8). For agents with high initial coherence, the threshold will be lower (e.g., around 0.4-0.6), and accuracy will be higher at all precision levels. The no-retrieval baseline accuracy will be lower for low coherence than high coherence.",
+      "falsifying_result": "If accuracy increases linearly with precision without a clear inflection point, OR if the threshold precision is identical for both coherence levels, OR if higher coherence leads to a higher threshold (i.e., high coherence agents need more precise retrieval to benefit), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate autonomous agents on fact-checking tasks with two levels of initial knowledge coherence (low, high). For each coherence level, test three retrieval precision levels (0.2, 0.5, 0.8) and a no-retrieval baseline. Each condition runs 100 tasks to estimate accuracy. Use a fixed agent architecture with constant filtering ability. The retrieval source returns documents with specified precision but constant noise distribution. The threshold is identified as the precision where accuracy significantly exceeds baseline (e.g., via t-test). A failure to find a threshold or a coherence-dependent shift falsifies the hypothesis.",
+      "risks_and_confounds": [
+        "The chosen precision levels may not capture the exact threshold if it lies between tested values.",
+        "Simulated agents may not accurately reflect real autonomous agents' behavior, especially regarding filtering and integration.",
+        "Fixed filtering ability may not be representative; agents with better filtering might have different thresholds.",
+        "Task difficulty and domain may interact with precision; results may not generalize."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical retrieval noise level N* such that for retrieval noise N < N*, retrieval improves task accuracy whenever the agent's knowledge state is incomplete, and for N > N*, retrieval reduces accuracy regardless of knowledge completeness. The critical noise N* increases with agent filtering ability and decreases with retrieval cost.",
+      "independent_variables": [
+        "retrieval noise level",
+        "agent filtering ability",
+        "retrieval cost"
+      ],
+      "dependent_variables": [
+        "task accuracy with retrieval",
+        "task accuracy without retrieval",
+        "difference in accuracy"
+      ],
+      "controlled_variables": [
+        "task difficulty",
+        "initial knowledge state completeness",
+        "time budget"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent completes task without any retrieval operation."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task Accuracy",
+          "definition": "Correctness of the agent's final output on the research task."
+        },
+        {
+          "name": "Accuracy Difference",
+          "definition": "Task accuracy with retrieval minus task accuracy without retrieval for matched conditions."
+        }
+      ],
+      "expected_result": "For a fixed filtering ability and cost, there exists a noise threshold where accuracy with retrieval crosses accuracy without retrieval. Below threshold, retrieval improves accuracy; above, it reduces accuracy. The threshold increases with filtering ability and decreases with cost.",
+      "falsifying_result": "No sharp threshold; accuracy difference varies smoothly with noise, or the sign is inconsistent (e.g., retrieval helps at high noise or hurts at low noise), or threshold does not shift with filtering ability/cost.",
+      "minimum_viable_experiment": "Simulate an autonomous research agent performing a set of standardized research tasks. Vary retrieval noise level (e.g., relevance of top-1 result from 0 to 1 in steps of 0.1). For each noise level, run multiple trials with retrieval enabled and disabled. Fix retrieval cost (e.g., constant latency) and agent filtering ability (e.g., perfect filtering). Repeat for two additional filtering ability levels (e.g., moderate, poor) and two cost levels (low, high). Record task accuracy. Analyze if there is a sharp transition in accuracy difference across noise levels.",
+      "risks_and_confounds": [
+        "Task difficulty may interact with retrieval noise; ensure consistent difficulty across trials.",
+        "Agent's initial knowledge state must be controlled; use same incomplete state.",
+        "Retrieval noise operationalization must be consistent; use synthetic relevance scores.",
+        "Filtering ability operationalization must be clear; define as probability of discarding irrelevant info.",
+        "Number of trials must be sufficient to detect threshold; use power analysis."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This work presents a rigorous first-principles analysis of when retrieval helps or hurts autonomous research agents, identifying key primitives, assumptions, tensions, and causal mechanisms. It proposes several falsifiable hypotheses about threshold effects (e.g., retrieval precision, noise, volume relative to filtering capacity) with clearly designed experiments. The derivation is sound and the framework is novel, offering a strong conceptual foundation for future empirical studies.",
+    "strengths": [
+      "Clear and principled decomposition of the problem into primitive concepts (retrieval, knowledge state, relevance) and explicit assumptions.",
+      "Well-articulated causal model with mediators and confounders, capturing the core trade-offs (cost vs. accuracy, exploration vs. exploitation).",
+      "Proposes multiple sharp, falsifiable hypotheses with specific thresholds and phase transitions, enhancing novelty and testability.",
+      "Experiment plans are detailed with independent/dependent variables, controls, baselines, and falsification criteria.",
+      "The work addresses a timely and under-explored question in autonomous AI research."
+    ],
+    "weaknesses": [
+      "The four proposed certificates are somewhat redundant, all focusing on threshold effects; a single, more general hypothesis could reduce repetition.",
+      "Experiments rely heavily on simulations with synthetic data; real-world validation with actual research agents and noisy retrieval sources would strengthen generalizability.",
+      "The mechanism model assumes binary retrieval usage; a more continuous or probabilistic treatment (e.g., varying retrieval frequency) might be more realistic.",
+      "Missing baselines: Comparisons to non-autonomous agents or human-in-the-loop retrieval, and to alternative retrieval strategies (e.g., active learning, uncertainty-based) are not considered.",
+      "The first-principles derivation, while logical, could benefit from formal mathematical modeling (e.g., expected utility framework) to quantify trade-offs more precisely."
+    ],
+    "questions": [
+      "How would the proposed thresholds change if retrieval is integrated sequentially (e.g., iterative refinement) rather than as a single operation?",
+      "Are the hypothesized thresholds robust across different agent architectures (e.g., LLM-based vs. symbolic)?",
+      "What is the role of retrieval source reliability? Could low-quality sources shift thresholds or create additional failure regimes?"
+    ],
+    "missing_baselines": [
+      "Human-in-the-loop retrieval: A mixed-initiative setting where a human decides when to retrieve.",
+      "No retrieval with perfect internal knowledge (oracle) to calibrate the upper bound.",
+      "Alternative retrieval strategies: uncertainty-based, contextual bandit, or fixed schedule (e.g., every N steps).",
+      "Static vs. adaptive filtering: compare fixed top-k to learned filtering.",
+      "Comparison with non-autonomous agents that retrieve on behalf of a human researcher."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "What is the critical threshold of retrieval precision below which retrieval usage decreases task accuracy, and above which it increases task accuracy, in autonomous research agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what ratio of retrieval volume to filtering capacity does retrieval shift from helpful to harmful for autonomous research agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What threshold of retrieval precision (ratio of relevant to irrelevant retrieved information) determines whether retrieval helps or hurts an autonomous research agent's task accuracy, and does this threshold shift with the agent's initial knowledge coherence?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold in retrieval noise that determines whether retrieval helps or hurts autonomous research agents, such that below the threshold retrieval always improves accuracy when a knowledge gap exists, and above it retrieval always degrades accuracy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T192002Z"
+  }
+}

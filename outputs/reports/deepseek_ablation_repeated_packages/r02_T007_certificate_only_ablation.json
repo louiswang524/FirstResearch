@@ -1,0 +1,1240 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A parametrized policy or mapping from states to actions that achieves a specific subgoal or task.",
+        "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their storage and composition define the library."
+      },
+      {
+        "name": "Library",
+        "definition": "A collection of skills maintained by an agent for reuse across tasks.",
+        "why_primitive": "The library is the structure that holds skills; its size and organization directly relate to bloat."
+      },
+      {
+        "name": "Bloat",
+        "definition": "An increase in the number of skills stored without proportional improvement in performance or coverage of task space.",
+        "why_primitive": "Bloat is the central phenomenon to explain; it quantifies library inefficiency."
+      },
+      {
+        "name": "Lifelong-Learning Agent",
+        "definition": "An agent that learns sequentially from a stream of tasks, aiming to retain and reuse knowledge.",
+        "why_primitive": "The agent's objectives and constraints (e.g., no task boundaries) drive the need for skills and the risk of bloat."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are learned independently per task and stored in a single library.",
+        "rationale": "This simplifies analysis by isolating the skill acquisition and storage process from forgetting or compression.",
+        "possible_failure": "If skills are interdependent or compressed, bloat may arise from different mechanisms."
+      },
+      {
+        "assumption": "The agent has no a priori knowledge of task similarity or structure.",
+        "rationale": "Without this, skill discovery must be based on observed data, leading to potential redundancy as similar tasks yield separate skills.",
+        "possible_failure": "If tasks are known to be related, the agent could explicitly reduce bloat via sharing."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Generalization vs. Specialization: Highly specialized skills minimize interference but increase library size; general skills reduce size but may degrade performance.",
+        "variables": [
+          "skill specificity",
+          "task coverage",
+          "interference"
+        ]
+      },
+      {
+        "tradeoff": "Storage vs. Reuse: Storing many skills ensures fast adaptation to new tasks but wastes memory; fewer skills require expensive recomposition or adaptation.",
+        "variables": [
+          "library size",
+          "learning speed",
+          "memory constraints"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_similarity_awareness",
+        "role": "input",
+        "description": "The agent's ability to detect similarity between new tasks and previously learned skills. Under assumption, this is low or absent."
+      },
+      {
+        "name": "skill_specificity",
+        "role": "mediator",
+        "description": "The degree to which a skill is specialized to a single task. Higher specificity increases library size."
+      },
+      {
+        "name": "skill_redundancy",
+        "role": "mediator",
+        "description": "The extent to which multiple skills cover overlapping task regions, indicating unnecessary duplication."
+      },
+      {
+        "name": "library_size",
+        "role": "output",
+        "description": "The number of skills stored in the library, which grows over time and is the measure of bloat."
+      },
+      {
+        "name": "interference",
+        "role": "mediator",
+        "description": "Negative transfer between skills when they are used together. High interference promotes specialization and thus bloat."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_similarity_awareness",
+        "relation": "low_level",
+        "target": "skill_specificity",
+        "explanation": "Without awareness of task similarity, the agent learns a highly specific skill for each new task."
+      },
+      {
+        "step": "2",
+        "source": "skill_specificity",
+        "relation": "increases",
+        "target": "skill_redundancy",
+        "explanation": "High specificity means each skill covers a narrow task region; across tasks, many skills overlap redundantly."
+      },
+      {
+        "step": "3",
+        "source": "skill_redundancy",
+        "relation": "increases",
+        "target": "library_size",
+        "explanation": "Redundant skills accumulate, directly increasing the library size without proportional coverage gain."
+      },
+      {
+        "step": "4",
+        "source": "skill_specificity",
+        "relation": "also_increases",
+        "target": "interference",
+        "explanation": "Specialized skills may interfere when combined, but this is a secondary effect that reinforces the cycle."
+      },
+      {
+        "step": "5",
+        "source": "interference",
+        "relation": "reinforces",
+        "target": "skill_specificity",
+        "explanation": "To avoid interference, the agent prefers even more specialized skills, exacerbating bloat."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Task similarity detection",
+        "why_it_matters": "Without the ability to detect which tasks are similar to existing skills, the agent cannot avoid learning redundant skills, directly causing bloat."
+      },
+      {
+        "bottleneck": "Skill comparison mechanism",
+        "why_it_matters": "Even if similarity could be detected, lacking a mechanism to compare new tasks with stored skills prevents skill reuse, leading to unnecessary additions to the library."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat arises primarily from the agent's inability to detect task similarity due to the assumption of no prior knowledge. This leads to learning highly specialized skills for each new task, which are often redundant with existing skills. The redundancy directly increases library size without proportional performance improvement. Additionally, interference between specialized skills reinforces a cycle of even higher specificity, further exacerbating bloat. Bottlenecks include the lack of task similarity detection and ineffective skill comparison mechanisms, which prevent efficient skill reuse."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption of independent skill learning per task (no similarity detection) contradicts the goal of minimizing bloat through skill reuse, creating a tension between simplicity and efficiency.",
+      "derived_from": [
+        "Assumption: Skills are learned independently per task",
+        "Core Tradeoff: Generalization vs. Specialization",
+        "Bottleneck: Task similarity detection"
+      ],
+      "why_it_matters": "If this assumption holds, bloat is inevitable; relaxing it could enable compression but may introduce interference or require complex comparison mechanisms.",
+      "what_existing_methods_may_miss": "Existing methods that assume no similarity detection may overlook the potential for selective sharing, leading to overestimation of bloat as a necessary evil.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Higher skill specificity reduces interference between skills but increases library size (bloat), creating a tradeoff between performance stability and resource efficiency.",
+      "derived_from": [
+        "Core Tradeoff: Generalization vs. Specialization",
+        "Mechanism: skill_specificity increases library_size via redundancy",
+        "Mechanism: skill_specificity also increases and reinforces interference"
+      ],
+      "why_it_matters": "This tradeoff determines whether an agent should prioritize low interference (specialization) or small library (generalization). The optimal balance is context-dependent.",
+      "what_existing_methods_may_miss": "Many methods treat specificity as fixed or ignore interference, missing the dynamic feedback where interference drives further specialization.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The under-tested assumption that lack of task similarity awareness is the primary bottleneck for bloat ignores other potential causes like memory constraints, task ordering, or skill forgetting.",
+      "derived_from": [
+        "Bottleneck: Task similarity detection",
+        "Mechanism Summary: primary cause is lack of similarity detection",
+        "Assumption: No a priori knowledge of task similarity"
+      ],
+      "why_it_matters": "If other factors are dominant, interventions targeting similarity detection may be ineffective. This tension highlights the need to identify the true driver of bloat.",
+      "what_existing_methods_may_miss": "Existing methods may over-focus on similarity-based compression without considering whether forgetting or memory limits play a larger role.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Storing many skills enables fast adaptation to new tasks but increases memory use, while storing few skills saves memory but requires costly adaptation, creating a storage-reuse tradeoff.",
+      "derived_from": [
+        "Core Tradeoff: Storage vs. Reuse",
+        "Variables: library_size, learning_speed"
+      ],
+      "why_it_matters": "This tradeoff affects the design of lifelong learning systems: should the agent prioritize memory efficiency or adaptation speed? The answer depends on resource constraints and task environment.",
+      "what_existing_methods_may_miss": "Existing methods often assume fixed memory budgets or ignore the cost of adaptation, leading to suboptimal policies.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "If an agent is equipped with a task similarity detection mechanism, does the skill library size increase at a significantly slower rate compared to an agent without such mechanism, while maintaining equivalent task performance?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Isolates the effect of similarity detection on bloat, providing causal evidence for whether it is the key bottleneck."
+    },
+    {
+      "question": "How does varying the skill specificity level (e.g., via a tunable parameter) affect the tradeoff between interference and library size? Is there an optimal specificity threshold that minimizes library size while keeping interference below a critical level across diverse task sequences?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "Provides practical guidelines for tuning specificity to balance bloat and performance, and reveals the dynamic feedback loop between interference and specialization."
+    },
+    {
+      "question": "Is the lack of task similarity awareness the primary cause of bloat, or do memory constraints and skill forgetting play a more significant role? A controlled experiment manipulating each factor independently (similarity detection, memory limit, forgetting rate) would identify the dominant driver.",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Determines which factors are most responsible for bloat, guiding where interventions should be focused."
+    },
+    {
+      "question": "What is the empirical Pareto frontier between library size and adaptation speed (measured as learning speed on new tasks) across different task environments? Does the shape of the frontier change with task similarity distribution?",
+      "question_type": "benchmark",
+      "source_tension": "T4",
+      "expected_contribution": "Characterizes the fundamental storage-reuse tradeoff in lifelong learning, providing a benchmark for evaluating algorithms and revealing environmental dependencies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A parametrized policy or mapping from states to actions that achieves a specific subgoal or task.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their storage and composition define the library."
+        },
+        {
+          "name": "Library",
+          "definition": "A collection of skills maintained by an agent for reuse across tasks.",
+          "why_primitive": "The library is the structure that holds skills; its size and organization directly relate to bloat."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An increase in the number of skills stored without proportional improvement in performance or coverage of task space.",
+          "why_primitive": "Bloat is the central phenomenon to explain; it quantifies library inefficiency."
+        },
+        {
+          "name": "Lifelong-Learning Agent",
+          "definition": "An agent that learns sequentially from a stream of tasks, aiming to retain and reuse knowledge.",
+          "why_primitive": "The agent's objectives and constraints (e.g., no task boundaries) drive the need for skills and the risk of bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned independently per task and stored in a single library.",
+          "rationale": "This simplifies analysis by isolating the skill acquisition and storage process from forgetting or compression.",
+          "possible_failure": "If skills are interdependent or compressed, bloat may arise from different mechanisms."
+        },
+        {
+          "assumption": "The agent has no a priori knowledge of task similarity or structure.",
+          "rationale": "Without this, skill discovery must be based on observed data, leading to potential redundancy as similar tasks yield separate skills.",
+          "possible_failure": "If tasks are known to be related, the agent could explicitly reduce bloat via sharing."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity_awareness",
+            "role": "input",
+            "description": "The agent's ability to detect similarity between new tasks and previously learned skills. Under assumption, this is low or absent."
+          },
+          {
+            "name": "skill_specificity",
+            "role": "mediator",
+            "description": "The degree to which a skill is specialized to a single task. Higher specificity increases library size."
+          },
+          {
+            "name": "skill_redundancy",
+            "role": "mediator",
+            "description": "The extent to which multiple skills cover overlapping task regions, indicating unnecessary duplication."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "The number of skills stored in the library, which grows over time and is the measure of bloat."
+          },
+          {
+            "name": "interference",
+            "role": "mediator",
+            "description": "Negative transfer between skills when they are used together. High interference promotes specialization and thus bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity_awareness",
+            "relation": "low_level",
+            "target": "skill_specificity",
+            "explanation": "Without awareness of task similarity, the agent learns a highly specific skill for each new task."
+          },
+          {
+            "step": "2",
+            "source": "skill_specificity",
+            "relation": "increases",
+            "target": "skill_redundancy",
+            "explanation": "High specificity means each skill covers a narrow task region; across tasks, many skills overlap redundantly."
+          },
+          {
+            "step": "3",
+            "source": "skill_redundancy",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate, directly increasing the library size without proportional coverage gain."
+          },
+          {
+            "step": "4",
+            "source": "skill_specificity",
+            "relation": "also_increases",
+            "target": "interference",
+            "explanation": "Specialized skills may interfere when combined, but this is a secondary effect that reinforces the cycle."
+          },
+          {
+            "step": "5",
+            "source": "interference",
+            "relation": "reinforces",
+            "target": "skill_specificity",
+            "explanation": "To avoid interference, the agent prefers even more specialized skills, exacerbating bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Task similarity detection",
+            "why_it_matters": "Without the ability to detect which tasks are similar to existing skills, the agent cannot avoid learning redundant skills, directly causing bloat."
+          },
+          {
+            "bottleneck": "Skill comparison mechanism",
+            "why_it_matters": "Even if similarity could be detected, lacking a mechanism to compare new tasks with stored skills prevents skill reuse, leading to unnecessary additions to the library."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises primarily from the agent's inability to detect task similarity due to the assumption of no prior knowledge. This leads to learning highly specialized skills for each new task, which are often redundant with existing skills. The redundancy directly increases library size without proportional performance improvement. Additionally, interference between specialized skills reinforces a cycle of even higher specificity, further exacerbating bloat. Bottlenecks include the lack of task similarity detection and ineffective skill comparison mechanisms, which prevent efficient skill reuse."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption of independent skill learning per task (no similarity detection) contradicts the goal of minimizing bloat through skill reuse, creating a tension between simplicity and efficiency.",
+        "derived_from": [
+          "Assumption: Skills are learned independently per task",
+          "Core Tradeoff: Generalization vs. Specialization",
+          "Bottleneck: Task similarity detection"
+        ],
+        "why_it_matters": "If this assumption holds, bloat is inevitable; relaxing it could enable compression but may introduce interference or require complex comparison mechanisms.",
+        "what_existing_methods_may_miss": "Existing methods that assume no similarity detection may overlook the potential for selective sharing, leading to overestimation of bloat as a necessary evil.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Given a lifelong-learning agent with a task similarity detection mechanism, what is the threshold of task similarity below which skill library bloat is inevitable regardless of detection capability, and above which detection significantly reduces bloat without performance loss?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp boundary condition (similarity threshold) that determines when similarity detection is effective, transforming the binary question into a nonlinear regime analysis."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of task similarity such that for tasks with similarity above this threshold, a similarity detection mechanism significantly reduces the rate of skill library growth; for tasks below the threshold, the detection mechanism does not reduce bloat, and library size grows at a rate comparable to an agent without detection.",
+        "predicted_effect": "The bloat mitigation effect of similarity detection is conditional on task similarity; the library size vs. number of tasks curve shows a change in slope at the threshold similarity value."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated lifelong learning environment, an agent with a tunable similarity detection mechanism learns a sequence of tasks whose pairwise similarities are systematically varied (e.g., from 0.1 to 0.9 in steps). For each similarity level, measure the library size after a fixed number of tasks and the average task performance. Compare to a control agent without detection. Identify the similarity level at which the bloat reduction benefit first becomes statistically significant.",
+        "independent_variables": [
+          "Task similarity level (continuous from low to high)"
+        ],
+        "dependent_variables": [
+          "Skill library size after N tasks",
+          "Task performance (average success rate)"
+        ],
+        "controls": [
+          "Same task sequence for each similarity level",
+          "Same underlying learning algorithm",
+          "Same skill representation",
+          "Same N (number of tasks)"
+        ],
+        "falsifying_observation": "If no clear threshold is found (i.e., detection either always reduces bloat equally or never reduces bloat across all similarity levels), or if performance drops significantly above the hypothesized threshold, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For tasks with similarity below a critical value, the library size of the detection agent is not significantly different from the control.",
+          "For tasks with similarity above the threshold, the detection agent's library size grows significantly slower than the control.",
+          "A clear inflection point is observed in the library size vs. similarity curve.",
+          "Task performance remains comparable between both agents across all similarity levels."
+        ],
+        "rejects_hypothesis": [
+          "The benefit of similarity detection is uniform across all similarity levels (i.e., no threshold).",
+          "The detection agent shows no significant bloat reduction at any similarity level.",
+          "The detection agent exhibits substantial performance degradation at high similarity levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold exists (detection always/never helps), then the hypothesis that bloat is governed by a similarity threshold is rejected.",
+        "assumption_to_revise": "The assumption that task similarity detection is the sole bottleneck may be invalid; other mechanisms such as skill merging or interference might dominate.",
+        "next_question": "What other mechanism, such as a skill-specificity interference tradeoff, produces a sharp phase transition in bloat growth even without similarity detection?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A parametrized policy or mapping from states to actions that achieves a specific subgoal or task.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their storage and composition define the library."
+        },
+        {
+          "name": "Library",
+          "definition": "A collection of skills maintained by an agent for reuse across tasks.",
+          "why_primitive": "The library is the structure that holds skills; its size and organization directly relate to bloat."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An increase in the number of skills stored without proportional improvement in performance or coverage of task space.",
+          "why_primitive": "Bloat is the central phenomenon to explain; it quantifies library inefficiency."
+        },
+        {
+          "name": "Lifelong-Learning Agent",
+          "definition": "An agent that learns sequentially from a stream of tasks, aiming to retain and reuse knowledge.",
+          "why_primitive": "The agent's objectives and constraints (e.g., no task boundaries) drive the need for skills and the risk of bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned independently per task and stored in a single library.",
+          "rationale": "This simplifies analysis by isolating the skill acquisition and storage process from forgetting or compression.",
+          "possible_failure": "If skills are interdependent or compressed, bloat may arise from different mechanisms."
+        },
+        {
+          "assumption": "The agent has no a priori knowledge of task similarity or structure.",
+          "rationale": "Without this, skill discovery must be based on observed data, leading to potential redundancy as similar tasks yield separate skills.",
+          "possible_failure": "If tasks are known to be related, the agent could explicitly reduce bloat via sharing."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity_awareness",
+            "role": "input",
+            "description": "The agent's ability to detect similarity between new tasks and previously learned skills. Under assumption, this is low or absent."
+          },
+          {
+            "name": "skill_specificity",
+            "role": "mediator",
+            "description": "The degree to which a skill is specialized to a single task. Higher specificity increases library size."
+          },
+          {
+            "name": "skill_redundancy",
+            "role": "mediator",
+            "description": "The extent to which multiple skills cover overlapping task regions, indicating unnecessary duplication."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "The number of skills stored in the library, which grows over time and is the measure of bloat."
+          },
+          {
+            "name": "interference",
+            "role": "mediator",
+            "description": "Negative transfer between skills when they are used together. High interference promotes specialization and thus bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity_awareness",
+            "relation": "low_level",
+            "target": "skill_specificity",
+            "explanation": "Without awareness of task similarity, the agent learns a highly specific skill for each new task."
+          },
+          {
+            "step": "2",
+            "source": "skill_specificity",
+            "relation": "increases",
+            "target": "skill_redundancy",
+            "explanation": "High specificity means each skill covers a narrow task region; across tasks, many skills overlap redundantly."
+          },
+          {
+            "step": "3",
+            "source": "skill_redundancy",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate, directly increasing the library size without proportional coverage gain."
+          },
+          {
+            "step": "4",
+            "source": "skill_specificity",
+            "relation": "also_increases",
+            "target": "interference",
+            "explanation": "Specialized skills may interfere when combined, but this is a secondary effect that reinforces the cycle."
+          },
+          {
+            "step": "5",
+            "source": "interference",
+            "relation": "reinforces",
+            "target": "skill_specificity",
+            "explanation": "To avoid interference, the agent prefers even more specialized skills, exacerbating bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Task similarity detection",
+            "why_it_matters": "Without the ability to detect which tasks are similar to existing skills, the agent cannot avoid learning redundant skills, directly causing bloat."
+          },
+          {
+            "bottleneck": "Skill comparison mechanism",
+            "why_it_matters": "Even if similarity could be detected, lacking a mechanism to compare new tasks with stored skills prevents skill reuse, leading to unnecessary additions to the library."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises primarily from the agent's inability to detect task similarity due to the assumption of no prior knowledge. This leads to learning highly specialized skills for each new task, which are often redundant with existing skills. The redundancy directly increases library size without proportional performance improvement. Additionally, interference between specialized skills reinforces a cycle of even higher specificity, further exacerbating bloat. Bottlenecks include the lack of task similarity detection and ineffective skill comparison mechanisms, which prevent efficient skill reuse."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Higher skill specificity reduces interference between skills but increases library size (bloat), creating a tradeoff between performance stability and resource efficiency.",
+        "derived_from": [
+          "Core Tradeoff: Generalization vs. Specialization",
+          "Mechanism: skill_specificity increases library_size via redundancy",
+          "Mechanism: skill_specificity also increases and reinforces interference"
+        ],
+        "why_it_matters": "This tradeoff determines whether an agent should prioritize low interference (specialization) or small library (generalization). The optimal balance is context-dependent.",
+        "what_existing_methods_may_miss": "Many methods treat specificity as fixed or ignore interference, missing the dynamic feedback where interference drives further specialization.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical specificity threshold above which the positive feedback between skill specificity and interference self-reinforces, causing a phase transition from gradual to explosive library growth?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp phase transition in skill-library dynamics, providing a clear design guideline to operate below the critical threshold to avoid bloat explosions."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical skill specificity level such that below it, library size grows linearly with task count, and above it, the interference-specificity feedback loop triggers superlinear (exponential) bloat.",
+        "predicted_effect": "Library size vs. specificity exhibits a sudden inflection: initially linear increase, then a sharp upward bend above the critical threshold, while interference drops sharply at the same point due to extreme specialization."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent on a sequence of tasks from diverse domains, systematically varying a skill specificity parameter (e.g., number of latent dimensions in a skill embedding). For each specificity level, train on an increasing number of tasks and measure library size after each task. Fit a piecewise linear model to detect a change in growth rate. Also measure interference (negative transfer) on held-out tasks. Identify the specificity at which the growth rate exponent changes from ~1 to >1.",
+        "independent_variables": [
+          "skill specificity parameter (e.g., number of latent dimensions in skill representation, ranging from low to high)"
+        ],
+        "dependent_variables": [
+          "library size as a function of number of tasks (growth exponent)",
+          "interference (average performance loss on new tasks compared to retraining from scratch)"
+        ],
+        "controls": [
+          "task sequence order and diversity across runs",
+          "base learning algorithm (e.g., DST or Skill-Spacing)",
+          "environment simulation (e.g., continuous control tasks with varying dynamics)",
+          "evaluation metric for interference (e.g., difference in cumulative reward on a test task before and after training on prior tasks)"
+        ],
+        "falsifying_observation": "If library size grows strictly linearly with task count for all specificity levels (no change in exponent), or if the growth rate increases gradually without a clear inflection point, then the hypothesis of a phase transition is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Low specificity: library size grows linearly with tasks (exponent ~1).",
+          "Above critical threshold: library size grows superlinearly (exponent significantly >1).",
+          "Interference drops sharply at the same critical specificity level.",
+          "The critical threshold is consistent across different task sequences (within a range)."
+        ],
+        "rejects_hypothesis": [
+          "Library size grows linearly for all specificity levels.",
+          "No clear inflection point in the library size vs. specificity curve.",
+          "Interference does not exhibit a sharp drop at any specificity level.",
+          "The critical threshold varies wildly across task sequences (no reproducibility)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed and library growth is always linear or always superlinear.",
+        "assumption_to_revise": "The assumption that specificity is a single controllable parameter; instead, the feedback loop may depend on the interaction of multiple factors such as task similarity distribution and forgetting rate.",
+        "next_question": "How does the distribution of task similarities (e.g., clustered vs. uniformly random) modulate the phase transition threshold for skill-library bloat?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A parametrized policy or mapping from states to actions that achieves a specific subgoal or task.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their storage and composition define the library."
+        },
+        {
+          "name": "Library",
+          "definition": "A collection of skills maintained by an agent for reuse across tasks.",
+          "why_primitive": "The library is the structure that holds skills; its size and organization directly relate to bloat."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An increase in the number of skills stored without proportional improvement in performance or coverage of task space.",
+          "why_primitive": "Bloat is the central phenomenon to explain; it quantifies library inefficiency."
+        },
+        {
+          "name": "Lifelong-Learning Agent",
+          "definition": "An agent that learns sequentially from a stream of tasks, aiming to retain and reuse knowledge.",
+          "why_primitive": "The agent's objectives and constraints (e.g., no task boundaries) drive the need for skills and the risk of bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned independently per task and stored in a single library.",
+          "rationale": "This simplifies analysis by isolating the skill acquisition and storage process from forgetting or compression.",
+          "possible_failure": "If skills are interdependent or compressed, bloat may arise from different mechanisms."
+        },
+        {
+          "assumption": "The agent has no a priori knowledge of task similarity or structure.",
+          "rationale": "Without this, skill discovery must be based on observed data, leading to potential redundancy as similar tasks yield separate skills.",
+          "possible_failure": "If tasks are known to be related, the agent could explicitly reduce bloat via sharing."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity_awareness",
+            "role": "input",
+            "description": "The agent's ability to detect similarity between new tasks and previously learned skills. Under assumption, this is low or absent."
+          },
+          {
+            "name": "skill_specificity",
+            "role": "mediator",
+            "description": "The degree to which a skill is specialized to a single task. Higher specificity increases library size."
+          },
+          {
+            "name": "skill_redundancy",
+            "role": "mediator",
+            "description": "The extent to which multiple skills cover overlapping task regions, indicating unnecessary duplication."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "The number of skills stored in the library, which grows over time and is the measure of bloat."
+          },
+          {
+            "name": "interference",
+            "role": "mediator",
+            "description": "Negative transfer between skills when they are used together. High interference promotes specialization and thus bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity_awareness",
+            "relation": "low_level",
+            "target": "skill_specificity",
+            "explanation": "Without awareness of task similarity, the agent learns a highly specific skill for each new task."
+          },
+          {
+            "step": "2",
+            "source": "skill_specificity",
+            "relation": "increases",
+            "target": "skill_redundancy",
+            "explanation": "High specificity means each skill covers a narrow task region; across tasks, many skills overlap redundantly."
+          },
+          {
+            "step": "3",
+            "source": "skill_redundancy",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate, directly increasing the library size without proportional coverage gain."
+          },
+          {
+            "step": "4",
+            "source": "skill_specificity",
+            "relation": "also_increases",
+            "target": "interference",
+            "explanation": "Specialized skills may interfere when combined, but this is a secondary effect that reinforces the cycle."
+          },
+          {
+            "step": "5",
+            "source": "interference",
+            "relation": "reinforces",
+            "target": "skill_specificity",
+            "explanation": "To avoid interference, the agent prefers even more specialized skills, exacerbating bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Task similarity detection",
+            "why_it_matters": "Without the ability to detect which tasks are similar to existing skills, the agent cannot avoid learning redundant skills, directly causing bloat."
+          },
+          {
+            "bottleneck": "Skill comparison mechanism",
+            "why_it_matters": "Even if similarity could be detected, lacking a mechanism to compare new tasks with stored skills prevents skill reuse, leading to unnecessary additions to the library."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises primarily from the agent's inability to detect task similarity due to the assumption of no prior knowledge. This leads to learning highly specialized skills for each new task, which are often redundant with existing skills. The redundancy directly increases library size without proportional performance improvement. Additionally, interference between specialized skills reinforces a cycle of even higher specificity, further exacerbating bloat. Bottlenecks include the lack of task similarity detection and ineffective skill comparison mechanisms, which prevent efficient skill reuse."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The under-tested assumption that lack of task similarity awareness is the primary bottleneck for bloat ignores other potential causes like memory constraints, task ordering, or skill forgetting.",
+        "derived_from": [
+          "Bottleneck: Task similarity detection",
+          "Mechanism Summary: primary cause is lack of similarity detection",
+          "Assumption: No a priori knowledge of task similarity"
+        ],
+        "why_it_matters": "If other factors are dominant, interventions targeting similarity detection may be ineffective. This tension highlights the need to identify the true driver of bloat.",
+        "what_existing_methods_may_miss": "Existing methods may over-focus on similarity-based compression without considering whether forgetting or memory limits play a larger role.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what critical task similarity threshold does skill-library bloat transition from effectively controlled to unbounded, and how does memory capacity shift this threshold?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in bloat dynamics, showing that similarity detection only curbs bloat above a critical similarity level, and that this threshold is modulated by memory constraints."
+      },
+      "hypothesis": {
+        "statement": "Skill-library bloat exhibits a phase transition at a critical task similarity threshold τ: when average task similarity > τ, similarity detection effectively curbs bloat (library size grows sublinearly); when similarity < τ, bloat becomes unbounded (library size grows linearly) regardless of similarity detection. Memory capacity lowers τ, making the threshold easier to cross.",
+        "predicted_effect": "Improving task similarity awareness will reduce bloat only if task similarity is above τ; below τ, similarity detection has negligible effect. Increasing memory capacity will lower τ, extending the regime where similarity detection is effective."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Generate a continuum of task sequences with varying average pairwise task similarity (0 to 1). For each similarity level, run agents with and without similarity detection, and with bounded vs. unbounded memory. Record library size after 100 tasks. Identify the similarity level at which the library size growth rate changes from sublinear to linear (phase transition). Compare the transition point between agents with and without similarity detection, and between memory conditions.",
+        "independent_variables": [
+          "Average task similarity (continuous from 0 to 1)",
+          "Presence of task similarity detection (on/off)",
+          "Memory capacity (bounded small vs. unbounded)"
+        ],
+        "dependent_variables": [
+          "Library size growth rate (sublinear vs. linear exponent)",
+          "Phase transition threshold τ (similarity where growth rate changes)",
+          "Final library size after 100 tasks"
+        ],
+        "controls": [
+          "Same number of tasks (100)",
+          "Same skill learning algorithm",
+          "Same task environment",
+          "Same evaluation metric for similarity"
+        ],
+        "falsifying_observation": "If no phase transition is observed (i.e., library growth rate changes smoothly with similarity) or if similarity detection reduces bloat equally across all similarity levels, then the hypothesis is false."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A sharp transition in library size growth rate at a critical similarity τ exists.",
+          "Below τ, agents with and without similarity detection have similar linear growth; above τ, detection leads to sublinear growth.",
+          "Increased memory capacity shifts τ to a lower similarity value, i.e., the detection-advantage regime expands."
+        ],
+        "rejects_hypothesis": [
+          "No sharp transition; growth rate changes gradually with similarity.",
+          "Similarity detection reduces bloat even at very low similarity.",
+          "Memory capacity does not affect the transition point."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is found or memory does not modulate τ,",
+        "assumption_to_revise": "Revise the assumption that bloat dynamics are driven by a threshold in task similarity; instead consider a continuum model or a different mediator (e.g., interference or forgetting).",
+        "next_question": "What continuous relationship between task similarity and bloat growth rate best explains the data, and which factor (similarity, memory, forgetting) is most predictive?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A parametrized policy or mapping from states to actions that achieves a specific subgoal or task.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their storage and composition define the library."
+        },
+        {
+          "name": "Library",
+          "definition": "A collection of skills maintained by an agent for reuse across tasks.",
+          "why_primitive": "The library is the structure that holds skills; its size and organization directly relate to bloat."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An increase in the number of skills stored without proportional improvement in performance or coverage of task space.",
+          "why_primitive": "Bloat is the central phenomenon to explain; it quantifies library inefficiency."
+        },
+        {
+          "name": "Lifelong-Learning Agent",
+          "definition": "An agent that learns sequentially from a stream of tasks, aiming to retain and reuse knowledge.",
+          "why_primitive": "The agent's objectives and constraints (e.g., no task boundaries) drive the need for skills and the risk of bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned independently per task and stored in a single library.",
+          "rationale": "This simplifies analysis by isolating the skill acquisition and storage process from forgetting or compression.",
+          "possible_failure": "If skills are interdependent or compressed, bloat may arise from different mechanisms."
+        },
+        {
+          "assumption": "The agent has no a priori knowledge of task similarity or structure.",
+          "rationale": "Without this, skill discovery must be based on observed data, leading to potential redundancy as similar tasks yield separate skills.",
+          "possible_failure": "If tasks are known to be related, the agent could explicitly reduce bloat via sharing."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity_awareness",
+            "role": "input",
+            "description": "The agent's ability to detect similarity between new tasks and previously learned skills. Under assumption, this is low or absent."
+          },
+          {
+            "name": "skill_specificity",
+            "role": "mediator",
+            "description": "The degree to which a skill is specialized to a single task. Higher specificity increases library size."
+          },
+          {
+            "name": "skill_redundancy",
+            "role": "mediator",
+            "description": "The extent to which multiple skills cover overlapping task regions, indicating unnecessary duplication."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "The number of skills stored in the library, which grows over time and is the measure of bloat."
+          },
+          {
+            "name": "interference",
+            "role": "mediator",
+            "description": "Negative transfer between skills when they are used together. High interference promotes specialization and thus bloat."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity_awareness",
+            "relation": "low_level",
+            "target": "skill_specificity",
+            "explanation": "Without awareness of task similarity, the agent learns a highly specific skill for each new task."
+          },
+          {
+            "step": "2",
+            "source": "skill_specificity",
+            "relation": "increases",
+            "target": "skill_redundancy",
+            "explanation": "High specificity means each skill covers a narrow task region; across tasks, many skills overlap redundantly."
+          },
+          {
+            "step": "3",
+            "source": "skill_redundancy",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate, directly increasing the library size without proportional coverage gain."
+          },
+          {
+            "step": "4",
+            "source": "skill_specificity",
+            "relation": "also_increases",
+            "target": "interference",
+            "explanation": "Specialized skills may interfere when combined, but this is a secondary effect that reinforces the cycle."
+          },
+          {
+            "step": "5",
+            "source": "interference",
+            "relation": "reinforces",
+            "target": "skill_specificity",
+            "explanation": "To avoid interference, the agent prefers even more specialized skills, exacerbating bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Task similarity detection",
+            "why_it_matters": "Without the ability to detect which tasks are similar to existing skills, the agent cannot avoid learning redundant skills, directly causing bloat."
+          },
+          {
+            "bottleneck": "Skill comparison mechanism",
+            "why_it_matters": "Even if similarity could be detected, lacking a mechanism to compare new tasks with stored skills prevents skill reuse, leading to unnecessary additions to the library."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises primarily from the agent's inability to detect task similarity due to the assumption of no prior knowledge. This leads to learning highly specialized skills for each new task, which are often redundant with existing skills. The redundancy directly increases library size without proportional performance improvement. Additionally, interference between specialized skills reinforces a cycle of even higher specificity, further exacerbating bloat. Bottlenecks include the lack of task similarity detection and ineffective skill comparison mechanisms, which prevent efficient skill reuse."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Storing many skills enables fast adaptation to new tasks but increases memory use, while storing few skills saves memory but requires costly adaptation, creating a storage-reuse tradeoff.",
+        "derived_from": [
+          "Core Tradeoff: Storage vs. Reuse",
+          "Variables: library_size, learning_speed"
+        ],
+        "why_it_matters": "This tradeoff affects the design of lifelong learning systems: should the agent prioritize memory efficiency or adaptation speed? The answer depends on resource constraints and task environment.",
+        "what_existing_methods_may_miss": "Existing methods often assume fixed memory budgets or ignore the cost of adaptation, leading to suboptimal policies.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a threshold in task similarity below which skill-library bloat transitions from sublinear to superlinear growth, driven by interference-induced specialization?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a phase transition in the storage-reuse tradeoff, revealing that bloat accelerates nonlinearly when task similarity falls below a critical value, shifting the Pareto frontier regime."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task similarity threshold τ such that for task similarity < τ, the library growth becomes superlinear (bloat accelerates) due to increasing interference forcing skill overspecialization, while for similarity ≥ τ, growth remains sublinear.",
+        "predicted_effect": "Below the threshold, adaptation speed gains per added skill diminish rapidly as library size increases, and the Pareto frontier becomes concave; above the threshold, gains per skill remain positive and the frontier stays convex."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a controlled lifelong learning environment with a stream of tasks generated from a parameterized similarity distribution (varying cosine distance between task reward functions), fix the maximum library size to a large value (e.g., 100) and measure the rate of skill addition (skills per task) and average adaptation speed (episodes to reach performance threshold) as task similarity varies continuously from 0 (dissimilar) to 1 (identical). Identify whether the growth rate changes abruptly at some similarity value. Replicate with different library size constraints.",
+        "independent_variables": [
+          "task similarity (continuous, e.g., normalized cosine distance between task reward functions)"
+        ],
+        "dependent_variables": [
+          "skill addition rate (new skills per task)",
+          "adaptation speed (episodes to threshold)"
+        ],
+        "controls": [
+          "learning algorithm for skill discovery and selection",
+          "task sequence length",
+          "performance threshold",
+          "state and action space",
+          "reward function structure",
+          "maximum library size (set to a fixed large value to avoid ceiling effects)"
+        ],
+        "falsifying_observation": "If the skill addition rate and adaptation speed change smoothly with task similarity without a clear threshold, or if the growth rate remains sublinear for all similarity values, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A sharp increase in skill addition rate at a critical similarity threshold τ.",
+          "Below τ, adaptation speed initially improves with library size but then plateaus or decreases, leading to a concave or even inverted Pareto frontier.",
+          "Above τ, adaptation speed increases consistently with library size, yielding a convex Pareto frontier.",
+          "The threshold τ shifts higher when interference between skills is artificially increased (e.g., by overlapping state-action spaces)."
+        ],
+        "rejects_hypothesis": [
+          "Skill addition rate varies linearly or smoothly with task similarity.",
+          "Pareto frontier shape does not change at any similarity value.",
+          "No evidence of a critical threshold across multiple random seeds and task distributions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then the assumption that interference is the primary driver of bloat acceleration may be incorrect. Bloat might arise from a different mechanism, such as diminishing returns in skill coverage or memory constraints.",
+        "assumption_to_revise": "Assumption: Interference mediates the transition to superlinear bloat. If falsified, the role of skill overlap and coverage redundancy should be considered instead.",
+        "next_question": "How does the distribution of task novelty (rather than pairwise similarity) affect the bloat growth curve? Could bloat become sublinear if skills are systematically compressed or merged?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold of task similarity such that for tasks with similarity above this threshold, a similarity detection mechanism significantly reduces the rate of skill library growth; for tasks below the threshold, the detection mechanism does not reduce bloat, and library size grows at a rate comparable to an agent without detection.",
+      "independent_variables": [
+        "Task similarity level (continuous from low to high, e.g., 0.1 to 0.9 in steps)"
+      ],
+      "dependent_variables": [
+        "Skill library size after N tasks",
+        "Task performance (average success rate)"
+      ],
+      "controlled_variables": [
+        "Same task sequence for each similarity level",
+        "Same underlying learning algorithm",
+        "Same skill representation",
+        "Same N (number of tasks)"
+      ],
+      "baselines": [
+        {
+          "name": "No detection baseline",
+          "description": "Agent without similarity detection mechanism, learning the same task sequence."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "Number of skills stored in the library after completing N tasks."
+        },
+        {
+          "name": "Task performance",
+          "definition": "Average success rate across all N tasks, measured as proportion of tasks successfully completed using skills from the library."
+        }
+      ],
+      "expected_result": "For tasks with similarity below a critical threshold (e.g., <0.5), the library size of the detection agent is not significantly different from the control; for tasks above the threshold, the detection agent's library size grows significantly slower. A clear inflection point is observed in the library size vs. similarity curve, and task performance remains comparable between agents across all similarity levels.",
+      "falsifying_result": "If no clear threshold is found (i.e., detection either always reduces bloat equally or never reduces bloat across all similarity levels), or if performance drops significantly above the hypothesized threshold, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a lifelong learning environment where a task similarity detection module is tunable. Generate a set of tasks with pairwise similarities varying from 0.1 to 0.9 in steps of 0.1. For each similarity level, run both the detection agent and a control (no detection) on the same sequence of 100 tasks. After each run, record library size and average task success rate. Repeat multiple times (e.g., 5 runs) to account for randomness. Use statistical tests (e.g., t-test) to identify the similarity level at which the difference in library size between detection and control becomes significant (p<0.05) and remains so for higher similarities.",
+      "risks_and_confounds": [
+        "Task similarity operationalization: how similarity is defined and measured may affect results; use a clear parametric measure (e.g., overlap in state-action distributions).",
+        "Detection mechanism complexity: if the detection mechanism itself introduces overhead or errors, it may confound bloat measures.",
+        "Skill representation: using fixed-size skill parameters vs. variable structures may influence library growth.",
+        "Number of tasks N: must be large enough to observe bloat but not so large that performance degrades due to other factors.",
+        "Random seed: ensure reproducibility by fixing random seeds across runs and comparing statistical distributions."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical skill specificity level such that below it, library size grows linearly with task count, and above it, the interference-specificity feedback loop triggers superlinear (exponential) bloat.",
+      "independent_variables": [
+        "skill specificity parameter (e.g., number of latent dimensions in skill representation, ranging from low to high)"
+      ],
+      "dependent_variables": [
+        "library size as a function of number of tasks (growth exponent)",
+        "interference (average performance loss on new tasks compared to retraining from scratch)"
+      ],
+      "controlled_variables": [
+        "task sequence order and diversity across runs",
+        "base learning algorithm (e.g., DST or Skill-Spacing)",
+        "environment simulation (e.g., continuous control tasks with varying dynamics)",
+        "evaluation metric for interference (e.g., difference in cumulative reward on a test task before and after training on prior tasks)"
+      ],
+      "baselines": [
+        {
+          "name": "Low specificity baseline",
+          "description": "Fixed low specificity parameter (e.g., 1 latent dimension) expected to yield linear library growth."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size growth exponent",
+          "definition": "Exponent alpha from power-law fit: library_size ~ tasks^alpha. Alpha ~1 indicates linear growth, >1 indicates superlinear."
+        },
+        {
+          "name": "Interference index",
+          "definition": "Average relative performance drop on a held-out set of tasks when using the learned library compared to retraining from scratch, normalized to [0,1]."
+        },
+        {
+          "name": "Critical specificity threshold",
+          "definition": "The specificity value at which the growth exponent transitions from ~1 to significantly >1, determined by piecewise linear regression."
+        }
+      ],
+      "expected_result": "Below a critical specificity threshold, library size grows linearly (exponent ~1) and interference remains moderate. Above the threshold, library growth becomes superlinear (exponent >1) and interference drops sharply, indicating a phase transition.",
+      "falsifying_result": "Library size grows strictly linearly with task count for all specificity levels (i.e., exponent remains ~1), or the growth rate increases gradually without a clear inflection point, or interference does not exhibit a sharp drop at any specificity level.",
+      "minimum_viable_experiment": "Simulate a lifelong learning agent on a sequence of 100 tasks randomly drawn from diverse domains (e.g., continuous control with varying dynamics). For each of 10 specificity levels (e.g., latent dimensions 1, 2, 4, 6, 8, 10, 12, 14, 16, 20), train the agent sequentially on the tasks, recording library size after each task. Fit a piecewise linear model to detect a change in growth rate. Also measure interference on a held-out set of 20 tasks. Repeat the entire procedure for 10 different task sequences to assess reproducibility.",
+      "risks_and_confounds": [
+        "Task diversity may be insufficient to trigger the feedback loop; ensure tasks cover a wide range of similarities.",
+        "The specificity parameter may not be orthogonal to other algorithmic details; vary only the specificity while keeping other parameters fixed.",
+        "Interference measurement can be noisy; average over multiple held-out tasks and random seeds.",
+        "The observed phase transition may be an artifact of the chosen library size metric; validate with alternative metrics like skill redundancy.",
+        "Computational cost may limit the number of tasks or specificity levels; ensure sufficient resolution around hypothesized threshold."
+      ]
+    },
+    {
+      "hypothesis": "Skill-library bloat exhibits a phase transition at a critical task similarity threshold τ: when average task similarity > τ, similarity detection effectively curbs bloat (library size grows sublinearly); when similarity < τ, bloat becomes unbounded (library size grows linearly) regardless of similarity detection. Memory capacity lowers τ, making the threshold easier to cross.",
+      "independent_variables": [
+        "Average task similarity (continuous from 0 to 1)",
+        "Presence of task similarity detection (on/off)",
+        "Memory capacity (bounded small vs. unbounded)"
+      ],
+      "dependent_variables": [
+        "Library size growth rate (sublinear vs. linear exponent)",
+        "Phase transition threshold τ (similarity where growth rate changes)",
+        "Final library size after 100 tasks"
+      ],
+      "controlled_variables": [
+        "Same number of tasks (100)",
+        "Same skill learning algorithm",
+        "Same task environment",
+        "Same evaluation metric for similarity",
+        "Same agent architecture"
+      ],
+      "baselines": [
+        {
+          "name": "NoDetect_BoundedMem",
+          "description": "Agent without task similarity detection and with small bounded memory."
+        },
+        {
+          "name": "NoDetect_UnboundedMem",
+          "description": "Agent without task similarity detection and with unbounded memory."
+        },
+        {
+          "name": "Detect_BoundedMem",
+          "description": "Agent with task similarity detection and with small bounded memory."
+        },
+        {
+          "name": "Detect_UnboundedMem",
+          "description": "Agent with task similarity detection and with unbounded memory."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "LibrarySizeGrowthExponent",
+          "definition": "Exponent α in library size L(t) ∝ t^α after 100 tasks, where α=1 indicates linear growth (unbounded bloat) and α<1 indicates sublinear growth (controlled bloat)."
+        },
+        {
+          "name": "CriticalSimilarityThreshold",
+          "definition": "The task similarity value τ at which the growth exponent α changes from 1 to <1, identified via a sharp transition in the α vs similarity curve."
+        },
+        {
+          "name": "FinalLibrarySize",
+          "definition": "Number of skills stored after completing 100 tasks."
+        }
+      ],
+      "expected_result": "There will be a sharp transition in library size growth rate from linear (α≈1) to sublinear (α<1) at a critical similarity τ. Below τ, both detection and no-detection agents show linear growth with similar library sizes; above τ, detection agents show sublinear growth while no-detection agents continue linear growth. Increasing memory capacity will shift τ to a lower similarity value.",
+      "falsifying_result": "If no sharp transition is observed (growth rate changes gradually with similarity), or if similarity detection reduces bloat (lowers growth rate) even at very low similarity levels, or if memory capacity does not affect the transition point, then the hypothesis is false.",
+      "minimum_viable_experiment": "Generate a continuum of task sequences with varying average pairwise task similarity (0 to 1). For each similarity level, run the four baseline agents (with/without detection, bounded/unbounded memory) on 100 tasks. Measure library size after each task, compute growth exponent α, and identify τ as the similarity where α changes from 1 to <1. Compare τ across conditions. The experiment requires at least 10 similarity levels spanning [0,1] and multiple runs per condition to detect phase transition.",
+      "risks_and_confounds": [
+        "Task similarity measure may not capture perceptual similarity for the agent.",
+        "100 tasks may be insufficient for transition to emerge; longer sequences needed.",
+        "Skill learning algorithm may include implicit similarity detection.",
+        "Bounded memory size choice may affect results if too large.",
+        "Random seed and task order may introduce noise; need multiple replicates."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical task similarity threshold τ such that for task similarity < τ, library growth becomes superlinear due to interference-induced overspecialization, while for similarity ≥ τ, growth remains sublinear.",
+      "independent_variables": [
+        "task similarity (continuous, 0 to 1, e.g., normalized cosine distance between task reward functions)"
+      ],
+      "dependent_variables": [
+        "skill addition rate (new skills per task)",
+        "adaptation speed (episodes to reach performance threshold)"
+      ],
+      "controlled_variables": [
+        "learning algorithm for skill discovery and selection",
+        "task sequence length",
+        "performance threshold",
+        "state and action space",
+        "reward function structure",
+        "maximum library size (fixed large value, e.g., 100)"
+      ],
+      "baselines": [
+        {
+          "name": "No interference baseline",
+          "description": "A variant of the learning algorithm where interference is artificially suppressed (e.g., by using orthogonal skill representations), to compare growth curves and confirm that interference drives the threshold."
+        },
+        {
+          "name": "Uniform similarity baseline",
+          "description": "Tasks are generated with similarity drawn uniformly over [0,1] without any threshold, to ensure that any observed transition is not an artifact of the distribution."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill addition rate",
+          "definition": "Number of new skills added per task, averaged over a sliding window of tasks."
+        },
+        {
+          "name": "Adaptation speed",
+          "definition": "Number of episodes required for the agent to achieve a predefined performance threshold on a new task, averaged over tasks."
+        },
+        {
+          "name": "Pareto frontier curvature",
+          "definition": "Convexity of the trade-off curve between library size and average adaptation speed; used to detect regime change."
+        }
+      ],
+      "expected_result": "A sharp increase in skill addition rate and a plateau or decrease in adaptation speed at a critical similarity threshold τ, below which growth is superlinear and above which it is sublinear. The Pareto frontier changes from convex (above τ) to concave (below τ).",
+      "falsifying_result": "Skill addition rate varies smoothly with task similarity without a clear threshold, or growth remains sublinear for all similarity values. No abrupt change in Pareto frontier shape is observed.",
+      "minimum_viable_experiment": "In a simulated lifelong learning environment (e.g., gridworld with parameterized reward functions), generate a stream of 100 tasks with similarities uniformly sampled from [0,1]. Use a fixed library size limit of 100 skills. For each similarity value, measure skill addition rate and adaptation speed. Replicate for 10 random seeds. If no threshold is detected via change-point analysis on the growth rate, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Limited number of tasks may obscure a threshold; choose task count large enough for statistical power.",
+        "The specific similarity metric (cosine distance) may not capture task relatedness; use multiple metrics (e.g., Wasserstein distance) to confirm.",
+        "Library size limit may cause ceiling effects; set limit high enough to avoid artificial saturation.",
+        "Interference may be confounded with skill overlap; use representational analysis to isolate interference."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Given a lifelong-learning agent with a task similarity detection mechanism, what is the threshold of task similarity below which skill library bloat is inevitable regardless of detection capability, and above which detection significantly reduces bloat without performance loss?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical specificity threshold above which the positive feedback between skill specificity and interference self-reinforces, causing a phase transition from gradual to explosive library growth?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical task similarity threshold does skill-library bloat transition from effectively controlled to unbounded, and how does memory capacity shift this threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a threshold in task similarity below which skill-library bloat transitions from sublinear to superlinear growth, driven by interference-induced specialization?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

@@ -1,0 +1,988 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable behavior or policy that achieves a specific subgoal or performs a specific function in an agent's environment.",
+        "why_primitive": "It is the atomic unit of behavior that can be learned, stored, and reused; cannot be decomposed into simpler learned components without losing its functional identity."
+      },
+      {
+        "name": "Skill library",
+        "definition": "A collection of skills that an agent has acquired over its lifetime, typically stored in a structured format for retrieval and composition.",
+        "why_primitive": "It defines the storage architecture; bloat is measured relative to this collection, and its properties (size, organization) directly influence agent performance."
+      },
+      {
+        "name": "Lifelong learning",
+        "definition": "A learning paradigm where an agent continuously acquires, refines, and leverages knowledge over an extended sequence of tasks without forgetting previous knowledge catastrophically.",
+        "why_primitive": "It establishes the temporal and cumulative context in which bloat emerges; without continual task exposure, bloat would not occur."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are learned incrementally from a stream of tasks, and each task may share structure with previous tasks.",
+        "rationale": "If tasks were completely independent, skills would not overlap and bloat would simply be the sum of all unique skills. Overlap is necessary for redundancy and thus bloat.",
+        "possible_failure": "Tasks may be sufficiently diverse that no skill sharing occurs, eliminating bloat as a problem but potentially making lifelong learning impossible."
+      },
+      {
+        "assumption": "The agent has a bounded memory or computational budget for storing and querying skills.",
+        "rationale": "If memory were infinite and retrieval perfect, adding every possible skill variation would not be detrimental. Bloat is only problematic under resource constraints.",
+        "possible_failure": "In practice, memory and computation are finite, but if they are extremely large relative to task complexity, bloat may not be an issue."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Skill specificity vs. generality: Specific skills are more efficient for a narrow task but accumulate quickly; general skills are reusable but may perform poorly on specialized tasks.",
+        "variables": [
+          "skill granularity",
+          "number of skills",
+          "transfer efficiency",
+          "task coverage"
+        ]
+      },
+      {
+        "tradeoff": "Skill retention vs. forgetting: Retaining all past skills avoids forgetting but causes library growth; forgetting old skills saves space but risks catastrophic forgetting of useful knowledge.",
+        "variables": [
+          "memory capacity",
+          "forgetting rate",
+          "skill utility",
+          "retrieval accuracy"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_similarity",
+        "role": "input",
+        "description": "The degree of overlap between successive tasks; low similarity encourages finer granularity."
+      },
+      {
+        "name": "skill_granularity",
+        "role": "input",
+        "description": "Level of abstraction at which skills are defined; finer granularity leads to more skills."
+      },
+      {
+        "name": "redundancy_detection_ability",
+        "role": "mediator",
+        "description": "Capability to identify and merge similar skills, reducing redundant storage."
+      },
+      {
+        "name": "memory_capacity",
+        "role": "input",
+        "description": "Maximum number of skills the library can store; constrains growth and retrieval."
+      },
+      {
+        "name": "skill_library_size",
+        "role": "outcome",
+        "description": "Total number of skills stored; measure of bloat."
+      },
+      {
+        "name": "retrieval_efficiency",
+        "role": "outcome",
+        "description": "Speed and accuracy of skill retrieval; degrades with library size."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_similarity",
+        "relation": "influences",
+        "target": "skill_granularity",
+        "explanation": "When tasks are diverse, the agent may adopt finer granularity to capture unique aspects, increasing subsequent skill count."
+      },
+      {
+        "step": "2",
+        "source": "skill_granularity",
+        "relation": "determines",
+        "target": "skill_library_size",
+        "explanation": "Finer granularity directly increases the number of skills created per task, leading to larger library."
+      },
+      {
+        "step": "3",
+        "source": "redundancy_detection_ability",
+        "relation": "decreases",
+        "target": "skill_library_size",
+        "explanation": "Better detection reduces effective number of skills by merging duplicates, slowing growth."
+      },
+      {
+        "step": "4",
+        "source": "skill_library_size",
+        "relation": "decreases",
+        "target": "retrieval_efficiency",
+        "explanation": "Larger library increases search time and error rate, degrading retrieval performance."
+      },
+      {
+        "step": "5",
+        "source": "memory_capacity",
+        "relation": "increases",
+        "target": "retrieval_efficiency",
+        "explanation": "Larger memory capacity allows more efficient indexing and faster search, mitigating the negative effect of library size."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ineffective redundancy detection",
+        "why_it_matters": "Without the ability to identify overlapping skills, the agent stores redundant variations, causing unnecessary accumulation and wasted storage."
+      },
+      {
+        "bottleneck": "Limited memory capacity",
+        "why_it_matters": "Even if skills are non-redundant, a finite memory imposes a hard limit; beyond this, bloat forces either forgetting or degraded retrieval."
+      },
+      {
+        "bottleneck": "Inappropriate skill granularity",
+        "why_it_matters": "If granularity is too fine, the agent creates an excessive number of skills even for simple tasks, accelerating bloat."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat in lifelong-learning agents arises from a cascade: diverse tasks prompt the agent to adopt fine-grained skill definitions, generating many skills. Without strong redundancy detection to merge similar skills, the library grows rapidly. Limited memory capacity constrains this growth, but if unchecked, the large library degrades retrieval efficiency. The core mechanism involves the interaction of task similarity, granularity choice, redundancy detection, and memory limits."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+      "derived_from": [
+        "Skill",
+        "Skill library",
+        "assumption: bounded memory"
+      ],
+      "why_it_matters": "This tradeoff directly impacts the agent's ability to balance immediate task performance with long-term scalability; choosing the wrong granularity can lead to either poor task performance or severe bloat.",
+      "what_existing_methods_may_miss": "Most methods fix granularity upfront rather than adapting it dynamically based on task similarity and resource constraints.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Retaining all past skills avoids catastrophic forgetting but leads to bloat and retrieval inefficiency, whereas forgetting old skills frees memory but risks losing useful knowledge for future similar tasks.",
+      "derived_from": [
+        "Lifelong learning",
+        "assumption: bounded memory",
+        "core tradeoff: skill retention vs. forgetting"
+      ],
+      "why_it_matters": "This tension defines the fundamental memory management problem in lifelong learning; getting it wrong causes either catastrophic forgetting or performance degradation due to bloat.",
+      "what_existing_methods_may_miss": "Many methods assume a fixed memory budget without modeling the utility distribution of skills over time, leading to suboptimal forgetting policies.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does dynamically adapting skill granularity based on task similarity reduce library bloat while maintaining task performance compared to fixed granularity?",
+      "question_type": "algorithmic",
+      "source_tension": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+      "expected_contribution": "Provides a mechanism to adapt granularity on the fly, which could mitigate the tradeoff between performance and bloat, and offers a testable algorithm for lifelong learning agents."
+    },
+    {
+      "question": "How does the utility distribution of past skills over task sequences affect the optimal forgetting policy under bounded memory?",
+      "question_type": "diagnostic",
+      "source_tension": "Retaining all past skills avoids catastrophic forgetting but leads to bloat and retrieval inefficiency, whereas forgetting old skills frees memory but risks losing useful knowledge for future similar tasks.",
+      "expected_contribution": "Characterizes when and which skills to forget based on task similarity and historical usefulness, informing better memory management strategies."
+    },
+    {
+      "question": "What is the causal effect of redundancy detection ability on the relationship between skill granularity and library size?",
+      "question_type": "causal",
+      "source_tension": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+      "expected_contribution": "Quantifies how improved redundancy detection can offset the growth from fine granularity, enabling more efficient skill libraries."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that achieves a specific subgoal or performs a specific function in an agent's environment.",
+          "why_primitive": "It is the atomic unit of behavior that can be learned, stored, and reused; cannot be decomposed into simpler learned components without losing its functional identity."
+        },
+        {
+          "name": "Skill library",
+          "definition": "A collection of skills that an agent has acquired over its lifetime, typically stored in a structured format for retrieval and composition.",
+          "why_primitive": "It defines the storage architecture; bloat is measured relative to this collection, and its properties (size, organization) directly influence agent performance."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "A learning paradigm where an agent continuously acquires, refines, and leverages knowledge over an extended sequence of tasks without forgetting previous knowledge catastrophically.",
+          "why_primitive": "It establishes the temporal and cumulative context in which bloat emerges; without continual task exposure, bloat would not occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned incrementally from a stream of tasks, and each task may share structure with previous tasks.",
+          "rationale": "If tasks were completely independent, skills would not overlap and bloat would simply be the sum of all unique skills. Overlap is necessary for redundancy and thus bloat.",
+          "possible_failure": "Tasks may be sufficiently diverse that no skill sharing occurs, eliminating bloat as a problem but potentially making lifelong learning impossible."
+        },
+        {
+          "assumption": "The agent has a bounded memory or computational budget for storing and querying skills.",
+          "rationale": "If memory were infinite and retrieval perfect, adding every possible skill variation would not be detrimental. Bloat is only problematic under resource constraints.",
+          "possible_failure": "In practice, memory and computation are finite, but if they are extremely large relative to task complexity, bloat may not be an issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity",
+            "role": "input",
+            "description": "The degree of overlap between successive tasks; low similarity encourages finer granularity."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of abstraction at which skills are defined; finer granularity leads to more skills."
+          },
+          {
+            "name": "redundancy_detection_ability",
+            "role": "mediator",
+            "description": "Capability to identify and merge similar skills, reducing redundant storage."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills the library can store; constrains growth and retrieval."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "outcome",
+            "description": "Total number of skills stored; measure of bloat."
+          },
+          {
+            "name": "retrieval_efficiency",
+            "role": "outcome",
+            "description": "Speed and accuracy of skill retrieval; degrades with library size."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "When tasks are diverse, the agent may adopt finer granularity to capture unique aspects, increasing subsequent skill count."
+          },
+          {
+            "step": "2",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_library_size",
+            "explanation": "Finer granularity directly increases the number of skills created per task, leading to larger library."
+          },
+          {
+            "step": "3",
+            "source": "redundancy_detection_ability",
+            "relation": "decreases",
+            "target": "skill_library_size",
+            "explanation": "Better detection reduces effective number of skills by merging duplicates, slowing growth."
+          },
+          {
+            "step": "4",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger library increases search time and error rate, degrading retrieval performance."
+          },
+          {
+            "step": "5",
+            "source": "memory_capacity",
+            "relation": "increases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger memory capacity allows more efficient indexing and faster search, mitigating the negative effect of library size."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ineffective redundancy detection",
+            "why_it_matters": "Without the ability to identify overlapping skills, the agent stores redundant variations, causing unnecessary accumulation and wasted storage."
+          },
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Even if skills are non-redundant, a finite memory imposes a hard limit; beyond this, bloat forces either forgetting or degraded retrieval."
+          },
+          {
+            "bottleneck": "Inappropriate skill granularity",
+            "why_it_matters": "If granularity is too fine, the agent creates an excessive number of skills even for simple tasks, accelerating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents arises from a cascade: diverse tasks prompt the agent to adopt fine-grained skill definitions, generating many skills. Without strong redundancy detection to merge similar skills, the library grows rapidly. Limited memory capacity constrains this growth, but if unchecked, the large library degrades retrieval efficiency. The core mechanism involves the interaction of task similarity, granularity choice, redundancy detection, and memory limits."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+        "derived_from": [
+          "Skill",
+          "Skill library",
+          "assumption: bounded memory"
+        ],
+        "why_it_matters": "This tradeoff directly impacts the agent's ability to balance immediate task performance with long-term scalability; choosing the wrong granularity can lead to either poor task performance or severe bloat.",
+        "what_existing_methods_may_miss": "Most methods fix granularity upfront rather than adapting it dynamically based on task similarity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical task similarity threshold where redundancy detection ability reverses its moderating effect on the skill granularity-library size relationship?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in skill library growth: below a similarity threshold, redundancy detection exacerbates bloat; above, it alleviates it, enabling adaptive granularity policies."
+      },
+      "hypothesis": {
+        "statement": "The moderating effect of redundancy detection ability on the granularity-library size relationship reverses at a critical task similarity threshold: below the threshold, higher detection ability increases library size when using fine granularity; above, it decreases library size.",
+        "predicted_effect": "Agents with high redundancy detection ability will have a larger library with fine granularity when task similarity is low, but a smaller library when similarity is high, compared to low detection ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent with varying task similarity (10 levels from 0 to 1), two levels of skill granularity (fine/coarse), and two levels of redundancy detection ability (low/high). Measure final library size after 20 tasks per condition. Identify the similarity threshold where the interaction flips.",
+        "independent_variables": [
+          "task_similarity",
+          "skill_granularity",
+          "redundancy_detection_ability"
+        ],
+        "dependent_variables": [
+          "skill_library_size"
+        ],
+        "controls": [
+          "memory_capacity",
+          "number_of_tasks",
+          "task_sequence"
+        ],
+        "falsifying_observation": "If the sign of the interaction (detection ability × granularity) remains the same across all similarity levels, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low task similarity (< threshold), high detection ability + fine granularity yields larger library than low detection ability.",
+          "At high task similarity (> threshold), high detection ability + fine granularity yields smaller library than low detection ability.",
+          "The crossover point is statistically significant via interaction term in regression."
+        ],
+        "rejects_hypothesis": [
+          "High detection ability always reduces library size for fine granularity regardless of similarity.",
+          "High detection ability always increases library size for fine granularity regardless of similarity.",
+          "No significant interaction between detection ability and granularity at any similarity level."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no reversal is observed (i.e., high detection ability consistently reduces or consistently increases library size), then the assumption that redundancy detection has a simple monotonic effect is incorrect.",
+        "assumption_to_revise": "The assumption that redundancy detection ability is uniformly beneficial or harmful; in reality, its effect may be purely monotonic but with a different mediator (e.g., overhead cost dominates).",
+        "next_question": "What is the net effect of redundancy detection ability on library efficiency under different task similarity regimes, considering both merging benefit and overhead cost?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that achieves a specific subgoal or performs a specific function in an agent's environment.",
+          "why_primitive": "It is the atomic unit of behavior that can be learned, stored, and reused; cannot be decomposed into simpler learned components without losing its functional identity."
+        },
+        {
+          "name": "Skill library",
+          "definition": "A collection of skills that an agent has acquired over its lifetime, typically stored in a structured format for retrieval and composition.",
+          "why_primitive": "It defines the storage architecture; bloat is measured relative to this collection, and its properties (size, organization) directly influence agent performance."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "A learning paradigm where an agent continuously acquires, refines, and leverages knowledge over an extended sequence of tasks without forgetting previous knowledge catastrophically.",
+          "why_primitive": "It establishes the temporal and cumulative context in which bloat emerges; without continual task exposure, bloat would not occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned incrementally from a stream of tasks, and each task may share structure with previous tasks.",
+          "rationale": "If tasks were completely independent, skills would not overlap and bloat would simply be the sum of all unique skills. Overlap is necessary for redundancy and thus bloat.",
+          "possible_failure": "Tasks may be sufficiently diverse that no skill sharing occurs, eliminating bloat as a problem but potentially making lifelong learning impossible."
+        },
+        {
+          "assumption": "The agent has a bounded memory or computational budget for storing and querying skills.",
+          "rationale": "If memory were infinite and retrieval perfect, adding every possible skill variation would not be detrimental. Bloat is only problematic under resource constraints.",
+          "possible_failure": "In practice, memory and computation are finite, but if they are extremely large relative to task complexity, bloat may not be an issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity",
+            "role": "input",
+            "description": "The degree of overlap between successive tasks; low similarity encourages finer granularity."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of abstraction at which skills are defined; finer granularity leads to more skills."
+          },
+          {
+            "name": "redundancy_detection_ability",
+            "role": "mediator",
+            "description": "Capability to identify and merge similar skills, reducing redundant storage."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills the library can store; constrains growth and retrieval."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "outcome",
+            "description": "Total number of skills stored; measure of bloat."
+          },
+          {
+            "name": "retrieval_efficiency",
+            "role": "outcome",
+            "description": "Speed and accuracy of skill retrieval; degrades with library size."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "When tasks are diverse, the agent may adopt finer granularity to capture unique aspects, increasing subsequent skill count."
+          },
+          {
+            "step": "2",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_library_size",
+            "explanation": "Finer granularity directly increases the number of skills created per task, leading to larger library."
+          },
+          {
+            "step": "3",
+            "source": "redundancy_detection_ability",
+            "relation": "decreases",
+            "target": "skill_library_size",
+            "explanation": "Better detection reduces effective number of skills by merging duplicates, slowing growth."
+          },
+          {
+            "step": "4",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger library increases search time and error rate, degrading retrieval performance."
+          },
+          {
+            "step": "5",
+            "source": "memory_capacity",
+            "relation": "increases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger memory capacity allows more efficient indexing and faster search, mitigating the negative effect of library size."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ineffective redundancy detection",
+            "why_it_matters": "Without the ability to identify overlapping skills, the agent stores redundant variations, causing unnecessary accumulation and wasted storage."
+          },
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Even if skills are non-redundant, a finite memory imposes a hard limit; beyond this, bloat forces either forgetting or degraded retrieval."
+          },
+          {
+            "bottleneck": "Inappropriate skill granularity",
+            "why_it_matters": "If granularity is too fine, the agent creates an excessive number of skills even for simple tasks, accelerating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents arises from a cascade: diverse tasks prompt the agent to adopt fine-grained skill definitions, generating many skills. Without strong redundancy detection to merge similar skills, the library grows rapidly. Limited memory capacity constrains this growth, but if unchecked, the large library degrades retrieval efficiency. The core mechanism involves the interaction of task similarity, granularity choice, redundancy detection, and memory limits."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+        "derived_from": [
+          "Skill",
+          "Skill library",
+          "assumption: bounded memory"
+        ],
+        "why_it_matters": "This tradeoff directly impacts the agent's ability to balance immediate task performance with long-term scalability; choosing the wrong granularity can lead to either poor task performance or severe bloat.",
+        "what_existing_methods_may_miss": "Most methods fix granularity upfront rather than adapting it dynamically based on task similarity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in task similarity that determines the optimal skill granularity, such that below the threshold fine granularity is necessary for performance and above it coarse granularity suffices without bloat, and does dynamically adjusting granularity around this threshold reduce bloat?",
+        "question_type": "algorithmic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies and validates a precise similarity threshold that governs the granularity-bloat tradeoff, enabling efficient dynamic granularity selection."
+      },
+      "hypothesis": {
+        "statement": "Skill library bloat can be minimized by dynamically switching between fine and coarse granularity at a task similarity threshold θ, where θ is the similarity level at which the rate of performance loss from using coarse granularity equals the rate of library growth from fine granularity.",
+        "predicted_effect": "Dynamic threshold-based adaptation achieves lower bloat than fixed granularity strategies while maintaining performance."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare three agents on a sequence of tasks with varying similarity: one with fixed fine granularity, one with fixed coarse granularity, and one with dynamic granularity that switches at an estimated threshold θ. Measure skill library size and average task performance. Additionally, test whether θ can be learned online via a simple heuristic.",
+        "independent_variables": [
+          "granularity adaptation strategy (fixed fine, fixed coarse, dynamic with threshold θ)"
+        ],
+        "dependent_variables": [
+          "skill library size",
+          "average task performance"
+        ],
+        "controls": [
+          "task sequence (same for all agents)",
+          "memory capacity",
+          "redundancy detection ability",
+          "skill learning algorithm"
+        ],
+        "falsifying_observation": "If the dynamic threshold agent does not achieve strictly lower library size than both fixed strategies while keeping performance within 5% of the best fixed, or if the estimated θ does not converge to a stable value across runs, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Dynamic threshold agent achieves smallest library size among all strategies.",
+          "Average task performance of dynamic threshold is comparable to the best fixed granularity (within 5%).",
+          "Estimated θ stabilizes around a consistent value across different task sequences."
+        ],
+        "rejects_hypothesis": [
+          "Dynamic threshold library size is not smaller than both fixed strategies.",
+          "Dynamic threshold performance is significantly worse (>10%) than fixed fine granularity.",
+          "Estimated θ does not converge or varies widely across runs."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold θ yields improvement, revise the assumption that the bloat-performance tradeoff is mediated by a single similarity threshold.",
+        "assumption_to_revise": "The tradeoff between granularity and bloat is governed by a single critical similarity threshold.",
+        "next_question": "Is the bloat-performance tradeoff better captured by a continuous optimal granularity function of task similarity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that achieves a specific subgoal or performs a specific function in an agent's environment.",
+          "why_primitive": "It is the atomic unit of behavior that can be learned, stored, and reused; cannot be decomposed into simpler learned components without losing its functional identity."
+        },
+        {
+          "name": "Skill library",
+          "definition": "A collection of skills that an agent has acquired over its lifetime, typically stored in a structured format for retrieval and composition.",
+          "why_primitive": "It defines the storage architecture; bloat is measured relative to this collection, and its properties (size, organization) directly influence agent performance."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "A learning paradigm where an agent continuously acquires, refines, and leverages knowledge over an extended sequence of tasks without forgetting previous knowledge catastrophically.",
+          "why_primitive": "It establishes the temporal and cumulative context in which bloat emerges; without continual task exposure, bloat would not occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are learned incrementally from a stream of tasks, and each task may share structure with previous tasks.",
+          "rationale": "If tasks were completely independent, skills would not overlap and bloat would simply be the sum of all unique skills. Overlap is necessary for redundancy and thus bloat.",
+          "possible_failure": "Tasks may be sufficiently diverse that no skill sharing occurs, eliminating bloat as a problem but potentially making lifelong learning impossible."
+        },
+        {
+          "assumption": "The agent has a bounded memory or computational budget for storing and querying skills.",
+          "rationale": "If memory were infinite and retrieval perfect, adding every possible skill variation would not be detrimental. Bloat is only problematic under resource constraints.",
+          "possible_failure": "In practice, memory and computation are finite, but if they are extremely large relative to task complexity, bloat may not be an issue."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_similarity",
+            "role": "input",
+            "description": "The degree of overlap between successive tasks; low similarity encourages finer granularity."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of abstraction at which skills are defined; finer granularity leads to more skills."
+          },
+          {
+            "name": "redundancy_detection_ability",
+            "role": "mediator",
+            "description": "Capability to identify and merge similar skills, reducing redundant storage."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills the library can store; constrains growth and retrieval."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "outcome",
+            "description": "Total number of skills stored; measure of bloat."
+          },
+          {
+            "name": "retrieval_efficiency",
+            "role": "outcome",
+            "description": "Speed and accuracy of skill retrieval; degrades with library size."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_similarity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "When tasks are diverse, the agent may adopt finer granularity to capture unique aspects, increasing subsequent skill count."
+          },
+          {
+            "step": "2",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_library_size",
+            "explanation": "Finer granularity directly increases the number of skills created per task, leading to larger library."
+          },
+          {
+            "step": "3",
+            "source": "redundancy_detection_ability",
+            "relation": "decreases",
+            "target": "skill_library_size",
+            "explanation": "Better detection reduces effective number of skills by merging duplicates, slowing growth."
+          },
+          {
+            "step": "4",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger library increases search time and error rate, degrading retrieval performance."
+          },
+          {
+            "step": "5",
+            "source": "memory_capacity",
+            "relation": "increases",
+            "target": "retrieval_efficiency",
+            "explanation": "Larger memory capacity allows more efficient indexing and faster search, mitigating the negative effect of library size."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ineffective redundancy detection",
+            "why_it_matters": "Without the ability to identify overlapping skills, the agent stores redundant variations, causing unnecessary accumulation and wasted storage."
+          },
+          {
+            "bottleneck": "Limited memory capacity",
+            "why_it_matters": "Even if skills are non-redundant, a finite memory imposes a hard limit; beyond this, bloat forces either forgetting or degraded retrieval."
+          },
+          {
+            "bottleneck": "Inappropriate skill granularity",
+            "why_it_matters": "If granularity is too fine, the agent creates an excessive number of skills even for simple tasks, accelerating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat in lifelong-learning agents arises from a cascade: diverse tasks prompt the agent to adopt fine-grained skill definitions, generating many skills. Without strong redundancy detection to merge similar skills, the library grows rapidly. Limited memory capacity constrains this growth, but if unchecked, the large library degrades retrieval efficiency. The core mechanism involves the interaction of task similarity, granularity choice, redundancy detection, and memory limits."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve task-specific performance but cause rapid library growth and degrade retrieval, while coarse-grained skills are reusable but may underperform on specialized tasks.",
+        "derived_from": [
+          "Skill",
+          "Skill library",
+          "assumption: bounded memory"
+        ],
+        "why_it_matters": "This tradeoff directly impacts the agent's ability to balance immediate task performance with long-term scalability; choosing the wrong granularity can lead to either poor task performance or severe bloat.",
+        "what_existing_methods_may_miss": "Most methods fix granularity upfront rather than adapting it dynamically based on task similarity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical task similarity threshold does skill-library bloat become unavoidable in lifelong-learning agents under bounded memory, and how does the skill granularity adaptation policy determine that threshold?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp phase transition in library growth as a function of task similarity, providing a precise condition under which bloat becomes inevitable and informing when granularity adaptation is necessary."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task similarity threshold θ such that when the proportion of tasks sharing common subtasks exceeds θ, the skill library grows exponentially (bloat becomes unavoidable) regardless of granularity adaptation policy; below θ, adaptive granularity keeps library size sub-linear. The threshold is determined by the redundancy detection ability and memory capacity.",
+        "predicted_effect": "As task similarity increases past θ, library size transitions from sub-linear to exponential growth, and retrieval efficiency drops sharply."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong-learning agent on a stream of tasks with controlled pairwise similarity. Vary the proportion of tasks that share at least one subtask from 0.1 to 1.0. Use two granularity policies: fixed fine-grained and adaptive (e.g., based on task similarity). Measure library size and retrieval efficiency after each task. Identify if library growth rate changes abruptly at a certain similarity proportion.",
+        "independent_variables": [
+          "Task similarity proportion",
+          "Granularity adaptation policy (fixed fine vs. adaptive)"
+        ],
+        "dependent_variables": [
+          "Library size",
+          "Retrieval efficiency"
+        ],
+        "controls": [
+          "Total number of tasks (e.g., 100)",
+          "Memory capacity (e.g., max 200 skills)",
+          "Skill learning algorithm (e.g., options discovery)",
+          "Number of seeds (e.g., 30)"
+        ],
+        "falsifying_observation": "If library size grows linearly or sub-linearly for all similarity levels, then the hypothesized threshold does not exist."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For adaptive policy, library size remains bounded below threshold but grows exponentially above.",
+          "For fixed fine-grained policy, library grows faster even below threshold but still shows a marked increase above threshold.",
+          "Retrieval efficiency drops sharply past the threshold for both policies."
+        ],
+        "rejects_hypothesis": [
+          "Linear growth in library size across all similarity levels.",
+          "No abrupt change in growth rate at any similarity level.",
+          "Adaptive policy performs worse than fixed fine-grained in all conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, then bloat is a continuous and gradual function of task similarity rather than a phase transition.",
+        "assumption_to_revise": "The assumption that bloat exhibits a critical threshold. Instead, bloat may accumulate linearly or sub-linearly even at high similarity, implying that forgetting policies are needed at all similarity levels.",
+        "next_question": "How does the rate of library growth depend continuously on task similarity, and what forgetting mechanisms can effectively control it across all similarity regimes?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Skill library bloat can be minimized by dynamically switching between fine and coarse granularity at a task similarity threshold θ, where θ is the similarity level at which the rate of performance loss from using coarse granularity equals the rate of library growth from fine granularity.",
+      "independent_variables": [
+        "granularity adaptation strategy (fixed fine, fixed coarse, dynamic threshold θ)"
+      ],
+      "dependent_variables": [
+        "skill library size",
+        "average task performance"
+      ],
+      "controlled_variables": [
+        "task sequence (same for all agents)",
+        "memory capacity",
+        "redundancy detection ability",
+        "skill learning algorithm"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed Fine Granularity",
+          "description": "Agent that always uses fine skill granularity regardless of task similarity."
+        },
+        {
+          "name": "Fixed Coarse Granularity",
+          "description": "Agent that always uses coarse skill granularity regardless of task similarity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill Library Size",
+          "definition": "Total number of skills stored in the agent's skill library after the entire task sequence."
+        },
+        {
+          "name": "Average Task Performance",
+          "definition": "Mean task success rate or reward across all tasks in the sequence."
+        }
+      ],
+      "expected_result": "The dynamic threshold agent achieves strictly smaller skill library size than both fixed strategies while maintaining average task performance within 5% of the best fixed strategy. Additionally, the estimated threshold θ converges to a stable value across multiple runs.",
+      "falsifying_result": "If the dynamic threshold agent does not achieve strictly smaller library size than both fixed strategies, or if its average task performance is more than 5% worse than the best fixed strategy, or if the estimated θ does not converge to a stable value across runs, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Run three lifelong learning agents (fixed fine, fixed coarse, dynamic) on a sequence of tasks with varying similarity (e.g., 10 tasks with pairwise similarities ranging from 0.1 to 0.9). Measure skill library size after each task and final average performance. The dynamic agent uses a simple heuristic to estimate θ online (e.g., based on performance degradation when using coarse skills). Repeat 10 times with different random seeds to assess convergence of θ.",
+      "risks_and_confounds": [
+        "The threshold θ may be sensitive to the specific task sequence or similarity measure, leading to non-convergence.",
+        "The redundancy detection ability is controlled but may interact with granularity changes.",
+        "Performance measurement noise could obscure small differences near the 5% threshold."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical task similarity threshold θ such that when the proportion of tasks sharing common subtasks exceeds θ, the skill library grows exponentially (bloat becomes unavoidable) regardless of granularity adaptation policy; below θ, adaptive granularity keeps library size sub-linear. The threshold is determined by the redundancy detection ability and memory capacity.",
+      "independent_variables": [
+        "Task similarity proportion",
+        "Granularity adaptation policy (fixed fine-grained vs. adaptive)"
+      ],
+      "dependent_variables": [
+        "Library size",
+        "Retrieval efficiency"
+      ],
+      "controlled_variables": [
+        "Total number of tasks (100)",
+        "Memory capacity (max 200 skills)",
+        "Skill learning algorithm (options discovery)",
+        "Number of seeds (30)",
+        "Task structure (synthetic with controllable subtask overlap)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed fine-grained policy",
+          "description": "A policy that always learns skills at a fixed fine granularity, without adaptation."
+        },
+        {
+          "name": "Fixed coarse-grained policy",
+          "description": "A policy that always learns skills at a fixed coarse granularity, serving as another baseline."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "Total number of skills stored in the skill library after each task."
+        },
+        {
+          "name": "Retrieval efficiency",
+          "definition": "Average time (or steps) to retrieve a relevant skill for a given subtask, measured after each task."
+        }
+      ],
+      "expected_result": "As task similarity proportion increases past a critical threshold θ, library size transitions from sub-linear to exponential growth for both policies. The adaptive policy maintains sub-linear growth below θ, while the fixed fine-grained policy grows faster even below θ. Retrieval efficiency drops sharply past θ for both policies.",
+      "falsifying_result": "If library size grows linearly or sub-linearly for all similarity levels, or if no abrupt change in growth rate occurs at any similarity level, or if the adaptive policy performs worse than the fixed fine-grained policy in all conditions.",
+      "minimum_viable_experiment": "Simulate a lifelong-learning agent on a stream of 100 synthetic tasks with controlled pairwise similarity. Vary the proportion of tasks that share at least one subtask from 0.1 to 1.0 in increments of 0.1. For each proportion, run the agent with both a fixed fine-grained skill granularity policy and an adaptive granularity policy (e.g., based on task similarity). After each task, record library size and retrieval efficiency. Repeat for 30 random seeds to ensure statistical significance. Identify if there is a sharp change in library growth rate as similarity proportion increases.",
+      "risks_and_confounds": [
+        "The adaptive policy implementation may not be optimal; a poor adaptive policy could mask the hypothesized effect.",
+        "The specific task structure (e.g., degree of subtask overlap) might influence results; use synthetic tasks with well-defined overlap.",
+        "The memory capacity constraint must be binding; if too large, bloat may not occur even at high similarity.",
+        "The skill learning algorithm might introduce variability; ensure consistent implementation across conditions."
+      ]
+    },
+    {
+      "hypothesis": "The moderating effect of redundancy detection ability on the granularity-library size relationship reverses at a critical task similarity threshold: below the threshold, higher detection ability increases library size when using fine granularity; above, it decreases library size.",
+      "independent_variables": [
+        "task_similarity (low: 0, high: 1)",
+        "redundancy_detection_ability (low, high)"
+      ],
+      "dependent_variables": [
+        "skill_library_size (number of skills stored after 20 tasks)"
+      ],
+      "controlled_variables": [
+        "skill_granularity (fixed to fine)",
+        "memory_capacity (fixed, e.g., unbounded or very large to avoid ceiling effects)",
+        "number_of_tasks (20)",
+        "task_sequence (fixed across conditions)",
+        "learning algorithm (e.g., same base algorithm for skill acquisition and reuse)"
+      ],
+      "baselines": [
+        {
+          "name": "Low detection ability",
+          "description": "Agent with minimal redundancy detection (e.g., no merging of similar skills)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "skill_library_size",
+          "definition": "Total count of skills stored in the library after completing all tasks."
+        }
+      ],
+      "expected_result": "At low task similarity (0), agents with high redundancy detection ability will have a larger skill library size than those with low detection ability. At high task similarity (1), agents with high detection ability will have a smaller library size than those with low detection ability. This crossover interaction will be statistically significant (e.g., interaction term in a 2x2 ANOVA, p < 0.05).",
+      "falsifying_result": "If at low similarity, high detection ability leads to smaller or equal library size compared to low detection, OR at high similarity high detection leads to larger or equal library size, then the hypothesis is falsified. More formally, if the sign of the difference (high - low detection) does not reverse across similarity levels, the hypothesis is rejected.",
+      "minimum_viable_experiment": "Simulate a lifelong learning agent with a fixed fine skill granularity. Manipulate task similarity at two levels: low (0, no overlap between tasks) and high (1, identical tasks). Manipulate redundancy detection ability at two levels: low (no merging) and high (aggressive merging of similar skills). Run each condition for 20 tasks. Measure final library size. Repeat multiple random seeds (e.g., 30) to ensure statistical power. Perform a 2x2 ANOVA to test the interaction. The experiment is minimal because it requires only 4 conditions and directly tests the predicted crossover.",
+      "risks_and_confounds": [
+        "Task order effects: Use the same task sequence for all conditions.",
+        "Definition of similarity: Ensure low similarity tasks share no subgoals; high similarity tasks are identical.",
+        "Detection ability implementation: Ensure high detection effectively merges skills without excessive overhead.",
+        "Threshold location: If the critical threshold lies strictly between 0 and 1, testing only extremes may still detect a reversal if the relationship is monotonic. However, if the effect is non-monotonic, extremes may not reveal it. This is a minimal test; if no reversal is seen, further experiments with intermediate similarity levels would be needed."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of skill-library bloat in lifelong-learning agents, identifying key variables (task similarity, skill granularity, redundancy detection, memory capacity) and their causal relationships. The work proposes several testable hypotheses, including a critical similarity threshold for granularity adaptation and a reversal effect of redundancy detection. The experiment plans are well-structured with clear falsification criteria. Overall, the paper is rigorous, novel, and provides a meaningful foundation for future research.",
+    "strengths": [
+      "Strong first-principles derivation with clear primitive definitions, assumptions, and tradeoffs.",
+      "Novel hypotheses about critical thresholds and interaction effects that go beyond existing static approaches.",
+      "Well-designed minimal decisive tests with explicit falsifying observations and failure update rules.",
+      "High clarity in mechanism modeling and causal chain specification.",
+      "Comprehensive treatment of tensions and their implications for lifelong learning."
+    ],
+    "weaknesses": [
+      "Some assumptions (e.g., bounded memory, incremental task stream) are reasonable but may limit generality.",
+      "The mechanism model simplifies the skill acquisition process; real-world agents may involve more complex interactions (e.g., skill composition, task interference).",
+      "The proposed experiments, while elegant, may require careful implementation to avoid confounds (e.g., similarity metric, redundancy detection overhead).",
+      "Potential overclaiming: the claimed novelty of thresholds is somewhat incremental relative to existing work on adaptive granularity in reinforcement learning."
+    ],
+    "questions": [
+      "How would the proposed dynamic granularity policy perform under non-stationary task distributions where task similarity changes over time?",
+      "Can the critical similarity threshold be learned online without prior knowledge of the task sequence, and how robust is it to estimation error?",
+      "What is the computational overhead of redundancy detection and granularity adaptation, and does it outweigh the benefits in practice?"
+    ],
+    "missing_baselines": [
+      "The proposed adaptive granularity should be compared against a simple 'rehearsal' baseline that stores all skills and uses retrieval pruning.",
+      "A baseline with meta-learning of skill granularity (e.g., learning to learn granularity) would strengthen the evaluation.",
+      "Comparison against existing lifelong learning methods that use fixed libraries with forgetting (e.g., GEM, EWC) to isolate bloat effects."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "metric displacement",
+    "root_cause": "The research package confounds causal explanation with algorithmic mitigation. The core question 'What causes skill-library bloat?' is not directly addressed; instead, the experiments test whether certain adaptation policies (e.g., dynamic granularity) reduce bloat, which only treats symptoms without isolating fundamental causes.",
+    "violated_principle": "First-principles research must directly test the causal mechanisms underlying the phenomenon, not merely evaluate potential solutions or moderators.",
+    "new_or_updated_principle": "For questions seeking causal explanation, the experiment's independent variables should be the primitive causes identified in the mechanism model (e.g., skill granularity, redundancy detection) rather than interventions (e.g., dynamic adaptation policy). Hypotheses must propose how changes in causes alter the outcome, not how to fix undesired outcomes.",
+    "new_or_updated_skill": "Causal Question Fidelity: Before finalizing experiments, verify that the independent variables are drawn from the set of input variables in the mechanism model (i.e., potential causes), not from a separate set of policies or solutions. Ensure that the experiment can falsify a causal claim, not just a performance claim.",
+    "regression_test": "Given a research question framed as 'What causes X?', check whether the experiment's independent variables are members of the mechanism model's input variables (or direct mediators) and whether the hypothesis predicts a change in X due to a change in those causes. If the independent variables are algorithmic choices (e.g., 'adaptive vs. fixed policy') rather than causal variables (e.g., 'task similarity'), flag the experiment as testing a solution, not a cause."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold in task similarity that determines the optimal skill granularity, such that below the threshold fine granularity is necessary for performance and above it coarse granularity suffices without bloat, and does dynamically adjusting granularity around this threshold reduce bloat?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical task similarity threshold does skill-library bloat become unavoidable in lifelong-learning agents under bounded memory, and how does the skill granularity adaptation policy determine that threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical task similarity threshold where redundancy detection ability reverses its moderating effect on the skill granularity-library size relationship?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "replicate": 1,
+    "run_id": "run-20260628T172150Z"
+  }
+}

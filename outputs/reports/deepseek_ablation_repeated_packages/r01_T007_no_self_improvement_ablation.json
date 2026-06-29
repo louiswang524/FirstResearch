@@ -1,0 +1,1266 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable mapping from states to actions, learned to achieve a specific subgoal or solve a subproblem within a task.",
+        "why_primitive": "Skills are the atomic units of knowledge that can be composed or reused; without this concept, we cannot discuss library growth."
+      },
+      {
+        "name": "Task",
+        "definition": "A learning problem characterized by a reward function, transition dynamics, and a termination condition; the agent's objective is to maximize cumulative reward.",
+        "why_primitive": "Tasks define the contexts in which skills are acquired and used; they are the source of skill demand and variation."
+      },
+      {
+        "name": "Skill Library",
+        "definition": "A structured collection of skills, each associated with metadata (e.g., description, success conditions, relevance), maintained by the agent for retrieval and reuse.",
+        "why_primitive": "The library is the entity that experiences bloat; its representation and management directly influence bloat."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are stored in their entirety without compression or abstraction.",
+        "rationale": "Many lifelong learning systems store policies or value functions directly. Without compression, each new skill adds potentially redundant information, leading to bloat.",
+        "possible_failure": "If skills are compressed or distilled into shared representations, the library may not bloat even with many tasks."
+      },
+      {
+        "assumption": "The agent does not prune or forget skills; all learned skills are retained indefinitely.",
+        "rationale": "Without a forgetting mechanism, the library grows monotonically with each task, even if some skills become obsolete or redundant.",
+        "possible_failure": "If selective forgetting is employed, the library size may stabilize or decrease, contradicting the bloat assumption."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Skill specificity vs. generality: Specific skills are more effective on their source task but less reusable, increasing library size as new tasks are encountered; general skills are more reusable but may require more complex learning or sacrifice performance.",
+        "variables": [
+          "skill representation granularity",
+          "reuse frequency",
+          "library growth rate"
+        ]
+      },
+      {
+        "tradeoff": "Memory capacity vs. retrieval speed: Larger skill libraries provide more potential for transfer but incur higher memory costs and slower retrieval, which can degrade performance in time-critical applications.",
+        "variables": [
+          "library size",
+          "retrieval time",
+          "performance on new tasks"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "N_tasks",
+        "role": "input",
+        "description": "The cumulative count of distinct tasks the agent has encountered."
+      },
+      {
+        "name": "Granularity",
+        "role": "input",
+        "description": "The degree to which skills are fine-grained; high granularity means more skills per task."
+      },
+      {
+        "name": "Reuse_freq",
+        "role": "mediator",
+        "description": "The frequency with which existing skills are reused for new tasks."
+      },
+      {
+        "name": "Library_size",
+        "role": "mediator",
+        "description": "The number of skills stored in the skill library."
+      },
+      {
+        "name": "Bloat_rate",
+        "role": "output",
+        "description": "The rate at which the skill library size increases per task."
+      },
+      {
+        "name": "Performance",
+        "role": "outcome",
+        "description": "The average reward or success rate of the agent across tasks, affected by retrieval overhead."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Task accumulation",
+        "source": "N_tasks",
+        "relation": "increases",
+        "target": "Library_size",
+        "explanation": "Each new task may add new skills to the library when existing skills are not reusable."
+      },
+      {
+        "step": "Skill granularity effect",
+        "source": "Granularity",
+        "relation": "increases",
+        "target": "Library_size",
+        "explanation": "Higher granularity means more skills per task, directly increasing library size."
+      },
+      {
+        "step": "Library size reduces reuse",
+        "source": "Library_size",
+        "relation": "decreases",
+        "target": "Reuse_freq",
+        "explanation": "A larger library increases search time and may lead to suboptimal skill selection, reducing the chance of reuse."
+      },
+      {
+        "step": "Low reuse drives bloat",
+        "source": "Reuse_freq",
+        "relation": "decreases",
+        "target": "Bloat_rate",
+        "explanation": "Low reuse forces the agent to create new skills for each task, accelerating the growth of the library."
+      },
+      {
+        "step": "Library size degrades performance",
+        "source": "Library_size",
+        "relation": "decreases",
+        "target": "Performance",
+        "explanation": "A larger library leads to slower retrieval, increasing time cost and potentially reducing task performance."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Skill reuse bottleneck",
+        "why_it_matters": "When existing skills cannot be reused for new tasks, the agent must create new skills, directly contributing to library bloat. Low reuse is the primary driver of skill accumulation."
+      },
+      {
+        "bottleneck": "Retrieval bottleneck",
+        "why_it_matters": "As the library grows, retrieval time and computational cost increase, reducing the agent's performance on new tasks and potentially hindering effective reuse."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat arises from the accumulation of skills without compression or forgetting. The primary drivers are the number of tasks encountered and the granularity of skill representations, which increase library size. Low skill reuse, exacerbated by large library sizes, forces creation of new skills, accelerating bloat. As the library expands, retrieval efficiency degrades, reducing task performance and potentially creating a feedback loop that further reduces reuse and worsens bloat."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "An increase in library size reduces skill reuse, which in turn forces creation of new skills, further increasing library size, creating a self-reinforcing bloat loop.",
+      "derived_from": [
+        "Library_size",
+        "Reuse_freq",
+        "Bloat_rate"
+      ],
+      "why_it_matters": "This indicates that bloat is not just additive but can accelerate, making early intervention crucial.",
+      "what_existing_methods_may_miss": "Many methods treat bloat as a linear accumulation; they may not account for this feedback.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a fundamental tradeoff between skill specificity and generality: specific skills provide better performance on source tasks but increase library size, while general skills reduce bloat but may incur performance loss on individual tasks.",
+      "derived_from": [
+        "core_tradeoffs[0]",
+        "Granularity",
+        "Library_size"
+      ],
+      "why_it_matters": "This tradeoff must be managed to balance learning efficiency and library growth.",
+      "what_existing_methods_may_miss": "Many works focus on either extreme without considering the optimal granularity.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "A larger skill library offers more transfer potential but increases retrieval time and memory cost, which can degrade overall performance, especially in time-sensitive tasks.",
+      "derived_from": [
+        "core_tradeoffs[1]",
+        "Library_size",
+        "Performance"
+      ],
+      "why_it_matters": "This tradeoff limits the practical size of skill libraries even if they could store many skills.",
+      "what_existing_methods_may_miss": "Retrieval efficiency is often assumed to be constant; methods may overlook the performance degradation as library grows.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that skills are stored without compression directly leads to linear growth of library with tasks; however, if skills can be compressed or abstracted into shared representations, the library may not bloat even with many tasks, challenging the fundamental premise.",
+      "derived_from": [
+        "assumptions[0]",
+        "Skill",
+        "Skill Library"
+      ],
+      "why_it_matters": "Compression could break the monotonic growth assumption and change the dynamics of bloat.",
+      "what_existing_methods_may_miss": "Many methods do not incorporate compression and thus may overestimate bloat.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "As the skill library size increases in a continual learning agent, does the rate of new skill creation (bloat rate) increase due to reduced reuse frequency, thus creating a self-reinforcing bloat loop?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Empirically validate the hypothesized positive feedback between library size and bloat rate, which many existing models treat as linear."
+    },
+    {
+      "question": "What is the optimal skill granularity that minimizes the growth of the skill library while preserving task performance, given the tradeoff between specificity and generality?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Provide a principled method for selecting skill granularity to balance library size and performance, moving beyond extreme strategies."
+    },
+    {
+      "question": "At what library size does retrieval time become the dominant factor degrading task performance in time-sensitive environments, compared to skill selection accuracy?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Identify the threshold where retrieval overhead outweighs other performance factors, informing practical library size limits."
+    },
+    {
+      "question": "Can skill compression or abstraction (e.g., via shared representations) eliminate the linear relationship between number of tasks and skill library size, thereby contradicting the assumption of unchecked growth?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Test the fundamental premise that library size scales linearly with tasks and explore whether compression mechanisms can mitigate bloat."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable mapping from states to actions, learned to achieve a specific subgoal or solve a subproblem within a task.",
+          "why_primitive": "Skills are the atomic units of knowledge that can be composed or reused; without this concept, we cannot discuss library growth."
+        },
+        {
+          "name": "Task",
+          "definition": "A learning problem characterized by a reward function, transition dynamics, and a termination condition; the agent's objective is to maximize cumulative reward.",
+          "why_primitive": "Tasks define the contexts in which skills are acquired and used; they are the source of skill demand and variation."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A structured collection of skills, each associated with metadata (e.g., description, success conditions, relevance), maintained by the agent for retrieval and reuse.",
+          "why_primitive": "The library is the entity that experiences bloat; its representation and management directly influence bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored in their entirety without compression or abstraction.",
+          "rationale": "Many lifelong learning systems store policies or value functions directly. Without compression, each new skill adds potentially redundant information, leading to bloat.",
+          "possible_failure": "If skills are compressed or distilled into shared representations, the library may not bloat even with many tasks."
+        },
+        {
+          "assumption": "The agent does not prune or forget skills; all learned skills are retained indefinitely.",
+          "rationale": "Without a forgetting mechanism, the library grows monotonically with each task, even if some skills become obsolete or redundant.",
+          "possible_failure": "If selective forgetting is employed, the library size may stabilize or decrease, contradicting the bloat assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "N_tasks",
+            "role": "input",
+            "description": "The cumulative count of distinct tasks the agent has encountered."
+          },
+          {
+            "name": "Granularity",
+            "role": "input",
+            "description": "The degree to which skills are fine-grained; high granularity means more skills per task."
+          },
+          {
+            "name": "Reuse_freq",
+            "role": "mediator",
+            "description": "The frequency with which existing skills are reused for new tasks."
+          },
+          {
+            "name": "Library_size",
+            "role": "mediator",
+            "description": "The number of skills stored in the skill library."
+          },
+          {
+            "name": "Bloat_rate",
+            "role": "output",
+            "description": "The rate at which the skill library size increases per task."
+          },
+          {
+            "name": "Performance",
+            "role": "outcome",
+            "description": "The average reward or success rate of the agent across tasks, affected by retrieval overhead."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task accumulation",
+            "source": "N_tasks",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Each new task may add new skills to the library when existing skills are not reusable."
+          },
+          {
+            "step": "Skill granularity effect",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Higher granularity means more skills per task, directly increasing library size."
+          },
+          {
+            "step": "Library size reduces reuse",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Reuse_freq",
+            "explanation": "A larger library increases search time and may lead to suboptimal skill selection, reducing the chance of reuse."
+          },
+          {
+            "step": "Low reuse drives bloat",
+            "source": "Reuse_freq",
+            "relation": "decreases",
+            "target": "Bloat_rate",
+            "explanation": "Low reuse forces the agent to create new skills for each task, accelerating the growth of the library."
+          },
+          {
+            "step": "Library size degrades performance",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Performance",
+            "explanation": "A larger library leads to slower retrieval, increasing time cost and potentially reducing task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Skill reuse bottleneck",
+            "why_it_matters": "When existing skills cannot be reused for new tasks, the agent must create new skills, directly contributing to library bloat. Low reuse is the primary driver of skill accumulation."
+          },
+          {
+            "bottleneck": "Retrieval bottleneck",
+            "why_it_matters": "As the library grows, retrieval time and computational cost increase, reducing the agent's performance on new tasks and potentially hindering effective reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of skills without compression or forgetting. The primary drivers are the number of tasks encountered and the granularity of skill representations, which increase library size. Low skill reuse, exacerbated by large library sizes, forces creation of new skills, accelerating bloat. As the library expands, retrieval efficiency degrades, reducing task performance and potentially creating a feedback loop that further reduces reuse and worsens bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "An increase in library size reduces skill reuse, which in turn forces creation of new skills, further increasing library size, creating a self-reinforcing bloat loop.",
+        "derived_from": [
+          "Library_size",
+          "Reuse_freq",
+          "Bloat_rate"
+        ],
+        "why_it_matters": "This indicates that bloat is not just additive but can accelerate, making early intervention crucial.",
+        "what_existing_methods_may_miss": "Many methods treat bloat as a linear accumulation; they may not account for this feedback.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the skill-library bloat rate exhibit a phase transition from sublinear to superlinear growth when the library size exceeds the agent's retrieval capacity, creating a self-reinforcing loop that is absent below the capacity threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp threshold in retrieval capacity that separates stable from runaway bloat, enabling targeted interventions such as capacity-constrained retrieval or adaptive pruning."
+      },
+      "hypothesis": {
+        "statement": "The bloat rate grows sublinearly with library size when the library size is below the retrieval capacity, but becomes superlinear when the library size exceeds that capacity, due to a sharp drop in reuse frequency caused by retrieval inefficiency.",
+        "predicted_effect": "A phase transition in bloat rate as a function of library size, with a clear inflection point at the retrieval capacity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train a continual learning agent (e.g., option-critic or skill-based RL) on a sequence of similar tasks, varying the library's initial size to span a range that includes the agent's estimated retrieval capacity. Control for task similarity and learning algorithm. For each initial library size, measure the bloat rate (new skills per task) and reuse frequency across tasks. Fit a piecewise linear model to identify a potential change point in bloat rate.",
+        "independent_variables": [
+          "Initial library size (number of pre-loaded skills)",
+          "Task sequence (fixed order across conditions)"
+        ],
+        "dependent_variables": [
+          "Bloat rate (new skills per task after initial library)",
+          "Reuse frequency (fraction of selections from library per task)"
+        ],
+        "controls": [
+          "Task similarity (all tasks from same environment family)",
+          "Skill representation (e.g., fixed-size embedding)",
+          "Learning algorithm parameters",
+          "Retrieval mechanism (exact nearest neighbor with fixed distance metric)"
+        ],
+        "falsifying_observation": "If the bloat rate grows linearly or decelerates with library size (no superlinear phase), or if the change point does not correspond to the retrieval capacity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Bloat rate shows a clear elbow: sublinear for small libraries, superlinear for large libraries.",
+          "Reuse frequency drops sharply at the same library size as the bloat rate elbow.",
+          "The elbow point correlates with the estimated retrieval capacity (e.g., 50-100 skills)."
+        ],
+        "rejects_hypothesis": [
+          "Bloat rate is constant or linear across all library sizes.",
+          "Reuse frequency degrades gradually without sharp drop.",
+          "No elbow is detected; bloat rate increases monotonically at the same slope."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed, the assumption that retrieval capacity is a limiting factor must be revised.",
+        "assumption_to_revise": "The assumption that retrieval capacity is a fixed bottleneck that causes a sharp drop in reuse. Alternative: reuse drops gradually due to task similarity distribution.",
+        "next_question": "Does task similarity, rather than retrieval capacity, determine the shape of the bloat curve?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable mapping from states to actions, learned to achieve a specific subgoal or solve a subproblem within a task.",
+          "why_primitive": "Skills are the atomic units of knowledge that can be composed or reused; without this concept, we cannot discuss library growth."
+        },
+        {
+          "name": "Task",
+          "definition": "A learning problem characterized by a reward function, transition dynamics, and a termination condition; the agent's objective is to maximize cumulative reward.",
+          "why_primitive": "Tasks define the contexts in which skills are acquired and used; they are the source of skill demand and variation."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A structured collection of skills, each associated with metadata (e.g., description, success conditions, relevance), maintained by the agent for retrieval and reuse.",
+          "why_primitive": "The library is the entity that experiences bloat; its representation and management directly influence bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored in their entirety without compression or abstraction.",
+          "rationale": "Many lifelong learning systems store policies or value functions directly. Without compression, each new skill adds potentially redundant information, leading to bloat.",
+          "possible_failure": "If skills are compressed or distilled into shared representations, the library may not bloat even with many tasks."
+        },
+        {
+          "assumption": "The agent does not prune or forget skills; all learned skills are retained indefinitely.",
+          "rationale": "Without a forgetting mechanism, the library grows monotonically with each task, even if some skills become obsolete or redundant.",
+          "possible_failure": "If selective forgetting is employed, the library size may stabilize or decrease, contradicting the bloat assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "N_tasks",
+            "role": "input",
+            "description": "The cumulative count of distinct tasks the agent has encountered."
+          },
+          {
+            "name": "Granularity",
+            "role": "input",
+            "description": "The degree to which skills are fine-grained; high granularity means more skills per task."
+          },
+          {
+            "name": "Reuse_freq",
+            "role": "mediator",
+            "description": "The frequency with which existing skills are reused for new tasks."
+          },
+          {
+            "name": "Library_size",
+            "role": "mediator",
+            "description": "The number of skills stored in the skill library."
+          },
+          {
+            "name": "Bloat_rate",
+            "role": "output",
+            "description": "The rate at which the skill library size increases per task."
+          },
+          {
+            "name": "Performance",
+            "role": "outcome",
+            "description": "The average reward or success rate of the agent across tasks, affected by retrieval overhead."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task accumulation",
+            "source": "N_tasks",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Each new task may add new skills to the library when existing skills are not reusable."
+          },
+          {
+            "step": "Skill granularity effect",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Higher granularity means more skills per task, directly increasing library size."
+          },
+          {
+            "step": "Library size reduces reuse",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Reuse_freq",
+            "explanation": "A larger library increases search time and may lead to suboptimal skill selection, reducing the chance of reuse."
+          },
+          {
+            "step": "Low reuse drives bloat",
+            "source": "Reuse_freq",
+            "relation": "decreases",
+            "target": "Bloat_rate",
+            "explanation": "Low reuse forces the agent to create new skills for each task, accelerating the growth of the library."
+          },
+          {
+            "step": "Library size degrades performance",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Performance",
+            "explanation": "A larger library leads to slower retrieval, increasing time cost and potentially reducing task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Skill reuse bottleneck",
+            "why_it_matters": "When existing skills cannot be reused for new tasks, the agent must create new skills, directly contributing to library bloat. Low reuse is the primary driver of skill accumulation."
+          },
+          {
+            "bottleneck": "Retrieval bottleneck",
+            "why_it_matters": "As the library grows, retrieval time and computational cost increase, reducing the agent's performance on new tasks and potentially hindering effective reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of skills without compression or forgetting. The primary drivers are the number of tasks encountered and the granularity of skill representations, which increase library size. Low skill reuse, exacerbated by large library sizes, forces creation of new skills, accelerating bloat. As the library expands, retrieval efficiency degrades, reducing task performance and potentially creating a feedback loop that further reduces reuse and worsens bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a fundamental tradeoff between skill specificity and generality: specific skills provide better performance on source tasks but increase library size, while general skills reduce bloat but may incur performance loss on individual tasks.",
+        "derived_from": [
+          "core_tradeoffs[0]",
+          "Granularity",
+          "Library_size"
+        ],
+        "why_it_matters": "This tradeoff must be managed to balance learning efficiency and library growth.",
+        "what_existing_methods_may_miss": "Many works focus on either extreme without considering the optimal granularity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical skill granularity threshold beyond which skill-library bloat transitions from sublinear to superlinear growth, and how does this threshold depend on task relatedness?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identification of a phase transition in library growth dynamics, enabling principled avoidance of bloat by staying below the critical granularity."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical skill granularity threshold such that for granularities below the threshold, library size grows sublinearly with tasks (high reuse), while above the threshold, library size grows superlinearly (low reuse, rapid bloat), and the threshold increases with task relatedness.",
+        "predicted_effect": "As granularity increases, library size per task will remain flat until a critical point, then sharply increase. Reuse frequency remains high until the critical point, then drops. The threshold shifts right with higher task similarity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent on sequences of tasks with varying pairwise similarity (e.g., grid-world with different obstacle configurations, controlling similarity via overlap in state space). For each similarity level, vary skill granularity systematically (e.g., by setting a clustering radius in skill extraction). Measure library size after each task and the cumulative tasks until a 10% drop in reuse frequency. Detect the granularity where library growth rate doubles.",
+        "independent_variables": [
+          "skill granularity (continuous parameter, e.g., clustering radius)",
+          "task relatedness (e.g., low, medium, high similarity in dynamics)"
+        ],
+        "dependent_variables": [
+          "library size growth rate (slope over tasks)",
+          "skill reuse frequency",
+          "critical granularity threshold (granularity at which growth rate doubles)"
+        ],
+        "controls": [
+          "fixed task sequence length (e.g., 50 tasks)",
+          "same base algorithm (e.g., DQN with skill extraction via options)",
+          "no compression or forgetting",
+          "same total number of tasks per sequence"
+        ],
+        "falsifying_observation": "Library size grows linearly with tasks regardless of granularity, or the growth rate is always sublinear (i.e., no sharp transition), or the threshold does not shift with task relatedness."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For a given task relatedness, library size per task is approximately constant at low granularities, then increases sharply at a critical granularity.",
+          "Reuse frequency drops abruptly at the same critical point.",
+          "The critical granularity increases as task relatedness increases."
+        ],
+        "rejects_hypothesis": [
+          "Library size per task increases monotonically with granularity without a sharp transition.",
+          "Reuse frequency decreases smoothly and linearly with granularity.",
+          "The critical granularity does not change with task relatedness, or changes opposite to prediction."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp transition is observed, the hypothesis of a critical threshold is rejected.",
+        "assumption_to_revise": "The assumption that reuse frequency depends on granularity in a threshold manner may be false; instead, the relationship might be continuous. Alternatively, the retrieval bottleneck may not be strong enough to cause a phase transition.",
+        "next_question": "What is the functional form of library growth as a function of granularity and task relatedness, and can it be approximated by a continuous model?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable mapping from states to actions, learned to achieve a specific subgoal or solve a subproblem within a task.",
+          "why_primitive": "Skills are the atomic units of knowledge that can be composed or reused; without this concept, we cannot discuss library growth."
+        },
+        {
+          "name": "Task",
+          "definition": "A learning problem characterized by a reward function, transition dynamics, and a termination condition; the agent's objective is to maximize cumulative reward.",
+          "why_primitive": "Tasks define the contexts in which skills are acquired and used; they are the source of skill demand and variation."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A structured collection of skills, each associated with metadata (e.g., description, success conditions, relevance), maintained by the agent for retrieval and reuse.",
+          "why_primitive": "The library is the entity that experiences bloat; its representation and management directly influence bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored in their entirety without compression or abstraction.",
+          "rationale": "Many lifelong learning systems store policies or value functions directly. Without compression, each new skill adds potentially redundant information, leading to bloat.",
+          "possible_failure": "If skills are compressed or distilled into shared representations, the library may not bloat even with many tasks."
+        },
+        {
+          "assumption": "The agent does not prune or forget skills; all learned skills are retained indefinitely.",
+          "rationale": "Without a forgetting mechanism, the library grows monotonically with each task, even if some skills become obsolete or redundant.",
+          "possible_failure": "If selective forgetting is employed, the library size may stabilize or decrease, contradicting the bloat assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "N_tasks",
+            "role": "input",
+            "description": "The cumulative count of distinct tasks the agent has encountered."
+          },
+          {
+            "name": "Granularity",
+            "role": "input",
+            "description": "The degree to which skills are fine-grained; high granularity means more skills per task."
+          },
+          {
+            "name": "Reuse_freq",
+            "role": "mediator",
+            "description": "The frequency with which existing skills are reused for new tasks."
+          },
+          {
+            "name": "Library_size",
+            "role": "mediator",
+            "description": "The number of skills stored in the skill library."
+          },
+          {
+            "name": "Bloat_rate",
+            "role": "output",
+            "description": "The rate at which the skill library size increases per task."
+          },
+          {
+            "name": "Performance",
+            "role": "outcome",
+            "description": "The average reward or success rate of the agent across tasks, affected by retrieval overhead."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task accumulation",
+            "source": "N_tasks",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Each new task may add new skills to the library when existing skills are not reusable."
+          },
+          {
+            "step": "Skill granularity effect",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Higher granularity means more skills per task, directly increasing library size."
+          },
+          {
+            "step": "Library size reduces reuse",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Reuse_freq",
+            "explanation": "A larger library increases search time and may lead to suboptimal skill selection, reducing the chance of reuse."
+          },
+          {
+            "step": "Low reuse drives bloat",
+            "source": "Reuse_freq",
+            "relation": "decreases",
+            "target": "Bloat_rate",
+            "explanation": "Low reuse forces the agent to create new skills for each task, accelerating the growth of the library."
+          },
+          {
+            "step": "Library size degrades performance",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Performance",
+            "explanation": "A larger library leads to slower retrieval, increasing time cost and potentially reducing task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Skill reuse bottleneck",
+            "why_it_matters": "When existing skills cannot be reused for new tasks, the agent must create new skills, directly contributing to library bloat. Low reuse is the primary driver of skill accumulation."
+          },
+          {
+            "bottleneck": "Retrieval bottleneck",
+            "why_it_matters": "As the library grows, retrieval time and computational cost increase, reducing the agent's performance on new tasks and potentially hindering effective reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of skills without compression or forgetting. The primary drivers are the number of tasks encountered and the granularity of skill representations, which increase library size. Low skill reuse, exacerbated by large library sizes, forces creation of new skills, accelerating bloat. As the library expands, retrieval efficiency degrades, reducing task performance and potentially creating a feedback loop that further reduces reuse and worsens bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "A larger skill library offers more transfer potential but increases retrieval time and memory cost, which can degrade overall performance, especially in time-sensitive tasks.",
+        "derived_from": [
+          "core_tradeoffs[1]",
+          "Library_size",
+          "Performance"
+        ],
+        "why_it_matters": "This tradeoff limits the practical size of skill libraries even if they could store many skills.",
+        "what_existing_methods_may_miss": "Retrieval efficiency is often assumed to be constant; methods may overlook the performance degradation as library grows.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical skill redundancy ratio does retrieval interference cause a discontinuous decline in performance, marking a phase transition from effective reuse to library bloat?",
+        "question_type": "benchmark",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a sharp phase transition threshold in skill redundancy ratio beyond which lifelong learning agents experience a catastrophic drop in performance due to retrieval interference, enabling design of libraries that avoid bloat."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical redundancy ratio R* (number of skills per distinct functional behavior) such that for redundancy ratios > R*, retrieval interference among similar skills causes a discontinuous drop in skill selection accuracy, leading to a phase transition from effective reuse to accelerating bloat and performance collapse.",
+        "predicted_effect": "As redundancy ratio increases beyond R*, skill selection accuracy drops sharply, forcing the agent to create new skills for every task, thus library size grows much faster and performance degrades nonlinearly."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent with a skill library that stores multiple skills that map to nearly identical behaviors (varying redundancy ratio by duplicating similar policies). Initialize with low redundancy and gradually add redundant skills while controlling total number of distinct tasks. Measure skill selection accuracy (e.g., proportion of times the correct skill is retrieved via nearest-neighbor) and task performance (average reward) as function of redundancy ratio. Use a time-sensitive environment with per-step time budget. Look for a sharp drop in accuracy at some R*.",
+        "independent_variables": [
+          "Skill redundancy ratio (number of skills per distinct functional behavior)"
+        ],
+        "dependent_variables": [
+          "Skill selection accuracy (retrieval success rate)",
+          "Task performance (average cumulative reward per episode)",
+          "Library growth rate (new skills per task)"
+        ],
+        "controls": [
+          "Total number of distinct tasks",
+          "Skill representation size and structure",
+          "Retrieval algorithm (e.g., exact nearest neighbor)",
+          "Time budget per step",
+          "Environment dynamics"
+        ],
+        "falsifying_observation": "If skill selection accuracy decays smoothly and linearly with redundancy ratio (no discontinuous drop) and no clear phase transition threshold exists, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For redundancy ratios below R*, skill selection accuracy is high (>95%) and performance stable.",
+          "At R*, accuracy drops sharply (e.g., from 95% to 60%) over a narrow range of redundancy ratio.",
+          "Beyond R*, library growth accelerates and performance shows an inflection point.",
+          "Plot of performance vs. redundancy exhibits a clear s-curve or jump."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy decreases linearly or smoothly across all redundancy ratios.",
+          "No sudden change in library growth rate or performance.",
+          "Retrieval interference never becomes severe enough to cause a phase transition, even at very high redundancy."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no discontinuous drop is observed and accuracy degrades smoothly",
+        "assumption_to_revise": "The assumption that retrieval interference among similar skills leads to a phase transition; instead, interference may accumulate gradually. Also, the assumption that the redundancy ratio is the correct control parameter.",
+        "next_question": "What functional form describes the relationship between skill redundancy and retrieval accuracy, and under what conditions does retrieval interference become catastrophic versus incremental?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable mapping from states to actions, learned to achieve a specific subgoal or solve a subproblem within a task.",
+          "why_primitive": "Skills are the atomic units of knowledge that can be composed or reused; without this concept, we cannot discuss library growth."
+        },
+        {
+          "name": "Task",
+          "definition": "A learning problem characterized by a reward function, transition dynamics, and a termination condition; the agent's objective is to maximize cumulative reward.",
+          "why_primitive": "Tasks define the contexts in which skills are acquired and used; they are the source of skill demand and variation."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A structured collection of skills, each associated with metadata (e.g., description, success conditions, relevance), maintained by the agent for retrieval and reuse.",
+          "why_primitive": "The library is the entity that experiences bloat; its representation and management directly influence bloat."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored in their entirety without compression or abstraction.",
+          "rationale": "Many lifelong learning systems store policies or value functions directly. Without compression, each new skill adds potentially redundant information, leading to bloat.",
+          "possible_failure": "If skills are compressed or distilled into shared representations, the library may not bloat even with many tasks."
+        },
+        {
+          "assumption": "The agent does not prune or forget skills; all learned skills are retained indefinitely.",
+          "rationale": "Without a forgetting mechanism, the library grows monotonically with each task, even if some skills become obsolete or redundant.",
+          "possible_failure": "If selective forgetting is employed, the library size may stabilize or decrease, contradicting the bloat assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "N_tasks",
+            "role": "input",
+            "description": "The cumulative count of distinct tasks the agent has encountered."
+          },
+          {
+            "name": "Granularity",
+            "role": "input",
+            "description": "The degree to which skills are fine-grained; high granularity means more skills per task."
+          },
+          {
+            "name": "Reuse_freq",
+            "role": "mediator",
+            "description": "The frequency with which existing skills are reused for new tasks."
+          },
+          {
+            "name": "Library_size",
+            "role": "mediator",
+            "description": "The number of skills stored in the skill library."
+          },
+          {
+            "name": "Bloat_rate",
+            "role": "output",
+            "description": "The rate at which the skill library size increases per task."
+          },
+          {
+            "name": "Performance",
+            "role": "outcome",
+            "description": "The average reward or success rate of the agent across tasks, affected by retrieval overhead."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task accumulation",
+            "source": "N_tasks",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Each new task may add new skills to the library when existing skills are not reusable."
+          },
+          {
+            "step": "Skill granularity effect",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Library_size",
+            "explanation": "Higher granularity means more skills per task, directly increasing library size."
+          },
+          {
+            "step": "Library size reduces reuse",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Reuse_freq",
+            "explanation": "A larger library increases search time and may lead to suboptimal skill selection, reducing the chance of reuse."
+          },
+          {
+            "step": "Low reuse drives bloat",
+            "source": "Reuse_freq",
+            "relation": "decreases",
+            "target": "Bloat_rate",
+            "explanation": "Low reuse forces the agent to create new skills for each task, accelerating the growth of the library."
+          },
+          {
+            "step": "Library size degrades performance",
+            "source": "Library_size",
+            "relation": "decreases",
+            "target": "Performance",
+            "explanation": "A larger library leads to slower retrieval, increasing time cost and potentially reducing task performance."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Skill reuse bottleneck",
+            "why_it_matters": "When existing skills cannot be reused for new tasks, the agent must create new skills, directly contributing to library bloat. Low reuse is the primary driver of skill accumulation."
+          },
+          {
+            "bottleneck": "Retrieval bottleneck",
+            "why_it_matters": "As the library grows, retrieval time and computational cost increase, reducing the agent's performance on new tasks and potentially hindering effective reuse."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of skills without compression or forgetting. The primary drivers are the number of tasks encountered and the granularity of skill representations, which increase library size. Low skill reuse, exacerbated by large library sizes, forces creation of new skills, accelerating bloat. As the library expands, retrieval efficiency degrades, reducing task performance and potentially creating a feedback loop that further reduces reuse and worsens bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that skills are stored without compression directly leads to linear growth of library with tasks; however, if skills can be compressed or abstracted into shared representations, the library may not bloat even with many tasks, challenging the fundamental premise.",
+        "derived_from": [
+          "assumptions[0]",
+          "Skill",
+          "Skill Library"
+        ],
+        "why_it_matters": "Compression could break the monotonic growth assumption and change the dynamics of bloat.",
+        "what_existing_methods_may_miss": "Many methods do not incorporate compression and thus may overestimate bloat.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task diversity beyond which skill compression no longer prevents linear library growth, revealing a phase transition in bloat dynamics?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a boundary condition where compression fails, transforming bloat from sublinear to linear growth."
+      },
+      "hypothesis": {
+        "statement": "Below a certain task diversity threshold (measured by pairwise distance in task embedding space), skill compression via shared representations yields sublinear library growth; above that threshold, library growth becomes linear regardless of compression.",
+        "predicted_effect": "A sharp increase in slope of library size vs. number of tasks when task diversity exceeds a critical value."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a lifelong learning agent with skill compression (e.g., option bottleneck) on a sequence of gridworld navigation tasks. Vary task diversity across runs by sampling task parameters (e.g., goal location, obstacle layout) from distributions with increasing variance. For each diversity level, measure library size after a fixed number of tasks and compute growth slope. Define a threshold as the diversity level where the slope exceeds a fraction (e.g., 0.8) of the baseline without compression.",
+        "independent_variables": [
+          "Task diversity (e.g., variance of goal positions, number of distinct obstacle patterns)"
+        ],
+        "dependent_variables": [
+          "Library size growth rate (slope of size vs. number of tasks)",
+          "Average task performance (cumulative reward per task)"
+        ],
+        "controls": [
+          "Same compression algorithm",
+          "Same number of preprocessing steps",
+          "Same baseline without compression for comparison",
+          "Same task sequence length (e.g., 100 tasks)"
+        ],
+        "falsifying_observation": "No abrupt change in growth rate is observed as diversity increases; the growth rate remains sublinear for all diversity levels."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Growth rate vs. diversity shows a clear elbow or inflection point at a specific diversity level.",
+          "Performance remains stable below threshold but degrades above threshold due to retrieval cost."
+        ],
+        "rejects_hypothesis": [
+          "Growth rate increases smoothly with diversity without a distinct threshold.",
+          "Performance degrades gradually and not correlated with a growth transition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, the assumption that compression fails at high diversity is false.",
+        "assumption_to_revise": "The mechanism assumes compression representations are universal; perhaps representations are not expressive enough for high diversity.",
+        "next_question": "How does the expressiveness of the shared representation (e.g., dimension, hierarchy) affect the critical diversity threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The bloat rate grows sublinearly with library size when the library size is below the retrieval capacity, but becomes superlinear when the library size exceeds that capacity, due to a sharp drop in reuse frequency caused by retrieval inefficiency.",
+      "independent_variables": [
+        "Initial library size (number of pre-loaded skills)"
+      ],
+      "dependent_variables": [
+        "Bloat rate (new skills per task after initial library)",
+        "Reuse frequency (fraction of selections from library per task)"
+      ],
+      "controlled_variables": [
+        "Task sequence (fixed order across conditions)",
+        "Task similarity (all tasks from same environment family)",
+        "Skill representation (fixed-size embedding)",
+        "Learning algorithm parameters",
+        "Retrieval mechanism (exact nearest neighbor with fixed distance metric)",
+        "Number of tasks in sequence (fixed, e.g., 50)",
+        "Random seed for task generation and agent initialization"
+      ],
+      "baselines": [
+        {
+          "name": "Small initial library",
+          "description": "Initial library size well below estimated retrieval capacity (e.g., 10 skills) to represent sublinear regime."
+        },
+        {
+          "name": "Medium initial library",
+          "description": "Initial library size near estimated retrieval capacity (e.g., 50-100 skills) to test transition."
+        },
+        {
+          "name": "Large initial library",
+          "description": "Initial library size above estimated retrieval capacity (e.g., 200-500 skills) to test superlinear regime."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Bloat rate",
+          "definition": "Average number of new skills added per task after the initial library, computed over the task sequence."
+        },
+        {
+          "name": "Reuse frequency",
+          "definition": "Proportion of task executions where the selected skill comes from the library (rather than being newly created), averaged across tasks."
+        },
+        {
+          "name": "Change point detection",
+          "definition": "The library size at which the bloat rate slope changes significantly, determined by piecewise linear regression with a breakpoint."
+        },
+        {
+          "name": "Retrieval time",
+          "definition": "Average time to retrieve the best matching skill from the library, measured per task."
+        }
+      ],
+      "expected_result": "For initial library sizes below the retrieval capacity (e.g., <50 skills), bloat rate is sublinear (slope < 1) and reuse frequency remains high (>0.8). For initial library sizes above the retrieval capacity (e.g., >100 skills), bloat rate becomes superlinear (slope > 1) and reuse frequency drops sharply (<0.4). A statistically significant change point in bloat rate is observed near the retrieval capacity threshold (e.g., 50-100 skills).",
+      "falsifying_result": "The bloat rate shows no significant change point; it remains constant or grows linearly across all initial library sizes. Alternatively, reuse frequency degrades gradually without a sharp drop, or the change point does not align with the estimated retrieval capacity.",
+      "minimum_viable_experiment": "Train a single continual learning agent (e.g., option-critic with neural network skills) on a fixed sequence of 50 similar tasks from a single environment family (e.g., MiniGrid or continuous control). Vary the initial library size across at least 5 levels (e.g., 10, 50, 100, 200, 500) with 10 random seeds each. For each condition, record the number of new skills created per task and the fraction of library reuses. Perform piecewise linear regression to detect a breakpoint in the bloat rate as a function of initial library size. Control for task order, skill representation (e.g., 64-dimensional embeddings), retrieval using exact nearest neighbor with cosine similarity, and fixed learning hyperparameters.",
+      "risks_and_confounds": [
+        "Task similarity variation within sequence may confound reuse frequency; control by using same environment family and fixed order.",
+        "Retrieval mechanism parameters (e.g., distance threshold) affect reuse; fix across conditions.",
+        "Random seed may influence results; use multiple seeds to ensure robustness.",
+        "Agent's learning algorithm might induce non-linearities; use a standard algorithm like DQN with options."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical skill granularity threshold such that for granularities below the threshold, library size grows sublinearly with tasks (high reuse), while above the threshold, library size grows superlinearly (low reuse, rapid bloat), and the threshold increases with task relatedness.",
+      "independent_variables": [
+        "skill granularity (clustering radius)",
+        "task relatedness (overlap in state space)"
+      ],
+      "dependent_variables": [
+        "library size growth rate (slope over tasks)",
+        "skill reuse frequency",
+        "critical granularity threshold (granularity at which growth rate doubles)"
+      ],
+      "controlled_variables": [
+        "task sequence length (e.g., 50 tasks)",
+        "base algorithm (e.g., DQN with options)",
+        "no skill compression or forgetting",
+        "same total number of tasks per sequence",
+        "reward structure",
+        "environment dynamics"
+      ],
+      "baselines": [
+        {
+          "name": "No skill library",
+          "description": "Agent learns each task from scratch without any skill reuse, providing upper bound for library growth (all new skills)."
+        },
+        {
+          "name": "Fixed granularity",
+          "description": "A single fixed granularity (e.g., medium) as a reference to compare the effects of variation."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size growth rate",
+          "definition": "Slope of linear regression of library size versus task index across all tasks in a sequence."
+        },
+        {
+          "name": "Skill reuse frequency",
+          "definition": "Proportion of tasks where at least one skill from the existing library is reused (i.e., the agent does not learn a completely novel skill for that task)."
+        },
+        {
+          "name": "Critical granularity threshold",
+          "definition": "The value of granularity parameter at which the library growth rate doubles compared to the sublinear regime (identified via piecewise linear fit)."
+        }
+      ],
+      "expected_result": "For each level of task relatedness, library size per task remains roughly constant at low granularities and then sharply increases after a critical granularity. Skill reuse frequency remains high until the critical point, then drops abruptly. The critical granularity increases with task relatedness.",
+      "falsifying_result": "Library size grows linearly with tasks across all granularities (no sharp transition), or reuse frequency decreases smoothly and linearly with granularity, or the critical granularity does not change with task relatedness (or changes in the opposite direction).",
+      "minimum_viable_experiment": "Simulate a lifelong learning agent on sequences of grid-world tasks with varying obstacle similarity (low, medium, high). For each similarity level, systematically vary skill granularity (e.g., clustering radius for extracting options). Run 50 tasks per sequence. For each combination, measure library size after each task and detect the granularity at which the library growth rate doubles. Use DQN with options as the base algorithm, no compression or forgetting.",
+      "risks_and_confounds": [
+        "Task similarity quantification may be coarse or subjective",
+        "Algorithm hyperparameters (e.g., learning rate) might interact with granularity",
+        "Random seed variations could affect reuse dynamics",
+        "Limited number of tasks per sequence (50) may not capture long-term behavior",
+        "Environmental stochasticity could introduce noise in reuse frequency measurements"
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical redundancy ratio R* (number of skills per distinct functional behavior) such that for redundancy ratios > R*, retrieval interference among similar skills causes a discontinuous drop in skill selection accuracy, leading to a phase transition from effective reuse to accelerating bloat and performance collapse.",
+      "independent_variables": [
+        "Skill redundancy ratio (number of skills per distinct functional behavior)"
+      ],
+      "dependent_variables": [
+        "Skill selection accuracy (retrieval success rate)",
+        "Task performance (average cumulative reward per episode)",
+        "Library growth rate (new skills per task)"
+      ],
+      "controlled_variables": [
+        "Total number of distinct tasks (fixed at 100)",
+        "Skill representation size and structure (tabular policy of fixed dimensions)",
+        "Retrieval algorithm (exact nearest neighbor based on state-action distance)",
+        "Time budget per step (0.1s)",
+        "Environment dynamics (discrete gridworld with deterministic transitions)"
+      ],
+      "baselines": [
+        {
+          "name": "Single-skill-per-behavior baseline",
+          "description": "Redundancy ratio = 1, i.e., exactly one unique skill per distinct behavior."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill selection accuracy",
+          "definition": "Proportion of tasks where the agent retrieves the correct skill (the one that yields highest expected reward) using nearest-neighbor matching."
+        },
+        {
+          "name": "Task performance",
+          "definition": "Average cumulative reward per episode across all tasks, normalized by maximum possible reward."
+        },
+        {
+          "name": "Library growth rate",
+          "definition": "Number of new skills added per task, averaged over the last 50 tasks."
+        }
+      ],
+      "expected_result": "Skill selection accuracy remains high (>95%) for redundancy ratios below a critical threshold R*. At R*, accuracy drops sharply (e.g., from 95% to 60%) over a narrow range of redundancy ratio. Beyond R*, library growth rate increases significantly and task performance shows an inflection point (decrease). The plot of performance vs. redundancy exhibits a clear s-curve or jump.",
+      "falsifying_result": "Skill selection accuracy decays smoothly and linearly with redundancy ratio, with no discontinuous drop observed. No clear phase transition threshold exists. Library growth rate and task performance change gradually without inflection.",
+      "minimum_viable_experiment": "Simulate a lifelong learning agent in a discrete gridworld with 100 distinct tasks, each requiring a unique navigation policy. The skill library stores tabular policies as skills. Manipulate redundancy ratio by adding duplicate copies of policies for each behavior (e.g., start with 1 copy, then add up to 10 copies). For each redundancy level, run the agent on the same sequence of tasks, with a per-step time budget of 0.1s. Use exact nearest-neighbor retrieval based on state-action space distance. Measure selection accuracy, task performance, and library growth rate. Identify R* as the point where accuracy drops by more than 20% over an increase of 0.5 in redundancy ratio.",
+      "risks_and_confounds": [
+        "Retrieval algorithm choice may affect interference patterns; using cosine similarity instead of distance might yield different results.",
+        "Time budget may be too generous or too tight, masking or exaggerating retrieval overhead.",
+        "Environment simplicity may not generalize to complex tasks; gridworld may not capture real-world skill interference.",
+        "Redundancy manipulation by adding exact duplicates may not reflect natural redundancy from similar but not identical skills."
+      ]
+    },
+    {
+      "hypothesis": "Below a certain task diversity threshold, skill compression via shared representations yields sublinear library growth; above that threshold, library growth becomes linear regardless of compression.",
+      "independent_variables": [
+        "Task diversity (measured as variance of goal positions and number of distinct obstacle patterns in gridworld tasks)"
+      ],
+      "dependent_variables": [
+        "Library size growth rate (slope of library size vs. number of tasks)",
+        "Average task performance (cumulative reward per task)"
+      ],
+      "controlled_variables": [
+        "Same compression algorithm (e.g., option bottleneck with fixed bottleneck size)",
+        "Same number of preprocessing steps",
+        "Same baseline without compression for comparison",
+        "Same task sequence length (e.g., 100 tasks)",
+        "Same environment dynamics (gridworld with fixed size)"
+      ],
+      "baselines": [
+        {
+          "name": "No compression",
+          "description": "Agent stores each skill without compression, leading to linear growth as a control."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size growth rate",
+          "definition": "The slope of a linear regression fitted to the library size over the last 80 tasks to measure steady-state growth."
+        },
+        {
+          "name": "Average task performance",
+          "definition": "Mean cumulative reward per task across all tasks in a run."
+        }
+      ],
+      "expected_result": "Library growth rate shows a sharp increase (elbow) at a critical task diversity level, transitioning from sublinear (slope < 0.5) to near linear (slope ≈ 1) as diversity exceeds the threshold. Performance remains high below threshold and drops above threshold.",
+      "falsifying_result": "No abrupt change in growth rate is observed as task diversity increases; growth rate remains sublinear (slope < 0.5) for all diversity levels, or increases smoothly without a distinct threshold.",
+      "minimum_viable_experiment": "Train a lifelong learning agent with skill compression on a sequence of 100 gridworld navigation tasks. Vary task diversity across runs by sampling goal locations from a Gaussian with increasing variance (0, 1, 2, ..., 10) and randomly generating obstacle layouts with varying numbers of obstacles (0, 1, 2, ..., 5). For each diversity level (10 levels), run 5 random seeds. For each run, record library size after every task. Compute growth slope via linear regression on the last 80 tasks. Determine if there is a diversity level where slope exceeds 0.8 (threshold). If no such threshold exists, hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Compression may not be effective even for low diversity; need to ensure compression method works.",
+        "Task diversity measure may not capture the relevant notion; use pairwise distance in task embedding space as defined.",
+        "Finite horizon may prevent reaching steady state; use long enough task sequence.",
+        "Random seeds may cause variance; average over multiple seeds."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a thorough first-principles decomposition of skill-library bloat in lifelong learning agents, identifying key variables (task count, granularity, reuse frequency) and causal chains. It proposes four testable hypotheses centered on phase transitions involving retrieval capacity, granularity, redundancy, and task diversity. The experiments are well-designed with clear controls and falsifying conditions. The work is novel in positing critical thresholds and feedback loops. However, the strong assumptions (no compression, no forgetting) limit immediate applicability, and the experiments rely on simplified gridworld environments. Comparisons to existing bloat mitigation methods are missing.",
+    "strengths": [
+      "Rigorously derived from first principles with clear primitive definitions and assumptions.",
+      "Mechanism model explicitly captures causal relationships and bottlenecks (reuse and retrieval).",
+      "Identifies novel tensions (e.g., self-reinforcing bloat loop) that suggest nonlinear dynamics.",
+      "Hypotheses are specific, falsifiable, and target phase transitions—a high-impact contribution.",
+      "Experimental designs include controls, baselines, and falsifying observations, enhancing reproducibility."
+    ],
+    "weaknesses": [
+      "Assumes no skill compression or forgetting, which may not hold in realistic lifelong learning systems; this limits generalizability.",
+      "Proposed experiments use simplistic gridworld domains; results may not transfer to complex or continuous tasks.",
+      "Missing comparison to existing lifelong learning algorithms that address bloat (e.g., progressive neural networks, GEM, SI).",
+      "Some constructs (e.g., 'retrieval capacity') are not rigorously defined or measured; operationalization could be clearer."
+    ],
+    "questions": [
+      "How would the phase transitions be affected if the agent uses skill compression or forgetting? Would the thresholds disappear or shift?",
+      "Can the critical thresholds be estimated a priori from task properties, or must they be empirically determined for each system?"
+    ],
+    "missing_baselines": [
+      "Progressive Neural Networks (PNNs) as a baseline for library growth without forgetting.",
+      "Elastic Weight Consolidation (EWC) or other regularized lifelong learning methods that limit bloat.",
+      "Skill substitution methods (e.g., CLEAR) that compress or merge skills."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Does the skill-library bloat rate exhibit a phase transition from sublinear to superlinear growth when the library size exceeds the agent's retrieval capacity, creating a self-reinforcing loop that is absent below the capacity threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical skill granularity threshold beyond which skill-library bloat transitions from sublinear to superlinear growth, and how does this threshold depend on task relatedness?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical skill redundancy ratio does retrieval interference cause a discontinuous decline in performance, marking a phase transition from effective reuse to library bloat?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of task diversity beyond which skill compression no longer prevents linear library growth, revealing a phase transition in bloat dynamics?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T172150Z"
+  }
+}

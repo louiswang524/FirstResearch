@@ -1,0 +1,1487 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "tool-use routing",
+        "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+        "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+      },
+      {
+        "name": "coding agent",
+        "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+        "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+      },
+      {
+        "name": "failure",
+        "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+        "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+        "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+        "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+      },
+      {
+        "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+        "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+        "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Specificity vs. generality: Highly specific tools handle their niche efficiently but fail when the task slightly deviates; general tools handle variety but lack precision.",
+        "variables": [
+          "tool specificity",
+          "task variability"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. accuracy: Fast routing via simple heuristics may often misroute; slower, more deliberative routing reduces failure but increases latency.",
+        "variables": [
+          "routing computation time",
+          "failure rate"
+        ]
+      },
+      {
+        "tradeoff": "Adaptability vs. consistency: Adaptive routing changes with context but can be unpredictable; consistent routing follows fixed rules but fails under novel contexts.",
+        "variables": [
+          "routing adaptiveness",
+          "routing consistency"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_representation",
+        "role": "input",
+        "description": "The encoded description of the current coding task or subtask."
+      },
+      {
+        "name": "tool_boundary_clarity",
+        "role": "input",
+        "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+      },
+      {
+        "name": "routing_policy",
+        "role": "input",
+        "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+      },
+      {
+        "name": "routing_decision",
+        "role": "mediator",
+        "description": "The specific tool selected for the task."
+      },
+      {
+        "name": "tool_execution",
+        "role": "output",
+        "description": "The process and result of executing the selected tool on the task."
+      },
+      {
+        "name": "task_success",
+        "role": "outcome",
+        "description": "Whether the overall coding task is completed correctly and efficiently."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "0",
+        "source": "tool_boundary_clarity",
+        "relation": "influences",
+        "target": "routing_policy",
+        "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+      },
+      {
+        "step": "1",
+        "source": "task_representation",
+        "relation": "combined with",
+        "target": "routing_policy",
+        "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+      },
+      {
+        "step": "2",
+        "source": "routing_policy",
+        "relation": "produces",
+        "target": "routing_decision",
+        "explanation": "The routing policy outputs a decision selecting a specific tool."
+      },
+      {
+        "step": "3",
+        "source": "routing_decision",
+        "relation": "leads to",
+        "target": "tool_execution",
+        "explanation": "The selected tool is invoked and executes on the task."
+      },
+      {
+        "step": "4",
+        "source": "tool_execution",
+        "relation": "determines",
+        "target": "task_success",
+        "explanation": "The quality of tool execution directly affects task success or failure."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ambiguous tool boundaries",
+        "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+      },
+      {
+        "bottleneck": "Overly rigid routing policy",
+        "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Highly specific tools handle their niche efficiently but fail when the task slightly deviates; general tools handle variety but lack precision.",
+      "derived_from": [
+        "core_tradeoffs: Specificity vs. generality",
+        "assumptions: Tools are distinct with clear boundaries"
+      ],
+      "why_it_matters": "This tradeoff forces designers to choose between coverage and precision; a mismatch can cause systematic failures when tasks are diverse or evolving.",
+      "what_existing_methods_may_miss": "Existing routing policies often assume a fixed set of tools with crisp boundaries, ignoring that tools may have overlapping or fuzzy capabilities, leading to suboptimal static tradeoffs.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Fast routing via simple heuristics may often misroute; slower, more deliberative routing reduces failure but increases latency.",
+      "derived_from": [
+        "core_tradeoffs: Speed vs. accuracy",
+        "mechanism: routing_policy"
+      ],
+      "why_it_matters": "Real-time coding agents need low latency, but misrouting wastes time on wrong tools; the optimal balance depends on task distribution and cost of failure.",
+      "what_existing_methods_may_miss": "Current methods often optimize for speed on average, ignoring worst-case misrouting or the asymmetric cost of failures (e.g., debugging time vs. routing time).",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Adaptive routing changes with context but can be unpredictable; consistent routing follows fixed rules but fails under novel contexts.",
+      "derived_from": [
+        "core_tradeoffs: Adaptability vs. consistency",
+        "assumptions: Routing decisions based on fixed features"
+      ],
+      "why_it_matters": "Coding tasks exhibit high variability; adaptive policies risk instability or overfitting, while fixed policies fail to handle unseen patterns.",
+      "what_existing_methods_may_miss": "Most routing policies are trained on static datasets and validated on held-out samples from the same distribution, not on truly novel tasks.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that tools have distinct, clear boundaries contradicts the bottleneck of ambiguous tool boundaries; routing reliability degrades when tools overlap or have unclear capabilities.",
+      "derived_from": [
+        "assumptions: Tools are distinct with clear boundaries",
+        "bottlenecks: Ambiguous tool boundaries"
+      ],
+      "why_it_matters": "If tools are not truly distinct, routing policies based on clear boundaries will misroute tasks that fall into overlapping regions, causing failures that are hard to diagnose.",
+      "what_existing_methods_may_miss": "Benchmarks often assume well-separated tools; they miss failure modes where multiple tools could apply but only one is correct, or where none fully fit.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the clarity of tool boundary definitions (tool_boundary_clarity) affect the misrouting rate (routing_decision accuracy) in a dynamic coding task environment?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Isolates the effect of tool boundary ambiguity on routing failures, providing evidence for whether clarifying tool definitions can reduce misrouting."
+    },
+    {
+      "question": "What is the diagnostic relationship between the rigidity of a routing policy and the frequency of task failure when tool boundaries are ambiguous?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Identifies whether rigid policies are more prone to failure under ambiguity, helping to diagnose failure modes in existing systems."
+    },
+    {
+      "question": "Can an adaptive routing policy that balances speed and accuracy achieve lower failure rates than fixed heuristics under varying task difficulty distributions?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the trade-off between speed and accuracy in practice, guiding the design of latency-aware routing policies."
+    },
+    {
+      "question": "How does the trade-off between specificity and generality manifest in the accuracy of code generation when tools with overlapping capabilities are available?",
+      "question_type": "descriptive",
+      "source_tension": "T1",
+      "expected_contribution": "Characterizes when specific tools outperform general ones and vice versa, informing tool selection strategies."
+    },
+    {
+      "question": "What algorithmic approach can dynamically adjust the routing policy to maintain consistency while adapting to novel coding tasks, and how does it compare to static policies?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Proposes a method to overcome the adaptability-consistency trade-off, with empirical comparison demonstrating its effectiveness."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+          "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+          "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+          "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+          "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+          "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+        },
+        {
+          "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+          "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+          "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_representation",
+            "role": "input",
+            "description": "The encoded description of the current coding task or subtask."
+          },
+          {
+            "name": "tool_boundary_clarity",
+            "role": "input",
+            "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+          },
+          {
+            "name": "routing_policy",
+            "role": "input",
+            "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected for the task."
+          },
+          {
+            "name": "tool_execution",
+            "role": "output",
+            "description": "The process and result of executing the selected tool on the task."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Whether the overall coding task is completed correctly and efficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "0",
+            "source": "tool_boundary_clarity",
+            "relation": "influences",
+            "target": "routing_policy",
+            "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+          },
+          {
+            "step": "1",
+            "source": "task_representation",
+            "relation": "combined with",
+            "target": "routing_policy",
+            "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+          },
+          {
+            "step": "2",
+            "source": "routing_policy",
+            "relation": "produces",
+            "target": "routing_decision",
+            "explanation": "The routing policy outputs a decision selecting a specific tool."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision",
+            "relation": "leads to",
+            "target": "tool_execution",
+            "explanation": "The selected tool is invoked and executes on the task."
+          },
+          {
+            "step": "4",
+            "source": "tool_execution",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "The quality of tool execution directly affects task success or failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous tool boundaries",
+            "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+          },
+          {
+            "bottleneck": "Overly rigid routing policy",
+            "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that tools have distinct, clear boundaries contradicts the bottleneck of ambiguous tool boundaries; routing reliability degrades when tools overlap or have unclear capabilities.",
+        "derived_from": [
+          "assumptions: Tools are distinct with clear boundaries",
+          "bottlenecks: Ambiguous tool boundaries"
+        ],
+        "why_it_matters": "If tools are not truly distinct, routing policies based on clear boundaries will misroute tasks that fall into overlapping regions, causing failures that are hard to diagnose.",
+        "what_existing_methods_may_miss": "Benchmarks often assume well-separated tools; they miss failure modes where multiple tools could apply but only one is correct, or where none fully fit.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical level of tool capability overlap beyond which rigid routing policies cause a disproportionate increase in task failure?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a threshold effect where rigid policies fail catastrophically under high tool overlap, revealing a phase transition in failure modes."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of tool capability overlap (e.g., fraction of tasks solvable by multiple tools) beyond which rigid routing policies exhibit a discontinuous jump in failure rate, while adaptive policies degrade gracefully.",
+        "predicted_effect": "As tool overlap increases, the failure rate for rigid policies remains low below a critical threshold and then spikes sharply; adaptive policies show a smooth, gradual increase."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of coding tasks with controlled levels of tool capability overlap: Low (10% of tasks ambiguous), Medium (30%), High (50%), Very High (70%). Implement two routing policies: a rule-based rigid policy that assigns tools based solely on task category, and an adaptive policy that uses task embeddings and a learned classifier. For each overlap level, run 100 trials per policy and record task failure rate (incorrect or inefficient completion). Plot failure rate vs. overlap to detect a discontinuity.",
+        "independent_variables": [
+          "tool capability overlap level (categorical: Low, Medium, High, Very High)",
+          "routing policy type (rigid vs. adaptive)"
+        ],
+        "dependent_variables": [
+          "task failure rate (proportion of trials where task outcome is incorrect or incomplete)"
+        ],
+        "controls": [
+          "same set of 100 distinct coding tasks per overlap level",
+          "same underlying tools (e.g., code generator, debugger, linter) with identical capabilities",
+          "same agent architecture and task representation encoding",
+          "same evaluation criteria for task success"
+        ],
+        "falsifying_observation": "If failure rate increases linearly for both policies without a discontinuous jump, or if rigid policies never exceed adaptive ones in failure rate, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Rigid policy failure rate is low (<10%) at Low and Medium overlap, then jumps to >50% at High or Very High overlap.",
+          "Adaptive policy failure rate increases gradually from <5% to <20% across overlap levels.",
+          "A clear 'elbow' or change point is observed in the rigid policy curve."
+        ],
+        "rejects_hypothesis": [
+          "Both policies show smooth, monotonic increases without any discontinuity.",
+          "Adaptive policy failure rate also jumps at a similar point.",
+          "Rigid policy failure rate is always lower than adaptive policy."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold effect is observed (i.e., failure rates increase smoothly or rigid policies match adaptive), then the hypothesized phase transition does not exist in this setup.",
+        "assumption_to_revise": "The assumption that tool overlap is the primary driver of discontinuity; consider that the interaction between policy rigidity and task complexity or tool quality might dominate.",
+        "next_question": "How does the complexity of tasks (e.g., number of steps, required tool chains) moderate the effect of tool overlap on routing failure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+          "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+          "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+          "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+          "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+          "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+        },
+        {
+          "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+          "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+          "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_representation",
+            "role": "input",
+            "description": "The encoded description of the current coding task or subtask."
+          },
+          {
+            "name": "tool_boundary_clarity",
+            "role": "input",
+            "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+          },
+          {
+            "name": "routing_policy",
+            "role": "input",
+            "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected for the task."
+          },
+          {
+            "name": "tool_execution",
+            "role": "output",
+            "description": "The process and result of executing the selected tool on the task."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Whether the overall coding task is completed correctly and efficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "0",
+            "source": "tool_boundary_clarity",
+            "relation": "influences",
+            "target": "routing_policy",
+            "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+          },
+          {
+            "step": "1",
+            "source": "task_representation",
+            "relation": "combined with",
+            "target": "routing_policy",
+            "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+          },
+          {
+            "step": "2",
+            "source": "routing_policy",
+            "relation": "produces",
+            "target": "routing_decision",
+            "explanation": "The routing policy outputs a decision selecting a specific tool."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision",
+            "relation": "leads to",
+            "target": "tool_execution",
+            "explanation": "The selected tool is invoked and executes on the task."
+          },
+          {
+            "step": "4",
+            "source": "tool_execution",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "The quality of tool execution directly affects task success or failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous tool boundaries",
+            "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+          },
+          {
+            "bottleneck": "Overly rigid routing policy",
+            "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Fast routing via simple heuristics may often misroute; slower, more deliberative routing reduces failure but increases latency.",
+        "derived_from": [
+          "core_tradeoffs: Speed vs. accuracy",
+          "mechanism: routing_policy"
+        ],
+        "why_it_matters": "Real-time coding agents need low latency, but misrouting wastes time on wrong tools; the optimal balance depends on task distribution and cost of failure.",
+        "what_existing_methods_may_miss": "Current methods often optimize for speed on average, ignoring worst-case misrouting or the asymmetric cost of failures (e.g., debugging time vs. routing time).",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical task difficulty threshold D* such that tool-use routing failure in coding agents exhibits a phase transition, with failure rates becoming irreducibly high above D* regardless of routing policy?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a clear boundary condition for routing failure, enabling prediction of when adaptive routing is necessary and when it is futile."
+      },
+      "hypothesis": {
+        "statement": "There exists a task difficulty threshold D* such that for tasks with difficulty > D*, tool-use routing failure rates exceed 50% for both adaptive and fixed policies, while for tasks with difficulty <= D*, adaptive routing achieves failure rates below 10% and significantly outperforms fixed heuristics.",
+        "predicted_effect": "As task difficulty increases, failure rate remains low for adaptive policy until a critical point, then jumps sharply; fixed heuristic fails earlier. The threshold D* corresponds to the point where tool boundary ambiguity becomes overwhelming."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Generate a set of coding tasks with a continuous difficulty scale (e.g., by varying code complexity, number of ambiguous API choices, or tool overlap). For each difficulty level, run an adaptive routing policy (confidence-based switching) and a fixed heuristic (always fastest tool) on 100 tasks. Measure failure rate and latency. Identify the difficulty level at which adaptive policy's failure rate first exceeds 10% and where it surpasses 50%. Compare with fixed heuristic.",
+        "independent_variables": [
+          "task difficulty (continuous scalar)",
+          "routing policy type (adaptive vs fixed heuristic)"
+        ],
+        "dependent_variables": [
+          "failure rate (proportion of tasks where output deviates from expected)",
+          "average latency (seconds per task)"
+        ],
+        "controls": [
+          "same set of tasks per difficulty",
+          "same agent architecture (LLM, tool set)",
+          "same failure definition",
+          "same confidence threshold for adaptive policy"
+        ],
+        "falsifying_observation": "Adaptive policy's failure rate increases linearly with difficulty without a clear threshold, or fixed heuristic performs equally well (or better) across all difficulty levels, or no difficulty value exists where adaptive failure rate <10% and fixed >50%."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Adaptive policy maintains <10% failure rate for tasks with difficulty up to D*, then sharply increases to >50% beyond D*.",
+          "Fixed heuristic shows >50% failure rate already at difficulty levels well below D*.",
+          "The threshold D* is robust across different task types and tool sets."
+        ],
+        "rejects_hypothesis": [
+          "Adaptive policy's failure rate increases gradually without a sharp transition.",
+          "Fixed heuristic achieves <10% failure rate across all difficulty levels.",
+          "No clear threshold exists; both policies perform similarly at all difficulty levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no clear threshold D* is found, or adaptive policy fails to outperform fixed heuristic in any difficulty regime, the core assumption that tool boundary clarity and task difficulty interact to produce a phase transition is incorrect.",
+        "assumption_to_revise": "The assumption that task difficulty is the primary driver of a failure threshold may be wrong. Perhaps the failure depends more on tool boundary ambiguity, which must be quantified separately.",
+        "next_question": "Does tool boundary ambiguity, rather than task difficulty, produce a phase transition in routing failure? Alternatively, does the interaction between task difficulty and tool ambiguity create the threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+          "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+          "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+          "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+          "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+          "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+        },
+        {
+          "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+          "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+          "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_representation",
+            "role": "input",
+            "description": "The encoded description of the current coding task or subtask."
+          },
+          {
+            "name": "tool_boundary_clarity",
+            "role": "input",
+            "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+          },
+          {
+            "name": "routing_policy",
+            "role": "input",
+            "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected for the task."
+          },
+          {
+            "name": "tool_execution",
+            "role": "output",
+            "description": "The process and result of executing the selected tool on the task."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Whether the overall coding task is completed correctly and efficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "0",
+            "source": "tool_boundary_clarity",
+            "relation": "influences",
+            "target": "routing_policy",
+            "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+          },
+          {
+            "step": "1",
+            "source": "task_representation",
+            "relation": "combined with",
+            "target": "routing_policy",
+            "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+          },
+          {
+            "step": "2",
+            "source": "routing_policy",
+            "relation": "produces",
+            "target": "routing_decision",
+            "explanation": "The routing policy outputs a decision selecting a specific tool."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision",
+            "relation": "leads to",
+            "target": "tool_execution",
+            "explanation": "The selected tool is invoked and executes on the task."
+          },
+          {
+            "step": "4",
+            "source": "tool_execution",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "The quality of tool execution directly affects task success or failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous tool boundaries",
+            "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+          },
+          {
+            "bottleneck": "Overly rigid routing policy",
+            "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Highly specific tools handle their niche efficiently but fail when the task slightly deviates; general tools handle variety but lack precision.",
+        "derived_from": [
+          "core_tradeoffs: Specificity vs. generality",
+          "assumptions: Tools are distinct with clear boundaries"
+        ],
+        "why_it_matters": "This tradeoff forces designers to choose between coverage and precision; a mismatch can cause systematic failures when tasks are diverse or evolving.",
+        "what_existing_methods_may_miss": "Existing routing policies often assume a fixed set of tools with crisp boundaries, ignoring that tools may have overlapping or fuzzy capabilities, leading to suboptimal static tradeoffs.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what level of tool capability overlap does tool-use routing in coding agents transition from reliable to unreliable?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical threshold of tool overlap that triggers a phase transition in routing failure, providing a sharp design rule for tool-sets."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical overlap threshold (pairwise Jaccard similarity > 0.6) above which the routing failure rate increases sharply (super-linear) compared to below the threshold, indicating a phase transition from reliable to unreliable routing.",
+        "predicted_effect": "A nonlinear (sigmoidal) relationship between tool overlap and routing failure rate, with an inflection point at the critical threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct 10 coding agents, each with a set of 5 tools whose pairwise capability overlaps (Jaccard similarity) vary from 0.1 to 0.9 in steps of ~0.08. For each agent, run 100 coding tasks (from a benchmark) and record the routing failure rate (proportion of tasks where the selected tool leads to incorrect code). Use breakpoint analysis (e.g., segmented regression) to detect a sharp change in slope. Control for agent architecture, prompt, and task difficulty.",
+        "independent_variables": [
+          "tool capability overlap (Jaccard similarity between tool descriptions)"
+        ],
+        "dependent_variables": [
+          "routing failure rate (proportion of tasks with incorrect tool selection leading to code errors)"
+        ],
+        "controls": [
+          "same coding agent architecture",
+          "same benchmark tasks",
+          "same evaluation criteria (pass/fail on hidden tests)",
+          "same number of tools (5) and tool names"
+        ],
+        "falsifying_observation": "The failure rate increases linearly (or without a clear inflection) with overlap, or no statistically significant breakpoint is found (e.g., difference in slopes below threshold is not significant at p<0.05)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate shows a sigmoidal shape: low and flat for overlap < 0.5, a steep increase around 0.6-0.7, then saturation at high failure for overlap > 0.8.",
+          "Segmented regression identifies a significant breakpoint at overlap ~0.6 with a slope change ratio > 3:1."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases linearly with overlap (R² > 0.9 for linear fit) without a clear inflection.",
+          "No breakpoint is significant (p > 0.05) or multiple breakpoints appear."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (linear or non-sigmoidal relationship), revise the assumption that tool boundaries are the primary driver of routing failure.",
+        "assumption_to_revise": "Assumption: Tools are distinct with clear, well-defined capabilities and boundaries.",
+        "next_question": "How does the task complexity interact with tool overlap to determine routing failure in coding agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+          "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+          "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+          "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+          "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+          "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+        },
+        {
+          "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+          "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+          "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_representation",
+            "role": "input",
+            "description": "The encoded description of the current coding task or subtask."
+          },
+          {
+            "name": "tool_boundary_clarity",
+            "role": "input",
+            "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+          },
+          {
+            "name": "routing_policy",
+            "role": "input",
+            "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected for the task."
+          },
+          {
+            "name": "tool_execution",
+            "role": "output",
+            "description": "The process and result of executing the selected tool on the task."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Whether the overall coding task is completed correctly and efficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "0",
+            "source": "tool_boundary_clarity",
+            "relation": "influences",
+            "target": "routing_policy",
+            "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+          },
+          {
+            "step": "1",
+            "source": "task_representation",
+            "relation": "combined with",
+            "target": "routing_policy",
+            "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+          },
+          {
+            "step": "2",
+            "source": "routing_policy",
+            "relation": "produces",
+            "target": "routing_decision",
+            "explanation": "The routing policy outputs a decision selecting a specific tool."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision",
+            "relation": "leads to",
+            "target": "tool_execution",
+            "explanation": "The selected tool is invoked and executes on the task."
+          },
+          {
+            "step": "4",
+            "source": "tool_execution",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "The quality of tool execution directly affects task success or failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous tool boundaries",
+            "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+          },
+          {
+            "bottleneck": "Overly rigid routing policy",
+            "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Adaptive routing changes with context but can be unpredictable; consistent routing follows fixed rules but fails under novel contexts.",
+        "derived_from": [
+          "core_tradeoffs: Adaptability vs. consistency",
+          "assumptions: Routing decisions based on fixed features"
+        ],
+        "why_it_matters": "Coding tasks exhibit high variability; adaptive policies risk instability or overfitting, while fixed policies fail to handle unseen patterns.",
+        "what_existing_methods_may_miss": "Most routing policies are trained on static datasets and validated on held-out samples from the same distribution, not on truly novel tasks.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the critical level of task novelty (quantified as distributional shift from training data) at which static routing policies in coding agents undergo a phase transition from reliable to failure-prone, and does an adaptive meta-learning routing policy shift that threshold?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a sharp phase-transition threshold in routing reliability as a function of task novelty, and demonstrates whether adaptive routing can extend the reliable regime or introduces its own failure mode beyond a second threshold."
+      },
+      "hypothesis": {
+        "statement": "Static routing policies exhibit a sigmoidal failure rate as a function of task novelty (measured by cosine distance to training examples), with a critical threshold θ such that tasks with novelty > θ have >80% failure rate. Adaptive meta-learning routing will shift this threshold to higher novelty levels but will itself exhibit a distinct phase transition above a second threshold θ' where it fails due to overfitting to recent tasks.",
+        "predicted_effect": "The adaptive policy will have lower failure rates than static for novelty levels between θ and θ', but at novelty > θ' the adaptive policy's failure rate will exceed that of static policies, creating a non-monotonic tradeoff."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Using a coding agent with three tools (code generation, debugging, refactoring) and a routing policy based on task embeddings, generate a controlled set of tasks at varying novelty levels (0 = training distribution, 10 = maximally out-of-distribution). Measure failure rate for three policies: (1) static heuristic (nearest centroid), (2) static learned (XGBoost), (3) adaptive meta-learning (MAML with online update). Fit a logistic curve to failure rate vs. novelty to estimate threshold θ (50% failure) and compare θ values. Test with 100 tasks per novelty level, repeated 5 times.",
+        "independent_variables": [
+          "Task novelty level (0 to 10, by varying edit distance from training code snippets)",
+          "Routing policy type (static heuristic, static learned, adaptive meta-learning)"
+        ],
+        "dependent_variables": [
+          "Task failure rate (0-100%) at each novelty level",
+          "Estimated critical threshold θ (novelty level where failure rate = 0.5) for each policy",
+          "Variance of routing decisions at each novelty level"
+        ],
+        "controls": [
+          "Same set of three tools with fixed capabilities",
+          "Same task embedding dimension (128) and encoder",
+          "Same compute budget per task (10 tool calls max)",
+          "Same training distribution sample size (1000 tasks) for static learned and meta-learning initialization",
+          "Same task set across all policies (randomized order)"
+        ],
+        "falsifying_observation": "If the failure rate vs. novelty curve for any policy does not exhibit a sigmoidal shape with a clear inflection point (R² < 0.7 for logistic fit), or if the adaptive policy's threshold θ is not significantly higher than both static policies (p<0.05, one-tailed), then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "All three policies show sigmoidal failure rate curves with R² > 0.85",
+          "Adaptive policy has θ at least 2 novelty units higher than best static policy",
+          "Adaptive policy failure rate at novelty levels near θ' (e.g., 8+) is >10% higher than static policies",
+          "Variance of adaptive routing decisions increases sharply beyond θ'"
+        ],
+        "rejects_hypothesis": [
+          "Failure rate curves are linear or have no clear threshold (R² < 0.7)",
+          "Adaptive policy θ is not significantly different from static policies",
+          "Adaptive policy failure rate is always lower or always higher than static across all novelty levels (lack of cross-over)",
+          "Adaptive policy variance remains constant across novelty levels"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sigmoidal threshold is observed, or adaptive policy does not show a cross-over with static policies.",
+        "assumption_to_revise": "The assumption that tool boundaries are static and that adaptation works monotonically may be invalid; instead, the failure regime may be governed by an interaction between task novelty and tool ambiguity that is not captured by a single threshold.",
+        "next_question": "Does the interaction between tool boundary ambiguity and task novelty produce a two-dimensional phase space with distinct failure regimes (e.g., confidence collapse vs. misrouting)?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool-use routing",
+          "definition": "The decision process that maps a task or subtask to a specific tool that an agent can invoke for execution.",
+          "why_primitive": "It is a fundamental operation in agentic systems, determining which external capability is engaged for a given step."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous software agent that performs coding tasks, such as writing, debugging, or refactoring code, often by invoking external tools.",
+          "why_primitive": "The agent is the core entity that executes tasks; its design and constraints shape routing failures."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output or behavior deviates from the expected correct result or leads to undesirable outcomes.",
+          "why_primitive": "Failure defines the phenomenon under study; understanding its types and causes is essential to analyze routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are distinct with clear, well-defined capabilities and boundaries.",
+          "rationale": "This allows routing to be based on a mapping from task type to tool, which is a common design in agent architectures.",
+          "possible_failure": "If tools have overlapping or ambiguous capabilities, routing can misassign tasks, leading to failure."
+        },
+        {
+          "assumption": "Routing decisions are made based on a fixed set of features or heuristics that may not capture all contextual nuances.",
+          "rationale": "Real-world agents use limited information (e.g., task description, current state) to decide routing, often via learned or rule-based policies.",
+          "possible_failure": "When the task context deviates from the training distribution or heuristic scope, routing can fail."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_representation",
+            "role": "input",
+            "description": "The encoded description of the current coding task or subtask."
+          },
+          {
+            "name": "tool_boundary_clarity",
+            "role": "input",
+            "description": "Clarity with which tool capabilities are defined and distinguished from each other."
+          },
+          {
+            "name": "routing_policy",
+            "role": "input",
+            "description": "The decision rule (e.g., heuristic, model) used to map tasks to tools."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The specific tool selected for the task."
+          },
+          {
+            "name": "tool_execution",
+            "role": "output",
+            "description": "The process and result of executing the selected tool on the task."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Whether the overall coding task is completed correctly and efficiently."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "0",
+            "source": "tool_boundary_clarity",
+            "relation": "influences",
+            "target": "routing_policy",
+            "explanation": "When tool boundaries are unclear, the routing policy becomes less reliable, increasing failure risk."
+          },
+          {
+            "step": "1",
+            "source": "task_representation",
+            "relation": "combined with",
+            "target": "routing_policy",
+            "explanation": "The agent uses the task representation and routing policy to determine which tool to use."
+          },
+          {
+            "step": "2",
+            "source": "routing_policy",
+            "relation": "produces",
+            "target": "routing_decision",
+            "explanation": "The routing policy outputs a decision selecting a specific tool."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision",
+            "relation": "leads to",
+            "target": "tool_execution",
+            "explanation": "The selected tool is invoked and executes on the task."
+          },
+          {
+            "step": "4",
+            "source": "tool_execution",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "The quality of tool execution directly affects task success or failure."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous tool boundaries",
+            "why_it_matters": "Without clear boundaries, the routing policy has insufficient information to correctly assign tasks, leading to misrouting and failure."
+          },
+          {
+            "bottleneck": "Overly rigid routing policy",
+            "why_it_matters": "A policy that cannot adapt to task variations or context changes will consistently misroute tasks that deviate from its training distribution."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing policy, influenced by task representation and tool boundary clarity, produces a routing decision that leads to inadequate tool execution, ultimately causing task failure. The main bottlenecks are ambiguous tool boundaries and overly rigid routing policies, which disrupt the causal chain from task input to successful outcome."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that tools have distinct, clear boundaries contradicts the bottleneck of ambiguous tool boundaries; routing reliability degrades when tools overlap or have unclear capabilities.",
+        "derived_from": [
+          "assumptions: Tools are distinct with clear boundaries",
+          "bottlenecks: Ambiguous tool boundaries"
+        ],
+        "why_it_matters": "If tools are not truly distinct, routing policies based on clear boundaries will misroute tasks that fall into overlapping regions, causing failures that are hard to diagnose.",
+        "what_existing_methods_may_miss": "Benchmarks often assume well-separated tools; they miss failure modes where multiple tools could apply but only one is correct, or where none fully fit.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the clarity of tool boundary definitions affect the misrouting rate in coding agents, and is there a threshold clarity level below which misrouting increases disproportionately?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a nonlinear threshold effect in tool boundary clarity, revealing a zone where small improvements yield large gains, beyond which returns diminish."
+      },
+      "hypothesis": {
+        "statement": "Misrouting rate decreases with increasing tool boundary clarity, but there exists a threshold clarity level such that below this threshold misrouting is significantly higher and decreases steeply with small improvements, while above the threshold misrouting is low and improvements yield diminishing returns.",
+        "predicted_effect": "A piecewise relationship with a changepoint: below threshold, steep negative slope; above threshold, shallow negative slope (or plateau)."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a fixed coding agent and a set of coding tasks. Create multiple tool sets with varying levels of boundary clarity (e.g., 5 levels: very ambiguous, ambiguous, moderate, clear, very clear). Each tool set has the same number of tools and capabilities, but the definitions differ in overlap and ambiguity. The agent uses the same fixed routing policy. Measure misrouting rate (proportion of tasks where the selected tool is not the optimal one) for each clarity level. Perform multiple runs to estimate variance. Fit a segmented regression model to test for a threshold effect.",
+        "independent_variables": [
+          "tool_boundary_clarity (5 ordinal levels: very ambiguous, ambiguous, moderate, clear, very clear)"
+        ],
+        "dependent_variables": [
+          "misrouting_rate"
+        ],
+        "controls": [
+          "same set of coding tasks",
+          "same agent architecture and routing policy",
+          "same number of tools (only boundary definitions vary)",
+          "same evaluation metric for optimal tool"
+        ],
+        "falsifying_observation": "Misrouting rate decreases linearly with clarity (no significant changepoint) or does not decrease at all."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A segmented regression shows a significant changepoint: misrouting rate drops steeply from very ambiguous to moderate clarity, then flattens from clear to very clear."
+        ],
+        "rejects_hypothesis": [
+          "Misrouting rate is not significantly different across clarity levels.",
+          "Misrouting rate decreases uniformly without a changepoint."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold effect is found, the hypothesis that misrouting is monotonic with a changepoint is falsified. Revise the assumption that tool boundary clarity alone determines misrouting; consider interaction with routing policy complexity.",
+        "assumption_to_revise": "Assumption: Misrouting is a simple decreasing function of clarity. Instead, clarity may interact with task complexity or policy adaptiveness.",
+        "next_question": "How does the optimal tool boundary clarity threshold depend on the complexity of the routing policy (e.g., number of features used)?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Misrouting rate decreases with increasing tool boundary clarity, but there exists a threshold clarity level such that below this threshold misrouting is significantly higher and decreases steeply with small improvements, while above the threshold misrouting is low and improvements yield diminishing returns.",
+      "independent_variables": [
+        "tool_boundary_clarity (5 ordinal levels: very ambiguous, ambiguous, moderate, clear, very clear)"
+      ],
+      "dependent_variables": [
+        "misrouting_rate"
+      ],
+      "controlled_variables": [
+        "same set of coding tasks",
+        "same agent architecture and routing policy",
+        "same number of tools (only boundary definitions vary)",
+        "same evaluation metric for optimal tool"
+      ],
+      "baselines": [
+        {
+          "name": "Random routing",
+          "description": "Tool selected uniformly at random regardless of task"
+        },
+        {
+          "name": "Perfect clarity",
+          "description": "Tool boundaries are non-overlapping and perfectly distinct, resulting in minimal misrouting"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "misrouting_rate",
+          "definition": "Proportion of tasks where the selected tool is not the optimal tool, averaged over multiple runs"
+        }
+      ],
+      "expected_result": "Segmented regression shows a significant changepoint: misrouting rate drops steeply from very ambiguous to moderate clarity, then flattens from clear to very clear.",
+      "falsifying_result": "No significant changepoint detected (e.g., linear decrease without threshold) or misrouting rate does not vary significantly across clarity levels.",
+      "minimum_viable_experiment": "Use a fixed coding agent and 100 coding tasks. Create 5 tool sets with varying boundary clarity (very ambiguous, ambiguous, moderate, clear, very clear). Each tool set has the same number of tools (e.g., 5 tools) with overlapping capabilities defined to achieve the intended clarity level. The agent uses the same fixed routing policy (e.g., a rule-based policy that selects tool based on task keywords). For each clarity level, run the agent on all tasks and record tool selections. Repeat 10 times to estimate misrouting rate variance. Perform segmented regression to test for threshold effect. The experiment is minimal because it uses only the essential components: a single agent, a fixed task set, and varying tool definitions.",
+      "risks_and_confounds": [
+        "Task difficulty may interact with tool clarity: ensure tasks are diverse but controlled for difficulty",
+        "Order effects: randomize task order within each run",
+        "Routing policy may be too simple; but we fix it to isolate clarity effect",
+        "Optimal tool definition may be subjective; define optimal tool as the one that maximizes task success rate in a separate oracle test",
+        "Learning or adaptation: use stateless agent to avoid learning across runs"
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold of tool capability overlap beyond which rigid routing policies exhibit a discontinuous jump in failure rate, while adaptive policies degrade gracefully.",
+      "independent_variables": [
+        "tool capability overlap level (categorical: Low (10%), Medium (30%), High (50%), Very High (70%))",
+        "routing policy type (rigid vs. adaptive)"
+      ],
+      "dependent_variables": [
+        "task failure rate (proportion of trials where task outcome is incorrect or incomplete)"
+      ],
+      "controlled_variables": [
+        "same set of 100 distinct coding tasks per overlap level",
+        "same underlying tools (e.g., code generator, debugger, linter) with identical capabilities",
+        "same agent architecture and task representation encoding",
+        "same evaluation criteria for task success"
+      ],
+      "baselines": [
+        {
+          "name": "Adaptive routing policy",
+          "description": "A policy that uses task embeddings and a learned classifier to assign tools, expected to degrade gracefully with overlap."
+        },
+        {
+          "name": "Random routing policy",
+          "description": "A policy that randomly selects a tool for each task, serving as a control for chance-level performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task failure rate",
+          "definition": "Proportion of trials where the agent's output is incorrect, incomplete, or inefficient as judged by predefined criteria."
+        },
+        {
+          "name": "Misrouting rate",
+          "definition": "Proportion of tasks where the assigned tool is not the best-suited tool for the task (based on expert annotation)."
+        }
+      ],
+      "expected_result": "For the rigid policy, failure rate remains below 10% at Low and Medium overlap but jumps to above 50% at High or Very High overlap. For the adaptive policy, failure rate increases gradually from <5% to <20% across all levels. There is a clear discontinuity (elbow) in the rigid policy curve.",
+      "falsifying_result": "Both policies show smooth, monotonic increases in failure rate without any discontinuity, or the rigid policy failure rate never exceeds the adaptive policy failure rate at any overlap level.",
+      "minimum_viable_experiment": "Construct a set of coding tasks with controlled tool capability overlap: 10% (Low), 30% (Medium), 50% (High), 70% (Very High) of tasks solvable by multiple tools. Implement a rigid rule-based policy (assigns tools solely by task category) and an adaptive policy (uses task embeddings and a classifier). For each overlap level, run 100 trials per policy, record task failure rate, and plot failure rate vs. overlap to detect a discontinuity.",
+      "risks_and_confounds": [
+        "Task selection bias: tasks may not uniformly represent coding challenges across overlap levels.",
+        "Tool capability definition: ambiguity in defining tool boundaries could affect overlap manipulation.",
+        "Learning effect: the adaptive policy may benefit from training on the same tasks, so ensure separate train/test splits.",
+        "Implementation errors: bug in routing policies could skew results."
+      ]
+    },
+    {
+      "hypothesis": "There exists a task difficulty threshold D* such that for tasks with difficulty > D*, tool-use routing failure rates exceed 50% for both adaptive and fixed policies, while for tasks with difficulty <= D*, adaptive routing achieves failure rates below 10% and significantly outperforms fixed heuristics.",
+      "independent_variables": [
+        "task difficulty (continuous scalar)",
+        "routing policy type (adaptive vs fixed heuristic)"
+      ],
+      "dependent_variables": [
+        "failure rate (proportion of tasks where output deviates from expected)",
+        "average latency (seconds per task)"
+      ],
+      "controlled_variables": [
+        "same set of tasks per difficulty level",
+        "same agent architecture (LLM, tool set)",
+        "same failure definition",
+        "same confidence threshold for adaptive policy"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed heuristic routing",
+          "description": "A simple heuristic that always selects the fastest tool regardless of task context."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate",
+          "definition": "Proportion of tasks where agent output deviates from expected correct result."
+        },
+        {
+          "name": "Average latency",
+          "definition": "Mean wall-clock time in seconds to complete each task."
+        }
+      ],
+      "expected_result": "Adaptive policy maintains <10% failure rate for tasks with difficulty up to D*, then sharply increases to >50% beyond D*. Fixed heuristic shows >50% failure rate at difficulty levels well below D*. A clear threshold D* is identified.",
+      "falsifying_result": "Adaptive policy's failure rate increases linearly with difficulty without a sharp transition, or fixed heuristic performs equally well or better across all difficulty levels, or no difficulty value exists where adaptive failure rate <10% and fixed heuristic failure rate >50%.",
+      "minimum_viable_experiment": "Generate a set of coding tasks with a continuous difficulty scale (e.g., varying code complexity, number of ambiguous API choices, tool overlap). For each difficulty level, run an adaptive routing policy (confidence-based switching) and a fixed heuristic (always fastest tool) on 100 tasks. Measure failure rate and latency. Identify the difficulty level at which adaptive policy's failure rate first exceeds 10% and where it surpasses 50%. Compare with fixed heuristic.",
+      "risks_and_confounds": [
+        "Difficulty scale may not be truly continuous or may have gaps",
+        "Order effects from running tasks in sequence",
+        "Confounding by specific tool overlap characteristics",
+        "Confidence threshold for adaptive policy may need tuning per difficulty level"
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical overlap threshold (pairwise Jaccard similarity > 0.6) above which the routing failure rate increases sharply (super-linear) compared to below the threshold, indicating a phase transition from reliable to unreliable routing.",
+      "independent_variables": [
+        "tool capability overlap (Jaccard similarity between tool descriptions)"
+      ],
+      "dependent_variables": [
+        "routing failure rate (proportion of tasks with incorrect tool selection leading to code errors)"
+      ],
+      "controlled_variables": [
+        "same coding agent architecture",
+        "same benchmark tasks",
+        "same evaluation criteria (pass/fail on hidden tests)",
+        "same number of tools (5) and tool names"
+      ],
+      "baselines": [
+        {
+          "name": "Low overlap condition",
+          "description": "Tools with Jaccard similarity < 0.2, expected low failure rate."
+        },
+        {
+          "name": "High overlap condition",
+          "description": "Tools with Jaccard similarity > 0.8, expected high failure rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "Proportion of tasks where selected tool leads to incorrect code (failing hidden test cases)."
+        },
+        {
+          "name": "Slope change ratio",
+          "definition": "Ratio of slope after breakpoint to slope before breakpoint in segmented regression of failure rate vs. overlap."
+        }
+      ],
+      "expected_result": "Failure rate shows a sigmoidal shape: low and flat for overlap < 0.5, a steep increase around 0.6-0.7, then saturation at high failure for overlap > 0.8. Segmented regression identifies a significant breakpoint at overlap ~0.6 with a slope change ratio > 3:1.",
+      "falsifying_result": "Failure rate increases linearly with overlap (R² > 0.9 for linear fit) without a clear inflection. No breakpoint is significant (p > 0.05) or multiple breakpoints appear.",
+      "minimum_viable_experiment": "Construct 10 coding agents, each with a set of 5 tools whose pairwise capability overlaps (Jaccard similarity) vary from 0.1 to 0.9 in steps of ~0.08. For each agent, run 100 coding tasks from a benchmark and record the routing failure rate (proportion of tasks where the selected tool leads to incorrect code). Use breakpoint analysis (e.g., segmented regression) to detect a sharp change in slope. Control for agent architecture, prompt, and task difficulty.",
+      "risks_and_confounds": [
+        "Ordering effects if tasks are not randomized across agents.",
+        "Confound with tool quality: some tools may be inherently worse, affecting failure rate independently of overlap.",
+        "Limited number of agents (10) may not provide sufficient statistical power to detect breakpoint.",
+        "Choice of benchmark tasks may not represent real-world coding diversity."
+      ]
+    },
+    {
+      "hypothesis": "Static routing policies exhibit a sigmoidal failure rate as a function of task novelty (measured by cosine distance to training examples), with a critical threshold θ such that tasks with novelty > θ have >80% failure rate. Adaptive meta-learning routing will shift this threshold to higher novelty levels but will itself exhibit a distinct phase transition above a second threshold θ' where it fails due to overfitting to recent tasks.",
+      "independent_variables": [
+        "Task novelty level (0 to 10, by varying edit distance from training code snippets)",
+        "Routing policy type (static heuristic, static learned, adaptive meta-learning)"
+      ],
+      "dependent_variables": [
+        "Task failure rate (0-100%) at each novelty level",
+        "Estimated critical threshold θ (novelty level where failure rate = 0.5) for each policy",
+        "Variance of routing decisions at each novelty level"
+      ],
+      "controlled_variables": [
+        "Same set of three tools with fixed capabilities (code generation, debugging, refactoring)",
+        "Same task embedding dimension (128) and encoder",
+        "Same compute budget per task (10 tool calls max)",
+        "Same training distribution sample size (1000 tasks) for static learned and meta-learning initialization",
+        "Same task set across all policies (randomized order)"
+      ],
+      "baselines": [
+        {
+          "name": "Static Heuristic",
+          "description": "Routing based on nearest centroid of task embeddings to tool prototypes."
+        },
+        {
+          "name": "Static Learned",
+          "description": "Routing based on XGBoost classifier trained on 1000 tasks from training distribution."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure Rate",
+          "definition": "Percentage of tasks where the agent's output is incorrect or fails to complete."
+        },
+        {
+          "name": "Logistic Fit R²",
+          "definition": "R-squared of sigmoidal logistic curve fit to failure rate vs. novelty."
+        },
+        {
+          "name": "Critical Threshold θ",
+          "definition": "Novelty level at which failure rate equals 0.5, estimated from logistic fit."
+        },
+        {
+          "name": "Routing Decision Variance",
+          "definition": "Variance of tool selections across repeated trials at same novelty level."
+        }
+      ],
+      "expected_result": "All three policies show sigmoidal failure rate curves with R² > 0.85. Adaptive policy has θ at least 2 novelty units higher than best static policy. Adaptive policy failure rate at novelty levels near 8+ is >10% higher than static policies. Variance of adaptive routing decisions increases sharply beyond its threshold.",
+      "falsifying_result": "If the failure rate vs. novelty curve for any policy does not exhibit a sigmoidal shape with a clear inflection point (R² < 0.7 for logistic fit), or if the adaptive policy's threshold θ is not significantly higher than both static policies (p<0.05, one-tailed), then the hypothesis is rejected.",
+      "minimum_viable_experiment": "Using a coding agent with three tools (code generation, debugging, refactoring) and a routing policy based on task embeddings, generate a controlled set of tasks at 11 novelty levels (0 to 10). For each novelty level, run 100 tasks per policy (total 3300 tasks per run), repeated 5 times. Measure failure rate. Fit logistic curves to estimate thresholds and compare across policies.",
+      "risks_and_confounds": [
+        "Tool boundary ambiguity may cause misrouting even at low novelty, obscuring the threshold effect.",
+        "Task embedding quality may not capture all relevant novelty dimensions.",
+        "Compute budget of 10 tool calls may limit the ability to observe success for difficult tasks.",
+        "Training distribution of 1000 tasks may not be representative or sufficient for meta-learning initialization.",
+        "Order effects could confound if tasks are not fully randomized.",
+        "The adaptive policy's online update mechanism may introduce additional variability."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles analysis of tool-use routing failures in coding agents, identifying key trade-offs and bottlenecks, and proposes several falsifiable hypotheses with minimal experiments. The derivation is rigorous and the proposed experiments are well-designed. However, the novelty is somewhat limited as the trade-offs (specificity vs. generality, speed vs. accuracy, adaptability vs. consistency) are well-known in the literature. The package would benefit from a more comprehensive survey of existing work and baseline methods. The focus on phase transitions and thresholds is interesting but may overclaim by implying a discontinuous change where a smooth transition is more plausible.",
+    "strengths": [
+      "Clear first-principles decomposition of the problem into primitive definitions, assumptions, and trade-offs.",
+      "Well-defined mechanism model with causal chain and bottlenecks.",
+      "Each tension is explicitly derived and connected to concrete research questions.",
+      "Hypotheses are falsifiable with minimal decisive tests that control confounds.",
+      "Experiment plans are detailed and specify independent/dependent variables and baselines."
+    ],
+    "weaknesses": [
+      "Novelty is limited: the core trade-offs (e.g., flexibility vs. stability) are standard in AI and have been studied in other domains (e.g., multi-armed bandits, task allocation).",
+      "Missing comparison to existing routing methods from the literature, such as modular neural networks, mixture-of-experts, or hierarchical RL.",
+      "Some hypotheses may be difficult to operationalize (e.g., 'task novelty' measured by edit distance may not capture semantic novelty).",
+      "Potential overclaiming: the term 'phase transition' implies a sharp discontinuity, but experiments may only show a gradual increase in failure rate.",
+      "The package is somewhat repetitive; multiple certificates revisit similar ideas with small variations."
+    ],
+    "questions": [
+      "How do the proposed experiments control for the quality of the routing policy implementation itself? Could failure be due to poor policy training rather than fundamental limits?",
+      "What is the evidence that existing systems actually suffer from these failure modes? Are there real-world examples or benchmarks that demonstrate these tensions?",
+      "How should the threshold for 'critical overlap' be defined in practice, given that tools may have fuzzy capabilities?"
+    ],
+    "missing_baselines": [
+      "Learning-based routing policies such as neural routing networks or reinforcement learning should be included as baselines.",
+      "Comparison to ensemble methods that use multiple tools simultaneously (e.g., voting or result combination).",
+      "Simple baselines like always using the most general tool or a random selection are included, but more sophisticated heuristics (e.g., matching task keywords) are missing."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Lack of novelty",
+    "root_cause": "The first-principles derivation recapitulated well-known trade-offs (specificity vs. generality, speed vs. accuracy, adaptability vs. consistency) without uncovering genuinely novel mechanisms or interactions. The candidate hypotheses, while falsifiable, are variations of standard ideas and do not represent a significant advance over existing literature.",
+    "violated_principle": "Research questions derived from first principles should identify non-obvious, previously unrecognized failure modes or mechanisms, not merely restate known trade-offs.",
+    "new_or_updated_principle": "First-principles research must demonstrate that the derived tensions and hypotheses are not trivial consequences of common knowledge in the field. At least one hypothesis should predict a non-obvious behavior or reveal a latent mechanism that existing work assumes away.",
+    "new_or_updated_skill": "Conduct a lightweight literature survey before finalizing candidate questions; explicitly compare each tension with at least three prior works to confirm that the identified failure mode is not already studied. If all tensions match known trade-offs, the package must include a novel empirical prediction or a new operationalization of a known idea.",
+    "regression_test": "When reviewing a research package, check whether any of the derived tensions appear verbatim in a standard textbook or survey of the domain. If all tensions are found in such sources with no additional nuance, flag the package for insufficient novelty and require either a new source of tension (e.g., from an overlooked interaction) or a concrete, testable prediction that goes beyond the known literature."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "How does the clarity of tool boundary definitions affect the misrouting rate in coding agents, and is there a threshold clarity level below which misrouting increases disproportionately?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical level of tool capability overlap beyond which rigid routing policies cause a disproportionate increase in task failure?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical task difficulty threshold D* such that tool-use routing failure in coding agents exhibits a phase transition, with failure rates becoming irreducibly high above D* regardless of routing policy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of tool capability overlap does tool-use routing in coding agents transition from reliable to unreliable?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical level of task novelty (quantified as distributional shift from training data) at which static routing policies in coding agents undergo a phase transition from reliable to failure-prone, and does an adaptive meta-learning routing policy shift that threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ]
+  }
+}

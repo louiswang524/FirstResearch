@@ -1,0 +1,1068 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool-Use Routing",
+        "definition": "The decision-making process by which a coding agent selects which external tool to invoke for a given subtask, based on the current context and goal.",
+        "why_primitive": "It is the fundamental mechanism that determines how the agent interacts with its environment; without it, the agent cannot use tools effectively."
+      },
+      {
+        "name": "Coding Agent",
+        "definition": "An AI system that combines natural language understanding, reasoning, and the ability to invoke external tools (e.g., code execution, file manipulation, search) to complete software development tasks.",
+        "why_primitive": "It is the core entity under study; all questions about routing failures are defined relative to its design and capabilities."
+      },
+      {
+        "name": "Failure",
+        "definition": "A state where the coding agent produces an incorrect, incomplete, or inefficient solution, or becomes stuck (e.g., infinite loops, contradictory tool calls), specifically due to errors in tool selection or usage.",
+        "why_primitive": "Failure is the outcome of interest; understanding its root causes requires decomposing what it means for routing to fail."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tools are reliable when used correctly.",
+        "rationale": "We assume that each tool (e.g., code interpreter, file editor) performs its intended function without bugs or inconsistencies if invoked with appropriate parameters.",
+        "possible_failure": "If a tool itself is unreliable, failures may be misattributed to routing rather than tool quality, confounding analysis."
+      },
+      {
+        "assumption": "The agent's internal reasoning about tool selection is based on incomplete context.",
+        "rationale": "Coding agents operate with limited memory and partial understanding of the full task; they cannot consider all possible future states when choosing a tool.",
+        "possible_failure": "This assumption is true in practice; if context were complete, routing failures might never occur, so the assumption is necessary to study realistic failures."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Precision vs. Coverage in Tool Selection",
+        "variables": [
+          "Tool specificity",
+          "Task diversity"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. Accuracy in Routing Decisions",
+        "variables": [
+          "Decision latency",
+          "Error rate"
+        ]
+      },
+      {
+        "tradeoff": "Autonomy vs. User Control",
+        "variables": [
+          "Agent initiative",
+          "User intervention"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Task complexity",
+        "role": "input",
+        "description": "The inherent difficulty or number of subtasks in the coding task."
+      },
+      {
+        "name": "Context completeness",
+        "role": "input",
+        "description": "The degree to which the agent has full information about the task and environment."
+      },
+      {
+        "name": "Agent internal reasoning quality",
+        "role": "mediator",
+        "description": "The capability of the agent to correctly infer which tool to use given its context."
+      },
+      {
+        "name": "Tool selection accuracy",
+        "role": "mediator",
+        "description": "How often the agent chooses the correct tool for the current subtask."
+      },
+      {
+        "name": "Routing decision latency",
+        "role": "mediator",
+        "description": "The time taken by the agent to decide which tool to invoke."
+      },
+      {
+        "name": "Error rate",
+        "role": "outcome",
+        "description": "Frequency of incorrect or suboptimal tool choices leading to failures."
+      },
+      {
+        "name": "Routing failure",
+        "role": "outcome",
+        "description": "A state where the agent's tool selection leads to incorrect, incomplete, or inefficient task execution."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Task complexity",
+        "relation": "increases",
+        "target": "Context incompleteness",
+        "explanation": "Complex tasks often exceed the agent's memory and attention, leading to incomplete context."
+      },
+      {
+        "step": "2",
+        "source": "Task complexity",
+        "relation": "increases",
+        "target": "Agent internal reasoning quality",
+        "explanation": "Higher complexity demands more reasoning, which can degrade quality if capacity is limited."
+      },
+      {
+        "step": "3",
+        "source": "Context completeness",
+        "relation": "decreases",
+        "target": "Tool selection accuracy",
+        "explanation": "Less complete context leads to more errors in tool selection."
+      },
+      {
+        "step": "4",
+        "source": "Agent internal reasoning quality",
+        "relation": "increases",
+        "target": "Tool selection accuracy",
+        "explanation": "Better reasoning improves the chance of selecting the correct tool."
+      },
+      {
+        "step": "5",
+        "source": "Tool selection accuracy",
+        "relation": "decreases",
+        "target": "Error rate",
+        "explanation": "Higher accuracy reduces the error rate in tool usage."
+      },
+      {
+        "step": "6",
+        "source": "Error rate",
+        "relation": "increases",
+        "target": "Routing failure",
+        "explanation": "A high error rate directly causes routing failures."
+      },
+      {
+        "step": "7",
+        "source": "Routing decision latency",
+        "relation": "increases",
+        "target": "Error rate",
+        "explanation": "Hasty decisions (low latency) may introduce errors; excessive latency can also cause failures due to timeouts or context changes."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Context incompleteness",
+        "why_it_matters": "Agents cannot access full task context, leading to incorrect tool selection regardless of reasoning quality."
+      },
+      {
+        "bottleneck": "Reasoning capacity limits",
+        "why_it_matters": "Even with complete context, the agent's internal reasoning may be insufficient for complex or novel tasks, causing routing failures."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing fails when coding agents face complex tasks that exceed their context window and reasoning capacity, leading to inaccurate tool selection. The causal chain starts with task complexity and context incompleteness, which degrade tool selection accuracy, increasing error rate and ultimately resulting in routing failure. Bottlenecks include limited context and reasoning capacity."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Achieving high precision in tool selection (choosing the exact right tool for each subtask) can reduce the coverage of diverse tasks the agent can handle, leading to failures in novel or edge-case scenarios.",
+      "derived_from": [
+        "Tool-Use Routing",
+        "Precision vs. Coverage in Tool Selection",
+        "Task complexity"
+      ],
+      "why_it_matters": "This tension underlies many routing failures when agents specialize too narrowly and cannot adapt to unexpected subtasks, yet overly general routing may also cause errors.",
+      "what_existing_methods_may_miss": "Existing methods often optimize for either precision or coverage separately, not acknowledging their inherent conflict.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Faster routing decisions reduce latency but may increase error rate due to hasty tool selection; conversely, slower decisions may reduce errors but risk timeouts or context drift.",
+      "derived_from": [
+        "Speed vs. Accuracy in Routing Decisions",
+        "Routing decision latency",
+        "Error rate"
+      ],
+      "why_it_matters": "This tradeoff directly impacts the agent's reliability and user experience; ignoring it leads to either inefficient or error-prone behavior.",
+      "what_existing_methods_may_miss": "Current systems often set a fixed latency budget or error tolerance without adapting to task complexity.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that tools are reliable when used correctly may be violated in practice, causing routing failures to be misattributed to agent errors rather than tool defects.",
+      "derived_from": [
+        "Assumptions",
+        "Failure"
+      ],
+      "why_it_matters": "If tool reliability is not ensured, diagnosing routing failures becomes confounded, and mitigation strategies may target the wrong cause.",
+      "what_existing_methods_may_miss": "Research often focuses on agent reasoning while treating tools as black boxes; tool-level verification is overlooked.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing tool selection precision (via context enrichment) reduce routing failure rate at the cost of reducing coverage on novel subtasks, and is this trade-off mediated by task complexity?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the precision-coverage trade-off and identifies task complexity as a moderator, guiding adaptive routing strategies."
+    },
+    {
+      "question": "Is there a non-monotonic relationship between routing decision latency and error rate, such that both very fast and very slow decisions increase failures, and does the optimal latency vary with task complexity?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Reveals the optimal latency region and its dependence on complexity, enabling dynamic latency adjustment."
+    },
+    {
+      "question": "Does explicitly modeling tool reliability (e.g., via confidence scores) reduce the misattribution of routing failures to agent errors, and does this improve overall routing accuracy when tools are imperfect?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Proposes a method to separate tool defects from routing errors, improving diagnostic accuracy and robustness."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision-making process by which a coding agent selects which external tool to invoke for a given subtask, based on the current context and goal.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent interacts with its environment; without it, the agent cannot use tools effectively."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An AI system that combines natural language understanding, reasoning, and the ability to invoke external tools (e.g., code execution, file manipulation, search) to complete software development tasks.",
+          "why_primitive": "It is the core entity under study; all questions about routing failures are defined relative to its design and capabilities."
+        },
+        {
+          "name": "Failure",
+          "definition": "A state where the coding agent produces an incorrect, incomplete, or inefficient solution, or becomes stuck (e.g., infinite loops, contradictory tool calls), specifically due to errors in tool selection or usage.",
+          "why_primitive": "Failure is the outcome of interest; understanding its root causes requires decomposing what it means for routing to fail."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are reliable when used correctly.",
+          "rationale": "We assume that each tool (e.g., code interpreter, file editor) performs its intended function without bugs or inconsistencies if invoked with appropriate parameters.",
+          "possible_failure": "If a tool itself is unreliable, failures may be misattributed to routing rather than tool quality, confounding analysis."
+        },
+        {
+          "assumption": "The agent's internal reasoning about tool selection is based on incomplete context.",
+          "rationale": "Coding agents operate with limited memory and partial understanding of the full task; they cannot consider all possible future states when choosing a tool.",
+          "possible_failure": "This assumption is true in practice; if context were complete, routing failures might never occur, so the assumption is necessary to study realistic failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task complexity",
+            "role": "input",
+            "description": "The inherent difficulty or number of subtasks in the coding task."
+          },
+          {
+            "name": "Context completeness",
+            "role": "input",
+            "description": "The degree to which the agent has full information about the task and environment."
+          },
+          {
+            "name": "Agent internal reasoning quality",
+            "role": "mediator",
+            "description": "The capability of the agent to correctly infer which tool to use given its context."
+          },
+          {
+            "name": "Tool selection accuracy",
+            "role": "mediator",
+            "description": "How often the agent chooses the correct tool for the current subtask."
+          },
+          {
+            "name": "Routing decision latency",
+            "role": "mediator",
+            "description": "The time taken by the agent to decide which tool to invoke."
+          },
+          {
+            "name": "Error rate",
+            "role": "outcome",
+            "description": "Frequency of incorrect or suboptimal tool choices leading to failures."
+          },
+          {
+            "name": "Routing failure",
+            "role": "outcome",
+            "description": "A state where the agent's tool selection leads to incorrect, incomplete, or inefficient task execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Context incompleteness",
+            "explanation": "Complex tasks often exceed the agent's memory and attention, leading to incomplete context."
+          },
+          {
+            "step": "2",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Agent internal reasoning quality",
+            "explanation": "Higher complexity demands more reasoning, which can degrade quality if capacity is limited."
+          },
+          {
+            "step": "3",
+            "source": "Context completeness",
+            "relation": "decreases",
+            "target": "Tool selection accuracy",
+            "explanation": "Less complete context leads to more errors in tool selection."
+          },
+          {
+            "step": "4",
+            "source": "Agent internal reasoning quality",
+            "relation": "increases",
+            "target": "Tool selection accuracy",
+            "explanation": "Better reasoning improves the chance of selecting the correct tool."
+          },
+          {
+            "step": "5",
+            "source": "Tool selection accuracy",
+            "relation": "decreases",
+            "target": "Error rate",
+            "explanation": "Higher accuracy reduces the error rate in tool usage."
+          },
+          {
+            "step": "6",
+            "source": "Error rate",
+            "relation": "increases",
+            "target": "Routing failure",
+            "explanation": "A high error rate directly causes routing failures."
+          },
+          {
+            "step": "7",
+            "source": "Routing decision latency",
+            "relation": "increases",
+            "target": "Error rate",
+            "explanation": "Hasty decisions (low latency) may introduce errors; excessive latency can also cause failures due to timeouts or context changes."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Context incompleteness",
+            "why_it_matters": "Agents cannot access full task context, leading to incorrect tool selection regardless of reasoning quality."
+          },
+          {
+            "bottleneck": "Reasoning capacity limits",
+            "why_it_matters": "Even with complete context, the agent's internal reasoning may be insufficient for complex or novel tasks, causing routing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when coding agents face complex tasks that exceed their context window and reasoning capacity, leading to inaccurate tool selection. The causal chain starts with task complexity and context incompleteness, which degrade tool selection accuracy, increasing error rate and ultimately resulting in routing failure. Bottlenecks include limited context and reasoning capacity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Faster routing decisions reduce latency but may increase error rate due to hasty tool selection; conversely, slower decisions may reduce errors but risk timeouts or context drift.",
+        "derived_from": [
+          "Speed vs. Accuracy in Routing Decisions",
+          "Routing decision latency",
+          "Error rate"
+        ],
+        "why_it_matters": "This tradeoff directly impacts the agent's reliability and user experience; ignoring it leads to either inefficient or error-prone behavior.",
+        "what_existing_methods_may_miss": "Current systems often set a fixed latency budget or error tolerance without adapting to task complexity.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task complexity relative to the agent's context capacity beyond which tool-use routing failures exhibit a phase transition from rare to catastrophic, and does this threshold depend on the agent's internal reasoning quality?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp boundary condition (phase transition) for routing failures, enabling proactive capacity-aware task decomposition."
+      },
+      "hypothesis": {
+        "statement": "For a given coding agent, the error rate of tool-use routing remains low and stable until task complexity exceeds a threshold C* proportional to the agent's context window size, after which the error rate jumps discontinuously (phase transition). Increasing the agent's internal reasoning quality shifts C* to higher values.",
+        "predicted_effect": "Under continuous increase of task complexity (number of subtasks), the error rate will show a sudden jump at a critical complexity level, and this jump point will increase when the agent uses more advanced reasoning strategies (e.g., chain-of-thought)."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with configurable context window size (e.g., 2K, 4K, 8K tokens) and reasoning quality (e.g., no chain-of-thought vs. chain-of-thought). Vary task complexity continuously from 5 to 50 subtasks in steps of 5. For each configuration, run 50 trials per complexity level and record error rate (proportion of tasks with incorrect tool selection or failure). Use change-point detection (e.g., binary segmentation) to identify any discontinuous jump. Test if the jump complexity scales with context window and reasoning quality.",
+        "independent_variables": [
+          "Task complexity (number of subtasks)",
+          "Context window size (tokens)",
+          "Reasoning quality (binary: with/without chain-of-thought)"
+        ],
+        "dependent_variables": [
+          "Error rate (proportion of tasks with tool-selection failure or task failure)"
+        ],
+        "controls": [
+          "Agent architecture (same base model and tool set)",
+          "Task type (code generation tasks from a fixed benchmark)",
+          "Environment (same code execution environment)",
+          "Random seed for repeatability"
+        ],
+        "falsifying_observation": "Either (1) error rate increases gradually with complexity (no sudden jump), or (2) the jump point does not depend on context window size, or (3) the jump point does not depend on reasoning quality, or (4) no jump is detected at all."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each configuration, error rate remains flat (low) up to a certain complexity, then suddenly increases by at least 50% at the next complexity level.",
+          "The critical complexity C* increases approximately linearly with context window size.",
+          "C* is higher when chain-of-thought reasoning is used compared to no chain-of-thought.",
+          "Change-point analysis identifies a single significant break point in the error rate curve."
+        ],
+        "rejects_hypothesis": [
+          "Error rate increases monotonically and smoothly with no sharp jump.",
+          "Error rate is always high regardless of complexity.",
+          "Error rate shows multiple jumps or no clear break point.",
+          "C* is invariant to context window size or reasoning quality."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed (error rate increases gradually or is independent of context/reasoning), then the assumption that context capacity imposes a discrete limit on routing performance is invalid.",
+        "assumption_to_revise": "Assumption: 'Context capacity sets a sharp ceiling on routing accuracy.' Revised assumption: 'Routing failures accumulate gradually due to compounding errors, and the notion of a discrete threshold is an artifact of task design or measurement granularity.'",
+        "next_question": "Does the error rate grow according to a power law or exponential function with respect to complexity/context ratio? What is the functional form of the gradual degradation and can it be explained by error propagation in the causal chain?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision-making process by which a coding agent selects which external tool to invoke for a given subtask, based on the current context and goal.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent interacts with its environment; without it, the agent cannot use tools effectively."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An AI system that combines natural language understanding, reasoning, and the ability to invoke external tools (e.g., code execution, file manipulation, search) to complete software development tasks.",
+          "why_primitive": "It is the core entity under study; all questions about routing failures are defined relative to its design and capabilities."
+        },
+        {
+          "name": "Failure",
+          "definition": "A state where the coding agent produces an incorrect, incomplete, or inefficient solution, or becomes stuck (e.g., infinite loops, contradictory tool calls), specifically due to errors in tool selection or usage.",
+          "why_primitive": "Failure is the outcome of interest; understanding its root causes requires decomposing what it means for routing to fail."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are reliable when used correctly.",
+          "rationale": "We assume that each tool (e.g., code interpreter, file editor) performs its intended function without bugs or inconsistencies if invoked with appropriate parameters.",
+          "possible_failure": "If a tool itself is unreliable, failures may be misattributed to routing rather than tool quality, confounding analysis."
+        },
+        {
+          "assumption": "The agent's internal reasoning about tool selection is based on incomplete context.",
+          "rationale": "Coding agents operate with limited memory and partial understanding of the full task; they cannot consider all possible future states when choosing a tool.",
+          "possible_failure": "This assumption is true in practice; if context were complete, routing failures might never occur, so the assumption is necessary to study realistic failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task complexity",
+            "role": "input",
+            "description": "The inherent difficulty or number of subtasks in the coding task."
+          },
+          {
+            "name": "Context completeness",
+            "role": "input",
+            "description": "The degree to which the agent has full information about the task and environment."
+          },
+          {
+            "name": "Agent internal reasoning quality",
+            "role": "mediator",
+            "description": "The capability of the agent to correctly infer which tool to use given its context."
+          },
+          {
+            "name": "Tool selection accuracy",
+            "role": "mediator",
+            "description": "How often the agent chooses the correct tool for the current subtask."
+          },
+          {
+            "name": "Routing decision latency",
+            "role": "mediator",
+            "description": "The time taken by the agent to decide which tool to invoke."
+          },
+          {
+            "name": "Error rate",
+            "role": "outcome",
+            "description": "Frequency of incorrect or suboptimal tool choices leading to failures."
+          },
+          {
+            "name": "Routing failure",
+            "role": "outcome",
+            "description": "A state where the agent's tool selection leads to incorrect, incomplete, or inefficient task execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Context incompleteness",
+            "explanation": "Complex tasks often exceed the agent's memory and attention, leading to incomplete context."
+          },
+          {
+            "step": "2",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Agent internal reasoning quality",
+            "explanation": "Higher complexity demands more reasoning, which can degrade quality if capacity is limited."
+          },
+          {
+            "step": "3",
+            "source": "Context completeness",
+            "relation": "decreases",
+            "target": "Tool selection accuracy",
+            "explanation": "Less complete context leads to more errors in tool selection."
+          },
+          {
+            "step": "4",
+            "source": "Agent internal reasoning quality",
+            "relation": "increases",
+            "target": "Tool selection accuracy",
+            "explanation": "Better reasoning improves the chance of selecting the correct tool."
+          },
+          {
+            "step": "5",
+            "source": "Tool selection accuracy",
+            "relation": "decreases",
+            "target": "Error rate",
+            "explanation": "Higher accuracy reduces the error rate in tool usage."
+          },
+          {
+            "step": "6",
+            "source": "Error rate",
+            "relation": "increases",
+            "target": "Routing failure",
+            "explanation": "A high error rate directly causes routing failures."
+          },
+          {
+            "step": "7",
+            "source": "Routing decision latency",
+            "relation": "increases",
+            "target": "Error rate",
+            "explanation": "Hasty decisions (low latency) may introduce errors; excessive latency can also cause failures due to timeouts or context changes."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Context incompleteness",
+            "why_it_matters": "Agents cannot access full task context, leading to incorrect tool selection regardless of reasoning quality."
+          },
+          {
+            "bottleneck": "Reasoning capacity limits",
+            "why_it_matters": "Even with complete context, the agent's internal reasoning may be insufficient for complex or novel tasks, causing routing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when coding agents face complex tasks that exceed their context window and reasoning capacity, leading to inaccurate tool selection. The causal chain starts with task complexity and context incompleteness, which degrade tool selection accuracy, increasing error rate and ultimately resulting in routing failure. Bottlenecks include limited context and reasoning capacity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that tools are reliable when used correctly may be violated in practice, causing routing failures to be misattributed to agent errors rather than tool defects.",
+        "derived_from": [
+          "Assumptions",
+          "Failure"
+        ],
+        "why_it_matters": "If tool reliability is not ensured, diagnosing routing failures becomes confounded, and mitigation strategies may target the wrong cause.",
+        "what_existing_methods_may_miss": "Research often focuses on agent reasoning while treating tools as black boxes; tool-level verification is overlooked.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Is there a critical context completeness threshold below which tool-use routing failures in coding agents become independent of tool reliability, and above which explicit reliability modeling significantly reduces failures?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in routing failure causes, enabling targeted reliability interventions only when context is sufficient."
+      },
+      "hypothesis": {
+        "statement": "Below a context completeness threshold (e.g., <60% of task-relevant information), routing failures are dominated by context insufficiency, making tool reliability modeling ineffective; above the threshold, explicit reliability modeling reduces failure rates by at least 20%.",
+        "predicted_effect": "The effect of reliability modeling on routing accuracy is moderated by context completeness, with a sharp threshold separating null from significant benefit."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a coding agent with variable context windows (e.g., 20%, 40%, 60%, 80%, 100% of full task description). For each context level, run tasks with either perfect tools or tools with 20% random failure rate. Compare baseline (no reliability model) vs. agent with confidence-score model. Measure routing failure rate per context level and tool reliability condition.",
+        "independent_variables": [
+          "Context completeness (5 levels: 20%, 40%, 60%, 80%, 100%)",
+          "Tool reliability (perfect vs. 20% failure rate)",
+          "Reliability modeling (with vs. without confidence scores)"
+        ],
+        "dependent_variables": [
+          "Routing failure rate",
+          "Task success rate",
+          "Misattribution rate (agent vs. tool errors)"
+        ],
+        "controls": [
+          "Same coding tasks (e.g., 100 diverse tasks)",
+          "Same agent architecture",
+          "Same number of trials per condition (e.g., 50)",
+          "Random seed repetition"
+        ],
+        "falsifying_observation": "No significant interaction between context completeness and reliability modeling: the effect of modeling is equal across all context levels, or no effect at any level."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low context completeness (<60%), routing failure rates are high (e.g., >40%) and unaffected by reliability modeling.",
+          "At high context completeness (>=60%), agents with reliability modeling have significantly lower failure rates (e.g., 20% less) than those without.",
+          "Misattribution rate drops sharply above threshold only with modeling."
+        ],
+        "rejects_hypothesis": [
+          "Reliability modeling improves failure rates uniformly across all context levels.",
+          "No improvement at any context level.",
+          "No evidence of a threshold effect (e.g., gradual linear improvement)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (i.e., reliability modeling either always helps or never helps), then the assumption that context completeness and tool reliability interact non-additively is likely wrong.",
+        "assumption_to_revise": "Context completeness and tool reliability have an interactive, threshold-dependent effect on routing failures.",
+        "next_question": "What is the relative contribution of context completeness vs. reasoning capacity to routing failures, and can they be disentangled?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision-making process by which a coding agent selects which external tool to invoke for a given subtask, based on the current context and goal.",
+          "why_primitive": "It is the fundamental mechanism that determines how the agent interacts with its environment; without it, the agent cannot use tools effectively."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An AI system that combines natural language understanding, reasoning, and the ability to invoke external tools (e.g., code execution, file manipulation, search) to complete software development tasks.",
+          "why_primitive": "It is the core entity under study; all questions about routing failures are defined relative to its design and capabilities."
+        },
+        {
+          "name": "Failure",
+          "definition": "A state where the coding agent produces an incorrect, incomplete, or inefficient solution, or becomes stuck (e.g., infinite loops, contradictory tool calls), specifically due to errors in tool selection or usage.",
+          "why_primitive": "Failure is the outcome of interest; understanding its root causes requires decomposing what it means for routing to fail."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools are reliable when used correctly.",
+          "rationale": "We assume that each tool (e.g., code interpreter, file editor) performs its intended function without bugs or inconsistencies if invoked with appropriate parameters.",
+          "possible_failure": "If a tool itself is unreliable, failures may be misattributed to routing rather than tool quality, confounding analysis."
+        },
+        {
+          "assumption": "The agent's internal reasoning about tool selection is based on incomplete context.",
+          "rationale": "Coding agents operate with limited memory and partial understanding of the full task; they cannot consider all possible future states when choosing a tool.",
+          "possible_failure": "This assumption is true in practice; if context were complete, routing failures might never occur, so the assumption is necessary to study realistic failures."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task complexity",
+            "role": "input",
+            "description": "The inherent difficulty or number of subtasks in the coding task."
+          },
+          {
+            "name": "Context completeness",
+            "role": "input",
+            "description": "The degree to which the agent has full information about the task and environment."
+          },
+          {
+            "name": "Agent internal reasoning quality",
+            "role": "mediator",
+            "description": "The capability of the agent to correctly infer which tool to use given its context."
+          },
+          {
+            "name": "Tool selection accuracy",
+            "role": "mediator",
+            "description": "How often the agent chooses the correct tool for the current subtask."
+          },
+          {
+            "name": "Routing decision latency",
+            "role": "mediator",
+            "description": "The time taken by the agent to decide which tool to invoke."
+          },
+          {
+            "name": "Error rate",
+            "role": "outcome",
+            "description": "Frequency of incorrect or suboptimal tool choices leading to failures."
+          },
+          {
+            "name": "Routing failure",
+            "role": "outcome",
+            "description": "A state where the agent's tool selection leads to incorrect, incomplete, or inefficient task execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Context incompleteness",
+            "explanation": "Complex tasks often exceed the agent's memory and attention, leading to incomplete context."
+          },
+          {
+            "step": "2",
+            "source": "Task complexity",
+            "relation": "increases",
+            "target": "Agent internal reasoning quality",
+            "explanation": "Higher complexity demands more reasoning, which can degrade quality if capacity is limited."
+          },
+          {
+            "step": "3",
+            "source": "Context completeness",
+            "relation": "decreases",
+            "target": "Tool selection accuracy",
+            "explanation": "Less complete context leads to more errors in tool selection."
+          },
+          {
+            "step": "4",
+            "source": "Agent internal reasoning quality",
+            "relation": "increases",
+            "target": "Tool selection accuracy",
+            "explanation": "Better reasoning improves the chance of selecting the correct tool."
+          },
+          {
+            "step": "5",
+            "source": "Tool selection accuracy",
+            "relation": "decreases",
+            "target": "Error rate",
+            "explanation": "Higher accuracy reduces the error rate in tool usage."
+          },
+          {
+            "step": "6",
+            "source": "Error rate",
+            "relation": "increases",
+            "target": "Routing failure",
+            "explanation": "A high error rate directly causes routing failures."
+          },
+          {
+            "step": "7",
+            "source": "Routing decision latency",
+            "relation": "increases",
+            "target": "Error rate",
+            "explanation": "Hasty decisions (low latency) may introduce errors; excessive latency can also cause failures due to timeouts or context changes."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Context incompleteness",
+            "why_it_matters": "Agents cannot access full task context, leading to incorrect tool selection regardless of reasoning quality."
+          },
+          {
+            "bottleneck": "Reasoning capacity limits",
+            "why_it_matters": "Even with complete context, the agent's internal reasoning may be insufficient for complex or novel tasks, causing routing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when coding agents face complex tasks that exceed their context window and reasoning capacity, leading to inaccurate tool selection. The causal chain starts with task complexity and context incompleteness, which degrade tool selection accuracy, increasing error rate and ultimately resulting in routing failure. Bottlenecks include limited context and reasoning capacity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Achieving high precision in tool selection (choosing the exact right tool for each subtask) can reduce the coverage of diverse tasks the agent can handle, leading to failures in novel or edge-case scenarios.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "Precision vs. Coverage in Tool Selection",
+          "Task complexity"
+        ],
+        "why_it_matters": "This tension underlies many routing failures when agents specialize too narrowly and cannot adapt to unexpected subtasks, yet overly general routing may also cause errors.",
+        "what_existing_methods_may_miss": "Existing methods often optimize for either precision or coverage separately, not acknowledging their inherent conflict.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does enriching a coding agent's context reduce routing failure only when the number of distinct tool invocations required (N) is below a critical threshold N*, but increase failure when N exceeds N* due to context overload, and is this threshold modulated by the novelty of the required tools?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp threshold (N*) in tool-use routing failures, explaining when context enrichment helps versus harms, and how tool novelty shifts this threshold."
+      },
+      "hypothesis": {
+        "statement": "For a fixed context window size, enriching agent context reduces routing failure rate for tasks requiring N < N* distinct tool invocations, but increases failure rate for N > N*, due to context overload overshadowing precision gains. The threshold N* is lower when the required tools are novel (i.e., rare in training).",
+        "predicted_effect": "A significant interaction between context enrichment and N relative to N*: enriched context decreases failure when N < N*, increases failure when N > N*, with N* shifted down for novel tools."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement two coding agents (baseline truncated context vs. enriched full context) with the same architecture. Create coding tasks varying the number of distinct tool invocations required (N from 1 to 20) and the novelty of tools (familiar vs. novel). Measure routing failure rate. Estimate N* as the crossover point where enriched agent's failure rate matches baseline.",
+        "independent_variables": [
+          "Context enrichment (full vs. truncated)",
+          "Number of distinct tool invocations required (N)",
+          "Tool novelty (familiar vs. novel)"
+        ],
+        "dependent_variables": [
+          "Routing failure rate",
+          "Crossover threshold N* (estimated from data)"
+        ],
+        "controls": [
+          "Same underlying agent architecture and reasoning model",
+          "Same set of available tools (but familiarity varies)",
+          "Same task environment and instructions",
+          "Fixed context window size"
+        ],
+        "falsifying_observation": "No crossover point exists; enriched context always reduces failure (or always increases) across all N. Or, the crossover does not depend on tool novelty."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For tasks with N below the crossover point, enriched context yields lower failure rate than baseline.",
+          "For tasks with N above the crossover point, enriched context yields higher failure rate than baseline.",
+          "The crossover point is lower for tasks involving novel tools compared to familiar tools."
+        ],
+        "rejects_hypothesis": [
+          "Enriched context reduces failure rate for all N (no crossover).",
+          "Enriched context increases failure rate for all N (no crossover).",
+          "Crossover point does not differ between familiar and novel tools."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no crossover threshold is observed, or the effect of novelty is absent, then the assumption that context overload causes a sharp failure phase transition may be incorrect.",
+        "assumption_to_revise": "The assumption that context overload primarily causes failures above a threshold; perhaps the agent adapts by ignoring irrelevant context, or failures are driven by other factors like reasoning quality.",
+        "next_question": "Does the failure threshold N* depend on the agent's internal attention mechanism or the structure of the tool dependency graph?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "For a fixed context window size, enriching agent context reduces routing failure rate for tasks requiring N < N* distinct tool invocations, but increases failure rate for N > N*, due to context overload overshadowing precision gains. The threshold N* is lower when the required tools are novel (i.e., rare in training).",
+      "independent_variables": [
+        "Context enrichment: full context vs truncated context",
+        "Number of distinct tool invocations required (N): 2, 6, 15",
+        "Tool novelty: familiar vs novel (tools rare in training)"
+      ],
+      "dependent_variables": [
+        "Routing failure rate: proportion of tasks where agent's tool selection leads to failure",
+        "Crossover threshold N*: estimated as N where enriched agent's failure rate equals baseline"
+      ],
+      "controlled_variables": [
+        "Same underlying agent architecture and reasoning model",
+        "Same set of available tools (familiarity manipulated via training data)",
+        "Same task environment and instructions",
+        "Fixed context window size",
+        "Same task complexity aside from N",
+        "Random seed and agent initialization"
+      ],
+      "baselines": [
+        {
+          "name": "Truncated context agent",
+          "description": "Agent with context limited to the current subtask only (no history of previous tool calls)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "Fraction of task episodes where the agent produces an incorrect, incomplete, or inefficient solution due to tool selection errors."
+        }
+      ],
+      "expected_result": "For familiar tools, enriched context reduces failure rate at N=2, but increases at N=15, with crossover near N=6. For novel tools, enriched context reduces failure at N=2, but increases already at N=6 (crossover lower than for familiar).",
+      "falsifying_result": "No crossover observed: enriched context always reduces failure rate across all N, or always increases. Or, the crossover point does not differ between familiar and novel tools.",
+      "minimum_viable_experiment": "Use two coding agents (baseline truncated context vs. enriched full context) with identical architecture. Create 6 task conditions: 2 (familiar vs novel tools) × 3 (N=2, 6, 15). Each condition run with enough trials (e.g., 50) to estimate failure rate reliably. Measure routing failure rate. If the interaction pattern (enriched better at low N, worse at high N) is absent or does not shift with novelty, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Tool familiarity may be confounded with tool complexity; ensure familiar and novel tools have similar complexity.",
+        "Context enrichment might change the agent's reasoning strategy beyond just more information; use same reasoning model.",
+        "The exact crossover N* may depend on the specific tools and tasks; generalize with caution.",
+        "Agent might ignore irrelevant context, reducing overload effect; consider attention mechanism differences.",
+        "Sample size may be insufficient to detect crossover; power analysis needed."
+      ]
+    },
+    {
+      "hypothesis": "For a given coding agent, the error rate of tool-use routing remains low and stable until task complexity exceeds a threshold C* proportional to the agent's context window size, after which the error rate jumps discontinuously (phase transition). Increasing the agent's internal reasoning quality shifts C* to higher values.",
+      "independent_variables": [
+        "Task complexity (number of subtasks)",
+        "Context window size (tokens)",
+        "Reasoning quality (binary: with/without chain-of-thought)"
+      ],
+      "dependent_variables": [
+        "Error rate (proportion of tasks with tool-selection failure or task failure)"
+      ],
+      "controlled_variables": [
+        "Agent architecture (same base model and tool set)",
+        "Task type (code generation tasks from a fixed benchmark)",
+        "Environment (same code execution environment)",
+        "Random seed for repeatability"
+      ],
+      "baselines": [
+        {
+          "name": "Baseline agent without chain-of-thought reasoning",
+          "description": "Coding agent using default reasoning (no explicit chain-of-thought) with a fixed context window of 4K tokens."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Error rate",
+          "definition": "Proportion of tasks where tool selection is incorrect or task fails due to routing error, over 50 trials per complexity level."
+        }
+      ],
+      "expected_result": "Error rate remains low and flat until a critical complexity C*, then jumps discontinuously (at least 50% increase at the next complexity level). C* increases approximately linearly with context window size and is higher when chain-of-thought reasoning is used. Change-point analysis identifies a single significant break point.",
+      "falsifying_result": "Error rate increases monotonically and smoothly with no sharp jump; or error rate is always high regardless of complexity; or error rate shows multiple jumps or no clear break point; or C* is invariant to context window size or reasoning quality.",
+      "minimum_viable_experiment": "Implement a coding agent with configurable context window size (2K, 4K, 8K tokens) and reasoning quality (no chain-of-thought vs. chain-of-thought). Vary task complexity from 5 to 50 subtasks in steps of 5. For each configuration, run 50 trials per complexity level. Use change-point detection (e.g., binary segmentation) to identify any discontinuous jump in error rate.",
+      "risks_and_confounds": [
+        "Tool reliability may confound if errors are due to tools rather than routing",
+        "Task complexity operationalization (number of subtasks) may not capture all relevant aspects",
+        "Agent's initial context may affect results",
+        "The same model may have variable reasoning quality across runs"
+      ]
+    },
+    {
+      "hypothesis": "Below a context completeness threshold (e.g., <60% of task-relevant information), routing failures are dominated by context insufficiency, making tool reliability modeling ineffective; above the threshold, explicit reliability modeling reduces failure rates by at least 20%.",
+      "independent_variables": [
+        "Context completeness (5 levels: 20%, 40%, 60%, 80%, 100%)",
+        "Tool reliability (perfect vs. 20% failure rate)",
+        "Reliability modeling (with vs. without confidence scores)"
+      ],
+      "dependent_variables": [
+        "Routing failure rate",
+        "Task success rate",
+        "Misattribution rate (agent vs. tool errors)"
+      ],
+      "controlled_variables": [
+        "Same coding tasks (100 diverse tasks)",
+        "Same agent architecture",
+        "Same number of trials per condition (50)",
+        "Random seed repetition"
+      ],
+      "baselines": [
+        {
+          "name": "Baseline (no reliability model) with perfect tools",
+          "description": "Agent without confidence-score model, using perfectly reliable tools."
+        },
+        {
+          "name": "Baseline (no reliability model) with 20% tool failure",
+          "description": "Agent without confidence-score model, using tools that fail 20% of the time."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "Proportion of tool selections that lead to incorrect, incomplete, or inefficient solutions, or cause the agent to get stuck."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks completed successfully (correct and efficient solution) overall."
+        },
+        {
+          "name": "Misattribution rate",
+          "definition": "Proportion of failures correctly attributed to agent error vs. tool defect, based on post-hoc analysis."
+        }
+      ],
+      "expected_result": "At low context completeness (<60%), routing failure rates are high (e.g., >40%) and unaffected by reliability modeling. At high context completeness (>=60%), agents with reliability modeling have significantly lower failure rates (at least 20% less) than those without. Misattribution rate drops sharply above threshold only with modeling.",
+      "falsifying_result": "No significant interaction between context completeness and reliability modeling: the effect of modeling is equal across all context levels, or no effect at any level. Alternatively, no evidence of a threshold effect (e.g., gradual linear improvement).",
+      "minimum_viable_experiment": "Test a coding agent with 5 context completeness levels (20%,40%,60%,80%,100%) crossed with 2 tool reliability conditions (perfect vs 20% failure) and 2 reliability modeling conditions (with vs without confidence scores). 50 trials per condition, total 5*2*2*50=1000 runs. Use 100 diverse coding tasks. Measure routing failure rate and check for a threshold interaction.",
+      "risks_and_confounds": []
+    }
+  ],
+  "review": {
+    "summary": "This work presents a first-principles analysis of tool-use routing failures in coding agents, deriving a mechanism model with causal chains, bottlenecks, and tensions. It proposes three falsifiable hypotheses with detailed experiments testing phase transitions, context overload thresholds, and interaction with tool reliability. The derivation is systematic and the experiments are well-designed, but the scope is narrow and some assumptions may limit generality.",
+    "strengths": [
+      "Thorough first-principles decomposition with clear primitive definitions and assumptions.",
+      "Mechanism model includes causal chains and bottlenecks, providing structural understanding.",
+      "Tensions are logically derived from primitives and lead to testable hypotheses.",
+      "Experiments are well-specified with independent/dependent variables, controls, and falsifying conditions.",
+      "High falsifiability and clarity in hypotheses and expected observations.",
+      "Novel focus on threshold and phase transition behaviors in routing failures."
+    ],
+    "weaknesses": [
+      "Assumption that tools are perfectly reliable when used correctly may be unrealistic in practice.",
+      "Mechanism model simplifies latency-error tradeoff as linear; non-linear effects may be missed.",
+      "Experiments may confound tool novelty with complexity; controls need more detail.",
+      "First-principles derivation lacks mathematical formalization, reducing precision.",
+      "Overclaiming: title 'When does tool-use routing fail?' implies comprehensive coverage, but only threshold-based failures are considered.",
+      "Significance somewhat limited by narrow focus on coding agents with specific architectures."
+    ],
+    "questions": [
+      "How would these findings generalize to multi-agent coding systems or different agent architectures?",
+      "Can context completeness be measured in practice without access to the full task description?",
+      "Are the threshold effects robust across various coding task domains beyond code generation?",
+      "How does the agent's internal attention mechanism affect the threshold behaviors?",
+      "What is the effect of tool failure rates other than 20%? Is there a similar threshold?"
+    ],
+    "missing_baselines": [
+      "Random tool selection baseline for all experiments.",
+      "Oracle tool selection (oracle agent) to establish upper bound.",
+      "Adaptive context management baseline (e.g., dynamically adjusting context window).",
+      "Baseline with perfect decision latency (zero latency) for speed-accuracy tradeoff.",
+      "Agent with explicit context retrieval (e.g., RAG) as alternative to enrichment."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Does enriching a coding agent's context reduce routing failure only when the number of distinct tool invocations required (N) is below a critical threshold N*, but increase failure when N exceeds N* due to context overload, and is this threshold modulated by the novelty of the required tools?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of task complexity relative to the agent's context capacity beyond which tool-use routing failures exhibit a phase transition from rare to catastrophic, and does this threshold depend on the agent's internal reasoning quality?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical context completeness threshold below which tool-use routing failures in coding agents become independent of tool reliability, and above which explicit reliability modeling significantly reduces failures?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

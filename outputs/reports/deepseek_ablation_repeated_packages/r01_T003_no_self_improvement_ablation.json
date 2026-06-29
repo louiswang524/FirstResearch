@@ -1,0 +1,1316 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "tool",
+        "definition": "An external function or API that performs a specific operation, such as running code, querying a database, or retrieving files, which can be invoked by an agent.",
+        "why_primitive": "Tools are the atomic units of action that agents use to interact with environments; without them, routing is meaningless."
+      },
+      {
+        "name": "routing",
+        "definition": "The decision process by which an agent selects which tool to invoke at a given step, based on its internal state, context, and goals.",
+        "why_primitive": "Routing is the core mechanism of tool use; it determines when and how tools are applied."
+      },
+      {
+        "name": "coding agent",
+        "definition": "An autonomous system that writes, executes, and debugs code to accomplish tasks, typically using large language models and tool invocation.",
+        "why_primitive": "The specific domain of coding defines constraints and failure modes unique to code generation and execution."
+      },
+      {
+        "name": "failure",
+        "definition": "An outcome where the agent does not achieve its intended goal, produces incorrect or harmful results, or enters an unrecoverable state.",
+        "why_primitive": "Understanding failure is necessary to study when routing fails; it defines the dependent variable."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tools have deterministic, well-defined interfaces and behaviors.",
+        "rationale": "Routing decisions rely on predictable tool outputs; if tools behave nondeterministically or have hidden side effects, the agent's expectations may be violated.",
+        "possible_failure": "Unexpected tool behavior leads to cascading errors, repeated calls, or infinite loops."
+      },
+      {
+        "assumption": "The agent has sufficient context to make correct routing decisions.",
+        "rationale": "Routing requires understanding the current state, the goal, and the effects of each tool. Limited context (e.g., token limits) impairs this.",
+        "possible_failure": "Agent selects wrong tool due to missing information, leading to wasted calls or incorrect code."
+      },
+      {
+        "assumption": "The agent's internal model accurately predicts tool outcomes.",
+        "rationale": "Agents rely on learned representations of tool effects; mismatches between model and reality cause flawed routing.",
+        "possible_failure": "Agent repeatedly uses ineffective tools, fails to calibrate, or over-relies on a single tool."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Accuracy vs. Speed: More thorough routing (e.g., considering many tools) improves correctness but increases latency and cost.",
+        "variables": [
+          "routing depth",
+          "response time",
+          "task completion rate"
+        ]
+      },
+      {
+        "tradeoff": "Generalization vs. Specialization: A general routing policy works across tasks but may miss optimal tool choices for specific domains.",
+        "variables": [
+          "policy generality",
+          "domain-specific performance",
+          "adaptation cost"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. Exploitation: Trying unfamiliar tools may discover better solutions but risks failure; sticking with known tools is safe but may be suboptimal.",
+        "variables": [
+          "exploration rate",
+          "failure rate",
+          "solution quality"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "context_quality",
+        "role": "input",
+        "description": "Sufficiency of the agent's contextual information to make accurate routing decisions."
+      },
+      {
+        "name": "tool_predictability",
+        "role": "input",
+        "description": "Degree to which tool behavior matches the agent's expectations (deterministic and well-defined)."
+      },
+      {
+        "name": "model_accuracy",
+        "role": "input",
+        "description": "Accuracy of the agent's internal model in predicting tool outcomes."
+      },
+      {
+        "name": "routing_strategy",
+        "role": "mediator",
+        "description": "The agent's choice of routing approach, e.g., depth of consideration, exploration rate, policy generality."
+      },
+      {
+        "name": "failure_rate",
+        "role": "output",
+        "description": "Frequency of failures in achieving task goals due to routing errors."
+      },
+      {
+        "name": "task_completion_rate",
+        "role": "output",
+        "description": "Proportion of tasks successfully completed."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "context_quality",
+        "relation": "influences",
+        "target": "routing_strategy",
+        "explanation": "Limited context forces heuristic or shallow routing."
+      },
+      {
+        "step": "2",
+        "source": "tool_predictability",
+        "relation": "moderates",
+        "target": "routing_strategy",
+        "explanation": "Unpredictable tools make routing unreliable."
+      },
+      {
+        "step": "3",
+        "source": "model_accuracy",
+        "relation": "moderates",
+        "target": "routing_strategy",
+        "explanation": "Inaccurate predictions lead to poor tool selection."
+      },
+      {
+        "step": "4",
+        "source": "routing_strategy",
+        "relation": "determines",
+        "target": "failure_rate",
+        "explanation": "Suboptimal routing increases failure likelihood."
+      },
+      {
+        "step": "5",
+        "source": "failure_rate",
+        "relation": "negatively affects",
+        "target": "task_completion_rate",
+        "explanation": "Failures reduce successful task completion."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Inadequate context",
+        "why_it_matters": "Without sufficient context, the agent cannot properly evaluate which tool to use, leading to wrong choices."
+      },
+      {
+        "bottleneck": "Model-tool mismatch",
+        "why_it_matters": "If the agent's mental model of tool behavior is inaccurate, even well-reasoned routing will fail."
+      },
+      {
+        "bottleneck": "Over-reliance on few tools",
+        "why_it_matters": "Agents may repeatedly use familiar tools even when others are more suitable, missing optimal solutions."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the agent's internal model, context, or tool properties deviate from assumptions, leading to suboptimal tool selection. Specifically, limited context, unpredictable tools, or inaccurate model predictions degrade routing strategy, resulting in increased failure rates and reduced task completion. Bottlenecks include inadequate context, model-tool mismatch, and over-reliance on few tools."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Assumption of deterministic tool behavior vs. real-world non-determinism: Tools may have side effects, latency variations, or non-deterministic outputs, violating the assumption that routing can rely on predictable outcomes.",
+      "derived_from": [
+        "Tools have deterministic, well-defined interfaces and behaviors.",
+        "tool_predictability"
+      ],
+      "why_it_matters": "If tools are unpredictable, routing strategies based on expected outcomes become unreliable, leading to cascading errors, repeated calls, and infinite loops.",
+      "what_existing_methods_may_miss": "Most benchmarks assume deterministic tools; real-world variability is under-tested.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Need for sufficient context vs. practical constraints (e.g., token limits): The assumption that agents have enough context to make correct routing decisions conflicts with limited context windows.",
+      "derived_from": [
+        "The agent has sufficient context to make correct routing decisions.",
+        "context_quality",
+        "Inadequate context"
+      ],
+      "why_it_matters": "Limited context forces heuristic or shallow routing, increasing the chance of wrong tool selection and failure.",
+      "what_existing_methods_may_miss": "Many evaluations provide as much context as needed; real-world agents often operate with truncated context.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Agent's internal model accuracy vs. dynamic tool behavior: The assumption that the agent's model accurately predicts tool outcomes is under-tested as tools evolve over time or have non-obvious behaviors.",
+      "derived_from": [
+        "The agent's internal model accurately predicts tool outcomes.",
+        "model_accuracy",
+        "Model-tool mismatch"
+      ],
+      "why_it_matters": "Inaccurate predictions lead to poor tool selection; model staleness is a hidden failure mode.",
+      "what_existing_methods_may_miss": "Static evaluations do not capture model decay; continuous adaptation is rarely tested.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Exploration vs. exploitation tradeoff in routing: Trying new tools may discover better solutions but risks failure, while sticking to familiar tools is safe but suboptimal.",
+      "derived_from": [
+        "Exploration vs. Exploitation",
+        "routing_strategy",
+        "Over-reliance on few tools"
+      ],
+      "why_it_matters": "Agents that over-exploit miss optimal solutions; those that over-explore incur high failure rates. The optimal balance is unknown.",
+      "what_existing_methods_may_miss": "Most agents use fixed strategies; adaptive exploration is under-studied.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does increasing tool non-determinism (e.g., random latency or side effects) affect the failure rate of an agent's routing strategy?",
+      "question_type": "causal",
+      "source_tension": "T1: Assumption of deterministic tool behavior vs. real-world non-determinism",
+      "expected_contribution": "Quantifies the impact of tool unpredictability on routing reliability, guiding design of robust agents."
+    },
+    {
+      "question": "Under what context window sizes does the agent's task completion rate drop significantly, and can adaptive context compression mitigate this decline?",
+      "question_type": "benchmark",
+      "source_tension": "T2: Need for sufficient context vs. practical constraints (e.g., token limits)",
+      "expected_contribution": "Identifies critical context thresholds and tests a potential mitigation strategy."
+    },
+    {
+      "question": "How does the accuracy of an agent's internal model of tool outcomes correlate with task success in environments where tool behavior drifts over time?",
+      "question_type": "diagnostic",
+      "source_tension": "T3: Agent's internal model accuracy vs. dynamic tool behavior",
+      "expected_contribution": "Reveals the relationship between model fidelity and long-term agent performance under drift."
+    },
+    {
+      "question": "What is the optimal exploration rate (epsilon) for a tool routing agent that balances failure avoidance and discovering better tools, and does it vary with tool set diversity?",
+      "question_type": "algorithmic",
+      "source_tension": "T4: Exploration vs. exploitation tradeoff in routing",
+      "expected_contribution": "Provides a principled guideline for setting exploration parameters in tool routing."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that performs a specific operation, such as running code, querying a database, or retrieving files, which can be invoked by an agent.",
+          "why_primitive": "Tools are the atomic units of action that agents use to interact with environments; without them, routing is meaningless."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which an agent selects which tool to invoke at a given step, based on its internal state, context, and goals.",
+          "why_primitive": "Routing is the core mechanism of tool use; it determines when and how tools are applied."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that writes, executes, and debugs code to accomplish tasks, typically using large language models and tool invocation.",
+          "why_primitive": "The specific domain of coding defines constraints and failure modes unique to code generation and execution."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent does not achieve its intended goal, produces incorrect or harmful results, or enters an unrecoverable state.",
+          "why_primitive": "Understanding failure is necessary to study when routing fails; it defines the dependent variable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have deterministic, well-defined interfaces and behaviors.",
+          "rationale": "Routing decisions rely on predictable tool outputs; if tools behave nondeterministically or have hidden side effects, the agent's expectations may be violated.",
+          "possible_failure": "Unexpected tool behavior leads to cascading errors, repeated calls, or infinite loops."
+        },
+        {
+          "assumption": "The agent has sufficient context to make correct routing decisions.",
+          "rationale": "Routing requires understanding the current state, the goal, and the effects of each tool. Limited context (e.g., token limits) impairs this.",
+          "possible_failure": "Agent selects wrong tool due to missing information, leading to wasted calls or incorrect code."
+        },
+        {
+          "assumption": "The agent's internal model accurately predicts tool outcomes.",
+          "rationale": "Agents rely on learned representations of tool effects; mismatches between model and reality cause flawed routing.",
+          "possible_failure": "Agent repeatedly uses ineffective tools, fails to calibrate, or over-relies on a single tool."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "context_quality",
+            "role": "input",
+            "description": "Sufficiency of the agent's contextual information to make accurate routing decisions."
+          },
+          {
+            "name": "tool_predictability",
+            "role": "input",
+            "description": "Degree to which tool behavior matches the agent's expectations (deterministic and well-defined)."
+          },
+          {
+            "name": "model_accuracy",
+            "role": "input",
+            "description": "Accuracy of the agent's internal model in predicting tool outcomes."
+          },
+          {
+            "name": "routing_strategy",
+            "role": "mediator",
+            "description": "The agent's choice of routing approach, e.g., depth of consideration, exploration rate, policy generality."
+          },
+          {
+            "name": "failure_rate",
+            "role": "output",
+            "description": "Frequency of failures in achieving task goals due to routing errors."
+          },
+          {
+            "name": "task_completion_rate",
+            "role": "output",
+            "description": "Proportion of tasks successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "context_quality",
+            "relation": "influences",
+            "target": "routing_strategy",
+            "explanation": "Limited context forces heuristic or shallow routing."
+          },
+          {
+            "step": "2",
+            "source": "tool_predictability",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Unpredictable tools make routing unreliable."
+          },
+          {
+            "step": "3",
+            "source": "model_accuracy",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Inaccurate predictions lead to poor tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_strategy",
+            "relation": "determines",
+            "target": "failure_rate",
+            "explanation": "Suboptimal routing increases failure likelihood."
+          },
+          {
+            "step": "5",
+            "source": "failure_rate",
+            "relation": "negatively affects",
+            "target": "task_completion_rate",
+            "explanation": "Failures reduce successful task completion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate context",
+            "why_it_matters": "Without sufficient context, the agent cannot properly evaluate which tool to use, leading to wrong choices."
+          },
+          {
+            "bottleneck": "Model-tool mismatch",
+            "why_it_matters": "If the agent's mental model of tool behavior is inaccurate, even well-reasoned routing will fail."
+          },
+          {
+            "bottleneck": "Over-reliance on few tools",
+            "why_it_matters": "Agents may repeatedly use familiar tools even when others are more suitable, missing optimal solutions."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the agent's internal model, context, or tool properties deviate from assumptions, leading to suboptimal tool selection. Specifically, limited context, unpredictable tools, or inaccurate model predictions degrade routing strategy, resulting in increased failure rates and reduced task completion. Bottlenecks include inadequate context, model-tool mismatch, and over-reliance on few tools."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption of deterministic tool behavior vs. real-world non-determinism: Tools may have side effects, latency variations, or non-deterministic outputs, violating the assumption that routing can rely on predictable outcomes.",
+        "derived_from": [
+          "Tools have deterministic, well-defined interfaces and behaviors.",
+          "tool_predictability"
+        ],
+        "why_it_matters": "If tools are unpredictable, routing strategies based on expected outcomes become unreliable, leading to cascading errors, repeated calls, and infinite loops.",
+        "what_existing_methods_may_miss": "Most benchmarks assume deterministic tools; real-world variability is under-tested.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of model accuracy relative to tool-behavior drift rate does tool-use routing failure become significantly more likely in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical boundary (accuracy-drift ratio) below which routing failure sharply increases, enabling prediction and prevention of failure under drift."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ratio between model accuracy (1 minus prediction error rate) and tool-behavior drift rate such that, when the ratio falls below this threshold, task success rates drop steeply, indicating a phase transition in routing failure.",
+        "predicted_effect": "As the accuracy-drift ratio decreases, task success remains high until a critical point, after which it drops sharply, forming a sigmoid-like relationship."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a synthetic coding environment where a code execution tool's output behavior drifts linearly over time (e.g., returning increasingly different results). Train agent instances with different model accuracy levels (by varying training data freshness) and test them under different drift rates (e.g., 0.01, 0.05, 0.10 per step). Measure task success rate for each combination of accuracy and drift rate. Use logistic regression or change-point detection to estimate the threshold ratio where success rate drops below 50%.",
+        "independent_variables": [
+          "model accuracy (1 - prediction error rate, measured on held-out tool outcome samples)",
+          "tool-behavior drift rate (change in tool output distribution per step, e.g., KL divergence per step)"
+        ],
+        "dependent_variables": [
+          "task success rate (proportion of tasks completed without error over a fixed time window)"
+        ],
+        "controls": [
+          "same initial tool behavior for all agents",
+          "same task set and task difficulty",
+          "same agent architecture except for model accuracy",
+          "same drift pattern (linear) and duration (e.g., 100 steps)"
+        ],
+        "falsifying_observation": "If the task success rate decreases smoothly and linearly with decreasing accuracy-drift ratio, without a distinct threshold, the hypothesis of a critical boundary is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Task success rates remain high (e.g., >80%) until a critical accuracy-drift ratio, then drop sharply to low levels (e.g., <20%) within a narrow range of ratio values.",
+          "The location of the threshold shifts predictably with changes in task complexity or context length, but the sharp transition persists.",
+          "Below the threshold, agents exhibit a higher proportion of repeated calls to the same tool and failure to recover, consistent with routing failure."
+        ],
+        "rejects_hypothesis": [
+          "Task success rate decreases as a continuous linear function of accuracy-drift ratio, with no clear inflection point.",
+          "The relationship is noisy and no significant change point is detected, suggesting model accuracy and drift rate have additive but not threshold effects.",
+          "Agents with low model accuracy still achieve moderate success under high drift, indicating other compensatory mechanisms dominate."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then the assumption that there is a critical boundary condition for routing failure under drift should be revised.",
+        "assumption_to_revise": "The assumption that routing failure exhibits a phase transition driven by the accuracy-drift ratio.",
+        "next_question": "What continuous relationship best describes how model accuracy and drift rate interact to affect routing failure, and are there alternative factors (e.g., context length, exploration rate) that mitigate the effect?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that performs a specific operation, such as running code, querying a database, or retrieving files, which can be invoked by an agent.",
+          "why_primitive": "Tools are the atomic units of action that agents use to interact with environments; without them, routing is meaningless."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which an agent selects which tool to invoke at a given step, based on its internal state, context, and goals.",
+          "why_primitive": "Routing is the core mechanism of tool use; it determines when and how tools are applied."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that writes, executes, and debugs code to accomplish tasks, typically using large language models and tool invocation.",
+          "why_primitive": "The specific domain of coding defines constraints and failure modes unique to code generation and execution."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent does not achieve its intended goal, produces incorrect or harmful results, or enters an unrecoverable state.",
+          "why_primitive": "Understanding failure is necessary to study when routing fails; it defines the dependent variable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have deterministic, well-defined interfaces and behaviors.",
+          "rationale": "Routing decisions rely on predictable tool outputs; if tools behave nondeterministically or have hidden side effects, the agent's expectations may be violated.",
+          "possible_failure": "Unexpected tool behavior leads to cascading errors, repeated calls, or infinite loops."
+        },
+        {
+          "assumption": "The agent has sufficient context to make correct routing decisions.",
+          "rationale": "Routing requires understanding the current state, the goal, and the effects of each tool. Limited context (e.g., token limits) impairs this.",
+          "possible_failure": "Agent selects wrong tool due to missing information, leading to wasted calls or incorrect code."
+        },
+        {
+          "assumption": "The agent's internal model accurately predicts tool outcomes.",
+          "rationale": "Agents rely on learned representations of tool effects; mismatches between model and reality cause flawed routing.",
+          "possible_failure": "Agent repeatedly uses ineffective tools, fails to calibrate, or over-relies on a single tool."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "context_quality",
+            "role": "input",
+            "description": "Sufficiency of the agent's contextual information to make accurate routing decisions."
+          },
+          {
+            "name": "tool_predictability",
+            "role": "input",
+            "description": "Degree to which tool behavior matches the agent's expectations (deterministic and well-defined)."
+          },
+          {
+            "name": "model_accuracy",
+            "role": "input",
+            "description": "Accuracy of the agent's internal model in predicting tool outcomes."
+          },
+          {
+            "name": "routing_strategy",
+            "role": "mediator",
+            "description": "The agent's choice of routing approach, e.g., depth of consideration, exploration rate, policy generality."
+          },
+          {
+            "name": "failure_rate",
+            "role": "output",
+            "description": "Frequency of failures in achieving task goals due to routing errors."
+          },
+          {
+            "name": "task_completion_rate",
+            "role": "output",
+            "description": "Proportion of tasks successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "context_quality",
+            "relation": "influences",
+            "target": "routing_strategy",
+            "explanation": "Limited context forces heuristic or shallow routing."
+          },
+          {
+            "step": "2",
+            "source": "tool_predictability",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Unpredictable tools make routing unreliable."
+          },
+          {
+            "step": "3",
+            "source": "model_accuracy",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Inaccurate predictions lead to poor tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_strategy",
+            "relation": "determines",
+            "target": "failure_rate",
+            "explanation": "Suboptimal routing increases failure likelihood."
+          },
+          {
+            "step": "5",
+            "source": "failure_rate",
+            "relation": "negatively affects",
+            "target": "task_completion_rate",
+            "explanation": "Failures reduce successful task completion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate context",
+            "why_it_matters": "Without sufficient context, the agent cannot properly evaluate which tool to use, leading to wrong choices."
+          },
+          {
+            "bottleneck": "Model-tool mismatch",
+            "why_it_matters": "If the agent's mental model of tool behavior is inaccurate, even well-reasoned routing will fail."
+          },
+          {
+            "bottleneck": "Over-reliance on few tools",
+            "why_it_matters": "Agents may repeatedly use familiar tools even when others are more suitable, missing optimal solutions."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the agent's internal model, context, or tool properties deviate from assumptions, leading to suboptimal tool selection. Specifically, limited context, unpredictable tools, or inaccurate model predictions degrade routing strategy, resulting in increased failure rates and reduced task completion. Bottlenecks include inadequate context, model-tool mismatch, and over-reliance on few tools."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption of deterministic tool behavior vs. real-world non-determinism: Tools may have side effects, latency variations, or non-deterministic outputs, violating the assumption that routing can rely on predictable outcomes.",
+        "derived_from": [
+          "Tools have deterministic, well-defined interfaces and behaviors.",
+          "tool_predictability"
+        ],
+        "why_it_matters": "If tools are unpredictable, routing strategies based on expected outcomes become unreliable, leading to cascading errors, repeated calls, and infinite loops.",
+        "what_existing_methods_may_miss": "Most benchmarks assume deterministic tools; real-world variability is under-tested.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of tool non-determinism beyond which the failure rate of a coding agent's routing strategy sharply increases, and does this threshold depend on the quality of the agent's context?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp boundary condition (non-determinism threshold) for reliable routing, and its dependence on context quality, guiding design of robust agents."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold T of tool non-determinism (e.g., probability of side effect or latency variance) such that for non-determinism levels below T, failure rate remains low (<20%), but for levels above T, failure rate sharply increases (>80%). Moreover, this threshold T is lower when the agent's context quality is limited (e.g., half the available token budget).",
+        "predicted_effect": "Failure rate exhibits a sigmoidal transition at T, with T decreasing under limited context."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Test a standard coding agent (GPT-4 with tool-use) on 500 coding tasks. Manipulate two independent variables: (a) non-determinism level: 0%, 10%, 20%, 30%, 40% probability of tool side effect; (b) context quality: full context (8000 tokens) vs. limited context (4000 tokens). Each condition tested with 25 tasks (2x5x25=250 total tasks, but repeat for robustness). Measure failure rate, task completion rate, average tool calls. Fit a sigmoid to failure rate vs non-determinism per context condition to estimate threshold T.",
+        "independent_variables": [
+          "Non-determinism level (0%, 10%, 20%, 30%, 40% tool side-effect probability)",
+          "Context quality (full 8k tokens vs limited 4k tokens)"
+        ],
+        "dependent_variables": [
+          "Failure rate of routing strategy",
+          "Task completion rate",
+          "Average number of tool calls per task"
+        ],
+        "controls": [
+          "Same agent architecture (GPT-4)",
+          "Same task set (coding tasks from HumanEval+)",
+          "Same routing algorithm (best-of-n with depth 3)",
+          "Same tool set (code execution, file read, database query)",
+          "Fixed tool execution time (except non-deterministic latency)"
+        ],
+        "falsifying_observation": "Failure rate increases linearly with non-determinism (no threshold), or threshold T is similar for both context conditions (no interaction), or no sharp transition is observed."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate as a function of non-determinism shows a sigmoidal shape with an inflection point (threshold) between 10-30%.",
+          "Threshold T is significantly lower (e.g., 10%) under limited context compared to full context (e.g., 30%).",
+          "Above threshold, failure rate exceeds 80% and agent enters loops or repeated calls."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases monotonically without a distinct threshold.",
+          "Threshold T is the same across context levels.",
+          "Failure rate remains below 50% even at 40% non-determinism."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment shows no threshold or no context interaction, then the assumption of a sharp phase transition in routing failure due to non-determinism is not supported.",
+        "assumption_to_revise": "There exists a critical threshold of tool unpredictability that causes abrupt failure.",
+        "next_question": "Does the effect of non-determinism on routing failure follow a gradual, linear degradation instead? Or does it interact with other factors like task complexity or agent architecture?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that performs a specific operation, such as running code, querying a database, or retrieving files, which can be invoked by an agent.",
+          "why_primitive": "Tools are the atomic units of action that agents use to interact with environments; without them, routing is meaningless."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which an agent selects which tool to invoke at a given step, based on its internal state, context, and goals.",
+          "why_primitive": "Routing is the core mechanism of tool use; it determines when and how tools are applied."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that writes, executes, and debugs code to accomplish tasks, typically using large language models and tool invocation.",
+          "why_primitive": "The specific domain of coding defines constraints and failure modes unique to code generation and execution."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent does not achieve its intended goal, produces incorrect or harmful results, or enters an unrecoverable state.",
+          "why_primitive": "Understanding failure is necessary to study when routing fails; it defines the dependent variable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have deterministic, well-defined interfaces and behaviors.",
+          "rationale": "Routing decisions rely on predictable tool outputs; if tools behave nondeterministically or have hidden side effects, the agent's expectations may be violated.",
+          "possible_failure": "Unexpected tool behavior leads to cascading errors, repeated calls, or infinite loops."
+        },
+        {
+          "assumption": "The agent has sufficient context to make correct routing decisions.",
+          "rationale": "Routing requires understanding the current state, the goal, and the effects of each tool. Limited context (e.g., token limits) impairs this.",
+          "possible_failure": "Agent selects wrong tool due to missing information, leading to wasted calls or incorrect code."
+        },
+        {
+          "assumption": "The agent's internal model accurately predicts tool outcomes.",
+          "rationale": "Agents rely on learned representations of tool effects; mismatches between model and reality cause flawed routing.",
+          "possible_failure": "Agent repeatedly uses ineffective tools, fails to calibrate, or over-relies on a single tool."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "context_quality",
+            "role": "input",
+            "description": "Sufficiency of the agent's contextual information to make accurate routing decisions."
+          },
+          {
+            "name": "tool_predictability",
+            "role": "input",
+            "description": "Degree to which tool behavior matches the agent's expectations (deterministic and well-defined)."
+          },
+          {
+            "name": "model_accuracy",
+            "role": "input",
+            "description": "Accuracy of the agent's internal model in predicting tool outcomes."
+          },
+          {
+            "name": "routing_strategy",
+            "role": "mediator",
+            "description": "The agent's choice of routing approach, e.g., depth of consideration, exploration rate, policy generality."
+          },
+          {
+            "name": "failure_rate",
+            "role": "output",
+            "description": "Frequency of failures in achieving task goals due to routing errors."
+          },
+          {
+            "name": "task_completion_rate",
+            "role": "output",
+            "description": "Proportion of tasks successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "context_quality",
+            "relation": "influences",
+            "target": "routing_strategy",
+            "explanation": "Limited context forces heuristic or shallow routing."
+          },
+          {
+            "step": "2",
+            "source": "tool_predictability",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Unpredictable tools make routing unreliable."
+          },
+          {
+            "step": "3",
+            "source": "model_accuracy",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Inaccurate predictions lead to poor tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_strategy",
+            "relation": "determines",
+            "target": "failure_rate",
+            "explanation": "Suboptimal routing increases failure likelihood."
+          },
+          {
+            "step": "5",
+            "source": "failure_rate",
+            "relation": "negatively affects",
+            "target": "task_completion_rate",
+            "explanation": "Failures reduce successful task completion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate context",
+            "why_it_matters": "Without sufficient context, the agent cannot properly evaluate which tool to use, leading to wrong choices."
+          },
+          {
+            "bottleneck": "Model-tool mismatch",
+            "why_it_matters": "If the agent's mental model of tool behavior is inaccurate, even well-reasoned routing will fail."
+          },
+          {
+            "bottleneck": "Over-reliance on few tools",
+            "why_it_matters": "Agents may repeatedly use familiar tools even when others are more suitable, missing optimal solutions."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the agent's internal model, context, or tool properties deviate from assumptions, leading to suboptimal tool selection. Specifically, limited context, unpredictable tools, or inaccurate model predictions degrade routing strategy, resulting in increased failure rates and reduced task completion. Bottlenecks include inadequate context, model-tool mismatch, and over-reliance on few tools."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption of deterministic tool behavior vs. real-world non-determinism: Tools may have side effects, latency variations, or non-deterministic outputs, violating the assumption that routing can rely on predictable outcomes.",
+        "derived_from": [
+          "Tools have deterministic, well-defined interfaces and behaviors.",
+          "tool_predictability"
+        ],
+        "why_it_matters": "If tools are unpredictable, routing strategies based on expected outcomes become unreliable, leading to cascading errors, repeated calls, and infinite loops.",
+        "what_existing_methods_may_miss": "Most benchmarks assume deterministic tools; real-world variability is under-tested.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what level of model-tool mismatch does a coding agent's tool-use routing transition from graceful degradation to catastrophic failure?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp phase transition threshold in tool-use routing failure driven by mismatch between agent's internal model and actual tool behavior, revealing a critical boundary condition for reliable routing."
+      },
+      "hypothesis": {
+        "statement": "There exists a sharp threshold of model-tool mismatch (measured as average deviation between predicted and actual tool outputs) beyond which a coding agent's task completion rate drops discontinuously (phase transition), and this threshold is lower for complex tasks.",
+        "predicted_effect": "Task completion rate as a function of mismatch level will show a sigmoid-like curve with a steep drop within a narrow range of mismatch, rather than a linear decline."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Evaluate a coding agent (e.g., GPT-4-based) on tasks from HumanEval and MBPP, inducing varying levels of model-tool mismatch by corrupting the agent's internal predictions (e.g., adding noise to predicted tool outputs) or using tools with controlled stochasticity. For each mismatch level (0%, 10%, 20%, ..., 100% deviation), measure task completion rate. Use tasks of low, medium, and high complexity (e.g., based on cyclomatic complexity or required tool diversity).",
+        "independent_variables": [
+          "model-tool mismatch level (0-100% deviation)",
+          "task complexity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "task_completion_rate",
+          "number_of_tool_calls_per_task",
+          "failure_mode (incorrect output vs. infinite loop)"
+        ],
+        "controls": [
+          "fixed agent architecture",
+          "same tool set",
+          "same task instances per complexity level",
+          "same evaluation metric (pass@1)"
+        ],
+        "falsifying_observation": "Task completion rate declines smoothly (e.g., linearly) with increasing mismatch, with no sharp drop or discontinuity at any mismatch level."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Task completion rate remains above 80% for mismatch below a certain threshold (e.g., <30%) and drops below 20% for mismatch above that threshold within a narrow range (e.g., 30-40%).",
+          "The threshold is lower for complex tasks (e.g., threshold at 20% mismatch for high complexity vs. 40% for low complexity).",
+          "The number of tool calls increases sharply near the threshold, indicating repeated attempts before failure."
+        ],
+        "rejects_hypothesis": [
+          "Task completion rate declines gradually and linearly across all mismatch levels (e.g., 10% mismatch → 90% rate, 20% → 80%, etc.).",
+          "No significant difference in rate between task complexity levels.",
+          "Task completion rate drops abruptly but at the same mismatch level regardless of complexity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, then the hypothesis that model-tool mismatch is a bifurcation parameter is rejected. This suggests that routing failures are not driven by a single threshold but by gradual degradation or other factors like tool predictability or context.",
+        "assumption_to_revise": "The assumption that 'agent's internal model accurately predicts tool outcomes' is not sufficient to cause a phase transition; instead, the interaction between mismatch and task structure may be gradual.",
+        "next_question": "What is the functional form of degradation in routing performance as model-tool mismatch increases, and does the presence of multiple tools with different predictability levels mitigate or exacerbate the decline?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that performs a specific operation, such as running code, querying a database, or retrieving files, which can be invoked by an agent.",
+          "why_primitive": "Tools are the atomic units of action that agents use to interact with environments; without them, routing is meaningless."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which an agent selects which tool to invoke at a given step, based on its internal state, context, and goals.",
+          "why_primitive": "Routing is the core mechanism of tool use; it determines when and how tools are applied."
+        },
+        {
+          "name": "coding agent",
+          "definition": "An autonomous system that writes, executes, and debugs code to accomplish tasks, typically using large language models and tool invocation.",
+          "why_primitive": "The specific domain of coding defines constraints and failure modes unique to code generation and execution."
+        },
+        {
+          "name": "failure",
+          "definition": "An outcome where the agent does not achieve its intended goal, produces incorrect or harmful results, or enters an unrecoverable state.",
+          "why_primitive": "Understanding failure is necessary to study when routing fails; it defines the dependent variable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have deterministic, well-defined interfaces and behaviors.",
+          "rationale": "Routing decisions rely on predictable tool outputs; if tools behave nondeterministically or have hidden side effects, the agent's expectations may be violated.",
+          "possible_failure": "Unexpected tool behavior leads to cascading errors, repeated calls, or infinite loops."
+        },
+        {
+          "assumption": "The agent has sufficient context to make correct routing decisions.",
+          "rationale": "Routing requires understanding the current state, the goal, and the effects of each tool. Limited context (e.g., token limits) impairs this.",
+          "possible_failure": "Agent selects wrong tool due to missing information, leading to wasted calls or incorrect code."
+        },
+        {
+          "assumption": "The agent's internal model accurately predicts tool outcomes.",
+          "rationale": "Agents rely on learned representations of tool effects; mismatches between model and reality cause flawed routing.",
+          "possible_failure": "Agent repeatedly uses ineffective tools, fails to calibrate, or over-relies on a single tool."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "context_quality",
+            "role": "input",
+            "description": "Sufficiency of the agent's contextual information to make accurate routing decisions."
+          },
+          {
+            "name": "tool_predictability",
+            "role": "input",
+            "description": "Degree to which tool behavior matches the agent's expectations (deterministic and well-defined)."
+          },
+          {
+            "name": "model_accuracy",
+            "role": "input",
+            "description": "Accuracy of the agent's internal model in predicting tool outcomes."
+          },
+          {
+            "name": "routing_strategy",
+            "role": "mediator",
+            "description": "The agent's choice of routing approach, e.g., depth of consideration, exploration rate, policy generality."
+          },
+          {
+            "name": "failure_rate",
+            "role": "output",
+            "description": "Frequency of failures in achieving task goals due to routing errors."
+          },
+          {
+            "name": "task_completion_rate",
+            "role": "output",
+            "description": "Proportion of tasks successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "context_quality",
+            "relation": "influences",
+            "target": "routing_strategy",
+            "explanation": "Limited context forces heuristic or shallow routing."
+          },
+          {
+            "step": "2",
+            "source": "tool_predictability",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Unpredictable tools make routing unreliable."
+          },
+          {
+            "step": "3",
+            "source": "model_accuracy",
+            "relation": "moderates",
+            "target": "routing_strategy",
+            "explanation": "Inaccurate predictions lead to poor tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_strategy",
+            "relation": "determines",
+            "target": "failure_rate",
+            "explanation": "Suboptimal routing increases failure likelihood."
+          },
+          {
+            "step": "5",
+            "source": "failure_rate",
+            "relation": "negatively affects",
+            "target": "task_completion_rate",
+            "explanation": "Failures reduce successful task completion."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadequate context",
+            "why_it_matters": "Without sufficient context, the agent cannot properly evaluate which tool to use, leading to wrong choices."
+          },
+          {
+            "bottleneck": "Model-tool mismatch",
+            "why_it_matters": "If the agent's mental model of tool behavior is inaccurate, even well-reasoned routing will fail."
+          },
+          {
+            "bottleneck": "Over-reliance on few tools",
+            "why_it_matters": "Agents may repeatedly use familiar tools even when others are more suitable, missing optimal solutions."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the agent's internal model, context, or tool properties deviate from assumptions, leading to suboptimal tool selection. Specifically, limited context, unpredictable tools, or inaccurate model predictions degrade routing strategy, resulting in increased failure rates and reduced task completion. Bottlenecks include inadequate context, model-tool mismatch, and over-reliance on few tools."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption of deterministic tool behavior vs. real-world non-determinism: Tools may have side effects, latency variations, or non-deterministic outputs, violating the assumption that routing can rely on predictable outcomes.",
+        "derived_from": [
+          "Tools have deterministic, well-defined interfaces and behaviors.",
+          "tool_predictability"
+        ],
+        "why_it_matters": "If tools are unpredictable, routing strategies based on expected outcomes become unreliable, leading to cascading errors, repeated calls, and infinite loops.",
+        "what_existing_methods_may_miss": "Most benchmarks assume deterministic tools; real-world variability is under-tested.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in tool predictability below which the optimal exploration rate for a tool-routing agent drops to zero, and does this threshold depend on the cost of failure?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in tool-using agent behavior: below a predictability threshold, exploration becomes too risky (zero optimal epsilon), providing a principled design rule for when to disable exploration in coding agents."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold in tool predictability (e.g., measured as variance in tool response accuracy) below which the optimal exploration rate epsilon for a tool-routing agent is zero; above the threshold, optimal epsilon is positive and increases with predictability. This threshold increases with the cost of tool failure (e.g., task restart penalty).",
+        "predicted_effect": "When tool predictability is low, the risk of failure from exploring outweighs the benefit of discovering better tools, driving the optimal epsilon to zero. As predictability improves, exploration becomes viable. A higher failure cost raises the threshold, making exploration optimal only at higher predictability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with an epsilon-greedy tool routing policy on a set of coding tasks. Manipulate tool predictability by varying the variance of tool output correctness (e.g., 0%, 5%, 10%, 20% error rate). For each predictability level, measure optimal epsilon (value maximizing task completion rate) via grid search (epsilon ∈ {0, 0.05, 0.1, 0.2, 0.5}). Repeat under two failure cost conditions: low cost (no penalty for failure) and high cost (failure resets task to start, doubling expected steps).",
+        "independent_variables": [
+          "Tool predictability (variance in tool output correctness: 0%, 5%, 10%, 20%)",
+          "Failure cost (low: no penalty; high: task restart penalty)"
+        ],
+        "dependent_variables": [
+          "Optimal exploration rate epsilon that maximizes average task completion rate"
+        ],
+        "controls": [
+          "Agent architecture (same base LLM and routing policy)",
+          "Task distribution (same set of 50 coding tasks)",
+          "Tool set (fixed 5 tools with different functions)",
+          "Budget per task (max 20 tool calls)",
+          "Learning algorithm (epsilon-greedy, fixed decay schedule)",
+          "Number of episodes per condition (1000 episodes for robust estimation)"
+        ],
+        "falsifying_observation": "If optimal epsilon is never zero even at very low predictability, or if it does not drop to zero as predictability decreases, then the hypothesis of a threshold is falsified. Also, if the threshold does not shift with failure cost, the cost-dependence part is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low predictability (e.g., 0% correct), optimal epsilon is 0 for both failure costs.",
+          "At high predictability (e.g., 0% error), optimal epsilon is positive (e.g., 0.1-0.2).",
+          "The predictability level where optimal epsilon first becomes positive (the threshold) is higher under high failure cost than under low cost."
+        ],
+        "rejects_hypothesis": [
+          "Optimal epsilon remains positive (e.g., >0.05) even at lowest predictability, indicating no threshold.",
+          "Optimal epsilon does not change with failure cost",
+          "Optimal epsilon jumps abruptly but never to zero, or smoothly decreases but stays above zero.",
+          "Threshold does not shift with failure cost."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed (optimal epsilon stays positive or smoothly declines), then the assumption that tool predictability alone creates a phase transition is invalid.",
+        "assumption_to_revise": "The assumption that the risk of failure from exploration depends monotonically on predictability. Instead, other factors like tool diversity or task difficulty may create the threshold.",
+        "next_question": "How does tool set diversity (number of tools) modulate the relationship between predictability and optimal exploration rate? Does diversity create a threshold even with low predictability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold T of tool non-determinism such that for non-determinism levels below T, failure rate remains low (<20%), but for levels above T, failure rate sharply increases (>80%). Moreover, this threshold T is lower when the agent's context quality is limited.",
+      "independent_variables": [
+        "Non-determinism level: 0%, 10%, 20%, 30%, 40% tool side-effect probability",
+        "Context quality: full context (8000 tokens) vs limited context (4000 tokens)"
+      ],
+      "dependent_variables": [
+        "Failure rate of routing strategy",
+        "Task completion rate",
+        "Average number of tool calls per task"
+      ],
+      "controlled_variables": [
+        "Agent architecture: GPT-4",
+        "Task set: coding tasks from HumanEval+",
+        "Routing algorithm: best-of-n with depth 3",
+        "Tool set: code execution, file read, database query",
+        "Tool execution time: fixed except for non-deterministic latency"
+      ],
+      "baselines": [
+        {
+          "name": "No non-determinism, full context",
+          "description": "0% non-determinism with full 8000 token context; expected low failure rate (<20%)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate",
+          "definition": "Proportion of tasks where the agent does not achieve the intended goal, produces incorrect results, or enters an unrecoverable state."
+        },
+        {
+          "name": "Task completion rate",
+          "definition": "Proportion of tasks successfully completed."
+        },
+        {
+          "name": "Average tool calls per task",
+          "definition": "Mean number of tool invocations per task across all tasks in a condition."
+        }
+      ],
+      "expected_result": "Failure rate shows a sigmoidal shape with a sharp threshold between 10-30% non-determinism; threshold is lower under limited context (e.g., 10% vs 30%). Above threshold, failure rate exceeds 80% and agent enters loops or repeated calls.",
+      "falsifying_result": "Failure rate increases linearly with non-determinism (no threshold), or threshold T is similar for both context conditions (no interaction), or no sharp transition is observed (failure rate remains below 50% at 40% non-determinism).",
+      "minimum_viable_experiment": "Test a standard coding agent (GPT-4 with tool-use) on 250 coding tasks: 5 non-determinism levels (0%,10%,20%,30%,40%) × 2 context conditions (full 8k, limited 4k) × 25 tasks per condition. Measure failure rate for each condition and fit a sigmoid to estimate threshold T per context.",
+      "risks_and_confounds": [
+        "Non-determinism implementation may not reflect real-world variability; side effects must be carefully controlled.",
+        "Task difficulty may interact with non-determinism; use uniform task set.",
+        "Agent may adapt its routing strategy over time; use a fresh agent per task.",
+        "Token limit manipulation may affect other aspects of reasoning; control for total processing time."
+      ]
+    },
+    {
+      "hypothesis": "There exists a sharp threshold of model-tool mismatch beyond which coding agent's task completion rate drops discontinuously, and this threshold is lower for complex tasks.",
+      "independent_variables": [
+        "model-tool mismatch level (0%, 20%, 40%, 60%, 80%, 100%)",
+        "task complexity (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "task completion rate (pass@1)"
+      ],
+      "controlled_variables": [
+        "agent architecture (GPT-4-based)",
+        "tool set (identical across conditions)",
+        "task instances per complexity level (fixed set)",
+        "evaluation metric (pass@1)",
+        "number of runs per condition"
+      ],
+      "baselines": [
+        {
+          "name": "Zero mismatch baseline",
+          "description": "Task completion rate with perfect model-tool alignment (0% mismatch) for each complexity level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "task completion rate",
+          "definition": "Proportion of tasks where the final output passes all test cases (pass@1)."
+        }
+      ],
+      "expected_result": "Task completion rate remains above 80% for mismatch below a threshold (e.g., <30%) and drops below 20% above that threshold within a narrow range; the threshold is lower for high complexity tasks.",
+      "falsifying_result": "Task completion rate declines gradually and linearly with increasing mismatch across all complexity levels, with no sharp drop or complexity-dependent threshold.",
+      "minimum_viable_experiment": "Test one low, one medium, and one high complexity task from HumanEval/MBPP with a single coding agent (e.g., GPT-4). For each complexity level, run 3 mismatch levels (0%, 30%, 60%) with at least 5 trials each. Measure pass@1. If the sharp drop is not observed, hypothesis is falsified. If observed, further levels can pinpoint threshold.",
+      "risks_and_confounds": [
+        "Small number of tasks may miss threshold; need sufficient tasks per complexity to estimate rate.",
+        "Mismatch implementation might affect agent behavior beyond intended (e.g., corrupting predictions vs. actual tool stochasticity).",
+        "Task complexity definition may be subjective; use cyclomatic complexity or required tool diversity."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ratio between model accuracy (1 minus prediction error rate) and tool-behavior drift rate such that, when the ratio falls below this threshold, task success rates drop steeply, indicating a phase transition in routing failure.",
+      "independent_variables": [
+        "model accuracy (1 - prediction error rate)",
+        "tool-behavior drift rate"
+      ],
+      "dependent_variables": [
+        "task success rate"
+      ],
+      "controlled_variables": [
+        "initial tool behavior",
+        "task set and difficulty",
+        "agent architecture (except model accuracy)",
+        "drift pattern (linear)",
+        "drift duration (100 steps)",
+        "context length"
+      ],
+      "baselines": [
+        {
+          "name": "No drift baseline",
+          "description": "Agent with perfect accuracy (accuracy=1.0) and no drift (drift rate=0). Expected success rate > 95%."
+        },
+        {
+          "name": "Random routing baseline",
+          "description": "Agent selects tools uniformly at random. Expected success rate low (e.g., chance level)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "task_success_rate",
+          "definition": "Proportion of tasks completed without error over a fixed time window of 100 steps."
+        }
+      ],
+      "expected_result": "Task success rates remain high (>80%) until a critical accuracy-drift ratio, then drop sharply to low levels (<20%) within a narrow range of ratio values. For example, with drift rate 0.05, accuracy 0.95 yields >80% success, accuracy 0.85 yields ~30%, and accuracy 0.75 yields <10%.",
+      "falsifying_result": "Task success rate decreases as a continuous linear function of accuracy-drift ratio, with no clear inflection point. The relationship is smooth and no significant change point is detected (e.g., using piecewise linear regression).",
+      "minimum_viable_experiment": "We implement a synthetic coding environment where a single tool (code execution) linearly drifts in output distribution over 100 steps. We train agents with varying model accuracy by controlling the freshness of training data (e.g., accuracy levels: 0.95, 0.85, 0.75, 0.65). All agents are tested on a fixed set of 50 tasks under a single drift rate of 0.05 per step. We measure task success rate for each accuracy level. To minimize, we test only 4 accuracy levels, sufficient to detect a nonlinear drop if present.",
+      "risks_and_confounds": [
+        "The specific drift rate (0.05) may not be representative; a different rate might shift the threshold. To mitigate, we also test a single lower drift rate (0.02) with the same accuracy levels as a secondary check.",
+        "Task difficulty might interact with accuracy. We control by using tasks of moderate difficulty where success depends on correct tool selection.",
+        "Overfitting of agent model to training distribution could affect accuracy measurement. We measure accuracy on held-out tool outcome samples."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold in tool predictability (e.g., measured as variance in tool response accuracy) below which the optimal exploration rate epsilon for a tool-routing agent is zero; above the threshold, optimal epsilon is positive and increases with predictability. This threshold increases with the cost of tool failure (e.g., task restart penalty).",
+      "independent_variables": [
+        "Tool predictability (variance in tool output correctness: 0%, 5%, 10%, 20% error rate)",
+        "Failure cost (low: no penalty for failure; high: failure resets task to start, doubling expected steps)"
+      ],
+      "dependent_variables": [
+        "Optimal exploration rate epsilon that maximizes average task completion rate (grid search over epsilon ∈ {0, 0.05, 0.1, 0.2, 0.5})"
+      ],
+      "controlled_variables": [
+        "Agent architecture (same base LLM and routing policy)",
+        "Task distribution (same set of 50 coding tasks)",
+        "Tool set (fixed 5 tools with different functions)",
+        "Budget per task (max 20 tool calls)",
+        "Learning algorithm (epsilon-greedy, fixed decay schedule)",
+        "Number of episodes per condition (1000 episodes for robust estimation)"
+      ],
+      "baselines": [
+        {
+          "name": "No exploration baseline",
+          "description": "Always choose the tool with highest expected reward (epsilon=0)."
+        },
+        {
+          "name": "Always explore baseline",
+          "description": "Always choose a random tool (epsilon=1)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average task completion rate",
+          "definition": "Proportion of tasks successfully completed within the budget per condition, averaged over episodes."
+        },
+        {
+          "name": "Optimal epsilon",
+          "definition": "The epsilon value from the grid search that yields the highest average task completion rate for a given predictability and failure cost condition."
+        }
+      ],
+      "expected_result": "At low predictability (e.g., 0% correct), optimal epsilon is 0 for both failure costs. At high predictability (e.g., 0% error), optimal epsilon is positive (e.g., 0.1-0.2). The predictability level where optimal epsilon first becomes positive (the threshold) is higher under high failure cost than under low cost.",
+      "falsifying_result": "If optimal epsilon is never zero even at the lowest predictability (0% correct), or if it does not drop to zero as predictability decreases, or if the threshold does not shift with failure cost, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a coding agent with an epsilon-greedy tool routing policy on a set of coding tasks. Manipulate tool predictability by varying the variance of tool output correctness (0%, 5%, 10%, 20% error rate). For each predictability level, measure optimal epsilon (value maximizing task completion rate) via grid search (epsilon ∈ {0, 0.05, 0.1, 0.2, 0.5}). Repeat under two failure cost conditions: low cost (no penalty for failure) and high cost (failure resets task to start, doubling expected steps). Use 50 coding tasks, fixed set of 5 tools, 20 tool calls per task, 1000 episodes per condition.",
+      "risks_and_confounds": [
+        "Limited number of tasks and tools may not generalize to all coding agent scenarios.",
+        "Epsilon-greedy may not be the optimal routing strategy; results may differ with other exploration policies.",
+        "The choice of predictability levels and epsilon grid may miss critical thresholds.",
+        "Task difficulty and tool set composition could confound the effect of predictability."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a first-principles analysis of tool-use routing failures in coding agents, identifying key assumptions and tensions (e.g., deterministic vs. non-deterministic tools, context limitations, model accuracy). It proposes several testable hypotheses about phase transitions in routing failure, with detailed experiment plans. The work is conceptually strong and well-grounded.",
+    "strengths": [
+      "Clear first-principles derivation of primitive definitions, assumptions, and mechanism model.",
+      "Novel focus on threshold or phase-transition behavior in routing failure, which is underexplored.",
+      "Testable hypotheses with detailed minimal decisive tests and expected observations.",
+      "Mechanism model explicitly identifies causal chains and bottlenecks.",
+      "Experiment plans are well-structured with controls, baselines, and falsification criteria."
+    ],
+    "weaknesses": [
+      "Some experiment designs may be computationally expensive (e.g., requiring GPT-4 and many tasks), but this is acceptable for a top-tier venue.",
+      "Limited discussion of how existing benchmarks (e.g., SWE-bench, ToolBench) align with or fail to capture the identified tensions.",
+      "The package could benefit from a more explicit mapping between the first-principles assumptions and real-world coding agent failures.",
+      "Overclaiming: The phrase 'phase transition' is used strongly; the experiments may reveal gradual degradation instead, but the hypotheses are appropriately cautious.",
+      "The experiments assume a specific agent architecture (GPT-4) and tool set; generalizability to other architectures is not discussed."
+    ],
+    "questions": [
+      "How do you ensure that the non-determinism manipulation does not introduce confounding factors like tool response time variations?",
+      "Could the proposed threshold be an artifact of the specific tool set chosen (e.g., code execution, file read, database query) and not generalize to other tools?"
+    ],
+    "missing_baselines": [
+      "Agents that adaptively update their internal model (e.g., through online learning) could be included as baselines to test whether model accuracy drift is mitigated.",
+      "Comparison with agents that use a fixed routing policy (e.g., always choose the most recently successful tool) would strengthen the exploration-exploitation experiments."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of tool non-determinism beyond which the failure rate of a coding agent's routing strategy sharply increases, and does this threshold depend on the quality of the agent's context?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of model-tool mismatch does a coding agent's tool-use routing transition from graceful degradation to catastrophic failure?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of model accuracy relative to tool-behavior drift rate does tool-use routing failure become significantly more likely in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold in tool predictability below which the optimal exploration rate for a tool-routing agent drops to zero, and does this threshold depend on the cost of failure?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T170131Z"
+  }
+}

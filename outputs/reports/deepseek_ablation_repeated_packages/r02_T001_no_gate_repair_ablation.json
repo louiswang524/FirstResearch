@@ -1,0 +1,1298 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable capability that enables an agent to perform a specific task or sub-task, typically learned from experience or data.",
+        "why_primitive": "It is the fundamental unit of agent competency; all agent actions are built from skills."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining two or more existing skills in a sequence or parallel to achieve a new task without acquiring new knowledge.",
+        "why_primitive": "Composition is a core operation for leveraging prior knowledge; it is the alternative to new skill acquisition."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of acquiring a new skill de novo, typically through exploration, learning from scratch, or adapting a pre-existing capability to a novel context.",
+        "why_primitive": "Discovery represents the fundamental act of expanding the agent's capability set; it is the core alternative to composition."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are modular and composable: they can be combined in a plug-and-play manner with well-defined interfaces.",
+        "rationale": "This assumption underlies the viability of composition as an alternative to discovery. Without modularity, composition is as costly as discovery.",
+        "possible_failure": "Skills may have hidden dependencies or incompatible representations, making composition error-prone or requiring adaptation that negates its benefits."
+      },
+      {
+        "assumption": "There is a significant cost asymmetry between composition and discovery: composition is typically cheaper (in time, computation, or data) than discovery.",
+        "rationale": "If discovery were no more expensive than composition, the decision problem would vanish; the trade-off exists because discovery incurs higher upfront cost.",
+        "possible_failure": "In dynamic environments, composition costs may become high due to planning overhead or frequent reconfiguration, potentially exceeding discovery costs."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Composition offers lower immediate cost but may lead to suboptimal performance due to skill mismatch; discovery yields higher long-term utility but at higher upfront cost.",
+        "variables": [
+          "performance gap",
+          "learning cost",
+          "usage frequency"
+        ]
+      },
+      {
+        "tradeoff": "Composition leverages existing knowledge and avoids starting from scratch, but may be constrained by available skills; discovery expands the skill set but risks overfitting to narrow tasks.",
+        "variables": [
+          "skill library size",
+          "task novelty",
+          "generalization need"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which the current task differs from tasks addressed by existing skills."
+      },
+      {
+        "name": "skill_library_size",
+        "role": "input",
+        "description": "Number of distinct skills currently available in the agent's repertoire."
+      },
+      {
+        "name": "usage_frequency",
+        "role": "input",
+        "description": "Expected number of times the skill will be used in the future."
+      },
+      {
+        "name": "performance_gap",
+        "role": "mediator",
+        "description": "Difference in performance (e.g., accuracy, efficiency) between the best composition of existing skills and a potential new skill."
+      },
+      {
+        "name": "learning_cost",
+        "role": "mediator",
+        "description": "Resources (time, computation, data) required to discover and learn the new skill."
+      },
+      {
+        "name": "composition_cost",
+        "role": "mediator",
+        "description": "Resources required to compose existing skills to perform the task."
+      },
+      {
+        "name": "decision",
+        "role": "output",
+        "description": "Choice between discovering a new skill (discovery) or composing existing skills (composition)."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "performance_gap",
+        "explanation": "Higher task novelty implies existing skills are less suited, increasing the performance gap."
+      },
+      {
+        "step": "2",
+        "source": "skill_library_size",
+        "relation": "decreases",
+        "target": "performance_gap",
+        "explanation": "Larger skill library increases probability of finding a suitable composition, reducing the gap."
+      },
+      {
+        "step": "3",
+        "source": "performance_gap",
+        "relation": "increases",
+        "target": "decision",
+        "explanation": "Larger performance gap favors discovery over composition."
+      },
+      {
+        "step": "4",
+        "source": "learning_cost",
+        "relation": "decreases",
+        "target": "decision",
+        "explanation": "Higher learning cost discourages discovery."
+      },
+      {
+        "step": "5",
+        "source": "composition_cost",
+        "relation": "increases",
+        "target": "decision",
+        "explanation": "Higher composition cost encourages discovery."
+      },
+      {
+        "step": "6",
+        "source": "usage_frequency",
+        "relation": "increases",
+        "target": "decision",
+        "explanation": "Higher usage frequency increases the long-term benefit of discovery, offsetting upfront cost."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Accurate estimation of performance gap",
+        "why_it_matters": "Without knowing how much better a new skill would be, the agent may make suboptimal choices."
+      },
+      {
+        "bottleneck": "High learning cost in dynamic environments",
+        "why_it_matters": "Rapidly changing tasks may render discovered skills obsolete, increasing the risk of discovery."
+      },
+      {
+        "bottleneck": "Skill modularity failure",
+        "why_it_matters": "If skills are not properly modular, composition may incur hidden costs that violate the cost asymmetry assumption."
+      }
+    ],
+    "mechanism_summary": "The decision to discover a new skill versus compose existing ones is governed by a tradeoff between immediate cost and long-term utility. Composition is cheaper upfront but may underperform on novel tasks, while discovery requires significant investment but yields better performance for frequently used or highly novel tasks. The agent evaluates task novelty, skill library size, usage frequency, and the resulting performance gap, along with learning and composition costs, to choose the option that maximizes expected utility over the task's lifetime."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that skills are modular and composable with well-defined interfaces contradicts the reality that skills often have hidden dependencies or incompatible representations, which can make composition as costly or error-prone as discovery.",
+      "derived_from": [
+        "Skills are modular and composable",
+        "Skill modularity failure"
+      ],
+      "why_it_matters": "If modularity fails, the cost asymmetry assumption breaks down, undermining the entire trade-off between composition and discovery.",
+      "what_existing_methods_may_miss": "Existing methods often assume plug-and-play composability without monitoring for hidden interactions or requiring adaptation.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "While composition is assumed cheaper than discovery, in dynamic environments the overhead of planning and reconfiguring compositions may make composition as costly as discovery, eroding the cost asymmetry.",
+      "derived_from": [
+        "Composition cost is cheaper than discovery",
+        "High learning cost in dynamic environments",
+        "Composition offers lower immediate cost but may lead to suboptimal performance"
+      ],
+      "why_it_matters": "The decision model relies on cost asymmetry; if it fails, the preference for composition may be unjustified.",
+      "what_existing_methods_may_miss": "Most models treat composition cost as static, ignoring environmental dynamism and reconfiguration overhead.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The decision hinges on accurately estimating the performance gap between composition and a potential new skill, but this gap is inherently difficult to predict without trying discovery, creating a chicken-and-egg problem.",
+      "derived_from": [
+        "Accurate estimation of performance gap",
+        "task_novelty increases performance_gap",
+        "skill_library_size decreases performance_gap"
+      ],
+      "why_it_matters": "Without reliable estimation, the agent may make suboptimal decisions, potentially favoring composition when discovery would be better or vice versa.",
+      "what_existing_methods_may_miss": "Many methods assume the performance gap is known or can be easily approximated, but in practice it requires costly exploration or prior knowledge.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "High usage frequency encourages discovery because the upfront cost can be amortized, but in dynamic environments the discovered skill may become obsolete quickly, contradicting the long-term benefit.",
+      "derived_from": [
+        "usage_frequency increases decision to discover",
+        "High learning cost in dynamic environments",
+        "Discovery yields higher long-term utility but at higher upfront cost"
+      ],
+      "why_it_matters": "The model predicts higher usage frequency favors discovery, but if tasks change rapidly, the skill's utility may be short-lived, making composition more robust.",
+      "what_existing_methods_may_miss": "Most treat tasks as static; they ignore that discovered skills may need to be updated or may become obsolete.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the presence of hidden dependencies between skills affect the relative cost of composition versus discovery in a controlled skill composition task?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Empirically establishes whether violation of modularity assumptions negates the cost asymmetry, informing when composition is no longer cheaper."
+    },
+    {
+      "question": "Under what conditions of environmental dynamism does the planning and reconfiguration overhead of composition make its total cost equivalent to or greater than that of discovery?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the break-even point of composition cost in dynamic settings, challenging the static cost assumption."
+    },
+    {
+      "question": "Can a meta-learning agent that explicitly estimates the performance gap through exploration outperform agents that assume a fixed gap in a sequence of tasks with varying novelty?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Provides a method to overcome the chicken-and-egg problem of gap estimation, improving decision accuracy."
+    },
+    {
+      "question": "How does the rate of task obsolescence moderate the relationship between usage frequency and the long-term utility of skill discovery?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Reveals the conditions under which high usage frequency no longer justifies discovery, due to skill expiration."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to perform a specific task or sub-task, typically learned from experience or data.",
+          "why_primitive": "It is the fundamental unit of agent competency; all agent actions are built from skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in a sequence or parallel to achieve a new task without acquiring new knowledge.",
+          "why_primitive": "Composition is a core operation for leveraging prior knowledge; it is the alternative to new skill acquisition."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill de novo, typically through exploration, learning from scratch, or adapting a pre-existing capability to a novel context.",
+          "why_primitive": "Discovery represents the fundamental act of expanding the agent's capability set; it is the core alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable: they can be combined in a plug-and-play manner with well-defined interfaces.",
+          "rationale": "This assumption underlies the viability of composition as an alternative to discovery. Without modularity, composition is as costly as discovery.",
+          "possible_failure": "Skills may have hidden dependencies or incompatible representations, making composition error-prone or requiring adaptation that negates its benefits."
+        },
+        {
+          "assumption": "There is a significant cost asymmetry between composition and discovery: composition is typically cheaper (in time, computation, or data) than discovery.",
+          "rationale": "If discovery were no more expensive than composition, the decision problem would vanish; the trade-off exists because discovery incurs higher upfront cost.",
+          "possible_failure": "In dynamic environments, composition costs may become high due to planning overhead or frequent reconfiguration, potentially exceeding discovery costs."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current task differs from tasks addressed by existing skills."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "input",
+            "description": "Number of distinct skills currently available in the agent's repertoire."
+          },
+          {
+            "name": "usage_frequency",
+            "role": "input",
+            "description": "Expected number of times the skill will be used in the future."
+          },
+          {
+            "name": "performance_gap",
+            "role": "mediator",
+            "description": "Difference in performance (e.g., accuracy, efficiency) between the best composition of existing skills and a potential new skill."
+          },
+          {
+            "name": "learning_cost",
+            "role": "mediator",
+            "description": "Resources (time, computation, data) required to discover and learn the new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "mediator",
+            "description": "Resources required to compose existing skills to perform the task."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Choice between discovering a new skill (discovery) or composing existing skills (composition)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "performance_gap",
+            "explanation": "Higher task novelty implies existing skills are less suited, increasing the performance gap."
+          },
+          {
+            "step": "2",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "performance_gap",
+            "explanation": "Larger skill library increases probability of finding a suitable composition, reducing the gap."
+          },
+          {
+            "step": "3",
+            "source": "performance_gap",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Larger performance gap favors discovery over composition."
+          },
+          {
+            "step": "4",
+            "source": "learning_cost",
+            "relation": "decreases",
+            "target": "decision",
+            "explanation": "Higher learning cost discourages discovery."
+          },
+          {
+            "step": "5",
+            "source": "composition_cost",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher composition cost encourages discovery."
+          },
+          {
+            "step": "6",
+            "source": "usage_frequency",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher usage frequency increases the long-term benefit of discovery, offsetting upfront cost."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of performance gap",
+            "why_it_matters": "Without knowing how much better a new skill would be, the agent may make suboptimal choices."
+          },
+          {
+            "bottleneck": "High learning cost in dynamic environments",
+            "why_it_matters": "Rapidly changing tasks may render discovered skills obsolete, increasing the risk of discovery."
+          },
+          {
+            "bottleneck": "Skill modularity failure",
+            "why_it_matters": "If skills are not properly modular, composition may incur hidden costs that violate the cost asymmetry assumption."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing ones is governed by a tradeoff between immediate cost and long-term utility. Composition is cheaper upfront but may underperform on novel tasks, while discovery requires significant investment but yields better performance for frequently used or highly novel tasks. The agent evaluates task novelty, skill library size, usage frequency, and the resulting performance gap, along with learning and composition costs, to choose the option that maximizes expected utility over the task's lifetime."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The decision hinges on accurately estimating the performance gap between composition and a potential new skill, but this gap is inherently difficult to predict without trying discovery, creating a chicken-and-egg problem.",
+        "derived_from": [
+          "Accurate estimation of performance gap",
+          "task_novelty increases performance_gap",
+          "skill_library_size decreases performance_gap"
+        ],
+        "why_it_matters": "Without reliable estimation, the agent may make suboptimal decisions, potentially favoring composition when discovery would be better or vice versa.",
+        "what_existing_methods_may_miss": "Many methods assume the performance gap is known or can be easily approximated, but in practice it requires costly exploration or prior knowledge.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Can a meta-learning agent that explicitly estimates the performance gap through exploration outperform agents that assume a fixed gap in a sequence of tasks with varying novelty?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Provides a method to overcome the chicken-and-egg problem of gap estimation, improving decision accuracy."
+      },
+      "hypothesis": {
+        "statement": "A meta-learning agent that explicitly estimates the performance gap between composition and discovery via targeted exploration will achieve higher cumulative task performance over a sequence of tasks with varying novelty compared to an agent that assumes a fixed performance gap (e.g., based on historical averages).",
+        "predicted_effect": "The meta-agent will make more accurate decisions (discovery vs. composition), leading to higher total reward or accuracy over the task sequence."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a sequence of 100 tasks with controlled novelty levels (e.g., 20% low, 40% medium, 40% high novelty). Train two agents: Agent A (meta-learning) explicitly estimates the performance gap via a few exploration steps on each task (e.g., trying one composition and one random action to gauge gap). Agent B (baseline) uses a fixed gap threshold (e.g., compose if gap < 0.1, else discover). Both agents have the same initial skill library. Measure cumulative success rate over the sequence.",
+        "independent_variables": [
+          "agent type (meta vs. baseline)",
+          "task novelty level"
+        ],
+        "dependent_variables": [
+          "cumulative task success rate",
+          "decision accuracy (whether correct choice was made)"
+        ],
+        "controls": [
+          "same initial skill library",
+          "same number of exploration episodes per task (for fairness, baseline also explores but uses fixed gap)",
+          "same task sequence order"
+        ],
+        "falsifying_observation": "If Agent A does not achieve significantly higher cumulative success rate than Agent B (p < 0.05), then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Agent A achieves higher cumulative success rate across all task novelty levels, with most significant gains on medium-novelty tasks where gap estimation is most informative.",
+          "Agent A's decisions align more closely with the optimal policy (derived from oracle) compared to Agent B."
+        ],
+        "rejects_hypothesis": [
+          "Agent B performs similarly or better than Agent A, indicating that explicit gap estimation is not beneficial or incurs too much overhead.",
+          "Agent A's exploration steps waste resources without improving decision quality, leading to lower performance."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If Agent A does not outperform Agent B, then the assumption that explicit gap estimation via exploration is beneficial may be false under the tested conditions.",
+        "assumption_to_revise": "The assumption that performance gap can be accurately estimated with limited exploration (assumption 'there is a significant cost asymmetry between composition and discovery' might need revision, specifically that exploration cost may outweigh benefits).",
+        "next_question": "Under what conditions (e.g., larger skill library, longer task horizon) does explicit gap estimation become beneficial, and what minimal exploration is needed to reliably estimate the gap?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to perform a specific task or sub-task, typically learned from experience or data.",
+          "why_primitive": "It is the fundamental unit of agent competency; all agent actions are built from skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in a sequence or parallel to achieve a new task without acquiring new knowledge.",
+          "why_primitive": "Composition is a core operation for leveraging prior knowledge; it is the alternative to new skill acquisition."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill de novo, typically through exploration, learning from scratch, or adapting a pre-existing capability to a novel context.",
+          "why_primitive": "Discovery represents the fundamental act of expanding the agent's capability set; it is the core alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable: they can be combined in a plug-and-play manner with well-defined interfaces.",
+          "rationale": "This assumption underlies the viability of composition as an alternative to discovery. Without modularity, composition is as costly as discovery.",
+          "possible_failure": "Skills may have hidden dependencies or incompatible representations, making composition error-prone or requiring adaptation that negates its benefits."
+        },
+        {
+          "assumption": "There is a significant cost asymmetry between composition and discovery: composition is typically cheaper (in time, computation, or data) than discovery.",
+          "rationale": "If discovery were no more expensive than composition, the decision problem would vanish; the trade-off exists because discovery incurs higher upfront cost.",
+          "possible_failure": "In dynamic environments, composition costs may become high due to planning overhead or frequent reconfiguration, potentially exceeding discovery costs."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current task differs from tasks addressed by existing skills."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "input",
+            "description": "Number of distinct skills currently available in the agent's repertoire."
+          },
+          {
+            "name": "usage_frequency",
+            "role": "input",
+            "description": "Expected number of times the skill will be used in the future."
+          },
+          {
+            "name": "performance_gap",
+            "role": "mediator",
+            "description": "Difference in performance (e.g., accuracy, efficiency) between the best composition of existing skills and a potential new skill."
+          },
+          {
+            "name": "learning_cost",
+            "role": "mediator",
+            "description": "Resources (time, computation, data) required to discover and learn the new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "mediator",
+            "description": "Resources required to compose existing skills to perform the task."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Choice between discovering a new skill (discovery) or composing existing skills (composition)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "performance_gap",
+            "explanation": "Higher task novelty implies existing skills are less suited, increasing the performance gap."
+          },
+          {
+            "step": "2",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "performance_gap",
+            "explanation": "Larger skill library increases probability of finding a suitable composition, reducing the gap."
+          },
+          {
+            "step": "3",
+            "source": "performance_gap",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Larger performance gap favors discovery over composition."
+          },
+          {
+            "step": "4",
+            "source": "learning_cost",
+            "relation": "decreases",
+            "target": "decision",
+            "explanation": "Higher learning cost discourages discovery."
+          },
+          {
+            "step": "5",
+            "source": "composition_cost",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher composition cost encourages discovery."
+          },
+          {
+            "step": "6",
+            "source": "usage_frequency",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher usage frequency increases the long-term benefit of discovery, offsetting upfront cost."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of performance gap",
+            "why_it_matters": "Without knowing how much better a new skill would be, the agent may make suboptimal choices."
+          },
+          {
+            "bottleneck": "High learning cost in dynamic environments",
+            "why_it_matters": "Rapidly changing tasks may render discovered skills obsolete, increasing the risk of discovery."
+          },
+          {
+            "bottleneck": "Skill modularity failure",
+            "why_it_matters": "If skills are not properly modular, composition may incur hidden costs that violate the cost asymmetry assumption."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing ones is governed by a tradeoff between immediate cost and long-term utility. Composition is cheaper upfront but may underperform on novel tasks, while discovery requires significant investment but yields better performance for frequently used or highly novel tasks. The agent evaluates task novelty, skill library size, usage frequency, and the resulting performance gap, along with learning and composition costs, to choose the option that maximizes expected utility over the task's lifetime."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that skills are modular and composable with well-defined interfaces contradicts the reality that skills often have hidden dependencies or incompatible representations, which can make composition as costly or error-prone as discovery.",
+        "derived_from": [
+          "Skills are modular and composable",
+          "Skill modularity failure"
+        ],
+        "why_it_matters": "If modularity fails, the cost asymmetry assumption breaks down, undermining the entire trade-off between composition and discovery.",
+        "what_existing_methods_may_miss": "Existing methods often assume plug-and-play composability without monitoring for hidden interactions or requiring adaptation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the presence of hidden dependencies between skills affect the relative cost of composition versus discovery in a controlled skill composition task?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Empirically establishes whether violation of modularity assumptions negates the cost asymmetry, informing when composition is no longer cheaper."
+      },
+      "hypothesis": {
+        "statement": "Hidden dependencies between skills increase the composition cost to the point where it equals or exceeds the discovery cost in a controlled skill composition task.",
+        "predicted_effect": "As hidden dependencies increase, the ratio of composition cost to discovery cost increases, and the agent's decision shifts from composition to discovery."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a series of compositional tasks using a library of skills with varying degrees of hidden dependencies. Measure composition cost (time or compute) and discovery cost (time or compute to learn a new skill from scratch) for each task. Compare costs as hidden dependency level varies.",
+        "independent_variables": [
+          "presence_of_hidden_dependencies",
+          "dependency_strength"
+        ],
+        "dependent_variables": [
+          "composition_cost",
+          "discovery_cost",
+          "cost_ratio",
+          "decision_outcome"
+        ],
+        "controls": [
+          "constant skill library size",
+          "constant task difficulty",
+          "no hidden dependencies baseline"
+        ],
+        "falsifying_observation": "If composition cost remains lower than discovery cost even with high hidden dependencies, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Composition cost increases with hidden dependencies, and eventually exceeds discovery cost.",
+          "Agent chooses discovery more often as hidden dependencies increase."
+        ],
+        "rejects_hypothesis": [
+          "Composition cost remains constant regardless of hidden dependencies.",
+          "Agent always chooses composition even with high hidden dependencies."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If hidden dependencies do not significantly increase composition cost, then the assumption that skills are modular may be correct for the tested tasks, but the cost asymmetry assumption might still be violated by other factors.",
+        "assumption_to_revise": "Skills are modular and composable with well-defined interfaces.",
+        "next_question": "What other factors (e.g., skill representation mismatch) cause composition cost to exceed discovery cost?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to perform a specific task or sub-task, typically learned from experience or data.",
+          "why_primitive": "It is the fundamental unit of agent competency; all agent actions are built from skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in a sequence or parallel to achieve a new task without acquiring new knowledge.",
+          "why_primitive": "Composition is a core operation for leveraging prior knowledge; it is the alternative to new skill acquisition."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill de novo, typically through exploration, learning from scratch, or adapting a pre-existing capability to a novel context.",
+          "why_primitive": "Discovery represents the fundamental act of expanding the agent's capability set; it is the core alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable: they can be combined in a plug-and-play manner with well-defined interfaces.",
+          "rationale": "This assumption underlies the viability of composition as an alternative to discovery. Without modularity, composition is as costly as discovery.",
+          "possible_failure": "Skills may have hidden dependencies or incompatible representations, making composition error-prone or requiring adaptation that negates its benefits."
+        },
+        {
+          "assumption": "There is a significant cost asymmetry between composition and discovery: composition is typically cheaper (in time, computation, or data) than discovery.",
+          "rationale": "If discovery were no more expensive than composition, the decision problem would vanish; the trade-off exists because discovery incurs higher upfront cost.",
+          "possible_failure": "In dynamic environments, composition costs may become high due to planning overhead or frequent reconfiguration, potentially exceeding discovery costs."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current task differs from tasks addressed by existing skills."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "input",
+            "description": "Number of distinct skills currently available in the agent's repertoire."
+          },
+          {
+            "name": "usage_frequency",
+            "role": "input",
+            "description": "Expected number of times the skill will be used in the future."
+          },
+          {
+            "name": "performance_gap",
+            "role": "mediator",
+            "description": "Difference in performance (e.g., accuracy, efficiency) between the best composition of existing skills and a potential new skill."
+          },
+          {
+            "name": "learning_cost",
+            "role": "mediator",
+            "description": "Resources (time, computation, data) required to discover and learn the new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "mediator",
+            "description": "Resources required to compose existing skills to perform the task."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Choice between discovering a new skill (discovery) or composing existing skills (composition)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "performance_gap",
+            "explanation": "Higher task novelty implies existing skills are less suited, increasing the performance gap."
+          },
+          {
+            "step": "2",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "performance_gap",
+            "explanation": "Larger skill library increases probability of finding a suitable composition, reducing the gap."
+          },
+          {
+            "step": "3",
+            "source": "performance_gap",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Larger performance gap favors discovery over composition."
+          },
+          {
+            "step": "4",
+            "source": "learning_cost",
+            "relation": "decreases",
+            "target": "decision",
+            "explanation": "Higher learning cost discourages discovery."
+          },
+          {
+            "step": "5",
+            "source": "composition_cost",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher composition cost encourages discovery."
+          },
+          {
+            "step": "6",
+            "source": "usage_frequency",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher usage frequency increases the long-term benefit of discovery, offsetting upfront cost."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of performance gap",
+            "why_it_matters": "Without knowing how much better a new skill would be, the agent may make suboptimal choices."
+          },
+          {
+            "bottleneck": "High learning cost in dynamic environments",
+            "why_it_matters": "Rapidly changing tasks may render discovered skills obsolete, increasing the risk of discovery."
+          },
+          {
+            "bottleneck": "Skill modularity failure",
+            "why_it_matters": "If skills are not properly modular, composition may incur hidden costs that violate the cost asymmetry assumption."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing ones is governed by a tradeoff between immediate cost and long-term utility. Composition is cheaper upfront but may underperform on novel tasks, while discovery requires significant investment but yields better performance for frequently used or highly novel tasks. The agent evaluates task novelty, skill library size, usage frequency, and the resulting performance gap, along with learning and composition costs, to choose the option that maximizes expected utility over the task's lifetime."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "While composition is assumed cheaper than discovery, in dynamic environments the overhead of planning and reconfiguring compositions may make composition as costly as discovery, eroding the cost asymmetry.",
+        "derived_from": [
+          "Composition cost is cheaper than discovery",
+          "High learning cost in dynamic environments",
+          "Composition offers lower immediate cost but may lead to suboptimal performance"
+        ],
+        "why_it_matters": "The decision model relies on cost asymmetry; if it fails, the preference for composition may be unjustified.",
+        "what_existing_methods_may_miss": "Most models treat composition cost as static, ignoring environmental dynamism and reconfiguration overhead.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Under what conditions of environmental dynamism does the planning and reconfiguration overhead of composition make its total cost equivalent to or greater than that of discovery?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Quantifies the break-even point of composition cost in dynamic settings, challenging the static cost assumption."
+      },
+      "hypothesis": {
+        "statement": "As environmental dynamism increases, the total cost of composition (including planning and reconfiguration overhead) increases, eventually surpassing the cost of discovery, especially for tasks where the composition requires frequent reconfiguration.",
+        "predicted_effect": "High environmental dynamism leads to composition costs that are equal to or greater than discovery costs, reversing the typical cost advantage."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent in a dynamic environment with varying degrees of change (e.g., task distribution shifts). Measure the total cost (time, computation, etc.) of composing existing skills versus discovering a new skill for a set of recurring tasks.",
+        "independent_variables": [
+          "Environmental dynamism (e.g., frequency of task changes)",
+          "Skill library size"
+        ],
+        "dependent_variables": [
+          "Total composition cost",
+          "Total discovery cost",
+          "Decision outcome"
+        ],
+        "controls": [
+          "Constant initial skill library",
+          "Fixed task set",
+          "Same discovery algorithm"
+        ],
+        "falsifying_observation": "Composition cost remains lower than discovery cost across all levels of dynamism."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At high dynamism, composition cost exceeds discovery cost; at low dynamism, composition cost is lower."
+        ],
+        "rejects_hypothesis": [
+          "Composition cost is always lower than discovery cost regardless of dynamism."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If composition cost never exceeds discovery cost, then the assumption that composition overhead increases with dynamism is wrong.",
+        "assumption_to_revise": "Composition overhead does not scale with dynamism as expected; perhaps skills are robust to change.",
+        "next_question": "What specific aspects of task change cause composition overhead to increase?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability that enables an agent to perform a specific task or sub-task, typically learned from experience or data.",
+          "why_primitive": "It is the fundamental unit of agent competency; all agent actions are built from skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in a sequence or parallel to achieve a new task without acquiring new knowledge.",
+          "why_primitive": "Composition is a core operation for leveraging prior knowledge; it is the alternative to new skill acquisition."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill de novo, typically through exploration, learning from scratch, or adapting a pre-existing capability to a novel context.",
+          "why_primitive": "Discovery represents the fundamental act of expanding the agent's capability set; it is the core alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable: they can be combined in a plug-and-play manner with well-defined interfaces.",
+          "rationale": "This assumption underlies the viability of composition as an alternative to discovery. Without modularity, composition is as costly as discovery.",
+          "possible_failure": "Skills may have hidden dependencies or incompatible representations, making composition error-prone or requiring adaptation that negates its benefits."
+        },
+        {
+          "assumption": "There is a significant cost asymmetry between composition and discovery: composition is typically cheaper (in time, computation, or data) than discovery.",
+          "rationale": "If discovery were no more expensive than composition, the decision problem would vanish; the trade-off exists because discovery incurs higher upfront cost.",
+          "possible_failure": "In dynamic environments, composition costs may become high due to planning overhead or frequent reconfiguration, potentially exceeding discovery costs."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the current task differs from tasks addressed by existing skills."
+          },
+          {
+            "name": "skill_library_size",
+            "role": "input",
+            "description": "Number of distinct skills currently available in the agent's repertoire."
+          },
+          {
+            "name": "usage_frequency",
+            "role": "input",
+            "description": "Expected number of times the skill will be used in the future."
+          },
+          {
+            "name": "performance_gap",
+            "role": "mediator",
+            "description": "Difference in performance (e.g., accuracy, efficiency) between the best composition of existing skills and a potential new skill."
+          },
+          {
+            "name": "learning_cost",
+            "role": "mediator",
+            "description": "Resources (time, computation, data) required to discover and learn the new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "mediator",
+            "description": "Resources required to compose existing skills to perform the task."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Choice between discovering a new skill (discovery) or composing existing skills (composition)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "performance_gap",
+            "explanation": "Higher task novelty implies existing skills are less suited, increasing the performance gap."
+          },
+          {
+            "step": "2",
+            "source": "skill_library_size",
+            "relation": "decreases",
+            "target": "performance_gap",
+            "explanation": "Larger skill library increases probability of finding a suitable composition, reducing the gap."
+          },
+          {
+            "step": "3",
+            "source": "performance_gap",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Larger performance gap favors discovery over composition."
+          },
+          {
+            "step": "4",
+            "source": "learning_cost",
+            "relation": "decreases",
+            "target": "decision",
+            "explanation": "Higher learning cost discourages discovery."
+          },
+          {
+            "step": "5",
+            "source": "composition_cost",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher composition cost encourages discovery."
+          },
+          {
+            "step": "6",
+            "source": "usage_frequency",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher usage frequency increases the long-term benefit of discovery, offsetting upfront cost."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of performance gap",
+            "why_it_matters": "Without knowing how much better a new skill would be, the agent may make suboptimal choices."
+          },
+          {
+            "bottleneck": "High learning cost in dynamic environments",
+            "why_it_matters": "Rapidly changing tasks may render discovered skills obsolete, increasing the risk of discovery."
+          },
+          {
+            "bottleneck": "Skill modularity failure",
+            "why_it_matters": "If skills are not properly modular, composition may incur hidden costs that violate the cost asymmetry assumption."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing ones is governed by a tradeoff between immediate cost and long-term utility. Composition is cheaper upfront but may underperform on novel tasks, while discovery requires significant investment but yields better performance for frequently used or highly novel tasks. The agent evaluates task novelty, skill library size, usage frequency, and the resulting performance gap, along with learning and composition costs, to choose the option that maximizes expected utility over the task's lifetime."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "High usage frequency encourages discovery because the upfront cost can be amortized, but in dynamic environments the discovered skill may become obsolete quickly, contradicting the long-term benefit.",
+        "derived_from": [
+          "usage_frequency increases decision to discover",
+          "High learning cost in dynamic environments",
+          "Discovery yields higher long-term utility but at higher upfront cost"
+        ],
+        "why_it_matters": "The model predicts higher usage frequency favors discovery, but if tasks change rapidly, the skill's utility may be short-lived, making composition more robust.",
+        "what_existing_methods_may_miss": "Most treat tasks as static; they ignore that discovered skills may need to be updated or may become obsolete.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the rate of task obsolescence moderate the relationship between usage frequency and the long-term utility of skill discovery?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Reveals the conditions under which high usage frequency no longer justifies discovery, due to skill expiration."
+      },
+      "hypothesis": {
+        "statement": "The positive effect of usage frequency on the long-term utility of skill discovery is weakened as the rate of task obsolescence increases.",
+        "predicted_effect": "When task obsolescence is high, agents that discover skills for frequently used tasks do not achieve higher long-term utility compared to those that compose existing skills."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent in a multi-task environment with varying task obsolescence rates. The agent can either discover new skills or compose existing ones. Measure cumulative performance over time.",
+        "independent_variables": [
+          "usage_frequency (high/low)",
+          "task_obsolescence_rate (high/low)"
+        ],
+        "dependent_variables": [
+          "long_term_utility (cumulative performance over task lifetime)"
+        ],
+        "controls": [
+          "skill_library_size (fixed at moderate level)",
+          "learning_cost (constant)",
+          "composition_cost (constant)",
+          "task novelty (medium)"
+        ],
+        "falsifying_observation": "If, under high task obsolescence, high usage frequency still leads to significantly higher long-term utility for discovery compared to composition, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under low task obsolescence, high usage frequency yields higher long-term utility for discovery than composition.",
+          "Under high task obsolescence, high usage frequency does not significantly outperform composition in long-term utility.",
+          "The interaction effect between usage frequency and obsolescence rate is significant, with diminishing returns from usage frequency as obsolescence rises."
+        ],
+        "rejects_hypothesis": [
+          "Under high task obsolescence, high usage frequency still yields higher long-term utility for discovery than composition.",
+          "No significant interaction between usage frequency and obsolescence rate is observed."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (i.e., high usage frequency remains beneficial under high obsolescence), then the assumption that skill discovery incurs a high upfront cost that can be amortized only over long usage periods may be incorrect.",
+        "assumption_to_revise": "The assumption that discovery has a significant upfront cost that is only justified by repeated use; perhaps discovered skills can be easily adapted or reused even after task changes.",
+        "next_question": "How does the adaptability of discovered skills (e.g., through fine-tuning or transfer learning) mitigate the effects of task obsolescence?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Hidden dependencies between skills increase the composition cost to the point where it equals or exceeds the discovery cost in a controlled skill composition task.",
+      "independent_variables": [
+        "presence_of_hidden_dependencies (binary: absent vs present)",
+        "dependency_strength (low vs high, if applicable)"
+      ],
+      "dependent_variables": [
+        "composition_cost",
+        "discovery_cost",
+        "cost_ratio",
+        "decision_outcome"
+      ],
+      "controlled_variables": [
+        "constant skill library size (e.g., 5 skills)",
+        "constant task difficulty (e.g., same number of subtasks)",
+        "no hidden dependencies baseline condition"
+      ],
+      "baselines": [
+        {
+          "name": "No Hidden Dependencies",
+          "description": "Skills have well-defined interfaces and no hidden interactions; composition and discovery costs measured under ideal modularity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "composition_cost",
+          "definition": "Total computational steps (or wall-clock time) required to successfully compose existing skills to perform a given task, including any planning, adaptation, or error correction."
+        },
+        {
+          "name": "discovery_cost",
+          "definition": "Total computational steps (or wall-clock time) required to learn a new skill from scratch (de novo) to perform the same task, including exploration and training."
+        },
+        {
+          "name": "cost_ratio",
+          "definition": "Ratio of composition_cost to discovery_cost."
+        },
+        {
+          "name": "decision_outcome",
+          "definition": "Binary choice (discovery or composition) made by the agent when optimizing for expected utility given observed costs."
+        }
+      ],
+      "expected_result": "The presence of hidden dependencies increases composition_cost, and for high enough dependency_strength, composition_cost equals or exceeds discovery_cost, leading to an increased likelihood of the agent choosing discovery over composition.",
+      "falsifying_result": "Composition_cost remains lower than discovery_cost even with strong hidden dependencies, and the agent consistently chooses composition regardless of hidden dependencies.",
+      "minimum_viable_experiment": "Simulate a grid of compositional tasks using a fixed library of skills. For each task, introduce hidden dependencies between skills (e.g., via shared state or side effects) at two levels: absent and present. Measure composition_cost and discovery_cost (both in computational steps) over repeated trials. Compare the cost_ratio across conditions. If composition_cost stays below discovery_cost in the presence condition, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "The operationalization of 'hidden dependencies' may be subjective; use a clear, reproducible mechanism.",
+        "Cost measurement may be influenced by implementation details; ensure both composition and discovery use similar compute resources.",
+        "Task difficulty might interact with hidden dependencies; control by using tasks of identical atomic subtasks."
+      ]
+    },
+    {
+      "hypothesis": "As environmental dynamism increases, the total cost of composition (including planning and reconfiguration overhead) increases, eventually surpassing the cost of discovery, especially for tasks where the composition requires frequent reconfiguration.",
+      "independent_variables": [
+        "Environmental dynamism (frequency of task changes)"
+      ],
+      "dependent_variables": [
+        "Total composition cost",
+        "Total discovery cost"
+      ],
+      "controlled_variables": [
+        "Initial skill library",
+        "Task set",
+        "Discovery algorithm",
+        "Task complexity"
+      ],
+      "baselines": [
+        {
+          "name": "Static environment",
+          "description": "Environment where tasks never change, representing low dynamism."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composition cost",
+          "definition": "Total time and computation required to compose existing skills for a task."
+        },
+        {
+          "name": "Discovery cost",
+          "definition": "Total time and computation required to discover and learn a new skill for a task."
+        }
+      ],
+      "expected_result": "Composition cost is lower than discovery cost at low dynamism, but becomes higher at high dynamism.",
+      "falsifying_result": "Composition cost is lower than discovery cost at all levels of dynamism.",
+      "minimum_viable_experiment": "Simulate an agent in a grid world with two levels of environmental dynamism: static (tasks never change) and dynamic (tasks change every 5 episodes). The agent has a fixed skill library of 3 skills. For each dynamism level, conduct 10 trials where the agent must accomplish a sequence of 10 tasks. In each trial, the agent either composes existing skills or discovers a new skill (randomly assigned). Measure the average total composition cost and discovery cost across trials. Compare the costs between static and dynamic conditions.",
+      "risks_and_confounds": [
+        "Skill library composition may affect composition cost",
+        "Task ordering may influence reconfiguration overhead",
+        "Discovery algorithm efficiency may vary with dynamism"
+      ]
+    },
+    {
+      "hypothesis": "A meta-learning agent that explicitly estimates the performance gap between composition and discovery via targeted exploration will achieve higher cumulative task performance over a sequence of tasks with varying novelty compared to an agent that assumes a fixed performance gap.",
+      "independent_variables": [
+        "agent type (meta vs baseline)",
+        "task novelty level"
+      ],
+      "dependent_variables": [
+        "cumulative task success rate",
+        "decision accuracy"
+      ],
+      "controlled_variables": [
+        "same initial skill library",
+        "same number of exploration episodes per task",
+        "same task sequence order"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed Gap Baseline",
+          "description": "An agent that uses a fixed performance gap threshold (e.g., compose if gap < 0.1, else discover) to decide between composition and discovery."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cumulative Success Rate",
+          "definition": "Proportion of tasks successfully completed over the sequence."
+        },
+        {
+          "name": "Decision Accuracy",
+          "definition": "Proportion of tasks where the agent's decision (discover or compose) matches the optimal decision as determined by an oracle."
+        }
+      ],
+      "expected_result": "The meta-learning agent achieves a significantly higher cumulative success rate and decision accuracy than the baseline agent, particularly on medium-novelty tasks.",
+      "falsifying_result": "If the meta-learning agent does not achieve a significantly higher cumulative success rate (p < 0.05) compared to the baseline agent, the hypothesis is rejected.",
+      "minimum_viable_experiment": "Create a sequence of 100 tasks with controlled novelty levels (20% low, 40% medium, 40% high novelty). Train Agent A (meta-learning) to explicitly estimate the performance gap via a few exploration steps on each task, and Agent B (baseline) to use a fixed gap threshold. Both agents start with the same initial skill library. Measure cumulative success rate and decision accuracy over the sequence.",
+      "risks_and_confounds": [
+        "Exploration overhead may negate benefits if not properly budgeted.",
+        "Task novelty levels must be meaningfully defined and controlled.",
+        "The fixed gap threshold choice may bias the baseline; sensitivity analysis recommended."
+      ]
+    },
+    {
+      "hypothesis": "The positive effect of usage frequency on the long-term utility of skill discovery is weakened as the rate of task obsolescence increases.",
+      "independent_variables": [
+        "usage_frequency (high vs low)",
+        "task_obsolescence_rate (high vs low)"
+      ],
+      "dependent_variables": [
+        "long_term_utility (cumulative performance over task lifetime)"
+      ],
+      "controlled_variables": [
+        "skill_library_size (moderate, fixed)",
+        "learning_cost (constant)",
+        "composition_cost (constant)",
+        "task novelty (medium)",
+        "number of tasks (fixed at 100 per agent)",
+        "environment type (static except for obsolescence manipulation)"
+      ],
+      "baselines": [
+        {
+          "name": "Composition-only agent",
+          "description": "Agent that always composes existing skills and never discovers new ones."
+        },
+        {
+          "name": "Discovery-only agent",
+          "description": "Agent that always discovers new skills for each task and never composes."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cumulative reward",
+          "definition": "Total reward accumulated over the entire task lifetime across all tasks."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Fraction of tasks completed successfully."
+        }
+      ],
+      "expected_result": "Under low task obsolescence, high usage frequency yields significantly higher cumulative reward for discovery compared to composition. Under high task obsolescence, the advantage of discovery disappears, with composition achieving similar or higher cumulative reward. A significant interaction effect between usage frequency and obsolescence rate is observed.",
+      "falsifying_result": "Under high task obsolescence, high usage frequency still yields significantly higher cumulative reward for discovery than composition, or no significant interaction between usage frequency and obsolescence rate is found.",
+      "minimum_viable_experiment": "A 2x2 factorial simulation experiment: 2 levels of usage frequency (high/low) × 2 levels of task obsolescence rate (high/low). Each condition is run with an agent that can choose to discover or compose, and a baseline composition-only agent. Each condition is repeated for N=100 independent task sequences. The dependent variable is cumulative reward over the task lifetime. This design directly tests the interaction effect with minimal complexity.",
+      "risks_and_confounds": [
+        "Task novelty may not be perfectly controlled; it is set to medium but could vary slightly.",
+        "Learning cost might inadvertently change with obsolescence if the environment dynamics affect learning.",
+        "Skill library composition at initialization could bias results if certain skills are more reusable.",
+        "The number of tasks (100) might be insufficient to observe long-term amortization effects.",
+        "The agent's decision policy for discovery vs composition may need to be learned, introducing confounding learning effects if not properly trained."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of the trade-off between skill composition and skill discovery in LLM agents. It defines primitives, assumptions, a causal mechanism model, identifies key tensions, and proposes testable hypotheses with experimental designs. The work is rigorous and well-structured, offering a clear framework for future research. However, the novelty is limited as the analysis is largely conceptual and the proposed experiments are straightforward verifications of the derived tensions. The contributions are more as a research blueprint than a novel technical contribution.",
+    "strengths": [
+      "Clear and rigorous first-principles decomposition.",
+      "Well-defined primitive concepts and assumptions.",
+      "Causal mechanism model that captures key variables and trade-offs.",
+      "Tensions are insightful and derived from assumptions.",
+      "Hypotheses are falsifiable and experimental designs are practical."
+    ],
+    "weaknesses": [
+      "Limited novelty; the trade-off between composition and discovery is already widely discussed in skill learning literature.",
+      "The assumptions (modularity, cost asymmetry) may be too strong and not generally applicable.",
+      "The experimental designs, while sound, do not introduce new algorithms or insights beyond validating the proposed framework.",
+      "The package reads more as a research plan than a completed scientific contribution."
+    ],
+    "questions": [
+      "How does the model account for skills that are neither purely composed nor discovered, e.g., skills that are transferred or adapted?",
+      "The cost asymmetry assumption is central; can you quantify the break-even point in realistic settings?"
+    ],
+    "missing_baselines": [
+      "Experiments should compare against adaptive composition strategies (e.g., composition with fine-tuning) and multi-task learning baselines."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Unsubstantiated assumption in mechanism model",
+    "root_cause": "The research assumes that explicit estimation of performance gap via exploration is beneficial, but does not provide evidence or clear mechanism that outperforms simpler heuristics under realistic costs.",
+    "violated_principle": "Mechanism model must be grounded in empirical evidence or established theory; the chicken-and-egg problem of gap estimation is not resolved.",
+    "new_or_updated_principle": "Performance gap estimation through targeted exploration must be shown to be cost-effective compared to simple heuristics under realistic conditions; otherwise, the chicken-and-egg problem remains unsolved.",
+    "new_or_updated_skill": "Skill of 'meta-exploration for gap estimation' — the ability to adaptively allocate exploration steps to estimate the potential improvement of a new skill over composition.",
+    "regression_test": "When the cost of exploration for gap estimation is high, the meta-agent's performance should degrade to at most that of a fixed-gap baseline; otherwise, the mechanism is not robust."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

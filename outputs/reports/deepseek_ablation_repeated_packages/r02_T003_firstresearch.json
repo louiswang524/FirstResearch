@@ -1,0 +1,1261 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool-Use Routing",
+        "definition": "The decision process by which a coding agent selects a specific external tool (e.g., code interpreter, file editor, search engine) to perform a subtask during code generation or debugging.",
+        "why_primitive": "It is the fundamental control mechanism that determines how the agent interfaces with its environment; without it, the agent cannot leverage tools."
+      },
+      {
+        "name": "Coding Agent",
+        "definition": "An autonomous system, typically powered by a large language model, that generates, modifies, or debugs code by orchestrating a set of external tools.",
+        "why_primitive": "It is the entity that performs routing and whose behavior we analyze; its architecture and capabilities are foundational to understanding routing failures."
+      },
+      {
+        "name": "Failure Mode",
+        "definition": "A scenario in which tool-use routing results in an incorrect or suboptimal tool selection, leading to errors, increased latency, or failure to achieve the intended coding objective.",
+        "why_primitive": "It defines the negative outcome we aim to predict and prevent; understanding its types is essential for analyzing when routing fails."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Each tool in the agent's repertoire has distinct, known capabilities and associated costs (e.g., execution time, error rate).",
+        "rationale": "Effective routing requires the agent to have a model of what each tool can do and how expensive it is; otherwise, selection cannot be informed.",
+        "possible_failure": "If tool characteristics are unknown, dynamic, or misrepresented, the routing policy may make consistently poor choices, leading to failure."
+      },
+      {
+        "assumption": "The routing decision is made based on limited context (e.g., current state history, prompt) and cannot anticipate all future interactions or tool outcomes.",
+        "rationale": "In practice, agents operate with bounded reasoning due to finite context windows and computational constraints.",
+        "possible_failure": "The agent may under- or over-estimate a tool's suitability for a task, especially if the task requirements are ambiguous or change during execution, leading to routing failure."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. Exploitation in tool selection",
+        "variables": [
+          "novelty of tool",
+          "expected success probability",
+          "time cost of trying a new tool"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. Accuracy in tool choice",
+        "variables": [
+          "response time",
+          "error rate",
+          "precision of tool output"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "Inherent difficulty and ambiguity of the coding task."
+      },
+      {
+        "name": "context_window_limit",
+        "role": "input",
+        "description": "Maximum tokens available for the agent's reasoning."
+      },
+      {
+        "name": "tool_capability_knowledge",
+        "role": "input",
+        "description": "Accuracy of the agent's model of each tool's capabilities and costs."
+      },
+      {
+        "name": "routing_policy_exploration",
+        "role": "input",
+        "description": "Tendency of the routing policy to try novel tools instead of exploiting known ones."
+      },
+      {
+        "name": "context_sufficiency",
+        "role": "mediator",
+        "description": "Degree to which the available context is sufficient to make an optimal routing decision."
+      },
+      {
+        "name": "tool_selection_accuracy",
+        "role": "mediator",
+        "description": "Probability that the chosen tool is optimal for the given subtask."
+      },
+      {
+        "name": "routing_success",
+        "role": "outcome",
+        "description": "Whether the routing leads to correct and efficient code generation (1 for success, 0 for failure)."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_complexity, context_window_limit",
+        "relation": "determine",
+        "target": "context_sufficiency",
+        "explanation": "Higher task complexity or smaller context window reduce the sufficiency of context for routing decisions."
+      },
+      {
+        "step": "2",
+        "source": "context_sufficiency",
+        "relation": "determines",
+        "target": "tool_selection_accuracy",
+        "explanation": "With insufficient context, the agent may misjudge tool suitability, reducing selection accuracy."
+      },
+      {
+        "step": "3",
+        "source": "tool_capability_knowledge, routing_policy_exploration",
+        "relation": "moderate",
+        "target": "tool_selection_accuracy",
+        "explanation": "Better tool knowledge can compensate for poor context, while high exploration may degrade accuracy."
+      },
+      {
+        "step": "4",
+        "source": "tool_selection_accuracy",
+        "relation": "determines",
+        "target": "routing_success",
+        "explanation": "Accurate tool selection leads to successful routing; otherwise, routing fails."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Insufficient context due to task ambiguity or limited context window",
+        "why_it_matters": "Agent may not have enough information to match task to tool, leading to mismatches and failures."
+      },
+      {
+        "bottleneck": "Incomplete or outdated tool capability knowledge",
+        "why_it_matters": "Even with good context, a wrong model of tool capabilities leads to poor selection decisions."
+      },
+      {
+        "bottleneck": "Exploration-exploitation imbalance",
+        "why_it_matters": "Too much exploration wastes time and may select suboptimal tools; too little can miss better tools, both causing failures."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing fails when insufficient context (due to high task complexity or limited context window) combines with poor tool capability knowledge or imbalanced exploration-exploitation, leading to inaccurate tool selection and ultimately routing failure. The mechanism is mediated by context sufficiency and moderated by knowledge and exploration policy."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+      "derived_from": [
+        "Tool-Use Routing",
+        "assumption: each tool has distinct known capabilities and associated costs",
+        "Coding Agent"
+      ],
+      "why_it_matters": "If tool characteristics are not static or accurately known, the routing policy cannot rely on a fixed model, causing mismatches between tool selection and actual task needs.",
+      "what_existing_methods_may_miss": "Existing methods often assume stable tool APIs and performance, ignoring real-world variation due to updates, query complexity, or environmental changes.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Limited context (due to small context window or ambiguous task) conflicts with the need for sufficient information to make optimal tool selection, as modeled in the causal chain.",
+      "derived_from": [
+        "assumption: routing decision based on limited context",
+        "Failure Mode",
+        "context_window_limit",
+        "task_complexity",
+        "context_sufficiency"
+      ],
+      "why_it_matters": "Insufficient context is a root cause of tool selection inaccuracy; any attempt to improve routing must address this bottleneck, but context is inherently bounded.",
+      "what_existing_methods_may_miss": "Current methods often extend context length or use retrieval, but may not resolve ambiguity in the task definition itself, which remains a challenge.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The exploration-exploitation tradeoff in tool selection is undertested under bounded reasoning: agents must balance trying novel tools vs. exploiting known ones, but limited context and knowledge exacerbate this dilemma.",
+      "derived_from": [
+        "tradeoff: Exploration vs. Exploitation in tool selection",
+        "routing_policy_exploration",
+        "tool_capability_knowledge"
+      ],
+      "why_it_matters": "Poor exploration-exploitation balance leads to either suboptimal tool use or wasted attempts; existing heuristics may not generalize across coding tasks with varying novelty.",
+      "what_existing_methods_may_miss": "Standard RL-based or heuristic exploration strategies assume stable reward distributions, but in coding, tool effectiveness can be highly task-specific and non-stationary.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The speed-accuracy tradeoff in tool choice is often under- or over-weighted by routing policies, but its impact on routing success is mediated by context and task constraints.",
+      "derived_from": [
+        "tradeoff: Speed vs. Accuracy in tool choice",
+        "tool_selection_accuracy",
+        "routing_success"
+      ],
+      "why_it_matters": "Choosing a faster but less accurate tool may cause errors that require re-routing, while prioritizing accuracy may cause unacceptable latency; optimal balance is context-dependent.",
+      "what_existing_methods_may_miss": "Most routing policies use fixed thresholds or cost functions, failing to adapt dynamically to changing task demands or user preferences during execution.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does uncertainty in tool capability knowledge (e.g., misrepresentation of tool accuracy or cost) causally affect routing success in coding agents, controlling for context sufficiency?",
+      "question_type": "causal",
+      "source_tension": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+      "expected_contribution": "Quantify the causal effect of tool knowledge inaccuracy on routing failure, isolating its impact from other factors like context limitations."
+    },
+    {
+      "question": "To what extent does context sufficiency mediate the relationship between task complexity and routing success in coding agents?",
+      "question_type": "causal",
+      "source_tension": "Limited context (due to small context window or ambiguous task) conflicts with the need for sufficient information to make optimal tool selection, as modeled in the causal chain.",
+      "expected_contribution": "Establish the mediating role of context sufficiency, identifying whether insufficient context is the primary bottleneck or if other factors dominate."
+    },
+    {
+      "question": "How does the exploration rate in the routing policy interact with context sufficiency to influence tool selection accuracy in coding agents?",
+      "question_type": "diagnostic",
+      "source_tension": "The exploration-exploitation tradeoff in tool selection is undertested under bounded reasoning: agents must balance trying novel tools vs. exploiting known ones, but limited context and knowledge exacerbate this dilemma.",
+      "expected_contribution": "Diagnose the conditions under which exploration is beneficial or harmful, revealing the optimal exploration rate as a function of context."
+    },
+    {
+      "question": "Under what conditions (e.g., task complexity, latency constraints) does prioritizing speed over accuracy in tool selection lead to higher routing success in coding agents?",
+      "question_type": "descriptive",
+      "source_tension": "The speed-accuracy tradeoff in tool choice is often under- or over-weighted by routing policies, but its impact on routing success is mediated by context and task constraints.",
+      "expected_contribution": "Characterize the task and context conditions that determine whether speed-prioritizing or accuracy-prioritizing routing policies yield better overall success."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision process by which a coding agent selects a specific external tool (e.g., code interpreter, file editor, search engine) to perform a subtask during code generation or debugging.",
+          "why_primitive": "It is the fundamental control mechanism that determines how the agent interfaces with its environment; without it, the agent cannot leverage tools."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system, typically powered by a large language model, that generates, modifies, or debugs code by orchestrating a set of external tools.",
+          "why_primitive": "It is the entity that performs routing and whose behavior we analyze; its architecture and capabilities are foundational to understanding routing failures."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A scenario in which tool-use routing results in an incorrect or suboptimal tool selection, leading to errors, increased latency, or failure to achieve the intended coding objective.",
+          "why_primitive": "It defines the negative outcome we aim to predict and prevent; understanding its types is essential for analyzing when routing fails."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Each tool in the agent's repertoire has distinct, known capabilities and associated costs (e.g., execution time, error rate).",
+          "rationale": "Effective routing requires the agent to have a model of what each tool can do and how expensive it is; otherwise, selection cannot be informed.",
+          "possible_failure": "If tool characteristics are unknown, dynamic, or misrepresented, the routing policy may make consistently poor choices, leading to failure."
+        },
+        {
+          "assumption": "The routing decision is made based on limited context (e.g., current state history, prompt) and cannot anticipate all future interactions or tool outcomes.",
+          "rationale": "In practice, agents operate with bounded reasoning due to finite context windows and computational constraints.",
+          "possible_failure": "The agent may under- or over-estimate a tool's suitability for a task, especially if the task requirements are ambiguous or change during execution, leading to routing failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Inherent difficulty and ambiguity of the coding task."
+          },
+          {
+            "name": "context_window_limit",
+            "role": "input",
+            "description": "Maximum tokens available for the agent's reasoning."
+          },
+          {
+            "name": "tool_capability_knowledge",
+            "role": "input",
+            "description": "Accuracy of the agent's model of each tool's capabilities and costs."
+          },
+          {
+            "name": "routing_policy_exploration",
+            "role": "input",
+            "description": "Tendency of the routing policy to try novel tools instead of exploiting known ones."
+          },
+          {
+            "name": "context_sufficiency",
+            "role": "mediator",
+            "description": "Degree to which the available context is sufficient to make an optimal routing decision."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "Probability that the chosen tool is optimal for the given subtask."
+          },
+          {
+            "name": "routing_success",
+            "role": "outcome",
+            "description": "Whether the routing leads to correct and efficient code generation (1 for success, 0 for failure)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity, context_window_limit",
+            "relation": "determine",
+            "target": "context_sufficiency",
+            "explanation": "Higher task complexity or smaller context window reduce the sufficiency of context for routing decisions."
+          },
+          {
+            "step": "2",
+            "source": "context_sufficiency",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "With insufficient context, the agent may misjudge tool suitability, reducing selection accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_knowledge, routing_policy_exploration",
+            "relation": "moderate",
+            "target": "tool_selection_accuracy",
+            "explanation": "Better tool knowledge can compensate for poor context, while high exploration may degrade accuracy."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection_accuracy",
+            "relation": "determines",
+            "target": "routing_success",
+            "explanation": "Accurate tool selection leads to successful routing; otherwise, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient context due to task ambiguity or limited context window",
+            "why_it_matters": "Agent may not have enough information to match task to tool, leading to mismatches and failures."
+          },
+          {
+            "bottleneck": "Incomplete or outdated tool capability knowledge",
+            "why_it_matters": "Even with good context, a wrong model of tool capabilities leads to poor selection decisions."
+          },
+          {
+            "bottleneck": "Exploration-exploitation imbalance",
+            "why_it_matters": "Too much exploration wastes time and may select suboptimal tools; too little can miss better tools, both causing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when insufficient context (due to high task complexity or limited context window) combines with poor tool capability knowledge or imbalanced exploration-exploitation, leading to inaccurate tool selection and ultimately routing failure. The mechanism is mediated by context sufficiency and moderated by knowledge and exploration policy."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "assumption: each tool has distinct known capabilities and associated costs",
+          "Coding Agent"
+        ],
+        "why_it_matters": "If tool characteristics are not static or accurately known, the routing policy cannot rely on a fixed model, causing mismatches between tool selection and actual task needs.",
+        "what_existing_methods_may_miss": "Existing methods often assume stable tool APIs and performance, ignoring real-world variation due to updates, query complexity, or environmental changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does tool knowledge uncertainty cause routing failure in coding agents only when context sufficiency falls below a critical threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a sharp boundary condition where the interaction between tool knowledge uncertainty and context sufficiency determines catastrophic routing failure, moving beyond monotonic effects."
+      },
+      "hypothesis": {
+        "statement": "Tool knowledge uncertainty significantly decreases routing success only when context sufficiency is low (below a threshold); when context sufficiency is high, uncertainty has negligible effect.",
+        "predicted_effect": "A significant interaction: at low context sufficiency, higher uncertainty reduces success; at high context sufficiency, uncertainty has little or no effect."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a 2x3 factorial experiment: context sufficiency (low vs. high) crossed with tool knowledge uncertainty (low, medium, high). Use a fixed set of coding tasks and a fixed agent. Context sufficiency is manipulated by varying context window size (small vs. large). Uncertainty is manipulated by adding noise to tool capabilities. Measure routing success (binary) and tool selection accuracy. Use logistic regression with interaction term to test significance.",
+        "independent_variables": [
+          "Tool knowledge uncertainty (low, medium, high)",
+          "Context sufficiency (low, high)"
+        ],
+        "dependent_variables": [
+          "Routing success (binary)",
+          "Tool selection accuracy (proportion)"
+        ],
+        "controls": [
+          "Task complexity (fixed set)",
+          "Agent architecture (fixed)",
+          "Exploration rate (fixed)",
+          "Number of trials per condition"
+        ],
+        "falsifying_observation": "If the interaction term is not statistically significant, or if high uncertainty significantly reduces success even under high context sufficiency, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant interaction: simple effects show uncertainty effect only under low context sufficiency.",
+          "Under low context sufficiency, success decreases as uncertainty increases.",
+          "Under high context sufficiency, success is high and stable across uncertainty levels."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction; uncertainty has a main effect across both context conditions.",
+          "Uncertainty has a significant effect under high context sufficiency as well.",
+          "Context sufficiency has no main or interactive effect."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis fails, the interaction may not exist; uncertainty might always impair routing, or context sufficiency may be the sole driver.",
+        "assumption_to_revise": "Assumption that tool knowledge is critical for routing success may be overstated; perhaps agents can compensate for uncertainty with better context.",
+        "next_question": "What is the independent causal effect of context sufficiency on routing success, controlling for tool knowledge?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision process by which a coding agent selects a specific external tool (e.g., code interpreter, file editor, search engine) to perform a subtask during code generation or debugging.",
+          "why_primitive": "It is the fundamental control mechanism that determines how the agent interfaces with its environment; without it, the agent cannot leverage tools."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system, typically powered by a large language model, that generates, modifies, or debugs code by orchestrating a set of external tools.",
+          "why_primitive": "It is the entity that performs routing and whose behavior we analyze; its architecture and capabilities are foundational to understanding routing failures."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A scenario in which tool-use routing results in an incorrect or suboptimal tool selection, leading to errors, increased latency, or failure to achieve the intended coding objective.",
+          "why_primitive": "It defines the negative outcome we aim to predict and prevent; understanding its types is essential for analyzing when routing fails."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Each tool in the agent's repertoire has distinct, known capabilities and associated costs (e.g., execution time, error rate).",
+          "rationale": "Effective routing requires the agent to have a model of what each tool can do and how expensive it is; otherwise, selection cannot be informed.",
+          "possible_failure": "If tool characteristics are unknown, dynamic, or misrepresented, the routing policy may make consistently poor choices, leading to failure."
+        },
+        {
+          "assumption": "The routing decision is made based on limited context (e.g., current state history, prompt) and cannot anticipate all future interactions or tool outcomes.",
+          "rationale": "In practice, agents operate with bounded reasoning due to finite context windows and computational constraints.",
+          "possible_failure": "The agent may under- or over-estimate a tool's suitability for a task, especially if the task requirements are ambiguous or change during execution, leading to routing failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Inherent difficulty and ambiguity of the coding task."
+          },
+          {
+            "name": "context_window_limit",
+            "role": "input",
+            "description": "Maximum tokens available for the agent's reasoning."
+          },
+          {
+            "name": "tool_capability_knowledge",
+            "role": "input",
+            "description": "Accuracy of the agent's model of each tool's capabilities and costs."
+          },
+          {
+            "name": "routing_policy_exploration",
+            "role": "input",
+            "description": "Tendency of the routing policy to try novel tools instead of exploiting known ones."
+          },
+          {
+            "name": "context_sufficiency",
+            "role": "mediator",
+            "description": "Degree to which the available context is sufficient to make an optimal routing decision."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "Probability that the chosen tool is optimal for the given subtask."
+          },
+          {
+            "name": "routing_success",
+            "role": "outcome",
+            "description": "Whether the routing leads to correct and efficient code generation (1 for success, 0 for failure)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity, context_window_limit",
+            "relation": "determine",
+            "target": "context_sufficiency",
+            "explanation": "Higher task complexity or smaller context window reduce the sufficiency of context for routing decisions."
+          },
+          {
+            "step": "2",
+            "source": "context_sufficiency",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "With insufficient context, the agent may misjudge tool suitability, reducing selection accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_knowledge, routing_policy_exploration",
+            "relation": "moderate",
+            "target": "tool_selection_accuracy",
+            "explanation": "Better tool knowledge can compensate for poor context, while high exploration may degrade accuracy."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection_accuracy",
+            "relation": "determines",
+            "target": "routing_success",
+            "explanation": "Accurate tool selection leads to successful routing; otherwise, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient context due to task ambiguity or limited context window",
+            "why_it_matters": "Agent may not have enough information to match task to tool, leading to mismatches and failures."
+          },
+          {
+            "bottleneck": "Incomplete or outdated tool capability knowledge",
+            "why_it_matters": "Even with good context, a wrong model of tool capabilities leads to poor selection decisions."
+          },
+          {
+            "bottleneck": "Exploration-exploitation imbalance",
+            "why_it_matters": "Too much exploration wastes time and may select suboptimal tools; too little can miss better tools, both causing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when insufficient context (due to high task complexity or limited context window) combines with poor tool capability knowledge or imbalanced exploration-exploitation, leading to inaccurate tool selection and ultimately routing failure. The mechanism is mediated by context sufficiency and moderated by knowledge and exploration policy."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "assumption: each tool has distinct known capabilities and associated costs",
+          "Coding Agent"
+        ],
+        "why_it_matters": "If tool characteristics are not static or accurately known, the routing policy cannot rely on a fixed model, causing mismatches between tool selection and actual task needs.",
+        "what_existing_methods_may_miss": "Existing methods often assume stable tool APIs and performance, ignoring real-world variation due to updates, query complexity, or environmental changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical level of context sufficiency below which tool-use routing success sharply declines, and how does this threshold vary with the accuracy of the agent's tool capability knowledge?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a sharp threshold in context sufficiency for routing failure and an interaction with tool knowledge accuracy, providing a predictive boundary condition for failure."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of context sufficiency below which routing success drops significantly, and this threshold is higher when tool capability knowledge is inaccurate compared to when it is accurate.",
+        "predicted_effect": "As context sufficiency decreases, routing success remains high until a critical point, then drops abruptly; the critical point occurs at a higher sufficiency level when tool knowledge is inaccurate."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a controlled simulation, a coding agent (e.g., GPT-4 with tool API) performs coding tasks of fixed moderate complexity. Manipulate context sufficiency by varying the maximum context window from 2k to 16k tokens in steps, and manipulate tool capability knowledge by providing either accurate or inaccurate (e.g., outdated) descriptions of tools. Measure routing success (binary: correct first tool selection). For each condition, fit a piecewise regression to detect a threshold in the relationship between context sufficiency (measured as ratio of relevant tokens to total) and routing success. Compare thresholds across knowledge conditions.",
+        "independent_variables": [
+          "context_sufficiency (continuous, manipulated via context window size)",
+          "tool_capability_knowledge_accuracy (binary: accurate vs inaccurate)"
+        ],
+        "dependent_variables": [
+          "routing_success (binary: first tool selection correct)",
+          "threshold position (context sufficiency level where success drops)"
+        ],
+        "controls": [
+          "task complexity (fixed moderate level)",
+          "routing policy exploration (set to 0, always exploit)",
+          "same set of tools"
+        ],
+        "falsifying_observation": "If no sharp threshold is observed (routing success declines linearly) or if the threshold does not differ between accurate and inaccurate tool knowledge conditions, the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Routing success remains high above a critical context sufficiency level and drops sharply below it.",
+          "The critical threshold is significantly higher (requires more context) when tool knowledge is inaccurate.",
+          "Piecewise regression indicates a breakpoint with goodness-of-fit better than linear model."
+        ],
+        "rejects_hypothesis": [
+          "Routing success declines linearly with context sufficiency, no clear threshold.",
+          "The threshold position does not differ significantly between knowledge conditions.",
+          "No interaction effect between context sufficiency and knowledge accuracy on routing success."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold or no interaction with knowledge accuracy is found, the assumption that context sufficiency has a critical bottleneck is unsupported.",
+        "assumption_to_revise": "The assumption that tool knowledge accuracy moderates the effect of context sufficiency in a threshold manner may be wrong; instead, both factors may contribute linearly and independently.",
+        "next_question": "Do task complexity and exploration-exploitation balance also exhibit threshold effects in combination with context sufficiency?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision process by which a coding agent selects a specific external tool (e.g., code interpreter, file editor, search engine) to perform a subtask during code generation or debugging.",
+          "why_primitive": "It is the fundamental control mechanism that determines how the agent interfaces with its environment; without it, the agent cannot leverage tools."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system, typically powered by a large language model, that generates, modifies, or debugs code by orchestrating a set of external tools.",
+          "why_primitive": "It is the entity that performs routing and whose behavior we analyze; its architecture and capabilities are foundational to understanding routing failures."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A scenario in which tool-use routing results in an incorrect or suboptimal tool selection, leading to errors, increased latency, or failure to achieve the intended coding objective.",
+          "why_primitive": "It defines the negative outcome we aim to predict and prevent; understanding its types is essential for analyzing when routing fails."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Each tool in the agent's repertoire has distinct, known capabilities and associated costs (e.g., execution time, error rate).",
+          "rationale": "Effective routing requires the agent to have a model of what each tool can do and how expensive it is; otherwise, selection cannot be informed.",
+          "possible_failure": "If tool characteristics are unknown, dynamic, or misrepresented, the routing policy may make consistently poor choices, leading to failure."
+        },
+        {
+          "assumption": "The routing decision is made based on limited context (e.g., current state history, prompt) and cannot anticipate all future interactions or tool outcomes.",
+          "rationale": "In practice, agents operate with bounded reasoning due to finite context windows and computational constraints.",
+          "possible_failure": "The agent may under- or over-estimate a tool's suitability for a task, especially if the task requirements are ambiguous or change during execution, leading to routing failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Inherent difficulty and ambiguity of the coding task."
+          },
+          {
+            "name": "context_window_limit",
+            "role": "input",
+            "description": "Maximum tokens available for the agent's reasoning."
+          },
+          {
+            "name": "tool_capability_knowledge",
+            "role": "input",
+            "description": "Accuracy of the agent's model of each tool's capabilities and costs."
+          },
+          {
+            "name": "routing_policy_exploration",
+            "role": "input",
+            "description": "Tendency of the routing policy to try novel tools instead of exploiting known ones."
+          },
+          {
+            "name": "context_sufficiency",
+            "role": "mediator",
+            "description": "Degree to which the available context is sufficient to make an optimal routing decision."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "Probability that the chosen tool is optimal for the given subtask."
+          },
+          {
+            "name": "routing_success",
+            "role": "outcome",
+            "description": "Whether the routing leads to correct and efficient code generation (1 for success, 0 for failure)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity, context_window_limit",
+            "relation": "determine",
+            "target": "context_sufficiency",
+            "explanation": "Higher task complexity or smaller context window reduce the sufficiency of context for routing decisions."
+          },
+          {
+            "step": "2",
+            "source": "context_sufficiency",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "With insufficient context, the agent may misjudge tool suitability, reducing selection accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_knowledge, routing_policy_exploration",
+            "relation": "moderate",
+            "target": "tool_selection_accuracy",
+            "explanation": "Better tool knowledge can compensate for poor context, while high exploration may degrade accuracy."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection_accuracy",
+            "relation": "determines",
+            "target": "routing_success",
+            "explanation": "Accurate tool selection leads to successful routing; otherwise, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient context due to task ambiguity or limited context window",
+            "why_it_matters": "Agent may not have enough information to match task to tool, leading to mismatches and failures."
+          },
+          {
+            "bottleneck": "Incomplete or outdated tool capability knowledge",
+            "why_it_matters": "Even with good context, a wrong model of tool capabilities leads to poor selection decisions."
+          },
+          {
+            "bottleneck": "Exploration-exploitation imbalance",
+            "why_it_matters": "Too much exploration wastes time and may select suboptimal tools; too little can miss better tools, both causing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when insufficient context (due to high task complexity or limited context window) combines with poor tool capability knowledge or imbalanced exploration-exploitation, leading to inaccurate tool selection and ultimately routing failure. The mechanism is mediated by context sufficiency and moderated by knowledge and exploration policy."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "assumption: each tool has distinct known capabilities and associated costs",
+          "Coding Agent"
+        ],
+        "why_it_matters": "If tool characteristics are not static or accurately known, the routing policy cannot rely on a fixed model, causing mismatches between tool selection and actual task needs.",
+        "what_existing_methods_may_miss": "Existing methods often assume stable tool APIs and performance, ignoring real-world variation due to updates, query complexity, or environmental changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical context sufficiency threshold below which tool-use routing success drops sharply, and how does the exploration rate modulate this threshold in coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a phase transition in routing success as a function of context sufficiency and show that exploration rate shifts this transition, providing a sharp boundary condition for failure."
+      },
+      "hypothesis": {
+        "statement": "Tool-use routing success exhibits a sigmoidal drop at a critical context sufficiency threshold; the threshold value increases monotonically with exploration rate, such that higher exploration narrows the range of context sufficiency where routing succeeds.",
+        "predicted_effect": "Under low exploration, the threshold is at low context sufficiency; under high exploration, the threshold shifts to higher context sufficiency, indicating that exploration amplifies the failure regime."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent performing a set of coding tasks with controlled context sufficiency (varied by task complexity and context window size) and two levels of exploration rate (0.1 and 0.5). Measure routing success (binary: correct tool selection leading to successful code generation) for each condition. Fit a logistic regression to estimate the context sufficiency threshold (point of 50% success) for each exploration rate.",
+        "independent_variables": [
+          "context_sufficiency (continuous, varied across a range)",
+          "exploration_rate (0.1 vs 0.5)"
+        ],
+        "dependent_variables": [
+          "routing_success (binary)"
+        ],
+        "controls": [
+          "Same set of tools with fixed capabilities",
+          "Same coding agent architecture",
+          "Same task set across conditions",
+          "Same training history for agent"
+        ],
+        "falsifying_observation": "No sigmoidal pattern in routing success as a function of context sufficiency, or no significant difference in threshold between exploration rates."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Routing success exhibits a clear sigmoidal drop as context sufficiency decreases.",
+          "The estimated threshold is significantly higher for exploration_rate=0.5 than for exploration_rate=0.1.",
+          "The slope of the sigmoid is steep, indicating a sharp transition."
+        ],
+        "rejects_hypothesis": [
+          "Routing success declines linearly with context sufficiency, without a sharp transition.",
+          "The threshold does not differ between exploration rates.",
+          "Higher exploration leads to a lower threshold (opposite effect)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp transition is observed or the threshold is not modulated by exploration rate as predicted.",
+        "assumption_to_revise": "The assumption that context sufficiency and exploration rate interact nonlinearly to produce a phase transition may be incorrect. Instead, the relationship could be linear, or exploration might have a monotonic effect independent of context sufficiency.",
+        "next_question": "What is the shape of the relationship between context sufficiency, exploration rate, and routing success? Is there an optimal exploration rate that minimizes failure across all context sufficiency levels?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision process by which a coding agent selects a specific external tool (e.g., code interpreter, file editor, search engine) to perform a subtask during code generation or debugging.",
+          "why_primitive": "It is the fundamental control mechanism that determines how the agent interfaces with its environment; without it, the agent cannot leverage tools."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system, typically powered by a large language model, that generates, modifies, or debugs code by orchestrating a set of external tools.",
+          "why_primitive": "It is the entity that performs routing and whose behavior we analyze; its architecture and capabilities are foundational to understanding routing failures."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A scenario in which tool-use routing results in an incorrect or suboptimal tool selection, leading to errors, increased latency, or failure to achieve the intended coding objective.",
+          "why_primitive": "It defines the negative outcome we aim to predict and prevent; understanding its types is essential for analyzing when routing fails."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Each tool in the agent's repertoire has distinct, known capabilities and associated costs (e.g., execution time, error rate).",
+          "rationale": "Effective routing requires the agent to have a model of what each tool can do and how expensive it is; otherwise, selection cannot be informed.",
+          "possible_failure": "If tool characteristics are unknown, dynamic, or misrepresented, the routing policy may make consistently poor choices, leading to failure."
+        },
+        {
+          "assumption": "The routing decision is made based on limited context (e.g., current state history, prompt) and cannot anticipate all future interactions or tool outcomes.",
+          "rationale": "In practice, agents operate with bounded reasoning due to finite context windows and computational constraints.",
+          "possible_failure": "The agent may under- or over-estimate a tool's suitability for a task, especially if the task requirements are ambiguous or change during execution, leading to routing failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "Inherent difficulty and ambiguity of the coding task."
+          },
+          {
+            "name": "context_window_limit",
+            "role": "input",
+            "description": "Maximum tokens available for the agent's reasoning."
+          },
+          {
+            "name": "tool_capability_knowledge",
+            "role": "input",
+            "description": "Accuracy of the agent's model of each tool's capabilities and costs."
+          },
+          {
+            "name": "routing_policy_exploration",
+            "role": "input",
+            "description": "Tendency of the routing policy to try novel tools instead of exploiting known ones."
+          },
+          {
+            "name": "context_sufficiency",
+            "role": "mediator",
+            "description": "Degree to which the available context is sufficient to make an optimal routing decision."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "Probability that the chosen tool is optimal for the given subtask."
+          },
+          {
+            "name": "routing_success",
+            "role": "outcome",
+            "description": "Whether the routing leads to correct and efficient code generation (1 for success, 0 for failure)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity, context_window_limit",
+            "relation": "determine",
+            "target": "context_sufficiency",
+            "explanation": "Higher task complexity or smaller context window reduce the sufficiency of context for routing decisions."
+          },
+          {
+            "step": "2",
+            "source": "context_sufficiency",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "With insufficient context, the agent may misjudge tool suitability, reducing selection accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_capability_knowledge, routing_policy_exploration",
+            "relation": "moderate",
+            "target": "tool_selection_accuracy",
+            "explanation": "Better tool knowledge can compensate for poor context, while high exploration may degrade accuracy."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection_accuracy",
+            "relation": "determines",
+            "target": "routing_success",
+            "explanation": "Accurate tool selection leads to successful routing; otherwise, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient context due to task ambiguity or limited context window",
+            "why_it_matters": "Agent may not have enough information to match task to tool, leading to mismatches and failures."
+          },
+          {
+            "bottleneck": "Incomplete or outdated tool capability knowledge",
+            "why_it_matters": "Even with good context, a wrong model of tool capabilities leads to poor selection decisions."
+          },
+          {
+            "bottleneck": "Exploration-exploitation imbalance",
+            "why_it_matters": "Too much exploration wastes time and may select suboptimal tools; too little can miss better tools, both causing failures."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails when insufficient context (due to high task complexity or limited context window) combines with poor tool capability knowledge or imbalanced exploration-exploitation, leading to inaccurate tool selection and ultimately routing failure. The mechanism is mediated by context sufficiency and moderated by knowledge and exploration policy."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption that each tool has distinct known capabilities and costs conflicts with the practical reality that tool capabilities may be dynamic, context-dependent, or misrepresented, leading to routing failures.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "assumption: each tool has distinct known capabilities and associated costs",
+          "Coding Agent"
+        ],
+        "why_it_matters": "If tool characteristics are not static or accurately known, the routing policy cannot rely on a fixed model, causing mismatches between tool selection and actual task needs.",
+        "what_existing_methods_may_miss": "Existing methods often assume stable tool APIs and performance, ignoring real-world variation due to updates, query complexity, or environmental changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the size of the toolset affect the critical context sufficiency threshold below which routing success collapses in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a phase transition in routing success as a function of context sufficiency and toolset size, providing a quantifiable design guideline for toolset engineering."
+      },
+      "hypothesis": {
+        "statement": "Routing success exhibits a phase transition at a context sufficiency threshold that increases with toolset size; for a small toolset (≤3 tools), the threshold is low, but for a large toolset (≥7 tools), the threshold is high, making routing failures more likely under limited context.",
+        "predicted_effect": "The context sufficiency threshold (measured as the ratio of context window tokens to task complexity) for a sharp drop in tool selection accuracy is an increasing function of toolset size, with a nonlinear jump around toolset size 5."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed LLM, varying toolset size (3, 5, 7, 10 tools) and context sufficiency (by controlling context window length and task complexity). For each condition, measure routing success rate (proportion of correct tool selections across 100 tasks). Identify the context sufficiency level where success rate drops below 70%.",
+        "independent_variables": [
+          "toolset_size",
+          "context_sufficiency (context_window / task_complexity)"
+        ],
+        "dependent_variables": [
+          "routing_success_rate"
+        ],
+        "controls": [
+          "same LLM",
+          "same task distribution across complexity levels",
+          "fixed tool capability knowledge",
+          "no exploration variation"
+        ],
+        "falsifying_observation": "If the success rate drops gradually without a clear threshold, or if the threshold does not increase with toolset size, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For toolset size 3, success rate drops sharply when context sufficiency falls below a low threshold (e.g., 0.3).",
+          "For toolset size 7, threshold is significantly higher (e.g., 0.6).",
+          "The relationship between threshold and toolset size is monotonic and nonlinear, with a jump between toolset sizes 5 and 7."
+        ],
+        "rejects_hypothesis": [
+          "No sharp drop in success rate for any toolset size.",
+          "Threshold does not increase with toolset size.",
+          "Threshold is the same for all toolset sizes."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, the assumption that toolset size moderates the context sufficiency threshold is incorrect.",
+        "assumption_to_revise": "Assumption that the primary bottleneck is context sufficiency alone; instead, the interaction may be driven by tool capability overlap rather than raw number.",
+        "next_question": "How does the overlap in tool capabilities (e.g., similarity of function embeddings) moderate the effect of toolset size on the context sufficiency threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Tool knowledge uncertainty significantly decreases routing success only when context sufficiency is low (below a threshold); when context sufficiency is high, uncertainty has negligible effect.",
+      "independent_variables": [
+        "Context sufficiency (manipulated via context window size: low vs high)",
+        "Tool knowledge uncertainty (manipulated via noise added to tool capability estimates: low vs high)"
+      ],
+      "dependent_variables": [
+        "Routing success (binary per trial, 1 if correct and efficient code generation, else 0)",
+        "Tool selection accuracy (proportion of subtasks where optimal tool was selected)"
+      ],
+      "controlled_variables": [
+        "Task complexity (fixed set of coding tasks with equal difficulty)",
+        "Agent architecture (fixed, e.g., GPT-4 with tool-use loop)",
+        "Exploration rate (fixed, e.g., epsilon-greedy with epsilon=0.1)",
+        "Number of trials per condition (e.g., 50 tasks per condition, total 200)",
+        "Tool set (fixed set of tools with known baseline capabilities)"
+      ],
+      "baselines": [
+        {
+          "name": "Low uncertainty, high context sufficiency",
+          "description": "Condition with low tool knowledge uncertainty (no noise) and high context window size (e.g., 8K tokens). Expected to yield highest routing success."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing success rate",
+          "definition": "Proportion of trials where routing leads to correct and efficient code generation, measured per condition."
+        },
+        {
+          "name": "Tool selection accuracy",
+          "definition": "Proportion of subtasks within a trial where the chosen tool is the optimal tool, averaged over trials in each condition."
+        }
+      ],
+      "expected_result": "A significant interaction between context sufficiency and tool knowledge uncertainty: simple main effects show that under low context sufficiency, higher uncertainty significantly reduces routing success and tool selection accuracy, while under high context sufficiency, uncertainty has no significant effect. The logistic regression interaction term is significant (p<0.05), and post-hoc comparisons confirm the pattern.",
+      "falsifying_result": "If the interaction term is not statistically significant, or if high uncertainty significantly reduces routing success even under high context sufficiency (main effect of uncertainty or simple effect within high context), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "A 2x2 between-subjects factorial experiment with 50 trials per condition (total 200 trials). Context sufficiency is manipulated by setting the agent's context window size to 2K tokens (low) or 8K tokens (high). Tool knowledge uncertainty is manipulated by adding 0% noise (low) or 30% noise (high) to the agent's internal estimates of each tool's success probability. The agent is a fixed GPT-4 with a fixed exploration rate (epsilon=0.1). Each trial uses a randomly sampled coding task from a predefined set of 20 tasks of equal complexity. Routing success and tool selection accuracy are recorded. Logistic regression with interaction term is used for analysis.",
+      "risks_and_confounds": [
+        "Task complexity may not be perfectly uniform across tasks; counterbalance by using multiple tasks per condition and random assignment.",
+        "Agent's exploration policy may interact with uncertainty; hold epsilon constant.",
+        "Manipulation of tool knowledge uncertainty may inadvertently affect agent's perception of tool costs; ensure noise is only on capability estimates.",
+        "Context window size manipulation may affect not only sufficiency but also agent's reasoning quality; control by using same base model and prompt structure."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold of context sufficiency below which routing success drops significantly, and this threshold is higher when tool capability knowledge is inaccurate compared to when it is accurate.",
+      "independent_variables": [
+        "context_window_size (tokens): 2k, 4k, 8k, 16k",
+        "tool_capability_knowledge_accuracy (accurate vs inaccurate)"
+      ],
+      "dependent_variables": [
+        "routing_success (binary: first tool selection correct)",
+        "threshold_position (context sufficiency level at which success drops sharply)"
+      ],
+      "controlled_variables": [
+        "task complexity (fixed moderate level)",
+        "routing policy exploration (set to 0, always exploit)",
+        "same set of tools",
+        "coding agent (e.g., GPT-4 with tool API)"
+      ],
+      "baselines": [
+        {
+          "name": "High context, accurate knowledge",
+          "description": "context window 16k tokens, accurate tool descriptions"
+        },
+        {
+          "name": "Low context, accurate knowledge",
+          "description": "context window 2k tokens, accurate tool descriptions"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing success rate",
+          "definition": "Proportion of trials where the agent selects the correct tool on the first attempt."
+        },
+        {
+          "name": "breakpoint location",
+          "definition": "The context sufficiency level estimated by piecewise regression where routing success rate transitions from high to low."
+        }
+      ],
+      "expected_result": "Routing success remains high above a critical context sufficiency level and drops sharply below it. The critical threshold is significantly higher (requires more context) when tool knowledge is inaccurate. Piecewise regression indicates a breakpoint with goodness-of-fit better than linear model.",
+      "falsifying_result": "If no sharp threshold is observed (routing success declines linearly with context sufficiency) or if the threshold position does not differ significantly between accurate and inaccurate tool knowledge conditions, the hypothesis is rejected.",
+      "minimum_viable_experiment": "Conduct a controlled simulation where a coding agent (e.g., GPT-4 with tool API) performs coding tasks of fixed moderate complexity. Vary context window size across 4 levels (2k, 4k, 8k, 16k tokens) and tool knowledge accuracy (accurate vs inaccurate descriptions of tools). For each combination, run multiple trials and record routing success. Fit a piecewise regression to detect a threshold in the relationship between context sufficiency (measured as relevant token ratio) and routing success. Compare threshold positions across knowledge conditions.",
+      "risks_and_confounds": [
+        "Task complexity may not be perfectly fixed across trials",
+        "Agent's internal randomness may cause variance",
+        "Context sufficiency is not solely determined by window size; relevance of tokens depends on task",
+        "Inaccurate tool knowledge may affect learning over time",
+        "Number of levels may be insufficient to detect threshold"
+      ]
+    },
+    {
+      "hypothesis": "Tool-use routing success exhibits a sigmoidal drop at a critical context sufficiency threshold; the threshold value increases monotonically with exploration rate, such that higher exploration narrows the range of context sufficiency where routing succeeds.",
+      "independent_variables": [
+        "context_sufficiency (continuous, varied by combining task complexity and context window size)",
+        "exploration_rate (two levels: 0.1 and 0.5)"
+      ],
+      "dependent_variables": [
+        "routing_success (binary: 1 if correct tool selected and code generation successful, else 0)"
+      ],
+      "controlled_variables": [
+        "Same set of tools with fixed capabilities",
+        "Same coding agent architecture",
+        "Same task set across all conditions",
+        "Same training history for agent",
+        "Fixed tool capability knowledge",
+        "Random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Pure exploitation (exploration rate = 0)",
+          "description": "Agent always selects the tool with highest expected reward according to its current knowledge, no exploration."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing_success",
+          "definition": "Binary indicator: 1 if the agent selects the correct tool for the subtask and subsequent code generation is successful, 0 otherwise."
+        },
+        {
+          "name": "context_sufficiency",
+          "definition": "Numeric value derived from task complexity and context window size, representing the degree to which the available context is sufficient for optimal routing."
+        },
+        {
+          "name": "context_sufficiency_threshold",
+          "definition": "The value of context_sufficiency at which logistic regression predicts 50% routing success, estimated separately for each exploration rate."
+        }
+      ],
+      "expected_result": "Routing success as a function of context sufficiency exhibits a sigmoidal pattern. The estimated threshold (point of 50% success) for exploration_rate=0.5 is significantly higher than for exploration_rate=0.1, as determined by a bootstrap test (p < 0.05).",
+      "falsifying_result": "No sigmoidal pattern is observed (e.g., linear decline); or the threshold does not differ significantly between exploration rates; or higher exploration leads to a lower threshold (opposite direction).",
+      "minimum_viable_experiment": "Simulate a single coding agent on a set of 100 coding tasks. For each task, systematically vary context sufficiency by adjusting both task complexity (e.g., number of steps, ambiguity) and context window size (e.g., 512, 1024, 2048 tokens) across 10 equally spaced levels. For each task and context sufficiency level, run the agent twice: once with exploration_rate=0.1 and once with exploration_rate=0.5. Record routing success per trial. Aggregate data across tasks and fit a logistic regression model with context_sufficiency as predictor and routing_success as outcome, separately for each exploration rate. Extract the threshold (x at p=0.5) and compare thresholds using a bootstrapped difference test.",
+      "risks_and_confounds": [
+        "Task complexity and context window size may not combine linearly into a single context_sufficiency metric; validation is needed.",
+        "Agent's prior knowledge of tool capabilities may vary across runs if not perfectly controlled.",
+        "Order effects or learning across tasks if tasks are not randomized.",
+        "Exploration rate may not be perfectly implemented if agent has internal stochasticity not fully controlled.",
+        "Small number of tasks or context levels may lead to noisy threshold estimates; power analysis should ensure adequate sample size.",
+        "Confound: tool selection accuracy may also depend on factors like tool availability, not just context sufficiency."
+      ]
+    },
+    {
+      "hypothesis": "Routing success exhibits a phase transition at a context sufficiency threshold that increases with toolset size; for a small toolset (≤3 tools), the threshold is low, but for a large toolset (≥7 tools), the threshold is high, making routing failures more likely under limited context.",
+      "independent_variables": [
+        "toolset_size",
+        "context_sufficiency (context_window_token_count / task_complexity_token_count)"
+      ],
+      "dependent_variables": [
+        "routing_success_rate"
+      ],
+      "controlled_variables": [
+        "same LLM (GPT-4)",
+        "same set of 100 coding tasks with balanced complexity",
+        "fixed tool capability knowledge (each tool's capabilities and costs are known exactly to the agent)",
+        "no exploration variation (routing policy is greedy, always picks highest-probability tool)",
+        "fixed context window tokens across all runs for a given sufficiency level"
+      ],
+      "baselines": [
+        {
+          "name": "Full context baseline",
+          "description": "For each toolset size (3 and 7), context_sufficiency = 1.0 (no context limitation). Expected to yield near-perfect routing."
+        },
+        {
+          "name": "Random routing baseline",
+          "description": "For each toolset size, tools selected uniformly at random. Provides chance-level success rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing_success_rate",
+          "definition": "Proportion of tasks (out of 100 independent tasks) for which the agent selects the correct tool (as pre-determined by oracle)."
+        }
+      ],
+      "expected_result": "For toolset size 3, routing success rate remains above 70% even at low context sufficiency (0.2). For toolset size 7, success rate drops below 70% at medium context sufficiency (0.5) and is very low at low context sufficiency (0.2). The threshold (context sufficiency where success crosses 70%) is significantly higher for size 7 than for size 3.",
+      "falsifying_result": "If for any toolset size the success rate does not drop sharply (e.g., decreases linearly) or if the threshold does not increase with toolset size (e.g., both sizes have similar threshold or size 3 has higher threshold than size 7), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use a single LLM (GPT-4) and a fixed set of 100 coding tasks. Vary toolset size at two levels: 3 and 7 tools. For each toolset size, test three context sufficiency levels: low (0.2), medium (0.5), and high (0.8), plus a full context baseline (1.0). Each condition runs once (no replication) but with 100 tasks per condition. Measure routing success rate (proportion of correct tool selections). Compare across conditions to detect a phase transition: a sharp drop in success rate between medium and low context for size 7 but not for size 3. Total conditions: 2 sizes × 4 sufficiency levels = 8 conditions, plus 2 random baselines = 10 conditions. Each condition: 100 tasks, each task involves one routing decision. Total ~1000 LLM calls (plus baselines). This is the smallest design that can falsify the hypothesis.",
+      "risks_and_confounds": [
+        "Task selection: The 100 tasks may not adequately cover the complexity range needed to define context sufficiency uniformly.",
+        "Tool capability overlap: If tools have overlapping capabilities, the 'correct tool' may be ambiguous, affecting success rate measurement.",
+        "LLM stochasticity: Single run per condition may not be representative; but 100 tasks per condition mitigate variance.",
+        "Definition of context sufficiency: The ratio of context window to task complexity may not capture the true information needed for routing. A different operationalization could yield different thresholds.",
+        "Fixed tool capability knowledge: In real agents, tool knowledge is learned, not fixed; this simplification may limit generalizability."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package systematically decomposes the problem of when tool-use routing fails in coding agents. It identifies primitive definitions, assumptions, tradeoffs, and a causal mechanism model with mediators and moderators. Four tensions are derived from first principles, leading to specific, falsifiable hypotheses with minimal decisive tests. The work is well-structured and theory-driven, but lacks empirical validation and comparison with existing routing methods.",
+    "strengths": [
+      "Clear and systematic first-principles decomposition.",
+      "Well-articulated causal mechanism model with mediators and moderators.",
+      "Falsifiable hypotheses with detailed minimal decisive tests.",
+      "Identifies key tensions (e.g., tool knowledge uncertainty, limited context) that are practically relevant.",
+      "Experiment plans include controls, baselines, and expected outcomes."
+    ],
+    "weaknesses": [
+      "First-principles derivation, while sound, does not introduce fundamentally new concepts; many tensions are known in the literature.",
+      "No comparison with existing baselines (e.g., ReAct, Reflexion, random routing) in the experiment plans.",
+      "Experiments rely on a single LLM (GPT-4) and fixed tool set, limiting generalizability.",
+      "The causal chain assumes linear mediation, ignoring potential feedback loops or dynamic learning.",
+      "Some hypotheses (e.g., threshold detection) may be difficult to test with discrete context window manipulations."
+    ],
+    "questions": [
+      "How do the findings generalize to other LLMs (e.g., LLaMA, Claude) or to agents that learn tool capabilities from interaction?",
+      "Does the mechanism model hold when agents can dynamically update their tool knowledge during a task?",
+      "How would the threshold hypotheses change if the tool set includes tools with overlapping capabilities?"
+    ],
+    "missing_baselines": [
+      "Random tool selection baseline",
+      "Heuristic policy (e.g., always select cheapest tool)",
+      "Existing agent frameworks with implicit routing (e.g., ReAct, Toolformer, Reflexion)"
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Lack of empirical grounding and comparative baselines",
+    "root_cause": "The research was excessively theoretical and lacked empirical validation against existing baselines, limiting its ability to demonstrate practical significance or falsifiability. The review highlighted missing baselines (random selection, heuristic policies, ReAct, Reflexion) and reliance on a single LLM, which prevents assessing generalizability.",
+    "violated_principle": "Empirical accountability: any causal mechanism or threshold claim must be tested against representative baselines and across diverse conditions (e.g., different LLMs, tool sets) to ensure robustness and falsifiability.",
+    "new_or_updated_principle": "Principle of Comparative Falsification: Every hypothesized causal mechanism or boundary condition in agent routing must be evaluated against at least two baseline policies (random, simple heuristic, and a state-of-the-art method) and across at least two different LLM architectures or toolset configurations.",
+    "new_or_updated_skill": "Skill: Baseline-aware experimental design for agent routing. This includes the ability to (1) select appropriate baselines (random, greedy, ReAct, others), (2) implement controlled experiments that isolate the hypothesized mechanism from confounds, and (3) perform statistical comparisons (e.g., bootstrap tests) to determine if the new mechanism significantly outperforms baselines under the boundary conditions.",
+    "regression_test": "For any future research package claiming a routing success threshold, failure mode, or mechanism, require that the minimal decisive test includes: (a) explicit baselines (random selection, cheapest tool heuristic, and ReAct-style routing), (b) at least two LLM backbones (e.g., GPT-4 and LLaMA-70B), and (c) a predefined statistical significance criterion (e.g., p<0.05) for comparing against baselines. The experiment plan must specify these baselines and a power analysis to ensure detectability of the effect."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Does tool knowledge uncertainty cause routing failure in coding agents only when context sufficiency falls below a critical threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical level of context sufficiency below which tool-use routing success sharply declines, and how does this threshold vary with the accuracy of the agent's tool capability knowledge?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical context sufficiency threshold below which tool-use routing success drops sharply, and how does the exploration rate modulate this threshold in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "How does the size of the toolset affect the critical context sufficiency threshold below which routing success collapses in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

@@ -1,0 +1,1673 @@
+{
+  "topic": {
+    "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+    "topic_id": "T009",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should coding-agent benchmarks isolate non-inferable requirements?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Requirement",
+        "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+        "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+      },
+      {
+        "name": "Non-inferable Requirement",
+        "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+        "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+      },
+      {
+        "name": "Isolation",
+        "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+        "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+      },
+      {
+        "name": "Benchmark",
+        "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+        "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+      },
+      {
+        "name": "Inference",
+        "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+        "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+        "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+        "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+      },
+      {
+        "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+        "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+        "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+      },
+      {
+        "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+        "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+        "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Realism vs. Reproducibility",
+        "variables": [
+          "degree of requirement ambiguity",
+          "granularity of isolation",
+          "evaluation metric clarity"
+        ]
+      },
+      {
+        "tradeoff": "Completeness vs. Feasibility",
+        "variables": [
+          "number of non-inferable requirements",
+          "benchmark size",
+          "diversity of domains"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Requirement Specification Method",
+        "role": "input",
+        "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+      },
+      {
+        "name": "Non-inferable Requirement Leak",
+        "role": "mediator",
+        "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+      },
+      {
+        "name": "Agent Inference Capability",
+        "role": "confounder",
+        "description": "Variation in agents' ability to infer implicit requirements from available context."
+      },
+      {
+        "name": "Benchmark Isolation Validity",
+        "role": "outcome",
+        "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+      },
+      {
+        "name": "Measured Agent Performance",
+        "role": "output",
+        "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+      },
+      {
+        "name": "Ground Truth Requirement Set",
+        "role": "input",
+        "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+      },
+      {
+        "name": "Evaluation Metric",
+        "role": "input",
+        "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Ground Truth Requirement Set",
+        "relation": "determines",
+        "target": "Requirement Specification Method",
+        "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+      },
+      {
+        "step": "2",
+        "source": "Requirement Specification Method",
+        "relation": "influences",
+        "target": "Non-inferable Requirement Leak",
+        "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+      },
+      {
+        "step": "3",
+        "source": "Non-inferable Requirement Leak",
+        "relation": "reduces",
+        "target": "Benchmark Isolation Validity",
+        "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+      },
+      {
+        "step": "4",
+        "source": "Benchmark Isolation Validity",
+        "relation": "moderates",
+        "target": "Measured Agent Performance",
+        "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+      },
+      {
+        "step": "5",
+        "source": "Agent Inference Capability",
+        "relation": "confounds",
+        "target": "Measured Agent Performance",
+        "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+      },
+      {
+        "step": "6",
+        "source": "Evaluation Metric",
+        "relation": "shapes",
+        "target": "Measured Agent Performance",
+        "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+        "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+      },
+      {
+        "bottleneck": "Subjectivity in determining the inferability boundary",
+        "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+      },
+      {
+        "bottleneck": "Dependence of isolation on agent capability",
+        "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+      }
+    ],
+    "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption of a well-defined boundary between inferable and non-inferable requirements conflicts with the subjectivity and agent-dependence of inferability.",
+      "derived_from": [
+        "assumption 1",
+        "bottleneck 2",
+        "bottleneck 3"
+      ],
+      "why_it_matters": "If the boundary is not well-defined and objective, isolation becomes arbitrary, undermining benchmark validity and comparability across agents.",
+      "what_existing_methods_may_miss": "Current methods assume a fixed boundary, ignoring that what is inferable may vary by agent or context.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Explicitly specifying non-inferable requirements to isolate them may inadvertently leak information that makes them inferable.",
+      "derived_from": [
+        "assumption 2",
+        "bottleneck 1"
+      ],
+      "why_it_matters": "Leakage undermines the isolation purpose, causing the benchmark to measure inference rather than handling of explicit non-inferable requirements.",
+      "what_existing_methods_may_miss": "Existing benchmarks often do not check for leakage; they assume specification does not create cues.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Benchmark fairness requires not penalizing agents for failing to infer non-inferable requirements, but real-world deployment demands agents infer unstated needs.",
+      "derived_from": [
+        "assumption 3",
+        "core_tradeoffs[0]"
+      ],
+      "why_it_matters": "This misalignment can lead to benchmarks that are valid in isolation but do not predict real-world performance.",
+      "what_existing_methods_may_miss": "Current benchmarks prioritize isolation over ecological validity, potentially overestimating or underestimating agent readiness.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Increasing benchmark realism (e.g., using ambiguous requirements) reduces reproducibility, while strict reproducibility undermines realism.",
+      "derived_from": [
+        "core_tradeoffs[0]"
+      ],
+      "why_it_matters": "Benchmark designers must balance these competing goals, and tradeoffs affect what conclusions can be drawn.",
+      "what_existing_methods_may_miss": "Existing methods often lean one way without quantifying the loss on the other dimension.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T5",
+      "statement": "Including more non-inferable requirements improves completeness but increases benchmark size and complexity, making evaluation less feasible.",
+      "derived_from": [
+        "core_tradeoffs[1]"
+      ],
+      "why_it_matters": "There is a practical limit to how many non-inferable requirements can be isolated and tested, potentially reducing construct coverage.",
+      "what_existing_methods_may_miss": "Existing benchmarks may underrepresent non-inferable requirements due to feasibility constraints.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does the inferability boundary for non-inferable requirements shift systematically between rule-based agents and large language models, and can we quantify this shift to adjust benchmark isolation thresholds?",
+      "question_type": "diagnostic",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies subjectivity in inferability, enabling agent-specific calibration of benchmarks and improving cross-agent comparability."
+    },
+    {
+      "question": "Does explicitly specifying non-inferable requirements using a controlled natural language template reduce information leakage compared to free-form text, and how does leakage reduction affect the measured inference capability of agents?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Identifies a concrete method to mitigate leakage, preserving isolation validity and ensuring benchmarks measure intended constructs."
+    },
+    {
+      "question": "Can a benchmark design that separately scores explicit and implicit requirements produce performance metrics that better correlate with real-world task success without penalizing agents for non-inferable items?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Proposes a new evaluation scheme that aligns benchmark fairness with ecological validity, bridging the gap between controlled testing and deployment."
+    },
+    {
+      "question": "What is the quantitative trade-off between benchmark ecological validity (measured by human judgment of realism) and reproducibility (measured by inter-rater agreement) when varying requirement specification ambiguity, and can a composite metric be derived to optimize both?",
+      "question_type": "benchmark",
+      "source_tension": "T4",
+      "expected_contribution": "Provides empirical data on the trade-off and a design principle for benchmarks that balance realism and reproducibility."
+    },
+    {
+      "question": "What is the minimal set of non-inferable requirements necessary to achieve a construct coverage score of 0.9 while keeping benchmark evaluation time under 10 minutes per agent, and how does this set vary across requirement domains?",
+      "question_type": "algorithmic",
+      "source_tension": "T5",
+      "expected_contribution": "Establishes practical guidelines for selecting non-inferable requirements to maximize coverage given feasibility constraints."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+          "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+          "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+          "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+          "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+          "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+          "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+          "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+        },
+        {
+          "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+          "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+          "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+        },
+        {
+          "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+          "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+          "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Requirement Specification Method",
+            "role": "input",
+            "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+          },
+          {
+            "name": "Non-inferable Requirement Leak",
+            "role": "mediator",
+            "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+          },
+          {
+            "name": "Agent Inference Capability",
+            "role": "confounder",
+            "description": "Variation in agents' ability to infer implicit requirements from available context."
+          },
+          {
+            "name": "Benchmark Isolation Validity",
+            "role": "outcome",
+            "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+          },
+          {
+            "name": "Measured Agent Performance",
+            "role": "output",
+            "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+          },
+          {
+            "name": "Ground Truth Requirement Set",
+            "role": "input",
+            "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+          },
+          {
+            "name": "Evaluation Metric",
+            "role": "input",
+            "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Ground Truth Requirement Set",
+            "relation": "determines",
+            "target": "Requirement Specification Method",
+            "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+          },
+          {
+            "step": "2",
+            "source": "Requirement Specification Method",
+            "relation": "influences",
+            "target": "Non-inferable Requirement Leak",
+            "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+          },
+          {
+            "step": "3",
+            "source": "Non-inferable Requirement Leak",
+            "relation": "reduces",
+            "target": "Benchmark Isolation Validity",
+            "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+          },
+          {
+            "step": "4",
+            "source": "Benchmark Isolation Validity",
+            "relation": "moderates",
+            "target": "Measured Agent Performance",
+            "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+          },
+          {
+            "step": "5",
+            "source": "Agent Inference Capability",
+            "relation": "confounds",
+            "target": "Measured Agent Performance",
+            "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+          },
+          {
+            "step": "6",
+            "source": "Evaluation Metric",
+            "relation": "shapes",
+            "target": "Measured Agent Performance",
+            "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+            "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+          },
+          {
+            "bottleneck": "Subjectivity in determining the inferability boundary",
+            "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+          },
+          {
+            "bottleneck": "Dependence of isolation on agent capability",
+            "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+          }
+        ],
+        "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Benchmark fairness requires not penalizing agents for failing to infer non-inferable requirements, but real-world deployment demands agents infer unstated needs.",
+        "derived_from": [
+          "assumption 3",
+          "core_tradeoffs[0]"
+        ],
+        "why_it_matters": "This misalignment can lead to benchmarks that are valid in isolation but do not predict real-world performance.",
+        "what_existing_methods_may_miss": "Current benchmarks prioritize isolation over ecological validity, potentially overestimating or underestimating agent readiness.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "What is the minimal contextual clue density (number and relevance of inferable hints) that causes a requirement to transition from non-inferable to inferable, and how can benchmarks be designed to calibrate isolation to this threshold to avoid penalizing agents for non-inferable requirements while ensuring real-world relevance?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Proposes a threshold-based isolation mechanism where benchmarks control clue density to maintain a clear separation between inferable and non-inferable requirements, enabling fair evaluation without sacrificing predictive validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a task-specific threshold of contextual clue density (measured as the number of goal-related cues in the prompt) such that below this threshold, agents perform at chance on inferring the requirement, and above it, they infer with high accuracy. A benchmark that sets clue density below the threshold for non-inferable requirements will achieve perfect isolation (no inference leakage) and produce performance metrics that correlate more strongly with real-world task success than a benchmark with uncontrolled clue density.",
+        "predicted_effect": "Below-threshold clues yield near-zero inference accuracy (chance), above-threshold yield >80% accuracy; the threshold-based benchmark shows significantly higher Spearman correlation with real-world success (Δρ > 0.15) and zero average penalty on non-inferable items."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select 50 requirements from a coding benchmark (e.g., SWE-bench) that are validated as non-inferable by human experts. For each requirement, create variants of the task prompt with increasing contextual clue density (number of additional sentences hinting at the requirement). For each variant, have 5 state-of-the-art LLM agents (GPT-4, Claude-3.5, Gemini-1.5, CodeLlama-34B, Mixtral-8x22B) attempt to infer the requirement (i.e., write code that satisfies it) without explicit instruction. Record binary success (satisfies requirement or not). Fit a sigmoidal psychometric function to accuracy vs clue density for each agent and requirement to estimate the threshold (density at 50% accuracy). Then design two benchmark variants: one using clue density at 0.5× the average threshold (below) for non-inferable requirements, and one using density at 2× threshold (above). Administer both benchmarks to the same agents on 100 tasks with known real-world success metrics (e.g., task completion time, user satisfaction). Compute Spearman correlation between benchmark scores (overall) and real-world success, and also compute average penalty (difference in accuracy between explicit instruction and inference condition) for non-inferable items.",
+        "independent_variables": [
+          "Clue density level for non-inferable requirements (below-threshold [0.5×θ] vs. above-threshold [2×θ])"
+        ],
+        "dependent_variables": [
+          "Spearman correlation coefficient between benchmark score and real-world success",
+          "Average penalty on non-inferable requirements (explicit instruction accuracy minus inference accuracy)"
+        ],
+        "controls": [
+          "Same set of tasks and ground truth requirements",
+          "Same set of agents",
+          "Same real-world success metrics",
+          "Threshold estimated per requirement per agent (calibrated individually)",
+          "Randomized order of benchmark variants per agent"
+        ],
+        "falsifying_observation": "The below-threshold benchmark does not achieve a significantly higher correlation with real-world success than the above-threshold benchmark (p ≤ 0.05), or the penalty on non-inferable items remains non-zero and not significantly different between conditions."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Psychometric functions show clear sigmoidal shape with R² > 0.8 for each agent-requirement pair.",
+          "Below-threshold benchmark yields Spearman correlation > 0.7 with real-world success, significantly higher than above-threshold (Δρ > 0.15, p < 0.01).",
+          "Average penalty on non-inferable items is near zero (< 0.05) for below-threshold, while above-threshold shows positive penalty (> 0.2)."
+        ],
+        "rejects_hypothesis": [
+          "Psychometric functions do not exhibit clear threshold (flat or linear) for most requirements.",
+          "No significant difference in correlation between below- and above-threshold benchmarks.",
+          "Below-threshold benchmark still shows a non-zero average penalty or penalty not significantly different from above-threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., no clear threshold or no improvement from below-threshold design), then the assumption that a simple clue-density threshold controls isolation is incorrect.",
+        "assumption_to_revise": "Assumption that clue density alone determines inferability; other factors such as clue relevance, placement, or agent architecture may be equally important.",
+        "next_question": "How does the relevance (semantic similarity) of contextual clues to the target requirement, as opposed to mere density, affect the inferability threshold and isolation validity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+          "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+          "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+          "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+          "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+          "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+          "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+          "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+        },
+        {
+          "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+          "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+          "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+        },
+        {
+          "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+          "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+          "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Requirement Specification Method",
+            "role": "input",
+            "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+          },
+          {
+            "name": "Non-inferable Requirement Leak",
+            "role": "mediator",
+            "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+          },
+          {
+            "name": "Agent Inference Capability",
+            "role": "confounder",
+            "description": "Variation in agents' ability to infer implicit requirements from available context."
+          },
+          {
+            "name": "Benchmark Isolation Validity",
+            "role": "outcome",
+            "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+          },
+          {
+            "name": "Measured Agent Performance",
+            "role": "output",
+            "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+          },
+          {
+            "name": "Ground Truth Requirement Set",
+            "role": "input",
+            "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+          },
+          {
+            "name": "Evaluation Metric",
+            "role": "input",
+            "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Ground Truth Requirement Set",
+            "relation": "determines",
+            "target": "Requirement Specification Method",
+            "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+          },
+          {
+            "step": "2",
+            "source": "Requirement Specification Method",
+            "relation": "influences",
+            "target": "Non-inferable Requirement Leak",
+            "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+          },
+          {
+            "step": "3",
+            "source": "Non-inferable Requirement Leak",
+            "relation": "reduces",
+            "target": "Benchmark Isolation Validity",
+            "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+          },
+          {
+            "step": "4",
+            "source": "Benchmark Isolation Validity",
+            "relation": "moderates",
+            "target": "Measured Agent Performance",
+            "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+          },
+          {
+            "step": "5",
+            "source": "Agent Inference Capability",
+            "relation": "confounds",
+            "target": "Measured Agent Performance",
+            "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+          },
+          {
+            "step": "6",
+            "source": "Evaluation Metric",
+            "relation": "shapes",
+            "target": "Measured Agent Performance",
+            "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+            "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+          },
+          {
+            "bottleneck": "Subjectivity in determining the inferability boundary",
+            "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+          },
+          {
+            "bottleneck": "Dependence of isolation on agent capability",
+            "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+          }
+        ],
+        "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption of a well-defined boundary between inferable and non-inferable requirements conflicts with the subjectivity and agent-dependence of inferability.",
+        "derived_from": [
+          "assumption 1",
+          "bottleneck 2",
+          "bottleneck 3"
+        ],
+        "why_it_matters": "If the boundary is not well-defined and objective, isolation becomes arbitrary, undermining benchmark validity and comparability across agents.",
+        "what_existing_methods_may_miss": "Current methods assume a fixed boundary, ignoring that what is inferable may vary by agent or context.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the critical context density (in bits per requirement) at which large language models transition from failing to inferring non-inferable requirements, and how does this threshold differ from rule-based agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in inferability, enabling benchmark designers to set context density below which non-inferable requirements remain truly non-inferable for all agents, improving isolation validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold context density (measured in bits of context per requirement) below which both LLMs and rule-based agents fail to infer non-inferable requirements, but above which LLMs exhibit a significantly higher inference rate than rule-based agents.",
+        "predicted_effect": "LLMs will show a sharp increase in inference accuracy at a lower context density threshold compared to rule-based agents, leading to a divergence in performance above the threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of coding tasks with a known set of non-inferable requirements and systematically vary the context density (e.g., number of tokens in documentation) across a range from very sparse to very rich. For each task, measure the proportion of non-inferable requirements correctly inferred by a set of rule-based agents and LLMs. Use change-point detection or logistic regression to estimate the threshold where inference accuracy increases significantly.",
+        "independent_variables": [
+          "Context density (bits per requirement)",
+          "Agent type (rule-based vs. LLM)"
+        ],
+        "dependent_variables": [
+          "Inferred non-inferable requirement accuracy",
+          "Estimated threshold value"
+        ],
+        "controls": [
+          "Same task set",
+          "Same ground truth requirements",
+          "Same evaluation metric",
+          "Task order randomized"
+        ],
+        "falsifying_observation": "If no clear threshold exists for either agent type, or the thresholds for LLMs and rule-based agents are not significantly different (e.g., p>0.05)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "LLMs show a sharp increase in inference accuracy at a context density threshold that is significantly lower than for rule-based agents.",
+          "The threshold is reproducible across different task domains."
+        ],
+        "rejects_hypothesis": [
+          "Both agent types show a continuous increase in inference accuracy without a clear threshold.",
+          "The thresholds for LLMs and rule-based agents do not differ significantly."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold exists or thresholds are not different, then the inferability boundary is not a phase transition but a continuous function of context density.",
+        "assumption_to_revise": "The assumption that inferability shifts discontinuously at a critical context density.",
+        "next_question": "What continuous model (e.g., logistic function of context density) best describes the relationship between context and inferability, and how does the function vary between agent architectures?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+          "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+          "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+          "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+          "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+          "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+          "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+          "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+        },
+        {
+          "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+          "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+          "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+        },
+        {
+          "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+          "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+          "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Requirement Specification Method",
+            "role": "input",
+            "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+          },
+          {
+            "name": "Non-inferable Requirement Leak",
+            "role": "mediator",
+            "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+          },
+          {
+            "name": "Agent Inference Capability",
+            "role": "confounder",
+            "description": "Variation in agents' ability to infer implicit requirements from available context."
+          },
+          {
+            "name": "Benchmark Isolation Validity",
+            "role": "outcome",
+            "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+          },
+          {
+            "name": "Measured Agent Performance",
+            "role": "output",
+            "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+          },
+          {
+            "name": "Ground Truth Requirement Set",
+            "role": "input",
+            "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+          },
+          {
+            "name": "Evaluation Metric",
+            "role": "input",
+            "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Ground Truth Requirement Set",
+            "relation": "determines",
+            "target": "Requirement Specification Method",
+            "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+          },
+          {
+            "step": "2",
+            "source": "Requirement Specification Method",
+            "relation": "influences",
+            "target": "Non-inferable Requirement Leak",
+            "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+          },
+          {
+            "step": "3",
+            "source": "Non-inferable Requirement Leak",
+            "relation": "reduces",
+            "target": "Benchmark Isolation Validity",
+            "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+          },
+          {
+            "step": "4",
+            "source": "Benchmark Isolation Validity",
+            "relation": "moderates",
+            "target": "Measured Agent Performance",
+            "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+          },
+          {
+            "step": "5",
+            "source": "Agent Inference Capability",
+            "relation": "confounds",
+            "target": "Measured Agent Performance",
+            "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+          },
+          {
+            "step": "6",
+            "source": "Evaluation Metric",
+            "relation": "shapes",
+            "target": "Measured Agent Performance",
+            "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+            "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+          },
+          {
+            "bottleneck": "Subjectivity in determining the inferability boundary",
+            "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+          },
+          {
+            "bottleneck": "Dependence of isolation on agent capability",
+            "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+          }
+        ],
+        "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Explicitly specifying non-inferable requirements to isolate them may inadvertently leak information that makes them inferable.",
+        "derived_from": [
+          "assumption 2",
+          "bottleneck 1"
+        ],
+        "why_it_matters": "Leakage undermines the isolation purpose, causing the benchmark to measure inference rather than handling of explicit non-inferable requirements.",
+        "what_existing_methods_may_miss": "Existing benchmarks often do not check for leakage; they assume specification does not create cues.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what level of specification concreteness does the tradeoff between information leakage and agent interpretability become critical, and how does this threshold depend on agents' inference capabilities?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a critical concreteness threshold for specification of non-inferable requirements, revealing a nonlinear tradeoff and interaction with agent capability, enabling benchmark designers to optimize isolation validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical concreteness threshold in the specification of non-inferable requirements such that below it agents fail to interpret requirements due to ambiguity, and above it information leakage increases significantly; this threshold is lower for agents with higher inference capability.",
+        "predicted_effect": "The relationship between specification concreteness and measured agent performance on non-inferable requirements will be non-monotonic (inverted-U shaped), with the peak shifting left for agents with higher inference capability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a benchmark with a fixed set of non-inferable requirements. Create multiple versions of the specification varying in concreteness (e.g., using a controlled language with different levels of abstraction, ranging from very abstract to very concrete). For each level, measure (1) information leakage: proportion of non-inferable requirements that a baseline agent can infer from the specification alone, and (2) agent success rate: proportion of non-inferable requirements correctly addressed by a test agent. Use two test agent groups: low and high inference capability. Plot success rate vs. concreteness for each group, and identify the concreteness level at which success rate peaks (critical threshold).",
+        "independent_variables": [
+          "Specification concreteness level (ordinal or continuous, e.g., 5 levels)",
+          "Agent inference capability (low vs. high, pre-screened)"
+        ],
+        "dependent_variables": [
+          "Information leakage score (proportion of non-inferable requirements inferable by baseline agent)",
+          "Agent success rate on non-inferable requirements"
+        ],
+        "controls": [
+          "Same ground truth non-inferable requirements across conditions",
+          "Same context and task complexity",
+          "Same baseline agent for leakage measurement",
+          "Same evaluation metric for success rate"
+        ],
+        "falsifying_observation": "Success rate increases monotonically with concreteness (no peak), or the peak concreteness level does not differ between low and high inference capability agents."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Inverted-U shaped relationship between concreteness and success rate for both agent groups.",
+          "Peak concreteness for high-inference agents is lower (more abstract) than for low-inference agents.",
+          "Leakage increases monotonically with concreteness, with a sharp rise beyond the critical threshold."
+        ],
+        "rejects_hypothesis": [
+          "Success rate is monotonic increasing or flat across concreteness levels.",
+          "No significant difference in peak concreteness between agent groups."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no critical threshold is observed (i.e., success rate monotonic), then the assumption that specification concreteness controls leakage in a threshold manner is unsupported.",
+        "assumption_to_revise": "Assumption: Leakage is primarily driven by concreteness of specification.",
+        "next_question": "How does the structure or format of specification (e.g., natural language vs. formal) interact with concreteness to affect leakage, or is leakage fundamentally determined by the content rather than the form?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+          "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+          "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+          "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+          "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+          "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+          "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+          "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+        },
+        {
+          "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+          "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+          "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+        },
+        {
+          "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+          "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+          "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Requirement Specification Method",
+            "role": "input",
+            "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+          },
+          {
+            "name": "Non-inferable Requirement Leak",
+            "role": "mediator",
+            "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+          },
+          {
+            "name": "Agent Inference Capability",
+            "role": "confounder",
+            "description": "Variation in agents' ability to infer implicit requirements from available context."
+          },
+          {
+            "name": "Benchmark Isolation Validity",
+            "role": "outcome",
+            "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+          },
+          {
+            "name": "Measured Agent Performance",
+            "role": "output",
+            "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+          },
+          {
+            "name": "Ground Truth Requirement Set",
+            "role": "input",
+            "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+          },
+          {
+            "name": "Evaluation Metric",
+            "role": "input",
+            "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Ground Truth Requirement Set",
+            "relation": "determines",
+            "target": "Requirement Specification Method",
+            "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+          },
+          {
+            "step": "2",
+            "source": "Requirement Specification Method",
+            "relation": "influences",
+            "target": "Non-inferable Requirement Leak",
+            "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+          },
+          {
+            "step": "3",
+            "source": "Non-inferable Requirement Leak",
+            "relation": "reduces",
+            "target": "Benchmark Isolation Validity",
+            "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+          },
+          {
+            "step": "4",
+            "source": "Benchmark Isolation Validity",
+            "relation": "moderates",
+            "target": "Measured Agent Performance",
+            "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+          },
+          {
+            "step": "5",
+            "source": "Agent Inference Capability",
+            "relation": "confounds",
+            "target": "Measured Agent Performance",
+            "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+          },
+          {
+            "step": "6",
+            "source": "Evaluation Metric",
+            "relation": "shapes",
+            "target": "Measured Agent Performance",
+            "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+            "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+          },
+          {
+            "bottleneck": "Subjectivity in determining the inferability boundary",
+            "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+          },
+          {
+            "bottleneck": "Dependence of isolation on agent capability",
+            "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+          }
+        ],
+        "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Increasing benchmark realism (e.g., using ambiguous requirements) reduces reproducibility, while strict reproducibility undermines realism.",
+        "derived_from": [
+          "core_tradeoffs[0]"
+        ],
+        "why_it_matters": "Benchmark designers must balance these competing goals, and tradeoffs affect what conclusions can be drawn.",
+        "what_existing_methods_may_miss": "Existing methods often lean one way without quantifying the loss on the other dimension.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the critical ambiguity level at which the reproducibility of a coding-agent benchmark drops below a practical threshold (Fleiss' kappa < 0.6) while ecological validity saturates, and can a composite metric be derived that identifies this regime shift?",
+        "question_type": "benchmark",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a phase transition in the realism-reproducibility trade-off, providing a design principle for benchmarks that avoid the collapse of reproducibility while maximizing validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ambiguity threshold t such that for ambiguity levels below t, reproducibility remains high (kappa > 0.8) and validity moderate; for levels above t, reproducibility drops rapidly (kappa < 0.6) while validity gains diminish, creating a distinct regime shift.",
+        "predicted_effect": "A nonlinear relationship where reproducibility decreases sharply beyond a threshold, while ecological validity increases but plateaus."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a set of 30 coding-agent tasks with 6 evenly spaced ambiguity levels (fully explicit to fully implicit). Recruit 20 human judges to rate ecological validity (1-7 Likert) and compute Fleiss' kappa for each ambiguity level. Use piecewise regression to detect a change point in the kappa vs. ambiguity curve. Verify that the change point aligns with a saturation in mean validity.",
+        "independent_variables": [
+          "Requirement specification ambiguity level (6 levels: 0%, 20%, 40%, 60%, 80%, 100% implicit)"
+        ],
+        "dependent_variables": [
+          "Mean ecological validity score",
+          "Fleiss' kappa inter-rater agreement"
+        ],
+        "controls": [
+          "Same ground truth requirements across tasks",
+          "Same task domain",
+          "Same pool of judges",
+          "Randomized order",
+          "Blind to hypothesis"
+        ],
+        "falsifying_observation": "No significant change point is detected; kappa decreases linearly with ambiguity, or validity and kappa both increase with ambiguity."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A significant change point is detected in the kappa-vs-ambiguity curve at some ambiguity level t.",
+          "For ambiguity levels < t, Fleiss' kappa > 0.8; for levels > t, kappa < 0.6.",
+          "Mean validity increases with ambiguity but plateaus near t, showing diminishing returns beyond t."
+        ],
+        "rejects_hypothesis": [
+          "No change point is detected; kappa decreases linearly across all ambiguity levels.",
+          "Kappa and validity both increase with ambiguity (no trade-off).",
+          "Kappa remains above 0.8 at all ambiguity levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed and the trade-off is linear or absent,",
+        "assumption_to_revise": "The assumption that ambiguity is the dominant cause of reproducibility loss; other factors such as task complexity or judge diversity may mask the threshold.",
+        "next_question": "What other factors mediate the relationship between specification method and reproducibility, and how can a threshold be induced by controlling for those factors?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A desired property or behavior of a code artifact, which may be inferable from context or non-inferable.",
+          "why_primitive": "All benchmarking revolves around specifying what the agent should achieve; requirements are the atomic units of specification."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context (e.g., code, documentation, common sense) and must be explicitly stated or discovered.",
+          "why_primitive": "The central challenge is distinguishing requirements that agents cannot guess from those they can, which fundamentally separates benchmark design choices."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones in a benchmark, either by design or by analysis.",
+          "why_primitive": "Benchmark validity depends on whether we can attribute agent failures to inability to infer vs. inability to satisfy explicit instructions."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized set of tasks and evaluation metrics used to measure the performance of coding agents.",
+          "why_primitive": "The entire discussion is about how to design this evaluation instrument; its structure determines what we learn."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from available information without explicit instruction.",
+          "why_primitive": "The contrast between inference and explicit instruction is the axis along which we classify requirements; understanding inference bounds is key."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined boundary between inferable and non-inferable requirements for a given context and agent capability.",
+          "rationale": "Without a boundary, isolation is impossible; we must assume that some requirements are genuinely not inferable even by ideal agents.",
+          "possible_failure": "The boundary may be fuzzy and agent-dependent, making isolation arbitrary or inconsistent across agents."
+        },
+        {
+          "assumption": "Non-inferable requirements can be identified and explicitly specified in a benchmark without losing the element of discovery or real-world ambiguity.",
+          "rationale": "Benchmark designers must be able to know which requirements are non-inferable to isolate them, and must be able to communicate them to evaluators.",
+          "possible_failure": "Designers may miss some non-inferable requirements or inadvertently leak information that makes them inferable, undermining isolation."
+        },
+        {
+          "assumption": "Agents that rely on inference should not be penalized for failing to satisfy non-inferable requirements that are not explicitly provided.",
+          "rationale": "Fair evaluation requires that agents are only judged on requirements they could reasonably know; isolation ensures this.",
+          "possible_failure": "Real-world users may expect agents to infer even unstated needs; penalizing non-inference may misalign with practical deployment."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Requirement Specification Method",
+            "role": "input",
+            "description": "How benchmarks present requirements: fully explicit, contextual, or mixed. Determines potential for inference."
+          },
+          {
+            "name": "Non-inferable Requirement Leak",
+            "role": "mediator",
+            "description": "Degree to which information in the task context or specification inadvertently makes non-inferable requirements inferable."
+          },
+          {
+            "name": "Agent Inference Capability",
+            "role": "confounder",
+            "description": "Variation in agents' ability to infer implicit requirements from available context."
+          },
+          {
+            "name": "Benchmark Isolation Validity",
+            "role": "outcome",
+            "description": "Extent to which the benchmark successfully separates non-inferable requirements from inferable ones in evaluation."
+          },
+          {
+            "name": "Measured Agent Performance",
+            "role": "output",
+            "description": "Observed score of agent on the benchmark, which may be confounded by isolation validity and inference capability."
+          },
+          {
+            "name": "Ground Truth Requirement Set",
+            "role": "input",
+            "description": "The complete set of requirements that the agent is expected to satisfy, including both inferable and non-inferable."
+          },
+          {
+            "name": "Evaluation Metric",
+            "role": "input",
+            "description": "The scoring function used to compute agent performance from its outputs and ground truth."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Ground Truth Requirement Set",
+            "relation": "determines",
+            "target": "Requirement Specification Method",
+            "explanation": "Benchmark designers decide how to present requirements based on the ground truth set, choosing between explicit and implicit formats."
+          },
+          {
+            "step": "2",
+            "source": "Requirement Specification Method",
+            "relation": "influences",
+            "target": "Non-inferable Requirement Leak",
+            "explanation": "Poorly designed specification methods may leak information about non-inferable requirements, making them inferable."
+          },
+          {
+            "step": "3",
+            "source": "Non-inferable Requirement Leak",
+            "relation": "reduces",
+            "target": "Benchmark Isolation Validity",
+            "explanation": "Leakage undermines the isolation of non-inferable requirements, reducing the validity of the benchmark."
+          },
+          {
+            "step": "4",
+            "source": "Benchmark Isolation Validity",
+            "relation": "moderates",
+            "target": "Measured Agent Performance",
+            "explanation": "Isolation validity affects whether performance reflects ability to handle non-inferable requirements or merely inference."
+          },
+          {
+            "step": "5",
+            "source": "Agent Inference Capability",
+            "relation": "confounds",
+            "target": "Measured Agent Performance",
+            "explanation": "Agents with different inference capabilities may score differently even under identical isolation, biasing comparisons."
+          },
+          {
+            "step": "6",
+            "source": "Evaluation Metric",
+            "relation": "shapes",
+            "target": "Measured Agent Performance",
+            "explanation": "The metric determines how performance is quantified, affecting the apparent impact of isolation."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Leakage of non-inferable requirements into inferable cues",
+            "why_it_matters": "It undermines the entire isolation purpose; if agents can infer a non-inferable requirement, the benchmark no longer measures the intended construct."
+          },
+          {
+            "bottleneck": "Subjectivity in determining the inferability boundary",
+            "why_it_matters": "Different benchmark designers may disagree on what is inferable, leading to inconsistent benchmarks and results that cannot be compared."
+          },
+          {
+            "bottleneck": "Dependence of isolation on agent capability",
+            "why_it_matters": "Isolation is not agent-independent; a requirement non-inferable for one agent may be inferable for another, making fair comparison difficult."
+          }
+        ],
+        "mechanism_summary": "The mechanism by which coding-agent benchmarks isolate non-inferable requirements begins with benchmark designers choosing a requirement specification method based on the ground truth set. This method influences the degree of leak of non-inferable information into inferable cues, which in turn affects the benchmark's isolation validity. Isolation validity moderates the relationship between actual agent performance and measured performance, while agent inference capability confounds the measurement. The evaluation metric further shapes the final performance scores. Key bottlenecks include leakage, subjectivity in defining inferability, and agent-dependent isolation, all of which challenge the validity and comparability of benchmarks."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "Including more non-inferable requirements improves completeness but increases benchmark size and complexity, making evaluation less feasible.",
+        "derived_from": [
+          "core_tradeoffs[1]"
+        ],
+        "why_it_matters": "There is a practical limit to how many non-inferable requirements can be isolated and tested, potentially reducing construct coverage.",
+        "what_existing_methods_may_miss": "Existing benchmarks may underrepresent non-inferable requirements due to feasibility constraints.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what threshold of non-inferable requirement count does construct coverage saturate, and how does this saturation threshold vary across requirement domains?",
+        "question_type": "algorithmic",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies a diminishing returns regime in benchmark design, establishing a saturation threshold that can guide efficient selection of non-inferable requirements."
+      },
+      "hypothesis": {
+        "statement": "For each requirement domain, the relationship between the number of non-inferable requirements and construct coverage follows a logistic function with a saturation threshold, defined as the count beyond which coverage gains are less than 0.05 per additional requirement. The saturation threshold differs significantly across domains.",
+        "predicted_effect": "Coverage increases steeply with early additions of non-inferable requirements but plateaus after a domain-dependent count, beyond which further requirements yield negligible improvement."
+      },
+      "minimal_decisive_test": {
+        "experiment": "For each of three requirement domains (e.g., web development, data science, systems programming), we construct a pool of non-inferable requirements. We then create benchmark variants by selecting subsets of increasing size (0 to full set) and evaluate a fixed agent (GPT-4) on each variant. We measure construct coverage using a rubric of ground truth requirements. We fit a logistic curve to the coverage vs. count data and estimate the saturation threshold as the count where the derivative drops below 0.05. We compare thresholds across domains.",
+        "independent_variables": [
+          "Number of non-inferable requirements",
+          "Domain"
+        ],
+        "dependent_variables": [
+          "Construct coverage score",
+          "Saturation threshold (count)"
+        ],
+        "controls": [
+          "Same base code context",
+          "Same agent (GPT-4)",
+          "Same hardware",
+          "Same evaluation metric and rubric"
+        ],
+        "falsifying_observation": "If for any domain the coverage increases linearly (no saturation) or if the saturation thresholds across domains are statistically indistinguishable (p > 0.05), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In each domain, the coverage vs. count data fits a logistic curve with R² > 0.9.",
+          "Saturation thresholds vary by at least 20% between domains (e.g., web development saturates at 5 requirements, data science at 10)."
+        ],
+        "rejects_hypothesis": [
+          "Coverage increases linearly throughout the full range without plateau.",
+          "Saturation thresholds are within 10% of each other across domains.",
+          "No logistic fit achieves R² > 0.7."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no saturation is observed or thresholds are identical across domains, the assumption that non-inferable requirements exhibit diminishing returns is false.",
+        "assumption_to_revise": "The assumption that construct coverage follows a diminishing returns curve; it may be that coverage scales with the number of requirements without bound, or that the effect is domain-independent.",
+        "next_question": "Does construct coverage scale linearly with the number of non-inferable requirements, and what determines the slope across domains?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold context density (measured in bits of context per requirement) below which both LLMs and rule-based agents fail to infer non-inferable requirements, but above which LLMs exhibit a significantly higher inference rate than rule-based agents.",
+      "independent_variables": [
+        "Context density (bits per requirement)",
+        "Agent type (rule-based vs. LLM)"
+      ],
+      "dependent_variables": [
+        "Inferred non-inferable requirement accuracy",
+        "Estimated threshold value"
+      ],
+      "controlled_variables": [
+        "Same task set",
+        "Same ground truth requirements",
+        "Same evaluation metric",
+        "Task order randomized"
+      ],
+      "baselines": [
+        {
+          "name": "Rule-based agent",
+          "description": "A non-LLM, deterministic agent that cannot infer beyond explicit instructions, serving as baseline for comparison."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inference Accuracy",
+          "definition": "Proportion of non-inferable requirements correctly inferred by the agent for a given task at a given context density."
+        },
+        {
+          "name": "Threshold",
+          "definition": "The context density at which inference accuracy exceeds chance level (e.g., 50% for binary decisions) determined via change-point detection or logistic regression."
+        }
+      ],
+      "expected_result": "LLMs show a sharp increase in inference accuracy at a context density threshold that is significantly lower than for rule-based agents.",
+      "falsifying_result": "No clear threshold exists for either agent type, or the thresholds for LLMs and rule-based agents are not significantly different (e.g., p>0.05).",
+      "minimum_viable_experiment": "Construct a set of 10-20 coding tasks, each with 1-2 non-inferable requirements. Systematically vary context density from 0 to 100 bits per requirement in 5-10 steps. For each combination of task, density, and agent type, measure inference accuracy. Use change-point detection to identify thresholds. The experiment is minimal if it includes at least one LLM (e.g., GPT-4) and one rule-based agent (e.g., a keyword-matching script) over multiple density levels.",
+      "risks_and_confounds": [
+        "Leakage of non-inferable requirements into context cues could make them inferable, biasing results.",
+        "The inferability boundary may be agent-dependent, making thresholds non-comparable.",
+        "Subjectivity in defining which requirements are non-inferable may lead to inconsistent ground truth.",
+        "Context density measured in bits may not fully capture semantic content; other dimensions like relevance matter."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical concreteness threshold in the specification of non-inferable requirements such that below it agents fail to interpret requirements due to ambiguity, and above it information leakage increases significantly; this threshold is lower for agents with higher inference capability.",
+      "independent_variables": [
+        "Specification concreteness level (5 levels: very abstract, abstract, moderate, concrete, very concrete)",
+        "Agent inference capability (low vs high)"
+      ],
+      "dependent_variables": [
+        "Information leakage score (proportion of non-inferable requirements inferable by baseline agent from specification alone)",
+        "Agent success rate on non-inferable requirements (proportion correctly addressed)"
+      ],
+      "controlled_variables": [
+        "Same ground truth set of non-inferable requirements across all conditions",
+        "Same task context and complexity",
+        "Same baseline agent for leakage measurement",
+        "Same evaluation metric for success rate"
+      ],
+      "baselines": [
+        {
+          "name": "Baseline agent for leakage measurement",
+          "description": "An agent with minimal inference capability (e.g., simple pattern matching) used to measure information leakage from specification alone."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Leakage Score",
+          "definition": "Proportion of non-inferable requirements that the baseline agent can infer from the specification alone."
+        },
+        {
+          "name": "Success Rate",
+          "definition": "Proportion of non-inferable requirements correctly addressed by the test agent, as judged by automatic comparison to ground truth."
+        }
+      ],
+      "expected_result": "For both low and high inference capability agent groups, the success rate will exhibit an inverted-U shaped relationship with specification concreteness. The peak (critical threshold) for high-inference agents will occur at a lower concreteness level (more abstract) than for low-inference agents. Leakage score will increase monotonically with concreteness, with a sharp rise beyond the critical threshold.",
+      "falsifying_result": "Success rate increases monotonically with concreteness (no peak), or the peak concreteness level does not differ between low and high inference capability agents.",
+      "minimum_viable_experiment": "Construct a benchmark with a fixed set of non-inferable requirements. Create 5 specification versions varying in concreteness (very abstract, abstract, moderate, concrete, very concrete). For each level, measure leakage using a baseline agent, and test two agent groups (low and high inference capability, pre-screened). Plot success rate vs. concreteness for each group. Identify the concreteness level at which success rate peaks. Compare peaks between groups. Sample size: at least 5 agents per group per concreteness level.",
+      "risks_and_confounds": [
+        "Subjectivity in defining concreteness levels; may not be evenly spaced",
+        "Order effects if agents are tested on multiple levels",
+        "Inference capability is a continuum; dichotomization may lose information",
+        "Leakage measurement baseline agent may not represent all possible inference paths",
+        "Task complexity may interact with concreteness"
+      ]
+    },
+    {
+      "hypothesis": "There exists a task-specific threshold of contextual clue density such that below this threshold, agents perform at chance on inferring the requirement, and above it, they infer with high accuracy. A benchmark that sets clue density below the threshold for non-inferable requirements will achieve perfect isolation (no inference leakage) and produce performance metrics that correlate more strongly with real-world task success than a benchmark with uncontrolled clue density.",
+      "independent_variables": [
+        "Clue density level for non-inferable requirements (below-threshold [0.5×θ] vs. above-threshold [2×θ])"
+      ],
+      "dependent_variables": [
+        "Average penalty on non-inferable requirements (explicit instruction accuracy minus inference accuracy)"
+      ],
+      "controlled_variables": [
+        "Same set of 5 non-inferable requirements validated by human experts",
+        "Single state-of-the-art LLM agent (e.g., GPT-4)",
+        "Same task context except clue density",
+        "Same evaluation metric (binary success on requirement satisfaction)",
+        "Randomized order of benchmark variants per requirement",
+        "Clue density levels derived from per-requirement threshold estimation"
+      ],
+      "baselines": [
+        {
+          "name": "Explicit instruction condition",
+          "description": "Agent is given the requirement explicitly in the prompt; used to compute inference accuracy baseline and penalty."
+        },
+        {
+          "name": "No clue condition (density=0)",
+          "description": "Agent is given no additional clues about the requirement; used to verify the requirement is non-inferable by default."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average penalty",
+          "definition": "Mean of (explicit_accuracy - inference_accuracy) across non-inferable requirements, where accuracy is proportion of trials where the agent outputs code satisfying the requirement."
+        },
+        {
+          "name": "Penalty difference",
+          "definition": "Difference in average penalty between below-threshold and above-threshold conditions."
+        }
+      ],
+      "expected_result": "The below-threshold condition yields an average penalty less than 0.05 (near zero), indicating perfect isolation, and this penalty is significantly lower (p < 0.05) than the above-threshold condition, which yields a positive penalty > 0.2.",
+      "falsifying_result": "The below-threshold condition yields an average penalty >= 0.05 or not significantly different from the above-threshold condition (p > 0.05), indicating that clue density alone does not control isolation as hypothesized.",
+      "minimum_viable_experiment": "Select 5 requirements validated as non-inferable by human experts. For each requirement, estimate the threshold clue density (θ) by measuring GPT-4's inference accuracy across 5 clue levels (0, 2, 4, 6, 8 additional hints) with 10 trials per level, fitting a sigmoid to find density at 50% accuracy. Then create two benchmark variants: one with clue density = 0.5×θ (below) and one with 2×θ (above). For each variant, run GPT-4 on 20 trials per requirement (half with explicit instruction, half without) in randomized order. Compute inference accuracy (without explicit) and explicit accuracy, then average penalty across requirements. Compare penalties between conditions using a paired t-test (N=5). If below-threshold penalty < 0.05 and significantly less than above-threshold, hypothesis is supported; otherwise falsified.",
+      "risks_and_confounds": [
+        "Threshold estimation might be noisy due to low trial count; could require more trials per level.",
+        "Order effects from repeated exposure to the same requirement across clue levels.",
+        "The chosen agent may not be representative of all coding agents; inference ability varies.",
+        "Small sample of requirements (5) may not generalize; more requirements would increase statistical power.",
+        "Real-world success correlation is omitted for minimality; the experiment tests only isolation, not ecological validity."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ambiguity threshold t such that for ambiguity levels below t, reproducibility remains high (kappa > 0.8) and validity moderate; for levels above t, reproducibility drops rapidly (kappa < 0.6) while validity gains diminish, creating a distinct regime shift.",
+      "independent_variables": [
+        "Requirement specification ambiguity level (6 levels: 0%, 20%, 40%, 60%, 80%, 100% implicit)"
+      ],
+      "dependent_variables": [
+        "Mean ecological validity score (1-7 Likert)",
+        "Fleiss' kappa inter-rater agreement"
+      ],
+      "controlled_variables": [
+        "Same ground truth requirements across all tasks",
+        "Same task domain (e.g., Python data processing)",
+        "Same pool of 20 human judges",
+        "Randomized presentation order of tasks",
+        "Judges are blind to hypothesis",
+        "All tasks have similar base complexity (e.g., 50-100 lines of code change)"
+      ],
+      "baselines": [
+        {
+          "name": "Fully explicit specification",
+          "description": "Ambiguity level 0%: all requirements stated verbatim, no inference needed."
+        },
+        {
+          "name": "Fully implicit specification",
+          "description": "Ambiguity level 100%: no explicit requirements, only a high-level goal; all requirements must be inferred."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fleiss' kappa",
+          "definition": "Inter-rater agreement among 20 judges on whether each requirement is satisfied by a reference solution; computed per ambiguity level."
+        },
+        {
+          "name": "Mean ecological validity",
+          "definition": "Average Likert score (1-7) per task across 20 judges, measuring how realistic the task feels."
+        }
+      ],
+      "expected_result": "A piecewise regression model will detect a change point at some ambiguity level t (between 20% and 80%). For levels < t, Fleiss' kappa > 0.8 and validity moderate (e.g., < 4). For levels > t, kappa < 0.6 and validity plateaus (no significant increase beyond t).",
+      "falsifying_result": "No significant change point is detected; kappa decreases linearly across all ambiguity levels, or kappa and validity both increase with ambiguity, or kappa remains > 0.8 at all levels.",
+      "minimum_viable_experiment": "Create 30 coding tasks with 6 ambiguity levels (0,20,40,60,80,100% implicit) using a shared ground truth. Recruit 20 human judges. Each judge rates each task for ecological validity (1-7) and specifies which requirements they consider explicit vs implicit. Compute Fleiss' kappa for each level. Perform piecewise regression to detect a change point in kappa vs ambiguity. Validate that the change point aligns with a plateau in mean validity.",
+      "risks_and_confounds": [
+        "Judges may interpret ambiguity differently, introducing noise.",
+        "Task domain may influence the inferability of requirements (e.g., common patterns may be more inferable).",
+        "Order effects or fatigue may affect validity ratings.",
+        "The specific set of 30 tasks may not be representative of all coding benchmarks.",
+        "Change point detection may be sensitive to the number of ambiguity levels and tasks per level."
+      ]
+    },
+    {
+      "hypothesis": "For each requirement domain, the relationship between the number of non-inferable requirements and construct coverage follows a logistic function with a saturation threshold, defined as the count beyond which coverage gains are less than 0.05 per additional requirement. The saturation threshold differs significantly across domains.",
+      "independent_variables": [
+        "Number of non-inferable requirements",
+        "Domain"
+      ],
+      "dependent_variables": [
+        "Construct coverage score",
+        "Saturation threshold (count)"
+      ],
+      "controlled_variables": [
+        "Same base code context",
+        "Same agent (GPT-4)",
+        "Same hardware",
+        "Same evaluation metric and rubric"
+      ],
+      "baselines": [
+        {
+          "name": "Zero non-inferable requirements",
+          "description": "Benchmark variant with no non-inferable requirements, only inferable ones, to establish baseline coverage from inference alone."
+        },
+        {
+          "name": "Full set of non-inferable requirements",
+          "description": "Benchmark variant containing the complete pool of non-inferable requirements for that domain, to measure maximum achievable coverage."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Construct coverage score",
+          "definition": "Proportion of ground truth non-inferable requirements that the agent successfully satisfies in its output, as judged by a rubric of expected behaviors."
+        }
+      ],
+      "expected_result": "For each domain, the coverage vs. count data fits a logistic curve with R² > 0.9. Saturation thresholds differ by at least 20% between domains (e.g., web development saturates at 5, data science at 10, systems programming at 8).",
+      "falsifying_result": "If for any domain the coverage increases linearly (no saturation) or if the saturation thresholds across domains are statistically indistinguishable (p > 0.05), the hypothesis is falsified.",
+      "minimum_viable_experiment": "For three domains (web development, data science, systems programming), construct a pool of at least 20 non-inferable requirements per domain. Create benchmark variants by randomly selecting subsets of sizes 0, 1, 2, ..., up to the full pool (or at least 20). Use GPT-4 to generate code for each variant (same base code context, same hardware). Score coverage against a rubric of expected behaviors. Fit a logistic function using nonlinear least squares and compute the saturation threshold as the count where the derivative falls below 0.05. Compare thresholds across domains.",
+      "risks_and_confounds": [
+        "Leakage: Non-inferable requirements may become inferable due to cues in the task description or code context, reducing isolation.",
+        "Subjectivity: The classification of requirements as non-inferable may vary between annotators, affecting reproducibility.",
+        "Agent dependence: GPT-4's inference capability may differ from other agents, limiting generalizability.",
+        "Order effects: Presenting subsets in a fixed order could bias learning or fatigue; randomize order.",
+        "Hardware variation: Different compute resources could affect agent speed or output quality; use identical hardware.",
+        "Metric sensitivity: The rubric for scoring coverage may not capture subtle satisfaction of requirements; ensure high inter-rater reliability."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of how coding-agent benchmarks should isolate non-inferable requirements. It introduces primitive definitions, a mechanism model, identifies tensions, and proposes five candidate research questions with detailed experimental designs including hypotheses, tests, and falsification criteria. The work is timely and addresses a critical gap in LLM evaluation methodology.",
+    "strengths": [
+      "Clear and rigorous first-principles derivation with well-defined primitives and assumptions.",
+      "Novel focus on inferability boundaries and threshold phenomena, which is underexplored in benchmark design.",
+      "Experimental designs are falsifiable, with precise independent/dependent variables, controls, and falsifying observations.",
+      "Addresses a significant problem: ensuring that benchmarks measure intended constructs rather than confounding inference.",
+      "The mechanism model and causal chain are coherent and provide a systematic framework."
+    ],
+    "weaknesses": [
+      "Assumption of a well-defined boundary between inferable and non-inferable requirements may be too strong; the boundary is likely fuzzy and agent-dependent.",
+      "Relies heavily on human annotation for ground truth (e.g., identifying non-inferable requirements), introducing subjectivity and potential inconsistency.",
+      "Proposed experiments are resource-intensive (e.g., 20 human judges, multiple agents, many trials), limiting practical feasibility.",
+      "The trade-off between realism and reproducibility is acknowledged but not fully resolved; the proposed threshold approach may not capture all real-world complexities.",
+      "Overclaiming: the hypothesis that precise thresholds exist is plausible but not yet supported by evidence; the language sometimes implies certainty."
+    ],
+    "questions": [
+      "How would the proposed threshold-based isolation extend to multi-turn or interactive benchmark settings where agents can ask clarifying questions?",
+      "What is the expected effect of using different LLMs (e.g., open-source vs. proprietary) on the inferred thresholds, and does the framework accommodate cross-model comparisons?"
+    ],
+    "missing_baselines": [
+      "Comparison of the proposed threshold-based isolation against a fully randomized specification method to assess the incremental value.",
+      "A baseline that uses formal specification languages (e.g., assertions) versus natural language for specifying non-inferable requirements."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Invalid assumption",
+    "root_cause": "The assumption that a well-defined objective boundary exists between inferable and non-inferable requirements is false; the boundary is inherently subjective and agent-dependent, leading to arbitrary isolation.",
+    "violated_principle": "Assumptions must be empirically testable and robust to variation in confounders.",
+    "new_or_updated_principle": "Isolation validity must be measured as a continuous property (e.g., leakage score, inference accuracy) rather than a binary classification, and benchmarks should calibrate specification methods to a pre-measured threshold for each requirement-agent pair.",
+    "new_or_updated_skill": "Calibrating specification concreteness or clue density using psychometric threshold estimation per requirement and agent.",
+    "regression_test": "Given a known non-inferable requirement (validated by human experts) and a candidate specification method, the method must produce an inference accuracy not significantly above chance (e.g., 50% for binary) when tested with a representative agent. If inference accuracy exceeds chance, the specification method leaks information and should be rejected."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "What is the critical context density (in bits per requirement) at which large language models transition from failing to inferring non-inferable requirements, and how does this threshold differ from rule-based agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of specification concreteness does the tradeoff between information leakage and agent interpretability become critical, and how does this threshold depend on agents' inference capabilities?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "What is the minimal contextual clue density (number and relevance of inferable hints) that causes a requirement to transition from non-inferable to inferable, and how can benchmarks be designed to calibrate isolation to this threshold to avoid penalizing agents for non-inferable requirements while ensuring real-world relevance?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical ambiguity level at which the reproducibility of a coding-agent benchmark drops below a practical threshold (Fleiss' kappa < 0.6) while ecological validity saturates, and can a composite metric be derived that identifies this regime shift?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of non-inferable requirement count does construct coverage saturate, and how does this saturation threshold vary across requirement domains?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ]
+  }
+}

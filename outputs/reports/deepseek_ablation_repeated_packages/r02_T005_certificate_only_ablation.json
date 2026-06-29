@@ -1,0 +1,1580 @@
+{
+  "topic": {
+    "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+    "topic_id": "T005",
+    "goal": null,
+    "domain": "agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How can we distinguish true agent planning from post-hoc explanation?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Planning",
+        "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+        "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+      },
+      {
+        "name": "Post-hoc Explanation",
+        "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+        "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+      },
+      {
+        "name": "Behavioral Signature",
+        "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+        "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+        "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+        "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+      },
+      {
+        "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+        "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+        "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+      },
+      {
+        "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+        "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+        "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of access vs. Non-intrusiveness",
+        "variables": [
+          "level of internal state observability",
+          "ecological validity of measurement"
+        ]
+      },
+      {
+        "tradeoff": "Complexity of planning vs. Simplicity of explanation",
+        "variables": [
+          "computational cost of planning",
+          "compression during explanation"
+        ]
+      },
+      {
+        "tradeoff": "Generality of distinguishing method vs. Accuracy per task",
+        "variables": [
+          "task variability",
+          "specificity of behavioral signatures"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Task Complexity",
+        "role": "input",
+        "description": "The complexity of the task, affecting the duration of planning if present."
+      },
+      {
+        "name": "True Internal Process",
+        "role": "input",
+        "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+      },
+      {
+        "name": "Reaction Time",
+        "role": "mediator",
+        "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+      },
+      {
+        "name": "Explanation Coherence",
+        "role": "mediator",
+        "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+      },
+      {
+        "name": "Behavioral Signature",
+        "role": "mediator",
+        "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+      },
+      {
+        "name": "Inference Result",
+        "role": "outcome",
+        "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Task Complexity",
+        "relation": "increases",
+        "target": "Reaction Time",
+        "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+      },
+      {
+        "step": "2",
+        "source": "True Internal Process",
+        "relation": "moderates",
+        "target": "Reaction Time",
+        "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+      },
+      {
+        "step": "3",
+        "source": "True Internal Process",
+        "relation": "determines",
+        "target": "Explanation Coherence",
+        "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+      },
+      {
+        "step": "4",
+        "source": "Reaction Time",
+        "relation": "contributes to",
+        "target": "Behavioral Signature",
+        "explanation": "Reaction time is a component of the behavioral signature used for inference."
+      },
+      {
+        "step": "5",
+        "source": "Explanation Coherence",
+        "relation": "contributes to",
+        "target": "Behavioral Signature",
+        "explanation": "Explanation coherence is the second component of the behavioral signature."
+      },
+      {
+        "step": "6",
+        "source": "Behavioral Signature",
+        "relation": "used to infer",
+        "target": "Inference Result",
+        "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Observational Equivalence",
+        "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+      },
+      {
+        "bottleneck": "Internal State Inaccessibility",
+        "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+      },
+      {
+        "bottleneck": "Task Dependency",
+        "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+      }
+    ],
+    "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+      "derived_from": [
+        "Agent Planning",
+        "Post-hoc Explanation",
+        "Assumption: True planning involves internal forward simulation that consumes time",
+        "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+      ],
+      "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+      "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Post-hoc explanations are assumed to be more coherent than planning traces, but if agents are trained to produce faithful explanations, coherence may no longer differentiate.",
+      "derived_from": [
+        "Post-hoc Explanation",
+        "Assumption: Post-hoc explanations are often simpler and more coherent than the actual decision process",
+        "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+      ],
+      "why_it_matters": "It removes a key signature for distinguishing planning from post-hoc explanation.",
+      "what_existing_methods_may_miss": "Methods that assume high coherence always indicates post-hoc may be fooled by agents that produce similarly coherent planning explanations.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "A method that works across many tasks may have lower accuracy per task because behavioral signatures are task-dependent, yet task-specific tailoring reduces generality.",
+      "derived_from": [
+        "Core Tradeoff: Generality of distinguishing method vs. Accuracy per task",
+        "Bottleneck: Task Dependency"
+      ],
+      "why_it_matters": "It creates a fundamental tradeoff between broad applicability and precise measurement of internal processes.",
+      "what_existing_methods_may_miss": "Methods aiming for general validity may miss task-specific variations that are crucial for accurate inference.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Are there computationally efficient planning algorithms that produce reaction times indistinguishable from post-hoc explanations, even for complex tasks?",
+      "question_type": "descriptive",
+      "source_tension": "T1: The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+      "expected_contribution": "Identifies whether reaction time is a reliable discriminant under efficient planning, directly testing a core assumption of the mechanism."
+    },
+    {
+      "question": "Can agents be trained to produce planning explanations that are as coherent as post-hoc explanations, thereby undermining coherence as a discriminant?",
+      "question_type": "diagnostic",
+      "source_tension": "T2: Post-hoc explanations are assumed to be more coherent than planning traces, but if agents are trained to produce faithful explanations, coherence may no longer differentiate.",
+      "expected_contribution": "Tests the robustness of coherence as a marker; if trainable, methods relying on coherence may be invalid."
+    },
+    {
+      "question": "How does the accuracy of behavioral signature-based inference vary across tasks with different complexity distributions, and can a single signature achieve high accuracy on all tasks?",
+      "question_type": "benchmark",
+      "source_tension": "T3: A method that works across many tasks may have lower accuracy per task because behavioral signatures are task-dependent, yet task-specific tailoring reduces generality.",
+      "expected_contribution": "Quantifies the tradeoff between generality and per-task accuracy, guiding method selection."
+    },
+    {
+      "question": "Under what conditions does the reaction time difference between planning and post-hoc explanation vanish, and can these conditions be systematically induced?",
+      "question_type": "causal",
+      "source_tension": "T1: The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+      "expected_contribution": "Identifies boundary conditions for the reaction time signature, informing when the mechanism can be applied."
+    },
+    {
+      "question": "Does explanation coherence vary systematically between planning and post-hoc explanation when agents are instructed to provide faithful accounts?",
+      "question_type": "causal",
+      "source_tension": "T2: Post-hoc explanations are assumed to be more coherent than planning traces, but if agents are trained to produce faithful explanations, coherence may no longer differentiate.",
+      "expected_contribution": "Tests the causal effect of instruction on coherence, directly examining a key assumption."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Planning",
+          "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+          "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+        },
+        {
+          "name": "Post-hoc Explanation",
+          "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+          "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+        },
+        {
+          "name": "Behavioral Signature",
+          "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+          "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+          "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+          "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+        },
+        {
+          "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+          "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+          "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+        },
+        {
+          "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+          "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+          "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The complexity of the task, affecting the duration of planning if present."
+          },
+          {
+            "name": "True Internal Process",
+            "role": "input",
+            "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+          },
+          {
+            "name": "Reaction Time",
+            "role": "mediator",
+            "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+          },
+          {
+            "name": "Explanation Coherence",
+            "role": "mediator",
+            "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+          },
+          {
+            "name": "Behavioral Signature",
+            "role": "mediator",
+            "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+          },
+          {
+            "name": "Inference Result",
+            "role": "outcome",
+            "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Reaction Time",
+            "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+          },
+          {
+            "step": "2",
+            "source": "True Internal Process",
+            "relation": "moderates",
+            "target": "Reaction Time",
+            "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+          },
+          {
+            "step": "3",
+            "source": "True Internal Process",
+            "relation": "determines",
+            "target": "Explanation Coherence",
+            "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+          },
+          {
+            "step": "4",
+            "source": "Reaction Time",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Reaction time is a component of the behavioral signature used for inference."
+          },
+          {
+            "step": "5",
+            "source": "Explanation Coherence",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Explanation coherence is the second component of the behavioral signature."
+          },
+          {
+            "step": "6",
+            "source": "Behavioral Signature",
+            "relation": "used to infer",
+            "target": "Inference Result",
+            "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observational Equivalence",
+            "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+          },
+          {
+            "bottleneck": "Internal State Inaccessibility",
+            "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+          },
+          {
+            "bottleneck": "Task Dependency",
+            "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+        "derived_from": [
+          "Agent Planning",
+          "Post-hoc Explanation",
+          "Assumption: True planning involves internal forward simulation that consumes time",
+          "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+        ],
+        "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+        "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical number of repeated trials (as a function of task complexity) at which reaction times for cached planning become indistinguishable from post-hoc explanation?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise, context-dependent threshold where the reaction-time signature breaks down, enabling principled application of behavioral tests."
+      },
+      "hypothesis": {
+        "statement": "There exists a finite number of repetition trials N* such that for repeated tasks, reaction times from cached planning and post-hoc explanation become statistically indistinguishable, and N* increases logarithmically with task complexity.",
+        "predicted_effect": "As task complexity increases, more repeated exposures are required for the reaction time gap to close, revealing a nonlinear tradeoff between planning efficiency and task novelty."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a gridworld experiment with an agent that can be set to true de novo planning, cached planning (from previous trials), or post-hoc explanation. Use two levels of task complexity (e.g., small vs. large grid). For each complexity, repeat the same task structure up to 20 trials. Measure reaction time per trial for each condition. Fit a logistic function to the reaction time difference (planning minus post-hoc) across trials to estimate the threshold N* where the difference falls below a significance threshold (e.g., Cohen's d < 0.2). Compare N* across complexity levels.",
+        "independent_variables": [
+          "Agent internal process (de novo planning, cached planning, post-hoc explanation)",
+          "Task complexity (small grid: 5x5, large grid: 15x15)",
+          "Trial number (1 to 20)"
+        ],
+        "dependent_variables": [
+          "Reaction time (milliseconds to produce action sequence)",
+          "Reaction time difference between planning and post-hoc conditions at each trial"
+        ],
+        "controls": [
+          "Same start state and goal location across conditions within a complexity level",
+          "Equal number of trials per condition (20)",
+          "Randomized order of conditions across runs",
+          "Use the same number of optimal steps for both complexity levels (by adjusting path length)"
+        ],
+        "falsifying_observation": "Cached planning reaction times remain significantly longer than post-hoc across all 20 trials for both complexity levels, or N* does not increase with complexity (i.e., the threshold is constant or decreases)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "De novo planning reaction times are longer than post-hoc on first trial for both complexities.",
+          "Cached planning reaction times approach post-hoc levels within fewer than 5 trials for low complexity, but require more than 10 trials for high complexity.",
+          "Estimated N* for low complexity is less than that for high complexity.",
+          "Reaction time difference decreases monotonically with trial number for cached planning."
+        ],
+        "rejects_hypothesis": [
+          "Cached planning reaction times remain significantly above post-hoc for all 20 trials even for low complexity.",
+          "Estimated N* for high complexity is equal to or less than that for low complexity.",
+          "Reaction time difference does not decrease consistently or shows erratic patterns."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If cached planning remains slower than post-hoc even after many repetitions, or if the threshold N* does not increase with complexity, then the assumption that planning time cost diminishes with repetition is not generally true or the cache is not fully effective.",
+        "assumption_to_revise": "Repeated exposure leads to caching that eliminates the planning time cost.",
+        "next_question": "What other features (e.g., sensitivity to goal changes, error patterns) can distinguish planning from post-hoc when reaction time fails?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Planning",
+          "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+          "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+        },
+        {
+          "name": "Post-hoc Explanation",
+          "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+          "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+        },
+        {
+          "name": "Behavioral Signature",
+          "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+          "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+          "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+          "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+        },
+        {
+          "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+          "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+          "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+        },
+        {
+          "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+          "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+          "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The complexity of the task, affecting the duration of planning if present."
+          },
+          {
+            "name": "True Internal Process",
+            "role": "input",
+            "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+          },
+          {
+            "name": "Reaction Time",
+            "role": "mediator",
+            "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+          },
+          {
+            "name": "Explanation Coherence",
+            "role": "mediator",
+            "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+          },
+          {
+            "name": "Behavioral Signature",
+            "role": "mediator",
+            "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+          },
+          {
+            "name": "Inference Result",
+            "role": "outcome",
+            "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Reaction Time",
+            "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+          },
+          {
+            "step": "2",
+            "source": "True Internal Process",
+            "relation": "moderates",
+            "target": "Reaction Time",
+            "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+          },
+          {
+            "step": "3",
+            "source": "True Internal Process",
+            "relation": "determines",
+            "target": "Explanation Coherence",
+            "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+          },
+          {
+            "step": "4",
+            "source": "Reaction Time",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Reaction time is a component of the behavioral signature used for inference."
+          },
+          {
+            "step": "5",
+            "source": "Explanation Coherence",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Explanation coherence is the second component of the behavioral signature."
+          },
+          {
+            "step": "6",
+            "source": "Behavioral Signature",
+            "relation": "used to infer",
+            "target": "Inference Result",
+            "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observational Equivalence",
+            "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+          },
+          {
+            "bottleneck": "Internal State Inaccessibility",
+            "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+          },
+          {
+            "bottleneck": "Task Dependency",
+            "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+        "derived_from": [
+          "Agent Planning",
+          "Post-hoc Explanation",
+          "Assumption: True planning involves internal forward simulation that consumes time",
+          "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+        ],
+        "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+        "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical task complexity threshold below which true planning and post-hoc explanation produce indistinguishable behavioral signatures, and above which they become distinguishable?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise boundary condition that determines when reaction time and coherence can reliably discriminate planning from post-hoc explanation, addressing the core tension of observational equivalence."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task complexity threshold C* such that for tasks with complexity below C*, the behavioral signatures (reaction time and explanation coherence) of true planning and post-hoc explanation are not significantly different, but for tasks above C*, they become significantly different.",
+        "predicted_effect": "The interaction between task complexity and agent type on behavioral signatures shifts from non-significant below C* to significant above C*."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a within-subjects design, each agent performs a series of tasks with varying complexity (e.g., number of steps or branching factor ranging from low to high). Agents are randomly assigned to either a true planning algorithm or a post-hoc explanation algorithm. For each task, reaction time and explanation coherence are measured. A change-point detection algorithm (e.g., segmented regression) is used to identify a complexity threshold where the difference in behavioral signatures between the two agent types becomes statistically significant.",
+        "independent_variables": [
+          "Agent type (planning vs post-hoc)",
+          "Task complexity (continuous scale, e.g., number of states or actions)"
+        ],
+        "dependent_variables": [
+          "Reaction time (ms)",
+          "Explanation coherence score (0-10)"
+        ],
+        "controls": [
+          "Same base language model for both agent types",
+          "Normalized explanation length",
+          "Random presentation order",
+          "Equal number of trials per complexity level"
+        ],
+        "falsifying_observation": "No significant change-point is detected across the entire complexity range, i.e., the difference in behavioral signatures between planning and post-hoc agents remains either consistently significant or consistently non-significant for all complexity levels."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A significant complexity threshold C* is identified, below which the behavioral signatures of planning and post-hoc agents are not significantly different (p > 0.05) and above which they are significantly different (p < 0.05).",
+          "The estimated C* is robust across different operationalizations of task complexity (e.g., number of steps, branching factor)."
+        ],
+        "rejects_hypothesis": [
+          "No significant change-point is detected; the difference in behavioral signatures is monotonic across all complexity levels (either always significant or never significant).",
+          "A threshold is found but the relationship is reversed (e.g., planning and post-hoc are different at low complexity but similar at high complexity)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no complexity threshold is found, the assumption that planning time scales with task complexity must be revised. This would suggest that either planning does not incur a measurable time cost or that the cost is masked by efficient caching or similar mechanisms.",
+        "assumption_to_revise": "True planning involves internal forward simulation that consumes time proportional to task complexity.",
+        "next_question": "What other computational signatures (e.g., consistency under perturbations, sensitivity to irrelevant information) could discriminate planning from post-hoc explanation, and do these signatures exhibit a threshold behaviour?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Planning",
+          "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+          "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+        },
+        {
+          "name": "Post-hoc Explanation",
+          "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+          "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+        },
+        {
+          "name": "Behavioral Signature",
+          "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+          "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+          "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+          "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+        },
+        {
+          "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+          "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+          "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+        },
+        {
+          "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+          "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+          "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The complexity of the task, affecting the duration of planning if present."
+          },
+          {
+            "name": "True Internal Process",
+            "role": "input",
+            "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+          },
+          {
+            "name": "Reaction Time",
+            "role": "mediator",
+            "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+          },
+          {
+            "name": "Explanation Coherence",
+            "role": "mediator",
+            "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+          },
+          {
+            "name": "Behavioral Signature",
+            "role": "mediator",
+            "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+          },
+          {
+            "name": "Inference Result",
+            "role": "outcome",
+            "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Reaction Time",
+            "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+          },
+          {
+            "step": "2",
+            "source": "True Internal Process",
+            "relation": "moderates",
+            "target": "Reaction Time",
+            "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+          },
+          {
+            "step": "3",
+            "source": "True Internal Process",
+            "relation": "determines",
+            "target": "Explanation Coherence",
+            "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+          },
+          {
+            "step": "4",
+            "source": "Reaction Time",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Reaction time is a component of the behavioral signature used for inference."
+          },
+          {
+            "step": "5",
+            "source": "Explanation Coherence",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Explanation coherence is the second component of the behavioral signature."
+          },
+          {
+            "step": "6",
+            "source": "Behavioral Signature",
+            "relation": "used to infer",
+            "target": "Inference Result",
+            "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observational Equivalence",
+            "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+          },
+          {
+            "bottleneck": "Internal State Inaccessibility",
+            "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+          },
+          {
+            "bottleneck": "Task Dependency",
+            "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+        "derived_from": [
+          "Agent Planning",
+          "Post-hoc Explanation",
+          "Assumption: True planning involves internal forward simulation that consumes time",
+          "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+        ],
+        "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+        "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical task complexity threshold beyond which the reaction time signature of efficient planning diverges from post-hoc explanation?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies whether a sharp boundary exists in task complexity that separates indistinguishable from distinguishable reaction time patterns, providing a novel phase transition in the behavioral distinction of planning vs. post-hoc explanation."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task complexity threshold such that for tasks below this threshold, efficient planning algorithms produce reaction times indistinguishable from post-hoc explanations, but above it, efficient planning yields significantly longer reaction times.",
+        "predicted_effect": "Reaction times for efficient planning and post-hoc explanation are similar at low complexity but diverge after a specific complexity level, with the divergence increasing monotonically beyond the threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a planning task (e.g., grid navigation) with continuous complexity levels varied by grid size or number of obstacles. Implement three agent types: efficient planning (A* with heuristic caching), traditional planning (breadth-first search), and post-hoc explanation (sequence retrodiction). For each complexity level, record median reaction time over multiple trials. Identify the complexity level where the reaction time difference between efficient planning and post-hoc explanation first becomes statistically significant (p < 0.01) and remains significant for all higher levels.",
+        "independent_variables": [
+          "agent type (efficient planning, traditional planning, post-hoc explanation)",
+          "task complexity (20 levels, equally spaced over a range that covers low to high difficulty)"
+        ],
+        "dependent_variables": [
+          "median reaction time per trial",
+          "statistical significance of difference (p-value between efficient planning and post-hoc explanation)"
+        ],
+        "controls": [
+          "identical task instances for each agent",
+          "same hardware and software environment",
+          "no prior exposure to tasks",
+          "agents have identical knowledge of task dynamics"
+        ],
+        "falsifying_observation": "If no critical threshold is found (i.e., the difference between efficient planning and post-hoc explanation is either always significant or never significant across all complexity levels), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "There exists a single complexity level C* such that for all complexities < C*, the reaction time difference is not significant, and for all complexities > C*, the difference is significant.",
+          "The reaction times of efficient planning and post-hoc explanation increase slowly with complexity, but efficient planning shows an inflection point at C*."
+        ],
+        "rejects_hypothesis": [
+          "The reaction time difference is significant at all complexity levels (no threshold).",
+          "The reaction time difference is never significant across any complexity level (no threshold).",
+          "Multiple thresholds or non-monotonic patterns are observed."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no critical threshold exists), then reaction time as a discriminant is either always reliable or never reliable, depending on the pattern. This simplifies the mapping but reduces specificity.",
+        "assumption_to_revise": "The assumption that efficient planning can sometimes mimic post-hoc explanation (i.e., a regime of indistinguishability) is incorrect; planning always leaves a detectable reaction time signature, or never does.",
+        "next_question": "What other behavioral signatures, beyond reaction time, can reliably distinguish planning from post-hoc explanation across all complexity levels?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Planning",
+          "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+          "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+        },
+        {
+          "name": "Post-hoc Explanation",
+          "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+          "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+        },
+        {
+          "name": "Behavioral Signature",
+          "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+          "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+          "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+          "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+        },
+        {
+          "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+          "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+          "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+        },
+        {
+          "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+          "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+          "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The complexity of the task, affecting the duration of planning if present."
+          },
+          {
+            "name": "True Internal Process",
+            "role": "input",
+            "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+          },
+          {
+            "name": "Reaction Time",
+            "role": "mediator",
+            "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+          },
+          {
+            "name": "Explanation Coherence",
+            "role": "mediator",
+            "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+          },
+          {
+            "name": "Behavioral Signature",
+            "role": "mediator",
+            "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+          },
+          {
+            "name": "Inference Result",
+            "role": "outcome",
+            "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Reaction Time",
+            "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+          },
+          {
+            "step": "2",
+            "source": "True Internal Process",
+            "relation": "moderates",
+            "target": "Reaction Time",
+            "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+          },
+          {
+            "step": "3",
+            "source": "True Internal Process",
+            "relation": "determines",
+            "target": "Explanation Coherence",
+            "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+          },
+          {
+            "step": "4",
+            "source": "Reaction Time",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Reaction time is a component of the behavioral signature used for inference."
+          },
+          {
+            "step": "5",
+            "source": "Explanation Coherence",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Explanation coherence is the second component of the behavioral signature."
+          },
+          {
+            "step": "6",
+            "source": "Behavioral Signature",
+            "relation": "used to infer",
+            "target": "Inference Result",
+            "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observational Equivalence",
+            "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+          },
+          {
+            "bottleneck": "Internal State Inaccessibility",
+            "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+          },
+          {
+            "bottleneck": "Task Dependency",
+            "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+        "derived_from": [
+          "Agent Planning",
+          "Post-hoc Explanation",
+          "Assumption: True planning involves internal forward simulation that consumes time",
+          "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+        ],
+        "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+        "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical planning horizon beyond which planning explanations become as coherent as post-hoc explanations, revealing a nonlinear tradeoff between planning depth and explanation faithfulness?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in the coherence of planning explanations as a function of planning horizon, providing a sharp boundary condition for distinguishing planning from post-hoc explanation."
+      },
+      "hypothesis": {
+        "statement": "If the planning horizon (number of future steps simulated) exceeds a task-specific threshold, then the coherence of planning explanations will increase nonlinearly and become statistically indistinguishable from post-hoc explanations, due to learned alignment with post-hoc narrative structures.",
+        "predicted_effect": "Coherence of planning explanations will exhibit a sigmoidal increase with planning horizon, crossing a threshold beyond which the coherence gap with post-hoc explanations vanishes."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train planning agents on a gridworld navigation task with varying planning horizons (1 to 10 steps). For each horizon, train the agent to produce explanations that are faithful to its planning process. Measure coherence using a standardized metric (e.g., logical consistency, detail, absence of contradictions). Fit a sigmoid curve to coherence versus horizon. Compare the inflection point to the coherence level of post-hoc explanations generated by a separate model after action selection.",
+        "independent_variables": [
+          "Planning horizon (integer from 1 to 10)",
+          "Task complexity (easy: 3x3 grid, hard: 5x5 grid with obstacles)"
+        ],
+        "dependent_variables": [
+          "Coherence score (composite of logical consistency, detail, and absence of contradictions)"
+        ],
+        "controls": [
+          "Same agent architecture (e.g., LSTM-based planner with explanation generator)",
+          "Equal number of training episodes per horizon",
+          "Post-hoc explanation model trained on same tasks with same architecture but without planning requirement"
+        ],
+        "falsifying_observation": "If the coherence of planning explanations does not exhibit a sigmoidal relationship with planning horizon (i.e., remains linear or flat) and never reaches the coherence level of post-hoc explanations within the tested range, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Coherence of planning explanations increases sigmoidally with planning horizon, with an inflection point at horizon 5 for easy tasks and horizon 7 for hard tasks.",
+          "Beyond the inflection point, planning explanation coherence statistically matches post-hoc explanation coherence (p > 0.05).",
+          "Post-hoc coherence remains constant across horizons."
+        ],
+        "rejects_hypothesis": [
+          "Coherence of planning explanations increases linearly with horizon but never reaches post-hoc coherence levels.",
+          "Coherence remains low and flat regardless of horizon.",
+          "Post-hoc coherence also varies with horizon, suggesting confound."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed (coherence remains lower than post-hoc for all horizons), then the assumption that planning explanations can be trained to match post-hoc coherence via longer planning is false. This implies that post-hoc explanations inherently possess a structural advantage (e.g., outcome knowledge) that cannot be replicated by increasing planning depth.",
+        "assumption_to_revise": "Assumption: Training on faithfulness can eventually align planning explanation coherence with post-hoc coherence if planning depth is sufficient.",
+        "next_question": "What intrinsic properties of the post-hoc explanation process (e.g., outcome knowledge, hindsight bias) contribute to higher coherence, and can these properties be induced in planning explanations through architectural changes that incorporate outcome knowledge during planning?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Planning",
+          "definition": "The internal process by which an agent selects a sequence of actions based on forward simulation, evaluation of future states, and goals, prior to execution.",
+          "why_primitive": "It is the core phenomenon we aim to detect; cannot be decomposed further without losing the concept of deliberative action selection."
+        },
+        {
+          "name": "Post-hoc Explanation",
+          "definition": "A retrospective narrative or reasoning constructed after an action to justify or rationalize the action, often leveraging outcome knowledge to infer intentions.",
+          "why_primitive": "It is the alternative explanation for observed behavior that we must distinguish from true planning; fundamental in the context of deception or confabulation."
+        },
+        {
+          "name": "Behavioral Signature",
+          "definition": "An observable pattern in an agent's actions, reaction times, or robustness that is indicative of underlying computational processes.",
+          "why_primitive": "Distinction must ultimately rely on observable evidence; signatures are the building blocks of any empirical test."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "True planning involves internal forward simulation that consumes time and cognitive resources, producing predictable latencies and sensitivity to problem structure.",
+          "rationale": "Planning requires exploring possible futures, which scales with problem complexity; post-hoc explanations can be generated quickly and are less sensitive to complexity.",
+          "possible_failure": "Agents may have access to cached plans or very efficient planning algorithms that mimic post-hoc speed."
+        },
+        {
+          "assumption": "Post-hoc explanations are often simpler and more coherent than the actual decision process, because they are constructed to be convincing after the fact.",
+          "rationale": "Human explanations tend to omit irrelevant details and impose linear narratives; similar tendencies may appear in AI-generated explanations.",
+          "possible_failure": "Explanation generators may be trained to be faithful, or planning processes may themselves produce simple representations."
+        },
+        {
+          "assumption": "Behavioral markers can be identified that differentiate planning from post-hoc explanation without accessing internal states.",
+          "rationale": "If planning and explanation are computationally distinct, they should leave different traces in action sequences, reaction times, or robustness to perturbations.",
+          "possible_failure": "The differences may be too subtle or confounded by other factors, making reliable distinction impossible from behavior alone."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The complexity of the task, affecting the duration of planning if present."
+          },
+          {
+            "name": "True Internal Process",
+            "role": "input",
+            "description": "Latent variable indicating whether the agent engages in true planning or constructs a post-hoc explanation."
+          },
+          {
+            "name": "Reaction Time",
+            "role": "mediator",
+            "description": "Time taken by the agent to produce a response; expected to be longer for planning compared to post-hoc explanation, especially for complex tasks."
+          },
+          {
+            "name": "Explanation Coherence",
+            "role": "mediator",
+            "description": "Logical consistency and detail of any explanation provided; expected to be higher for post-hoc explanations."
+          },
+          {
+            "name": "Behavioral Signature",
+            "role": "mediator",
+            "description": "Observable pattern constructed from reaction time and explanation coherence, used to infer the internal process."
+          },
+          {
+            "name": "Inference Result",
+            "role": "outcome",
+            "description": "Classification of the agent's internal process as planning or post-hoc explanation based on the behavioral signature."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Reaction Time",
+            "explanation": "Higher task complexity increases planning time, but only if the agent is truly planning."
+          },
+          {
+            "step": "2",
+            "source": "True Internal Process",
+            "relation": "moderates",
+            "target": "Reaction Time",
+            "explanation": "The effect of task complexity on reaction time depends on whether the agent is planning (longer) or constructing a post-hoc explanation (shorter)."
+          },
+          {
+            "step": "3",
+            "source": "True Internal Process",
+            "relation": "determines",
+            "target": "Explanation Coherence",
+            "explanation": "Post-hoc explanations are constructed to be coherent and compelling, while planning may not naturally produce such coherence."
+          },
+          {
+            "step": "4",
+            "source": "Reaction Time",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Reaction time is a component of the behavioral signature used for inference."
+          },
+          {
+            "step": "5",
+            "source": "Explanation Coherence",
+            "relation": "contributes to",
+            "target": "Behavioral Signature",
+            "explanation": "Explanation coherence is the second component of the behavioral signature."
+          },
+          {
+            "step": "6",
+            "source": "Behavioral Signature",
+            "relation": "used to infer",
+            "target": "Inference Result",
+            "explanation": "An algorithm classifies the internal process based on the combined behavioral signature."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observational Equivalence",
+            "why_it_matters": "Planning and post-hoc explanation can produce similar behavioral signatures in some tasks, making reliable distinction difficult without additional information."
+          },
+          {
+            "bottleneck": "Internal State Inaccessibility",
+            "why_it_matters": "We cannot directly observe the internal process; any inference based on behavioral markers is indirect and may be noisy or confounded."
+          },
+          {
+            "bottleneck": "Task Dependency",
+            "why_it_matters": "The effectiveness of reaction time and coherence as discriminative features varies across tasks, requiring careful selection and calibration of tasks to ensure valid differentiation."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes true planning from post-hoc explanation by analyzing behavioral signatures derived from reaction time and explanation coherence. True planning typically increases reaction time with task complexity, while post-hoc explanations are faster and more coherent. These observable differences are combined into a signature that is used to infer the underlying process. The approach relies on the assumptions that planning is computationally costly and that post-hoc explanations are constructed for coherence. Key bottlenecks include observational equivalence, limited access to internal states, and task dependency of the signatures."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that true planning always incurs a measurable time cost may fail if agents use cached plans or efficient algorithms, making planning behaviorally indistinguishable from post-hoc explanation.",
+        "derived_from": [
+          "Agent Planning",
+          "Post-hoc Explanation",
+          "Assumption: True planning involves internal forward simulation that consumes time",
+          "Core Tradeoff: Complexity of planning vs. Simplicity of explanation"
+        ],
+        "why_it_matters": "It undermines reaction time as a reliable discriminant, which is central to the proposed mechanism.",
+        "what_existing_methods_may_miss": "Existing methods that rely solely on latency differences may misclassify efficient planners as post-hoc explainers.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a phase transition in the behavioral signature that distinguishes true agent planning from post-hoc explanation as task complexity exceeds the agent's planning horizon?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp boundary condition where planning and post-hoc explanation become behaviorally indistinguishable, directly addressing the core tension of distinguishing the two."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold task complexity beyond which the behavioral signature of true planning becomes indistinguishable from that of post-hoc explanation, due to a shift in the agent's internal process from forward simulation to heuristic-based response.",
+        "predicted_effect": "Classification accuracy for distinguishing planning from post-hoc explanation exhibits a sharp drop at the threshold complexity, rather than a gradual decline."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Generate a continuous range of tasks varying in complexity (e.g., number of steps, branching factor). For each complexity level, collect behavioral signatures (reaction time and explanation coherence) from a planning agent and a post-hoc explanation generator. Train a classifier on low-complexity tasks only, then evaluate its accuracy across all complexity levels. Look for a discontinuity in accuracy that indicates a phase transition.",
+        "independent_variables": [
+          "Task complexity (continuous variable)",
+          "True internal process (planning vs. post-hoc explanation)"
+        ],
+        "dependent_variables": [
+          "Classification accuracy of the behavioral signature",
+          "Reaction time",
+          "Explanation coherence"
+        ],
+        "controls": [
+          "Use the same agent model for both conditions (planning vs. explanation) to avoid architectural confounds",
+          "Ensure equal number of planning and post-hoc trials per complexity level",
+          "Randomize trial order and complexity presentation"
+        ],
+        "falsifying_observation": "If classification accuracy remains above 90% across the entire complexity range, or declines smoothly without a sharp threshold, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Classification accuracy on low-complexity tasks is high (e.g., >90%).",
+          "At a specific threshold complexity, accuracy drops sharply to near chance (e.g., <55%).",
+          "Reaction time for planning tasks increases linearly up to the threshold, then becomes flat or decreases."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy remains high (e.g., >90%) for all complexity levels.",
+          "Accuracy declines gradually with increasing complexity, without a clear threshold.",
+          "Reaction time and coherence differences persist uniformly across complexities."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed (accuracy remains high or declines smoothly), then the assumption of a sharp boundary based on planning horizon is incorrect.",
+        "assumption_to_revise": "The assumption that planning resources become exhausted at a critical complexity, leading to a categorical shift in behavior.",
+        "next_question": "What continuous tradeoff between planning depth and explanation quality allows behavioral signatures to remain separable across all complexities, and can we identify invariant features?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical task complexity threshold such that for tasks below this threshold, efficient planning algorithms produce reaction times indistinguishable from post-hoc explanations, but above it, efficient planning yields significantly longer reaction times.",
+      "independent_variables": [
+        "agent type (efficient planning vs. post-hoc explanation)",
+        "task complexity (3 levels: low, medium, high)"
+      ],
+      "dependent_variables": [
+        "median reaction time per trial",
+        "statistical significance of difference (p-value between efficient planning and post-hoc explanation)"
+      ],
+      "controlled_variables": [
+        "identical task instances for each agent type",
+        "same hardware and software environment",
+        "no prior exposure to tasks",
+        "agents have identical knowledge of task dynamics",
+        "fixed time measurement methodology"
+      ],
+      "baselines": [
+        {
+          "name": "Traditional planning (breadth-first search)",
+          "description": "A planning algorithm that does not use caching or heuristics, included as a sanity check to ensure tasks are sufficiently complex to induce planning time."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Median reaction time",
+          "definition": "The median of reaction times over multiple trials for each agent type and complexity level."
+        },
+        {
+          "name": "Statistical significance of difference",
+          "definition": "The p-value from a Welch's t-test or Mann-Whitney U test comparing reaction times of efficient planning and post-hoc explanation at each complexity level."
+        }
+      ],
+      "expected_result": "At low complexity, the reaction time difference between efficient planning and post-hoc explanation is not statistically significant (p >= 0.05). At medium and high complexity, the difference is significant (p < 0.05) with efficient planning exhibiting longer reaction times.",
+      "falsifying_result": "Any of the following: (1) No significant difference at high complexity; (2) Significant difference at low complexity; (3) Non-monotonic pattern where significance appears and disappears; (4) Efficient planning is faster than post-hoc explanation at any level.",
+      "minimum_viable_experiment": "Implement a pathfinding task on a grid with obstacles. Task complexity is varied by grid size and number of obstacles: low (3x3, 0 obstacles), medium (5x5, 5 obstacles), high (8x8, 10 obstacles). Efficient planning uses A* with a heuristic and cached previous solutions; post-hoc explanation uses a sequence retrodiction algorithm that, given the goal and outcome, generates a plausible path. Each agent type completes 100 trials per complexity level. Median reaction times are recorded and compared using statistical tests. The critical threshold is identified as the complexity level where the p-value first drops below 0.05 and remains below for all higher levels.",
+      "risks_and_confounds": [
+        "Implementation details of efficient planning and post-hoc explanation may not faithfully represent theoretical constructs.",
+        "The specific task may not induce a clear threshold; other tasks might yield different results.",
+        "Learning or adaptation over trials could confound reaction times; counterbalance trial order.",
+        "Hardware differences or background processes could introduce noise; use same machine and monitor CPU load.",
+        "Choice of statistical test and significance threshold may affect conclusions."
+      ]
+    },
+    {
+      "hypothesis": "If the planning horizon (number of future steps simulated) exceeds a task-specific threshold, then the coherence of planning explanations will increase nonlinearly and become statistically indistinguishable from post-hoc explanations, due to learned alignment with post-hoc narrative structures.",
+      "independent_variables": [
+        "Planning horizon (integer from 1 to 10)"
+      ],
+      "dependent_variables": [
+        "Coherence score (composite of logical consistency, detail, and absence of contradictions)"
+      ],
+      "controlled_variables": [
+        "Same agent architecture (LSTM-based planner with explanation generator)",
+        "Equal number of training episodes per horizon",
+        "Fixed task complexity (3x3 grid with obstacles)"
+      ],
+      "baselines": [
+        {
+          "name": "Post-hoc explanation baseline",
+          "description": "Explanations generated by a separate model trained on the same tasks but without planning requirement; explanations are produced after action selection using outcome knowledge."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Coherence score",
+          "definition": "A composite metric combining logical consistency (e.g., no contradictions between steps), detail (e.g., number of relevant steps mentioned), and absence of contradictions (e.g., statements that do not conflict with task constraints). Scores range from 0 to 1, with higher indicating greater coherence."
+        }
+      ],
+      "expected_result": "Coherence of planning explanations increases sigmoidally with planning horizon, crossing a threshold (e.g., horizon 5) beyond which the coherence gap with post-hoc explanations vanishes (p > 0.05).",
+      "falsifying_result": "Coherence of planning explanations does not exhibit a sigmoidal relationship with planning horizon (remains linear or flat) and never reaches the coherence level of post-hoc explanations within the range of horizons tested (1 to 10).",
+      "minimum_viable_experiment": "Train planning agents on a 3x3 gridworld navigation task with planning horizons from 1 to 10 steps. For each horizon, train an LSTM-based agent that plans by simulating future states and then generates an explanation faithful to its planning process. Measure coherence using the standardized metric. Additionally, train a post-hoc explanation model on the same tasks (without planning requirement) to generate explanations after action selection. Compare coherence across horizons and against the post-hoc baseline. Fit a sigmoid to the coherence versus horizon data and test the significance of the threshold.",
+      "risks_and_confounds": [
+        "Training may not achieve faithful explanations; agents might learn to produce coherent but unfaithful explanations.",
+        "Coherence metric may not capture the relevant aspects of explanation faithfulness.",
+        "The choice of grid size (3x3) may be too simple; planning horizon effects may be more pronounced on harder tasks.",
+        "Computational cost: training for 10 horizons may be resource-intensive."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold task complexity beyond which the behavioral signature of true planning becomes indistinguishable from that of post-hoc explanation, due to a shift in the agent's internal process from forward simulation to heuristic-based response.",
+      "independent_variables": [
+        "Task complexity (continuous, e.g., number of steps or branching factor)",
+        "True internal process (planning vs. post-hoc explanation)"
+      ],
+      "dependent_variables": [
+        "Classification accuracy of the behavioral signature",
+        "Reaction time",
+        "Explanation coherence"
+      ],
+      "controlled_variables": [
+        "Same agent model for both conditions (planning and explanation) to avoid architectural confounds",
+        "Equal number of planning and post-hoc trials per complexity level",
+        "Randomized trial order and complexity presentation"
+      ],
+      "baselines": [
+        {
+          "name": "Random classifier baseline",
+          "description": "Classifier that outputs random prediction; expected accuracy 50%"
+        },
+        {
+          "name": "Low-complexity oracle",
+          "description": "Classifier trained on only lowest complexity tasks; should achieve high accuracy on those tasks"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Classification accuracy",
+          "definition": "Proportion of trials where the classifier correctly identifies the true internal process"
+        },
+        {
+          "name": "Reaction time",
+          "definition": "Time from task presentation to agent's response"
+        },
+        {
+          "name": "Explanation coherence",
+          "definition": "Score from a separate coherence evaluator (e.g., trained on human judgments) measuring logical consistency and detail of any explanation provided"
+        }
+      ],
+      "expected_result": "Classification accuracy is high (>90%) on tasks with low complexity. At a threshold complexity, accuracy drops sharply to near chance (<55%). Reaction time for planning tasks increases linearly up to the threshold, then becomes flat or decreases. Coherence of post-hoc explanations remains high across all complexities, while planning explanations show lower coherence that improves near the threshold.",
+      "falsifying_result": "Classification accuracy remains above 90% across the entire complexity range, or declines smoothly without a sharp drop. Reaction time and coherence differences persist uniformly across complexities, or no systematic pattern is observed.",
+      "minimum_viable_experiment": "Generate a continuous range of tasks varying in complexity (e.g., number of steps from 1 to 20). For each complexity level, collect behavioral signatures (reaction time and explanation coherence) from a planning agent and a post-hoc explanation generator. Train a classifier (e.g., logistic regression) on data from only low-complexity tasks (e.g., steps 1-5) using reaction time and coherence as features. Evaluate the classifier on all complexity levels and plot accuracy versus complexity. Identify if there is a discontinuous drop in accuracy at a specific complexity.",
+      "risks_and_confounds": [
+        "Observational equivalence: planning and post-hoc explanation may produce similar signatures in some tasks, especially at low complexity",
+        "Internal state inaccessibility: we cannot directly observe the internal process; inference is indirect and noisy",
+        "Task dependency: effectiveness of reaction time and coherence as discriminative features varies across tasks; careful calibration needed",
+        "Agent architecture: if the planning agent uses cached plans or very efficient algorithms, reaction time differences may vanish",
+        "Explanation generation quality: post-hoc explanations may not always be more coherent; if generator is faithful, coherence may not differ"
+      ]
+    },
+    {
+      "hypothesis": "There exists a finite number of repetition trials N* such that for repeated tasks, reaction times from cached planning and post-hoc explanation become statistically indistinguishable, and N* increases logarithmically with task complexity.",
+      "independent_variables": [
+        "Agent internal process (de novo planning, cached planning, post-hoc explanation)",
+        "Task complexity (5x5 grid, 15x15 grid)",
+        "Trial number (1 to 20)"
+      ],
+      "dependent_variables": [
+        "Reaction time to produce action sequence (milliseconds)",
+        "Reaction time difference between cached planning and post-hoc explanation conditions per trial"
+      ],
+      "controlled_variables": [
+        "Same start state and goal location across conditions within a complexity level",
+        "Equal number of trials per condition (20)",
+        "Randomized order of conditions across runs",
+        "Use the same number of optimal steps for both complexity levels (by adjusting path length)",
+        "Same grid environment layout within each complexity level",
+        "Equal opportunity for caching across conditions (same number of exposures)"
+      ],
+      "baselines": [
+        {
+          "name": "De novo planning baseline",
+          "description": "Agent plans from scratch on each trial without any caching of previous solutions."
+        },
+        {
+          "name": "Post-hoc explanation baseline",
+          "description": "Agent generates an explanation after executing the action, without any planning prior to action."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Reaction time",
+          "definition": "Time from stimulus onset to completion of action sequence, measured in milliseconds."
+        },
+        {
+          "name": "Effect size (Cohen's d)",
+          "definition": "Difference in mean reaction time between cached planning and post-hoc explanation conditions divided by pooled standard deviation, calculated per trial."
+        },
+        {
+          "name": "Threshold N*",
+          "definition": "Smallest trial number for which Cohen's d < 0.2 for two consecutive trials, indicating statistical indistinguishability."
+        }
+      ],
+      "expected_result": "For low complexity (5x5 grid), the threshold N* is small (e.g., fewer than 5 trials), meaning cached planning reaction times quickly approach post-hoc levels. For high complexity (15x15 grid), N* is larger (e.g., more than 10 trials). Overall, the reaction time difference decreases monotonically with trial number for cached planning.",
+      "falsifying_result": "Cached planning reaction times remain significantly longer than post-hoc across all 20 trials for both complexity levels (Cohen's d > 0.2 for all trials), or the estimated threshold N* does not increase with complexity (i.e., N* is constant or smaller for higher complexity).",
+      "minimum_viable_experiment": "Use a gridworld environment. Set up an agent with three modes: de novo planning (replan each trial), cached planning (store and reuse plans from previous trials), and post-hoc explanation (no planning, generate explanation after action). Use two grid sizes: 5x5 (low complexity) and 15x15 (high complexity). For each combination of mode and complexity, run 20 trials with identical start and goal positions. Record reaction time per trial. Compute Cohen's d between cached planning and post-hoc for each trial. Identify N* as the first trial where d < 0.2 for two consecutive trials. Compare N* across complexity levels.",
+      "risks_and_confounds": [
+        "Learning effects across conditions if order is not randomized",
+        "Interference between conditions if not properly separated",
+        "Agent's caching mechanism may not be optimal or may degrade over time",
+        "Task complexity may not sufficiently differ in planning time if path lengths are controlled",
+        "Reaction time measurement may include motor execution time which varies",
+        "Post-hoc explanation may involve incidental planning if agent is trained to explain",
+        "Statistical power limited by 20 trials per condition",
+        "Choice of Cohen's d = 0.2 threshold may be arbitrary"
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical task complexity threshold C* such that for tasks with complexity below C*, the behavioral signatures (reaction time and explanation coherence) of true planning and post-hoc explanation are not significantly different, but for tasks above C*, they become significantly different.",
+      "independent_variables": [
+        "Agent type: planning vs post-hoc (between-subjects)",
+        "Task complexity: continuous scale (e.g., number of states or actions) across levels from low to high (within-subjects)"
+      ],
+      "dependent_variables": [
+        "Reaction time (ms)",
+        "Explanation coherence score (0-10)"
+      ],
+      "controlled_variables": [
+        "Same base language model for both agent types",
+        "Normalized explanation length",
+        "Random presentation order of tasks",
+        "Equal number of trials per complexity level",
+        "Task type held constant (e.g., navigation or puzzle)",
+        "No inter-trial feedback",
+        "Counterbalanced block order",
+        "Fixed time window for response"
+      ],
+      "baselines": [
+        {
+          "name": "True planning algorithm",
+          "description": "Agent uses explicit forward simulation to select actions, with planning time proportional to task complexity."
+        },
+        {
+          "name": "Post-hoc explanation algorithm",
+          "description": "Agent generates actions quickly via a heuristic or random policy, then constructs a coherent explanation after the fact using a language model."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Reaction time",
+          "definition": "Time in milliseconds from task onset to action selection, measured per trial."
+        },
+        {
+          "name": "Explanation coherence",
+          "definition": "Average score from human raters or automated coherence metric (e.g., logical consistency, detail) on a 0-10 scale after explanation is generated."
+        },
+        {
+          "name": "Change-point significance",
+          "definition": "Statistical significance (p < 0.05) of a segmented regression or other change-point detection model indicating a shift in the difference of behavioral signatures between agent types across complexity levels."
+        }
+      ],
+      "expected_result": "A significant complexity threshold C* is identified (p < 0.05). Below C*, the difference in reaction time and explanation coherence between planning and post-hoc agents is not significant (p > 0.05). Above C*, the difference becomes significant (p < 0.05) in the direction predicted: planning agents show longer reaction times and lower coherence relative to post-hoc agents. The threshold is robust across alternative operationalizations of complexity.",
+      "falsifying_result": "No significant change-point is detected across the entire complexity range; i.e., the difference in behavioral signatures between planning and post-hoc agents remains either consistently significant (p < 0.05) or consistently non-significant (p > 0.05) at all complexity levels. Alternatively, a threshold is found but with reversed pattern (significant difference at low complexity, non-significant at high complexity).",
+      "minimum_viable_experiment": "Use 20 agents (10 per agent type) each performing 100 trials across 5 complexity levels (20 trials per level). Task complexity is operationalized as the number of steps in a deterministic grid-world navigation task (levels: 2, 4, 6, 8, 10 steps). Reaction time is measured from task presentation to action. After each trial, agents provide a written explanation limited to 50 tokens; coherence is rated by 3 independent human judges on a 0-10 Likert scale. Use segmented regression to detect a single breakpoint in the linear relationship between complexity and the difference in reaction times (or coherence) between the two agent types. The experiment is run in a single session with counterbalanced block order.",
+      "risks_and_confounds": [
+        "Observational equivalence: If planning algorithms operate very efficiently (e.g., cached plans), reaction time differences may vanish even at high complexity.",
+        "Explanation coherence may be confounded by the language model's tendency to produce plausible narratives regardless of actual process.",
+        "Practice effects: Reaction times may decrease over trials, differentially affecting post-hoc agents if they learn to generate explanations faster.",
+        "Individual differences in processing speed between agents (if using different base models) could mask the effect.",
+        "Task dependency: The specific operationalization of complexity (steps) may not capture cognitive load; other dimensions like branching factor may matter.",
+        "Rater bias: Subjective coherence ratings may introduce noise; automated coherence metrics may not capture explanatory quality."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical task complexity threshold beyond which the reaction time signature of efficient planning diverges from post-hoc explanation?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical planning horizon beyond which planning explanations become as coherent as post-hoc explanations, revealing a nonlinear tradeoff between planning depth and explanation faithfulness?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a phase transition in the behavioral signature that distinguishes true agent planning from post-hoc explanation as task complexity exceeds the agent's planning horizon?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical number of repeated trials (as a function of task complexity) at which reaction times for cached planning become indistinguishable from post-hoc explanation?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "Is there a critical task complexity threshold below which true planning and post-hoc explanation produce indistinguishable behavioral signatures, and above which they become distinguishable?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

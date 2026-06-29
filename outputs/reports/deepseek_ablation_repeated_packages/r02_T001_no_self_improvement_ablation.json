@@ -1,0 +1,1490 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable capability to perform a specific type of action or solve a specific subtask, encapsulated as a parameterized function.",
+        "why_primitive": "It is the basic unit of agent capability; cannot be decomposed further in this context."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of chaining or combining multiple skills to achieve a task without altering the skills themselves.",
+        "why_primitive": "It is a fundamental operation for reusing existing knowledge without modification."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of acquiring a new skill through learning, search, or generation, expanding the agent's skill set.",
+        "why_primitive": "It is the alternative to composition and involves creating new knowledge from scratch or via adaptation."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are modular and composable with predictable interfaces.",
+        "rationale": "This allows composition to be a viable strategy; otherwise, discovery is always needed.",
+        "possible_failure": "If skills are not modular, composition may fail or incur costs comparable to discovery."
+      },
+      {
+        "assumption": "The cost of discovery is higher than the cost of composition for a given task, but composition may have lower success probability.",
+        "rationale": "Discovery requires additional resources (e.g., data, compute), while composition leverages existing investments; however, composition may not always succeed if the task is not decomposable.",
+        "possible_failure": "Discovery cost could be lower if existing skills are poor or if composition complexity is high, reversing the cost relationship."
+      },
+      {
+        "assumption": "The agent can estimate the success probability of composition before execution.",
+        "rationale": "The decision between composition and discovery relies on an evaluation of composition feasibility.",
+        "possible_failure": "If estimation is inaccurate, the agent may make suboptimal decisions."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Cost-efficiency of discovery vs. composition",
+        "variables": [
+          "discovery_cost",
+          "composition_cost",
+          "success_probability_composition",
+          "task_failure_cost"
+        ]
+      },
+      {
+        "tradeoff": "Short-term performance vs. long-term skill diversity",
+        "variables": [
+          "immediate_task_performance",
+          "skill_set_size",
+          "future_task_generalization"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "discovery_cost",
+        "role": "input",
+        "description": "The cost (time, compute, data) required to discover a new skill."
+      },
+      {
+        "name": "composition_cost",
+        "role": "input",
+        "description": "The cost of composing existing skills to perform the task."
+      },
+      {
+        "name": "success_probability_composition",
+        "role": "input",
+        "description": "Estimated probability that composition will succeed."
+      },
+      {
+        "name": "task_failure_cost",
+        "role": "input",
+        "description": "Cost incurred if the task fails."
+      },
+      {
+        "name": "decision_to_discover",
+        "role": "mediator",
+        "description": "Binary decision: agent chooses to discover a new skill."
+      },
+      {
+        "name": "immediate_performance",
+        "role": "outcome",
+        "description": "Actual task outcome and total cost (combination of success/failure and costs)."
+      },
+      {
+        "name": "skill_set_size",
+        "role": "outcome",
+        "description": "Number of skills in the agent's repertoire after the decision."
+      },
+      {
+        "name": "future_generalization",
+        "role": "outcome",
+        "description": "Expected ability to handle future tasks due to skill diversity."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Agent receives task",
+        "source": "task",
+        "relation": "leads_to",
+        "target": "estimation of composition success probability and costs",
+        "explanation": "The agent evaluates the feasibility and cost of composition."
+      },
+      {
+        "step": "Agent compares expected costs",
+        "source": "discovery_cost, composition_cost, success_probability_composition, task_failure_cost",
+        "relation": "into",
+        "target": "expected cost_composition = composition_cost + (1 - success_probability_composition) * task_failure_cost; expected cost_discovery = discovery_cost (assuming discovery always yields a usable skill)",
+        "explanation": "Decision rule: choose discovery if expected cost_discovery < expected cost_composition, else compose."
+      },
+      {
+        "step": "If expected cost_discovery < expected cost_composition, agent decides to discover",
+        "source": "comparison result",
+        "relation": "activates",
+        "target": "decision_to_discover = True",
+        "explanation": "Discovery is chosen to minimize expected cost."
+      },
+      {
+        "step": "If decision_to_discover, agent executes discovery process",
+        "source": "decision_to_discover",
+        "relation": "causes",
+        "target": "new skill acquisition",
+        "explanation": "Agent invests resources to learn a new skill."
+      },
+      {
+        "step": "Agent uses new skill to perform task",
+        "source": "new skill",
+        "relation": "enables",
+        "target": "immediate_performance (success with high probability, cost = discovery_cost)",
+        "explanation": "New skill likely succeeds, but at discovery cost."
+      },
+      {
+        "step": "If not decision_to_discover, agent attempts composition",
+        "source": "decision_to_discover = False",
+        "relation": "leads_to",
+        "target": "composition execution",
+        "explanation": "Agent composes existing skills."
+      },
+      {
+        "step": "Composition may succeed or fail stochastically",
+        "source": "composition execution, success_probability_composition",
+        "relation": "determines",
+        "target": "immediate_performance (success with prob p, failure with prob 1-p)",
+        "explanation": "Outcome depends on actual composability of skills."
+      },
+      {
+        "step": "Outcome influences skill_set_size and future_generalization",
+        "source": "decision_to_discover, immediate_performance",
+        "relation": "affects",
+        "target": "skill_set_size, future_generalization",
+        "explanation": "Discovery increases skill set, while composition does not. Success/failure may also affect learning."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Estimation accuracy of success_probability_composition",
+        "why_it_matters": "If the agent's estimate of composition success is inaccurate, the decision between discovery and composition may be suboptimal, leading to higher costs or failures."
+      },
+      {
+        "bottleneck": "Uncertainty in discovery cost and outcome",
+        "why_it_matters": "Discovery cost may vary unpredictably, and the resulting skill may not be immediately useful, affecting the cost comparison and immediate performance."
+      },
+      {
+        "bottleneck": "Static vs. dynamic trade-off between immediate and future performance",
+        "why_it_matters": "The decision model may ignore long-term benefits of skill discovery, such as improved future generalization, leading to under-investment in discovery."
+      }
+    ],
+    "mechanism_summary": "The agent decides between discovery and composition by comparing expected total costs. Expected composition cost includes the composition cost plus the probability of failure times task failure cost, while expected discovery cost is simply the discovery cost (assuming it yields a working skill). The decision rule is to discover when expected discovery cost is lower. However, this decision is sensitive to accurate estimation of composition success probability and discovery costs, and it may neglect long-term benefits of skill acquisition such as increased skill set size and future generalization. Bottlenecks include estimation accuracy, cost uncertainty, and the static nature of the decision criterion."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+      "derived_from": [
+        "assumption 2: The cost of discovery is higher than the cost of composition",
+        "core_tradeoff: cost-efficiency of discovery vs. composition",
+        "possible_failure: Discovery cost could be lower if existing skills are poor or if composition complexity is high"
+      ],
+      "why_it_matters": "If the cost relationship flips, the agent may systematically choose the more expensive option, leading to higher overall costs and reduced performance.",
+      "what_existing_methods_may_miss": "Existing decision rules often assume a fixed cost hierarchy; adaptive estimation of both costs and modularity may be needed.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The decision rule relies on accurate estimation of composition success probability, but in practice, this probability is highly uncertain and context-dependent, leading to potentially suboptimal discovery-versus-composition choices.",
+      "derived_from": [
+        "assumption 3: The agent can estimate the success probability of composition before execution",
+        "bottleneck: Estimation accuracy of success_probability_composition",
+        "possible_failure: If estimation is inaccurate, the agent may make suboptimal decisions"
+      ],
+      "why_it_matters": "Inaccurate estimates can cause the agent to either over-rely on composition (risking failure) or unnecessarily incur discovery costs, both degrading efficiency.",
+      "what_existing_methods_may_miss": "Many systems assume known or learnable probabilities; they may not account for dynamic uncertainty or the cost of estimation itself.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The decision model prioritizes immediate cost minimization over long-term benefits of skill discovery, such as increased skill set size and future generalization, potentially causing under-investment in discovery.",
+      "derived_from": [
+        "core_tradeoff: Short-term performance vs. long-term skill diversity",
+        "bottleneck: Static vs. dynamic trade-off between immediate and future performance",
+        "mechanism_summary: decision may neglect long-term benefits"
+      ],
+      "why_it_matters": "Under-investing in discovery can lead to a static skill set, reducing adaptability to novel tasks and causing higher cumulative costs over time.",
+      "what_existing_methods_may_miss": "Purely cost-based decision rules ignore the value of exploration and skill acquisition for future tasks; reinforcement learning or meta-learning frameworks may be needed.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that skills are modular and composable with predictable interfaces is often violated in practice, making composition failure or excessive cost more likely than modeled.",
+      "derived_from": [
+        "assumption 1: Skills are modular and composable with predictable interfaces",
+        "possible_failure: If skills are not modular, composition may fail or incur costs comparable to discovery"
+      ],
+      "why_it_matters": "If composition is unreliable or costly due to poor modularity, the agent may need to discover new skills more often than expected, increasing overall cost.",
+      "what_existing_methods_may_miss": "Many skill composition approaches assume clean interfaces; real-world skills often have hidden dependencies or incompatible representations.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the modularity of existing skills affect the relative costs of discovery vs. composition?",
+      "question_type": "causal",
+      "source_tension": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+      "expected_contribution": "Quantify how skill modularity influences cost dynamics, enabling adaptive decision rules that adjust for modularity."
+    },
+    {
+      "question": "How does uncertainty in estimating composition success probability influence the optimality of the discovery vs. composition decision?",
+      "question_type": "diagnostic",
+      "source_tension": "The decision rule relies on accurate estimation of composition success probability, but in practice, this probability is highly uncertain and context-dependent, leading to potentially suboptimal discovery-versus-composition choices.",
+      "expected_contribution": "Identify conditions under which estimation uncertainty leads to systematic decision biases and propose uncertainty-aware decision frameworks."
+    },
+    {
+      "question": "To what extent does the neglect of long-term skill benefits in cost-based decision rules lead to under-investment in skill discovery?",
+      "question_type": "descriptive",
+      "source_tension": "The decision model prioritizes immediate cost minimization over long-term benefits of skill discovery, such as increased skill set size and future generalization, potentially causing under-investment in discovery.",
+      "expected_contribution": "Measure the gap between myopic and optimal discovery investment, and characterize environments where long-term benefits are most impactful."
+    },
+    {
+      "question": "How do violations of the modularity assumption (e.g., hidden dependencies) impact the failure rate and cost of skill composition?",
+      "question_type": "causal",
+      "source_tension": "The assumption that skills are modular and composable with predictable interfaces is often violated in practice, making composition failure or excessive cost more likely than modeled.",
+      "expected_contribution": "Demonstrate that non-modular skills increase composition risk, motivating methods to detect or mitigate hidden dependencies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability to perform a specific type of action or solve a specific subtask, encapsulated as a parameterized function.",
+          "why_primitive": "It is the basic unit of agent capability; cannot be decomposed further in this context."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of chaining or combining multiple skills to achieve a task without altering the skills themselves.",
+          "why_primitive": "It is a fundamental operation for reusing existing knowledge without modification."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill through learning, search, or generation, expanding the agent's skill set.",
+          "why_primitive": "It is the alternative to composition and involves creating new knowledge from scratch or via adaptation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable with predictable interfaces.",
+          "rationale": "This allows composition to be a viable strategy; otherwise, discovery is always needed.",
+          "possible_failure": "If skills are not modular, composition may fail or incur costs comparable to discovery."
+        },
+        {
+          "assumption": "The cost of discovery is higher than the cost of composition for a given task, but composition may have lower success probability.",
+          "rationale": "Discovery requires additional resources (e.g., data, compute), while composition leverages existing investments; however, composition may not always succeed if the task is not decomposable.",
+          "possible_failure": "Discovery cost could be lower if existing skills are poor or if composition complexity is high, reversing the cost relationship."
+        },
+        {
+          "assumption": "The agent can estimate the success probability of composition before execution.",
+          "rationale": "The decision between composition and discovery relies on an evaluation of composition feasibility.",
+          "possible_failure": "If estimation is inaccurate, the agent may make suboptimal decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "The cost (time, compute, data) required to discover a new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "The cost of composing existing skills to perform the task."
+          },
+          {
+            "name": "success_probability_composition",
+            "role": "input",
+            "description": "Estimated probability that composition will succeed."
+          },
+          {
+            "name": "task_failure_cost",
+            "role": "input",
+            "description": "Cost incurred if the task fails."
+          },
+          {
+            "name": "decision_to_discover",
+            "role": "mediator",
+            "description": "Binary decision: agent chooses to discover a new skill."
+          },
+          {
+            "name": "immediate_performance",
+            "role": "outcome",
+            "description": "Actual task outcome and total cost (combination of success/failure and costs)."
+          },
+          {
+            "name": "skill_set_size",
+            "role": "outcome",
+            "description": "Number of skills in the agent's repertoire after the decision."
+          },
+          {
+            "name": "future_generalization",
+            "role": "outcome",
+            "description": "Expected ability to handle future tasks due to skill diversity."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Agent receives task",
+            "source": "task",
+            "relation": "leads_to",
+            "target": "estimation of composition success probability and costs",
+            "explanation": "The agent evaluates the feasibility and cost of composition."
+          },
+          {
+            "step": "Agent compares expected costs",
+            "source": "discovery_cost, composition_cost, success_probability_composition, task_failure_cost",
+            "relation": "into",
+            "target": "expected cost_composition = composition_cost + (1 - success_probability_composition) * task_failure_cost; expected cost_discovery = discovery_cost (assuming discovery always yields a usable skill)",
+            "explanation": "Decision rule: choose discovery if expected cost_discovery < expected cost_composition, else compose."
+          },
+          {
+            "step": "If expected cost_discovery < expected cost_composition, agent decides to discover",
+            "source": "comparison result",
+            "relation": "activates",
+            "target": "decision_to_discover = True",
+            "explanation": "Discovery is chosen to minimize expected cost."
+          },
+          {
+            "step": "If decision_to_discover, agent executes discovery process",
+            "source": "decision_to_discover",
+            "relation": "causes",
+            "target": "new skill acquisition",
+            "explanation": "Agent invests resources to learn a new skill."
+          },
+          {
+            "step": "Agent uses new skill to perform task",
+            "source": "new skill",
+            "relation": "enables",
+            "target": "immediate_performance (success with high probability, cost = discovery_cost)",
+            "explanation": "New skill likely succeeds, but at discovery cost."
+          },
+          {
+            "step": "If not decision_to_discover, agent attempts composition",
+            "source": "decision_to_discover = False",
+            "relation": "leads_to",
+            "target": "composition execution",
+            "explanation": "Agent composes existing skills."
+          },
+          {
+            "step": "Composition may succeed or fail stochastically",
+            "source": "composition execution, success_probability_composition",
+            "relation": "determines",
+            "target": "immediate_performance (success with prob p, failure with prob 1-p)",
+            "explanation": "Outcome depends on actual composability of skills."
+          },
+          {
+            "step": "Outcome influences skill_set_size and future_generalization",
+            "source": "decision_to_discover, immediate_performance",
+            "relation": "affects",
+            "target": "skill_set_size, future_generalization",
+            "explanation": "Discovery increases skill set, while composition does not. Success/failure may also affect learning."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimation accuracy of success_probability_composition",
+            "why_it_matters": "If the agent's estimate of composition success is inaccurate, the decision between discovery and composition may be suboptimal, leading to higher costs or failures."
+          },
+          {
+            "bottleneck": "Uncertainty in discovery cost and outcome",
+            "why_it_matters": "Discovery cost may vary unpredictably, and the resulting skill may not be immediately useful, affecting the cost comparison and immediate performance."
+          },
+          {
+            "bottleneck": "Static vs. dynamic trade-off between immediate and future performance",
+            "why_it_matters": "The decision model may ignore long-term benefits of skill discovery, such as improved future generalization, leading to under-investment in discovery."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovery and composition by comparing expected total costs. Expected composition cost includes the composition cost plus the probability of failure times task failure cost, while expected discovery cost is simply the discovery cost (assuming it yields a working skill). The decision rule is to discover when expected discovery cost is lower. However, this decision is sensitive to accurate estimation of composition success probability and discovery costs, and it may neglect long-term benefits of skill acquisition such as increased skill set size and future generalization. Bottlenecks include estimation accuracy, cost uncertainty, and the static nature of the decision criterion."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+        "derived_from": [
+          "assumption 2: The cost of discovery is higher than the cost of composition",
+          "core_tradeoff: cost-efficiency of discovery vs. composition",
+          "possible_failure: Discovery cost could be lower if existing skills are poor or if composition complexity is high"
+        ],
+        "why_it_matters": "If the cost relationship flips, the agent may systematically choose the more expensive option, leading to higher overall costs and reduced performance.",
+        "what_existing_methods_may_miss": "Existing decision rules often assume a fixed cost hierarchy; adaptive estimation of both costs and modularity may be needed.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of skill modularity below which discovery becomes strictly more cost-effective than composition, irrespective of task novelty?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a sharp phase transition in the discovery-vs-composition decision rule, enabling adaptive policies that exploit modularity thresholds."
+      },
+      "hypothesis": {
+        "statement": "There exists a modularity threshold M* such that when modularity < M*, expected cost of discovery < expected cost of composition for all tasks, and when modularity > M*, the reverse holds for most tasks.",
+        "predicted_effect": "The decision rule switches abruptly from favoring composition to favoring discovery as modularity decreases past M*."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with a skill set of varying modularity (measured by interface coherence and independence). For each modularity level, present a set of tasks that vary in novelty (fraction of new atomic actions required). Record the expected cost of composition and discovery. Determine if there exists a modularity value M* such that for all tasks, discovery is cheaper below M* and composition cheaper above M*.",
+        "independent_variables": [
+          "modularity level (0 to 1 continuous)",
+          "task novelty (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "expected cost of composition",
+          "expected cost of discovery",
+          "binary decision outcome (discovery chosen or not)"
+        ],
+        "controls": [
+          "total number of skills (fixed at 10)",
+          "task failure cost (fixed)",
+          "skill set diversity (fixed)",
+          "discovery cost function (fixed)"
+        ],
+        "falsifying_observation": "No clear threshold M* exists; the relative cost ordering depends on task novelty, or composition cost varies continuously without a sharp transition."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low modularity (e.g., 0.2), discovery cost is lower than composition cost for all tasks.",
+          "For high modularity (e.g., 0.8), composition cost is lower for most tasks.",
+          "The transition from discovery-dominant to composition-dominant occurs over a narrow modularity range (width < 0.1)."
+        ],
+        "rejects_hypothesis": [
+          "The cost ordering varies significantly with task novelty, showing no single threshold.",
+          "Composition cost decreases linearly with modularity without any abrupt change.",
+          "Discovery cost is sometimes lower even at high modularity due to task novelty."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold exists, then the hypothesis that modularity alone dictates a phase transition is false.",
+        "assumption_to_revise": "Assumption 2: The cost of discovery is higher than the cost of composition. Revise to include task novelty as a moderating factor, so the decision rule is a function of both modularity and novelty.",
+        "next_question": "How does task novelty interact with skill modularity to determine the optimal decision threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability to perform a specific type of action or solve a specific subtask, encapsulated as a parameterized function.",
+          "why_primitive": "It is the basic unit of agent capability; cannot be decomposed further in this context."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of chaining or combining multiple skills to achieve a task without altering the skills themselves.",
+          "why_primitive": "It is a fundamental operation for reusing existing knowledge without modification."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill through learning, search, or generation, expanding the agent's skill set.",
+          "why_primitive": "It is the alternative to composition and involves creating new knowledge from scratch or via adaptation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable with predictable interfaces.",
+          "rationale": "This allows composition to be a viable strategy; otherwise, discovery is always needed.",
+          "possible_failure": "If skills are not modular, composition may fail or incur costs comparable to discovery."
+        },
+        {
+          "assumption": "The cost of discovery is higher than the cost of composition for a given task, but composition may have lower success probability.",
+          "rationale": "Discovery requires additional resources (e.g., data, compute), while composition leverages existing investments; however, composition may not always succeed if the task is not decomposable.",
+          "possible_failure": "Discovery cost could be lower if existing skills are poor or if composition complexity is high, reversing the cost relationship."
+        },
+        {
+          "assumption": "The agent can estimate the success probability of composition before execution.",
+          "rationale": "The decision between composition and discovery relies on an evaluation of composition feasibility.",
+          "possible_failure": "If estimation is inaccurate, the agent may make suboptimal decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "The cost (time, compute, data) required to discover a new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "The cost of composing existing skills to perform the task."
+          },
+          {
+            "name": "success_probability_composition",
+            "role": "input",
+            "description": "Estimated probability that composition will succeed."
+          },
+          {
+            "name": "task_failure_cost",
+            "role": "input",
+            "description": "Cost incurred if the task fails."
+          },
+          {
+            "name": "decision_to_discover",
+            "role": "mediator",
+            "description": "Binary decision: agent chooses to discover a new skill."
+          },
+          {
+            "name": "immediate_performance",
+            "role": "outcome",
+            "description": "Actual task outcome and total cost (combination of success/failure and costs)."
+          },
+          {
+            "name": "skill_set_size",
+            "role": "outcome",
+            "description": "Number of skills in the agent's repertoire after the decision."
+          },
+          {
+            "name": "future_generalization",
+            "role": "outcome",
+            "description": "Expected ability to handle future tasks due to skill diversity."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Agent receives task",
+            "source": "task",
+            "relation": "leads_to",
+            "target": "estimation of composition success probability and costs",
+            "explanation": "The agent evaluates the feasibility and cost of composition."
+          },
+          {
+            "step": "Agent compares expected costs",
+            "source": "discovery_cost, composition_cost, success_probability_composition, task_failure_cost",
+            "relation": "into",
+            "target": "expected cost_composition = composition_cost + (1 - success_probability_composition) * task_failure_cost; expected cost_discovery = discovery_cost (assuming discovery always yields a usable skill)",
+            "explanation": "Decision rule: choose discovery if expected cost_discovery < expected cost_composition, else compose."
+          },
+          {
+            "step": "If expected cost_discovery < expected cost_composition, agent decides to discover",
+            "source": "comparison result",
+            "relation": "activates",
+            "target": "decision_to_discover = True",
+            "explanation": "Discovery is chosen to minimize expected cost."
+          },
+          {
+            "step": "If decision_to_discover, agent executes discovery process",
+            "source": "decision_to_discover",
+            "relation": "causes",
+            "target": "new skill acquisition",
+            "explanation": "Agent invests resources to learn a new skill."
+          },
+          {
+            "step": "Agent uses new skill to perform task",
+            "source": "new skill",
+            "relation": "enables",
+            "target": "immediate_performance (success with high probability, cost = discovery_cost)",
+            "explanation": "New skill likely succeeds, but at discovery cost."
+          },
+          {
+            "step": "If not decision_to_discover, agent attempts composition",
+            "source": "decision_to_discover = False",
+            "relation": "leads_to",
+            "target": "composition execution",
+            "explanation": "Agent composes existing skills."
+          },
+          {
+            "step": "Composition may succeed or fail stochastically",
+            "source": "composition execution, success_probability_composition",
+            "relation": "determines",
+            "target": "immediate_performance (success with prob p, failure with prob 1-p)",
+            "explanation": "Outcome depends on actual composability of skills."
+          },
+          {
+            "step": "Outcome influences skill_set_size and future_generalization",
+            "source": "decision_to_discover, immediate_performance",
+            "relation": "affects",
+            "target": "skill_set_size, future_generalization",
+            "explanation": "Discovery increases skill set, while composition does not. Success/failure may also affect learning."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimation accuracy of success_probability_composition",
+            "why_it_matters": "If the agent's estimate of composition success is inaccurate, the decision between discovery and composition may be suboptimal, leading to higher costs or failures."
+          },
+          {
+            "bottleneck": "Uncertainty in discovery cost and outcome",
+            "why_it_matters": "Discovery cost may vary unpredictably, and the resulting skill may not be immediately useful, affecting the cost comparison and immediate performance."
+          },
+          {
+            "bottleneck": "Static vs. dynamic trade-off between immediate and future performance",
+            "why_it_matters": "The decision model may ignore long-term benefits of skill discovery, such as improved future generalization, leading to under-investment in discovery."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovery and composition by comparing expected total costs. Expected composition cost includes the composition cost plus the probability of failure times task failure cost, while expected discovery cost is simply the discovery cost (assuming it yields a working skill). The decision rule is to discover when expected discovery cost is lower. However, this decision is sensitive to accurate estimation of composition success probability and discovery costs, and it may neglect long-term benefits of skill acquisition such as increased skill set size and future generalization. Bottlenecks include estimation accuracy, cost uncertainty, and the static nature of the decision criterion."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+        "derived_from": [
+          "assumption 2: The cost of discovery is higher than the cost of composition",
+          "core_tradeoff: cost-efficiency of discovery vs. composition",
+          "possible_failure: Discovery cost could be lower if existing skills are poor or if composition complexity is high"
+        ],
+        "why_it_matters": "If the cost relationship flips, the agent may systematically choose the more expensive option, leading to higher overall costs and reduced performance.",
+        "what_existing_methods_may_miss": "Existing decision rules often assume a fixed cost hierarchy; adaptive estimation of both costs and modularity may be needed.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical threshold of composition failure probability (or cost ratio) at which myopic cost-based decision rules lead to suboptimal under-investment in skill discovery, and how is this threshold modulated by the modularity of the skill set?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a phase transition in the myopic decision rule's optimality, characterized by a threshold in composition failure probability that depends on skill modularity, providing a precise boundary for when discovery is favored."
+      },
+      "hypothesis": {
+        "statement": "Below a critical composition success probability threshold, myopic rules that ignore future skill benefits systematically under-invest in discovery, and this threshold increases as skill modularity decreases.",
+        "predicted_effect": "The gap between myopic and optimal discovery rates grows sharply below the threshold, with lower modularity shifting the threshold to higher success probabilities."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent performing a sequence of tasks with varying composition success probability (p_comp) and skill modularity (mod). Use two policies: (1) myopic rule minimizing expected immediate cost, (2) optimal policy considering future skill value. Measure cumulative performance and discovery count. Vary p_comp from 0.1 to 0.9 and mod from low to high. Identify the p_comp where the myopic policy's discovery rate deviates significantly from optimal.",
+        "independent_variables": [
+          "composition success probability (p_comp)",
+          "skill modularity (mod)"
+        ],
+        "dependent_variables": [
+          "discovery count gap (optimal - myopic)",
+          "cumulative success rate difference"
+        ],
+        "controls": [
+          "initial skill set size = 3",
+          "discovery cost = 10",
+          "composition cost = 1",
+          "task failure cost = 5",
+          "task horizon = 100"
+        ],
+        "falsifying_observation": "If no statistically significant threshold is found (i.e., the discovery gap does not increase sharply but remains constant or zero across all p_comp and mod), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Discovery count gap increases sharply below a critical p_comp threshold.",
+          "The threshold p_comp is higher for low modularity compared to high modularity.",
+          "Myopic agent performs similarly to optimal above threshold but significantly worse below."
+        ],
+        "rejects_hypothesis": [
+          "No clear threshold; gap is constant across p_comp.",
+          "Modularity does not affect the threshold location.",
+          "Myopic agent performs identically to optimal under all conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed or modularity does not modulate it, then the assumed interaction between modularity and composition success is invalid.",
+        "assumption_to_revise": "Assumption: modularity directly affects the success probability of composition. Revise to consider that modularity may be captured differently (e.g., through interface compatibility rather than success probability).",
+        "next_question": "How does the cost structure (e.g., ratio of discovery to composition cost) independently determine the optimal policy, regardless of modularity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability to perform a specific type of action or solve a specific subtask, encapsulated as a parameterized function.",
+          "why_primitive": "It is the basic unit of agent capability; cannot be decomposed further in this context."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of chaining or combining multiple skills to achieve a task without altering the skills themselves.",
+          "why_primitive": "It is a fundamental operation for reusing existing knowledge without modification."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill through learning, search, or generation, expanding the agent's skill set.",
+          "why_primitive": "It is the alternative to composition and involves creating new knowledge from scratch or via adaptation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable with predictable interfaces.",
+          "rationale": "This allows composition to be a viable strategy; otherwise, discovery is always needed.",
+          "possible_failure": "If skills are not modular, composition may fail or incur costs comparable to discovery."
+        },
+        {
+          "assumption": "The cost of discovery is higher than the cost of composition for a given task, but composition may have lower success probability.",
+          "rationale": "Discovery requires additional resources (e.g., data, compute), while composition leverages existing investments; however, composition may not always succeed if the task is not decomposable.",
+          "possible_failure": "Discovery cost could be lower if existing skills are poor or if composition complexity is high, reversing the cost relationship."
+        },
+        {
+          "assumption": "The agent can estimate the success probability of composition before execution.",
+          "rationale": "The decision between composition and discovery relies on an evaluation of composition feasibility.",
+          "possible_failure": "If estimation is inaccurate, the agent may make suboptimal decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "The cost (time, compute, data) required to discover a new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "The cost of composing existing skills to perform the task."
+          },
+          {
+            "name": "success_probability_composition",
+            "role": "input",
+            "description": "Estimated probability that composition will succeed."
+          },
+          {
+            "name": "task_failure_cost",
+            "role": "input",
+            "description": "Cost incurred if the task fails."
+          },
+          {
+            "name": "decision_to_discover",
+            "role": "mediator",
+            "description": "Binary decision: agent chooses to discover a new skill."
+          },
+          {
+            "name": "immediate_performance",
+            "role": "outcome",
+            "description": "Actual task outcome and total cost (combination of success/failure and costs)."
+          },
+          {
+            "name": "skill_set_size",
+            "role": "outcome",
+            "description": "Number of skills in the agent's repertoire after the decision."
+          },
+          {
+            "name": "future_generalization",
+            "role": "outcome",
+            "description": "Expected ability to handle future tasks due to skill diversity."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Agent receives task",
+            "source": "task",
+            "relation": "leads_to",
+            "target": "estimation of composition success probability and costs",
+            "explanation": "The agent evaluates the feasibility and cost of composition."
+          },
+          {
+            "step": "Agent compares expected costs",
+            "source": "discovery_cost, composition_cost, success_probability_composition, task_failure_cost",
+            "relation": "into",
+            "target": "expected cost_composition = composition_cost + (1 - success_probability_composition) * task_failure_cost; expected cost_discovery = discovery_cost (assuming discovery always yields a usable skill)",
+            "explanation": "Decision rule: choose discovery if expected cost_discovery < expected cost_composition, else compose."
+          },
+          {
+            "step": "If expected cost_discovery < expected cost_composition, agent decides to discover",
+            "source": "comparison result",
+            "relation": "activates",
+            "target": "decision_to_discover = True",
+            "explanation": "Discovery is chosen to minimize expected cost."
+          },
+          {
+            "step": "If decision_to_discover, agent executes discovery process",
+            "source": "decision_to_discover",
+            "relation": "causes",
+            "target": "new skill acquisition",
+            "explanation": "Agent invests resources to learn a new skill."
+          },
+          {
+            "step": "Agent uses new skill to perform task",
+            "source": "new skill",
+            "relation": "enables",
+            "target": "immediate_performance (success with high probability, cost = discovery_cost)",
+            "explanation": "New skill likely succeeds, but at discovery cost."
+          },
+          {
+            "step": "If not decision_to_discover, agent attempts composition",
+            "source": "decision_to_discover = False",
+            "relation": "leads_to",
+            "target": "composition execution",
+            "explanation": "Agent composes existing skills."
+          },
+          {
+            "step": "Composition may succeed or fail stochastically",
+            "source": "composition execution, success_probability_composition",
+            "relation": "determines",
+            "target": "immediate_performance (success with prob p, failure with prob 1-p)",
+            "explanation": "Outcome depends on actual composability of skills."
+          },
+          {
+            "step": "Outcome influences skill_set_size and future_generalization",
+            "source": "decision_to_discover, immediate_performance",
+            "relation": "affects",
+            "target": "skill_set_size, future_generalization",
+            "explanation": "Discovery increases skill set, while composition does not. Success/failure may also affect learning."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimation accuracy of success_probability_composition",
+            "why_it_matters": "If the agent's estimate of composition success is inaccurate, the decision between discovery and composition may be suboptimal, leading to higher costs or failures."
+          },
+          {
+            "bottleneck": "Uncertainty in discovery cost and outcome",
+            "why_it_matters": "Discovery cost may vary unpredictably, and the resulting skill may not be immediately useful, affecting the cost comparison and immediate performance."
+          },
+          {
+            "bottleneck": "Static vs. dynamic trade-off between immediate and future performance",
+            "why_it_matters": "The decision model may ignore long-term benefits of skill discovery, such as improved future generalization, leading to under-investment in discovery."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovery and composition by comparing expected total costs. Expected composition cost includes the composition cost plus the probability of failure times task failure cost, while expected discovery cost is simply the discovery cost (assuming it yields a working skill). The decision rule is to discover when expected discovery cost is lower. However, this decision is sensitive to accurate estimation of composition success probability and discovery costs, and it may neglect long-term benefits of skill acquisition such as increased skill set size and future generalization. Bottlenecks include estimation accuracy, cost uncertainty, and the static nature of the decision criterion."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+        "derived_from": [
+          "assumption 2: The cost of discovery is higher than the cost of composition",
+          "core_tradeoff: cost-efficiency of discovery vs. composition",
+          "possible_failure: Discovery cost could be lower if existing skills are poor or if composition complexity is high"
+        ],
+        "why_it_matters": "If the cost relationship flips, the agent may systematically choose the more expensive option, leading to higher overall costs and reduced performance.",
+        "what_existing_methods_may_miss": "Existing decision rules often assume a fixed cost hierarchy; adaptive estimation of both costs and modularity may be needed.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of hidden dependency density does discovery become more cost-effective than composition for an LLM agent?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a critical density ratio that determines the optimal choice between composition and discovery, enabling adaptive decision-making."
+      },
+      "hypothesis": {
+        "statement": "There exists a finite threshold of hidden dependency density (ratio of hidden dependencies to all skill interactions) above which the expected cost of discovery becomes lower than that of composition.",
+        "predicted_effect": "As hidden dependency density increases from 0 to 1, the expected cost of composition increases monotonically, crossing the expected cost of discovery at a specific density value."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of N skills, each with M possible interactions, and embed a controlled proportion of hidden dependencies (ranging from 0 to 1 in steps of 0.1). For each density, have an LLM agent repeatedly solve a held-out task by either composing skills or discovering a new skill. Record the cost (compute time, tokens) and success rate for each decision. Estimate the expected cost of composition as cost_compose + (1 - success_rate) * task_failure_cost and compare to cost_discovery. Identify the density at which expected cost_discovery first becomes less than expected cost_compose.",
+        "independent_variables": [
+          "Hidden dependency density (ratio of hidden dependencies to total interactions), 11 levels from 0 to 1"
+        ],
+        "dependent_variables": [
+          "Expected cost of composition",
+          "Expected cost of discovery",
+          "Crossing point (threshold density)"
+        ],
+        "controls": [
+          "Number of skills (N=10)",
+          "Base skill set (same skills, dependencies varied only by type)",
+          "Task difficulty and type",
+          "Agent's estimation algorithm (fixed)",
+          "Discovery cost and process (constant)"
+        ],
+        "falsifying_observation": "If the expected cost of composition never exceeds discovery cost for any density, or if no single crossing point exists (costs remain parallel), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Expected cost of composition increases with hidden dependency density.",
+          "Expected cost of discovery remains approximately constant.",
+          "There is a clear crossing point where discovery becomes cheaper."
+        ],
+        "rejects_hypothesis": [
+          "Expected cost of composition does not increase with density.",
+          "Expected cost of discovery is always higher than composition cost.",
+          "Cost curves are non-monotonic or cross multiple times."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or composition never becomes more expensive, then the decision rule based purely on cost comparison may be insufficient; other factors (e.g., long-term skill utility) could dominate.",
+        "assumption_to_revise": "That immediate cost comparison dictates the decision; long-term generalization benefits of discovery may outweigh cost in some regimes.",
+        "next_question": "How do future generalization benefits alter the effective threshold for discovery under hidden dependencies?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable capability to perform a specific type of action or solve a specific subtask, encapsulated as a parameterized function.",
+          "why_primitive": "It is the basic unit of agent capability; cannot be decomposed further in this context."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of chaining or combining multiple skills to achieve a task without altering the skills themselves.",
+          "why_primitive": "It is a fundamental operation for reusing existing knowledge without modification."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of acquiring a new skill through learning, search, or generation, expanding the agent's skill set.",
+          "why_primitive": "It is the alternative to composition and involves creating new knowledge from scratch or via adaptation."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable with predictable interfaces.",
+          "rationale": "This allows composition to be a viable strategy; otherwise, discovery is always needed.",
+          "possible_failure": "If skills are not modular, composition may fail or incur costs comparable to discovery."
+        },
+        {
+          "assumption": "The cost of discovery is higher than the cost of composition for a given task, but composition may have lower success probability.",
+          "rationale": "Discovery requires additional resources (e.g., data, compute), while composition leverages existing investments; however, composition may not always succeed if the task is not decomposable.",
+          "possible_failure": "Discovery cost could be lower if existing skills are poor or if composition complexity is high, reversing the cost relationship."
+        },
+        {
+          "assumption": "The agent can estimate the success probability of composition before execution.",
+          "rationale": "The decision between composition and discovery relies on an evaluation of composition feasibility.",
+          "possible_failure": "If estimation is inaccurate, the agent may make suboptimal decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "The cost (time, compute, data) required to discover a new skill."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "The cost of composing existing skills to perform the task."
+          },
+          {
+            "name": "success_probability_composition",
+            "role": "input",
+            "description": "Estimated probability that composition will succeed."
+          },
+          {
+            "name": "task_failure_cost",
+            "role": "input",
+            "description": "Cost incurred if the task fails."
+          },
+          {
+            "name": "decision_to_discover",
+            "role": "mediator",
+            "description": "Binary decision: agent chooses to discover a new skill."
+          },
+          {
+            "name": "immediate_performance",
+            "role": "outcome",
+            "description": "Actual task outcome and total cost (combination of success/failure and costs)."
+          },
+          {
+            "name": "skill_set_size",
+            "role": "outcome",
+            "description": "Number of skills in the agent's repertoire after the decision."
+          },
+          {
+            "name": "future_generalization",
+            "role": "outcome",
+            "description": "Expected ability to handle future tasks due to skill diversity."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Agent receives task",
+            "source": "task",
+            "relation": "leads_to",
+            "target": "estimation of composition success probability and costs",
+            "explanation": "The agent evaluates the feasibility and cost of composition."
+          },
+          {
+            "step": "Agent compares expected costs",
+            "source": "discovery_cost, composition_cost, success_probability_composition, task_failure_cost",
+            "relation": "into",
+            "target": "expected cost_composition = composition_cost + (1 - success_probability_composition) * task_failure_cost; expected cost_discovery = discovery_cost (assuming discovery always yields a usable skill)",
+            "explanation": "Decision rule: choose discovery if expected cost_discovery < expected cost_composition, else compose."
+          },
+          {
+            "step": "If expected cost_discovery < expected cost_composition, agent decides to discover",
+            "source": "comparison result",
+            "relation": "activates",
+            "target": "decision_to_discover = True",
+            "explanation": "Discovery is chosen to minimize expected cost."
+          },
+          {
+            "step": "If decision_to_discover, agent executes discovery process",
+            "source": "decision_to_discover",
+            "relation": "causes",
+            "target": "new skill acquisition",
+            "explanation": "Agent invests resources to learn a new skill."
+          },
+          {
+            "step": "Agent uses new skill to perform task",
+            "source": "new skill",
+            "relation": "enables",
+            "target": "immediate_performance (success with high probability, cost = discovery_cost)",
+            "explanation": "New skill likely succeeds, but at discovery cost."
+          },
+          {
+            "step": "If not decision_to_discover, agent attempts composition",
+            "source": "decision_to_discover = False",
+            "relation": "leads_to",
+            "target": "composition execution",
+            "explanation": "Agent composes existing skills."
+          },
+          {
+            "step": "Composition may succeed or fail stochastically",
+            "source": "composition execution, success_probability_composition",
+            "relation": "determines",
+            "target": "immediate_performance (success with prob p, failure with prob 1-p)",
+            "explanation": "Outcome depends on actual composability of skills."
+          },
+          {
+            "step": "Outcome influences skill_set_size and future_generalization",
+            "source": "decision_to_discover, immediate_performance",
+            "relation": "affects",
+            "target": "skill_set_size, future_generalization",
+            "explanation": "Discovery increases skill set, while composition does not. Success/failure may also affect learning."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Estimation accuracy of success_probability_composition",
+            "why_it_matters": "If the agent's estimate of composition success is inaccurate, the decision between discovery and composition may be suboptimal, leading to higher costs or failures."
+          },
+          {
+            "bottleneck": "Uncertainty in discovery cost and outcome",
+            "why_it_matters": "Discovery cost may vary unpredictably, and the resulting skill may not be immediately useful, affecting the cost comparison and immediate performance."
+          },
+          {
+            "bottleneck": "Static vs. dynamic trade-off between immediate and future performance",
+            "why_it_matters": "The decision model may ignore long-term benefits of skill discovery, such as improved future generalization, leading to under-investment in discovery."
+          }
+        ],
+        "mechanism_summary": "The agent decides between discovery and composition by comparing expected total costs. Expected composition cost includes the composition cost plus the probability of failure times task failure cost, while expected discovery cost is simply the discovery cost (assuming it yields a working skill). The decision rule is to discover when expected discovery cost is lower. However, this decision is sensitive to accurate estimation of composition success probability and discovery costs, and it may neglect long-term benefits of skill acquisition such as increased skill set size and future generalization. Bottlenecks include estimation accuracy, cost uncertainty, and the static nature of the decision criterion."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that discovery cost reliably exceeds composition cost may be violated if existing skills are poorly modular or composition complexity is high, reversing the cost relationship and invalidating the decision rule.",
+        "derived_from": [
+          "assumption 2: The cost of discovery is higher than the cost of composition",
+          "core_tradeoff: cost-efficiency of discovery vs. composition",
+          "possible_failure: Discovery cost could be lower if existing skills are poor or if composition complexity is high"
+        ],
+        "why_it_matters": "If the cost relationship flips, the agent may systematically choose the more expensive option, leading to higher overall costs and reduced performance.",
+        "what_existing_methods_may_miss": "Existing decision rules often assume a fixed cost hierarchy; adaptive estimation of both costs and modularity may be needed.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the variance of composition success probability estimates determine a threshold beyond which an agent should always discover a new skill rather than compose existing skills?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a critical coefficient of variation (CV) of composition success probability that triggers a phase transition from composition-dominant to discovery-dominant optimal policy, providing a sharp decision rule for agents under estimation uncertainty."
+      },
+      "hypothesis": {
+        "statement": "For a given ratio of discovery cost to composition cost, there exists a critical coefficient of variation (CV) of the composition success probability estimate such that when the CV exceeds this threshold, the optimal policy under expected cost minimization switches from composition to discovery, regardless of the point estimate.",
+        "predicted_effect": "In a simulated sequential task environment, an agent using a threshold policy based on CV will achieve lower average total cost than an agent using only point estimates, and the advantage increases with the true CV."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a sequential task environment where an agent must choose to discover a new skill or compose existing ones. The agent estimates composition success probability via Bayesian updating with known prior mean but unknown prior variance. Manipulate the true CV of the distribution generating the success probability across conditions (low, medium, high). Evaluate whether using a decision rule that considers CV (e.g., discover if estimated CV > critical value) outperforms a baseline that only uses the point estimate (expected success probability).",
+        "independent_variables": [
+          "True coefficient of variation of composition success probability (3 levels: 0.1, 0.5, 1.0)",
+          "Prior mean of composition success probability (fixed at 0.7)",
+          "Decision rule (point-estimate only vs. CV-threshold)"
+        ],
+        "dependent_variables": [
+          "Proportion of discovery decisions",
+          "Average total cost per task",
+          "Regret relative to oracle (knows true success probability)"
+        ],
+        "controls": [
+          "Discovery cost (fixed at 10)",
+          "Composition cost (fixed at 2)",
+          "Task failure cost (fixed at 20)",
+          "Number of tasks per run (100)",
+          "Number of observations per task for estimation (2 prior updates)"
+        ],
+        "falsifying_observation": "The CV-threshold rule does not yield significantly lower regret than the point-estimate rule in any condition, or the threshold rule performs worse for some CV values."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "When true CV is low (<0.2), both rules perform similarly, with no significant difference in regret.",
+          "When true CV is moderate (0.5), the CV-threshold rule shows significantly lower regret than the point-estimate rule.",
+          "When true CV is high (1.0), the CV-threshold rule dominates, with point-estimate rule incurring high regret due to frequent suboptimal discovery decisions."
+        ],
+        "rejects_hypothesis": [
+          "The CV-threshold rule does not consistently outperform the point-estimate rule across CV levels, or the performance gap is not statistically significant.",
+          "The point-estimate rule adapts to CV implicitly and achieves similar regret."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no significant advantage of the CV-threshold rule is observed, indicating that estimation variance does not create a sharp phase transition.",
+        "assumption_to_revise": "The assumption that a simple variance-based threshold can capture the optimal decision boundary; perhaps the interaction between variance and cost asymmetry is more complex, requiring a utility-theoretic approach with risk aversion.",
+        "next_question": "How does risk sensitivity (e.g., exponential utility) alter the optimal discovery threshold under estimation uncertainty?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a modularity threshold M* such that when modularity < M*, expected cost of discovery < expected cost of composition for all tasks, and when modularity > M*, the reverse holds for most tasks.",
+      "independent_variables": [
+        "modularity level (0 to 1 continuous)",
+        "task novelty (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "expected cost of composition",
+        "expected cost of discovery",
+        "binary decision outcome (discovery chosen or not)"
+      ],
+      "controlled_variables": [
+        "total number of skills (fixed at 10)",
+        "task failure cost (fixed)",
+        "skill set diversity (fixed)",
+        "discovery cost function (fixed)",
+        "task set (same tasks across conditions)"
+      ],
+      "baselines": [
+        {
+          "name": "Low modularity baseline",
+          "description": "Modularity fixed at 0.1 to represent very poor modularity."
+        },
+        {
+          "name": "High modularity baseline",
+          "description": "Modularity fixed at 0.9 to represent near-perfect modularity."
+        },
+        {
+          "name": "Random decision baseline",
+          "description": "Agent randomly chooses discovery or composition regardless of costs."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Expected cost of composition",
+          "definition": "Average total cost (composition cost + failure penalty) over many trials at a given modularity and task novelty."
+        },
+        {
+          "name": "Expected cost of discovery",
+          "definition": "Average total cost (discovery cost) over many trials at a given modularity and task novelty, assuming discovery always yields a usable skill."
+        },
+        {
+          "name": "Cost difference",
+          "definition": "Expected cost of composition minus expected cost of discovery; positive means discovery is cheaper."
+        },
+        {
+          "name": "Decision boundary",
+          "definition": "The modularity level at which the agent's decision switches from discovery to composition for each task novelty."
+        }
+      ],
+      "expected_result": "For each task novelty, there exists a single modularity threshold M* such that for all modularity values below M*, expected cost of discovery < expected cost of composition, and for all modularity values above M*, expected cost of composition < expected cost of discovery. The threshold M* is consistent across task novelty levels or varies minimally (range < 0.1).",
+      "falsifying_result": "No clear threshold exists; for at least one task novelty, the relative cost ordering changes multiple times or composition cost decreases linearly without a sharp transition. Alternatively, the threshold varies significantly (range > 0.2) across task novelty, indicating that modularity alone does not determine the decision.",
+      "minimum_viable_experiment": "Simulate an agent with a skill set of 10 skills whose modularity (measured by interface coherence and independence) is varied from 0 to 1 in steps of 0.05. For each modularity level, present 10 tasks with varying novelty (fraction of new atomic actions: 0.2, 0.5, 0.8). For each task, compute expected cost of composition by running 1000 trials of composition (which may fail with probability depending on modularity) and expected cost of discovery as a fixed function (e.g., discovery cost = 10 + 20*(1-modularity)). Record the decision outcome. Identify whether a threshold M* exists where the agent consistently chooses discovery below M* and composition above M* for most tasks.",
+      "risks_and_confounds": [
+        "Stochasticity in composition success may require many trials to estimate expected costs accurately.",
+        "The choice of discovery cost function may bias results; different functions might yield different thresholds.",
+        "Task novelty itself may not be uniformly distributed; the set of tasks may not represent all possible tasks.",
+        "The metric of modularity (interface coherence and independence) may not fully capture the construct.",
+        "The fixed skill set size (10) and fixed diversity may limit generalizability.",
+        "The agent's ability to estimate success probability may be imperfect, confounding the decision rule."
+      ]
+    },
+    {
+      "hypothesis": "For a given ratio of discovery cost to composition cost, there exists a critical coefficient of variation (CV) of the composition success probability estimate such that when the CV exceeds this threshold, the optimal policy under expected cost minimization switches from composition to discovery, regardless of the point estimate.",
+      "independent_variables": [
+        "True coefficient of variation of composition success probability (3 levels: 0.1, 0.5, 1.0)",
+        "Prior mean of composition success probability (fixed at 0.7)",
+        "Decision rule (point-estimate only vs. CV-threshold)"
+      ],
+      "dependent_variables": [
+        "Proportion of discovery decisions",
+        "Average total cost per task",
+        "Regret relative to oracle (knows true success probability)"
+      ],
+      "controlled_variables": [
+        "Discovery cost (fixed at 10)",
+        "Composition cost (fixed at 2)",
+        "Task failure cost (fixed at 20)",
+        "Number of tasks per run (100)",
+        "Number of observations per task for estimation (2 prior updates)"
+      ],
+      "baselines": [
+        {
+          "name": "Point-estimate baseline",
+          "description": "Agent uses only the point estimate (expected success probability) to decide between discovery and composition, ignoring variance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Discovery proportion",
+          "definition": "Proportion of tasks where the agent chooses to discover a new skill."
+        },
+        {
+          "name": "Average total cost",
+          "definition": "Mean of (discovery cost if discovery chosen, else composition cost plus failure cost if composition fails) over tasks."
+        },
+        {
+          "name": "Regret",
+          "definition": "Difference between the average total cost incurred by the agent and the cost incurred by an oracle that knows the true success probability and chooses the cheaper action."
+        }
+      ],
+      "expected_result": "When true CV is low (<0.2), both rules perform similarly, with no significant difference in regret. When true CV is moderate (0.5), the CV-threshold rule shows significantly lower regret than the point-estimate rule. When true CV is high (1.0), the CV-threshold rule dominates, with point-estimate rule incurring high regret due to frequent suboptimal discovery decisions.",
+      "falsifying_result": "The CV-threshold rule does not yield significantly lower regret than the point-estimate rule in any condition, or the threshold rule performs worse for some CV values.",
+      "minimum_viable_experiment": "A simulation where an agent repeatedly faces a task and must choose to either compose existing skills or discover a new skill. The agent estimates the composition success probability via Bayesian updating with a known prior mean and unknown prior variance. The true CV of the generating distribution is manipulated across conditions (low, medium, high). Two decision rules are compared: one using only the point estimate of success probability, and one using an estimated CV to trigger discovery above a critical threshold (set based on cost ratio). Each condition is replicated 1000 times to assess statistical significance.",
+      "risks_and_confounds": [
+        "Estimation noise: The agent's limited observations may lead to noisy CV estimates, affecting the threshold rule's performance.",
+        "Task heterogeneity: If tasks vary in difficulty beyond the CV manipulation, it may confound results.",
+        "Assumption of known costs: In reality, discovery cost might also be uncertain; this experiment fixes discovery cost for simplicity.",
+        "Number of prior updates: Using only 2 prior updates may not yield reliable CV estimates; a sensitivity analysis with more updates could be needed."
+      ]
+    },
+    {
+      "hypothesis": "Below a critical composition success probability threshold, myopic rules that ignore future skill benefits systematically under-invest in discovery, and this threshold increases as skill modularity decreases.",
+      "independent_variables": [
+        "composition success probability (p_comp): levels 0.1, 0.3, 0.5, 0.7, 0.9",
+        "skill modularity (mod): low (0.3) and high (0.7)"
+      ],
+      "dependent_variables": [
+        "discovery count gap (optimal - myopic)",
+        "cumulative success rate difference (optimal - myopic)"
+      ],
+      "controlled_variables": [
+        "initial skill set size = 3",
+        "discovery cost = 10",
+        "composition cost = 1",
+        "task failure cost = 5",
+        "task horizon = 100",
+        "number of tasks per condition = 1000 (for statistical power)",
+        "agent estimates composition success probability perfectly (to isolate effect)"
+      ],
+      "baselines": [
+        {
+          "name": "Optimal policy",
+          "description": "Policy that considers future value of skill discovery via dynamic programming, maximizing cumulative discounted reward over horizon."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "discovery count gap",
+          "definition": "Average difference in number of discoveries made by optimal policy minus myopic policy over the task horizon."
+        },
+        {
+          "name": "cumulative success rate difference",
+          "definition": "Average difference in proportion of successful tasks achieved by optimal policy minus myopic policy."
+        }
+      ],
+      "expected_result": "For both levels of modularity, the discovery count gap and cumulative success rate difference will be near zero for high p_comp (e.g., 0.7, 0.9) but will increase sharply below a critical p_comp threshold. The threshold will be higher for low modularity (e.g., around 0.5) than for high modularity (e.g., around 0.3).",
+      "falsifying_result": "If there is no sharp increase in the gap as p_comp decreases (i.e., the gap remains constant or near zero across all p_comp values), or if modularity does not shift the threshold (i.e., the gap curves overlap), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate an agent performing 100 tasks per run, with 1000 runs per condition, using the given costs and initial skills. The agent can either compose existing skills (with success probability p_comp) or discover a new skill (with cost 10, always succeeds). Compare the myopic policy (always choose the option with lower expected immediate cost) against the optimal policy (which accounts for future benefits of increased skill set). Repeat for each combination of p_comp (0.1, 0.3, 0.5, 0.7, 0.9) and modularity (low: 0.3, high: 0.7). Measure the average discovery count gap and success rate difference.",
+      "risks_and_confounds": [
+        "The optimal policy may be computationally expensive; we can approximate it via value iteration or use a known analytical solution.",
+        "The number of tasks (100) may not be enough to observe future benefits; if too short, the myopic policy may not under-invest significantly. Extend if needed.",
+        "The definition of modularity is abstract; we operationalize it as a parameter that directly influences composition success probability? Actually, modularity is a separate variable; we assume it affects the composability independently. We need to ensure that low modularity means that composition success probability is lower for a given task. We can model it as: for low modularity, the actual composition success probability is lower than the nominal p_comp? The certificate says 'skill modularity' as independent variable, but we need to define how it modulates. Perhaps we can set that in low modularity, the composition success probability is reduced by a factor (e.g., actual p_comp = nominal p_comp * modularity factor). To simplify, we can treat modularity as directly controlling a parameter that affects the mapping from task to skills. For clarity, we assume that modularity is a multiplier on p_comp: actual success prob = p_comp * mod, where mod ranges 0.3-0.7. This captures the idea that low modularity reduces composition success. Then the nominal p_comp is the base probability given perfect modularity. That way modularity and p_comp are distinct."
+      ]
+    },
+    {
+      "hypothesis": "There exists a finite threshold of hidden dependency density (ratio of hidden dependencies to all skill interactions) above which the expected cost of discovery becomes lower than that of composition.",
+      "independent_variables": [
+        "Hidden dependency density (ratio of hidden dependencies to total interactions), 11 levels from 0 to 1 in steps of 0.1"
+      ],
+      "dependent_variables": [
+        "Expected cost of composition",
+        "Expected cost of discovery",
+        "Threshold density where expected cost of discovery first becomes less than expected cost of composition"
+      ],
+      "controlled_variables": [
+        "Number of skills (N=10)",
+        "Base skill set (same skills, dependencies varied only by type)",
+        "Task difficulty and type",
+        "Agent's estimation algorithm (fixed)",
+        "Discovery cost and process (constant)"
+      ],
+      "baselines": [
+        {
+          "name": "Pure composition baseline",
+          "description": "Agent always composes skills, with no discovery option, to measure composition cost at each density."
+        },
+        {
+          "name": "Pure discovery baseline",
+          "description": "Agent always discovers a new skill to perform the task, measuring discovery cost."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Expected cost of composition",
+          "definition": "Average total cost over trials: composition_cost + (1 - success_rate) * task_failure_cost."
+        },
+        {
+          "name": "Expected cost of discovery",
+          "definition": "Average total cost over trials: discovery_cost (assuming discovery always yields a usable skill)."
+        },
+        {
+          "name": "Threshold density",
+          "definition": "The smallest density value at which the expected cost of discovery is less than the expected cost of composition."
+        }
+      ],
+      "expected_result": "As hidden dependency density increases from 0 to 1, the expected cost of composition increases monotonically, while the expected cost of discovery remains roughly constant. There will be a clear crossing point (threshold density) where discovery becomes cheaper. For example, at low density composition is cheaper, at high density discovery is cheaper.",
+      "falsifying_result": "Either: (1) the expected cost of composition never exceeds the expected cost of discovery for any density (i.e., composition always cheaper), (2) the expected cost of composition does not increase with density, (3) the cost curves are non-monotonic or cross multiple times, or (4) no single finite threshold exists.",
+      "minimum_viable_experiment": "Construct a set of 10 skills, each with a controlled number of interactions (e.g., 10 total interactions per skill pair). Vary the proportion of hidden dependency interactions from 0% to 100% in steps of 10%, holding the total number of interactions constant. For each density level, have an LLM agent perform a held-out task 100 times, with the decision to either compose the existing skills or discover a new skill (the decision is forced to composition only or discovery only for each trial, to measure costs separately, not the agent's choice). Record compute cost (e.g., tokens) and success/failure. Compute expected cost using a fixed task_failure_cost. Identify the density where the running average of composition cost first exceeds discovery cost. This experiment uses at least 11 density levels × 100 trials = 1100 trials, which is minimal but statistically sufficient.",
+      "risks_and_confounds": [
+        "The choice of 10 skills may affect generalizability; using a different N could change threshold.",
+        "Task failure cost setting is arbitrary; sensitivity analysis may be needed.",
+        "Agent's estimation algorithm for success probability might bias results if not fixed adequately.",
+        "Discovery cost might vary with density if hidden dependencies affect learning difficulty; control by using a fixed discovery process independent of skill set.",
+        "Stochasticity in success/failure requires sufficient trials per density to estimate expected cost accurately."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles decomposition of the decision problem between skill discovery and composition in LLM agents. It defines primitives, assumptions, a cost-based mechanism model, and identifies tensions. Four falsifiable hypotheses with detailed experiments are proposed, focusing on modularity thresholds, estimation uncertainty, myopic vs. optimal trade-offs, and hidden dependencies. The package is logically coherent and well-structured.",
+    "strengths": [
+      "Clear first-principles derivation from primitive definitions to mechanism model.",
+      "Falsifiable hypotheses with concrete experimental designs.",
+      "Identifies meaningful tensions (e.g., cost trade-offs, uncertainty, long-term planning).",
+      "Good coverage of key decision factors: modularity, estimation variance, hidden dependencies."
+    ],
+    "weaknesses": [
+      "Mechanism model relies on strong assumptions (e.g., modularity, cost hierarchy) that may not hold in real LLM agents.",
+      "All experiments are simulations; lack of validation with actual LLM deployments weakens practical relevance.",
+      "No comparison to existing methods or baselines from skill discovery literature (e.g., DQN-based skill acquisition, hierarchical RL).",
+      "The decision rule is myopic; long-term benefits are only considered in one experiment but not integrated into the core model."
+    ],
+    "questions": [
+      "How would the proposed decision rules scale to large numbers of skills and complex task distributions in real LLM agents?",
+      "Could the cost comparison be extended to incorporate risk aversion or varying uncertainty in discovery costs?"
+    ],
+    "missing_baselines": [
+      "Hierarchical RL approaches (e.g., option discovery, skill chaining).",
+      "Probabilistic planning methods that explicitly model composition uncertainty."
+    ],
+    "score": 7,
+    "confidence": 3,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of skill modularity below which discovery becomes strictly more cost-effective than composition, irrespective of task novelty?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "How does the variance of composition success probability estimates determine a threshold beyond which an agent should always discover a new skill rather than compose existing skills?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical threshold of composition failure probability (or cost ratio) at which myopic cost-based decision rules lead to suboptimal under-investment in skill discovery, and how is this threshold modulated by the modularity of the skill set?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "At what threshold of hidden dependency density does discovery become more cost-effective than composition for an LLM agent?",
+        "original_suggestions": [
+          "Improve primitive-to-question traceability to at least 4/5.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

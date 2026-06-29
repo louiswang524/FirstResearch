@@ -1,0 +1,984 @@
+{
+  "topic": {
+    "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+    "topic_id": "T009",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should coding-agent benchmarks isolate non-inferable requirements?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Requirement",
+        "definition": "A specification that defines what the coding agent should accomplish, including functional behavior, constraints, and desired properties of the output.",
+        "why_primitive": "All benchmarks evaluate agents against requirements; understanding requirements is foundational to designing isolation methods."
+      },
+      {
+        "name": "Non-inferable Requirement",
+        "definition": "A requirement that cannot be logically deduced from the provided context (e.g., code, documentation, task description) and must be explicitly given or assumed from external knowledge.",
+        "why_primitive": "The core concept to isolate; its definition determines what counts as 'non-inferable' and thus what needs special handling in benchmarks."
+      },
+      {
+        "name": "Isolation",
+        "definition": "The process of ensuring that a benchmark specifically measures an agent's ability to handle non-inferable requirements without confounding with other abilities like code generation, comprehension, or knowledge retrieval.",
+        "why_primitive": "The central goal of the question; defines the separation needed to attribute performance to handling non-inferable requirements."
+      },
+      {
+        "name": "Benchmark",
+        "definition": "A standardized evaluation framework with tasks, metrics, and procedures to measure and compare the performance of coding agents on specific capabilities.",
+        "why_primitive": "The artifact being designed; its structure must incorporate isolation mechanisms to be valid for the target capability."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Some requirements are inherently non-inferable because they depend on unstated user preferences, domain knowledge not present in the task context, or underspecified goals.",
+        "rationale": "Real-world coding tasks often involve implicit assumptions and client-specific needs that cannot be derived solely from the written specification.",
+        "possible_failure": "If all requirements were inferable from sufficient context, then isolation would be unnecessary; but in practice, ambiguity exists."
+      },
+      {
+        "assumption": "Current benchmarks often conflate inferable and non-inferable requirements, making it impossible to attribute an agent's failure to inability to handle non-inferable requirements versus other factors.",
+        "rationale": "Benchmarks typically include requirements without distinguishing their source, mixing deduction and external specification in the same metric.",
+        "possible_failure": "Benchmarks might be designed with careful separation, but without explicit documentation, the conflation can persist and mislead interpretation."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Thoroughness of non-inferable requirement coverage vs. risk of leaking information through the benchmark design",
+        "variables": [
+          "Number of non-inferable requirements per task",
+          "Degree of explicitness in requirement presentation",
+          "Risk that agents learn to infer requirements from patterns in the benchmark"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "TaskContext",
+        "role": "input",
+        "description": "The information provided to the agent, including code, documentation, and task description."
+      },
+      {
+        "name": "RequirementSet",
+        "role": "input",
+        "description": "All requirements for the task, some of which are inferable from context and some are not."
+      },
+      {
+        "name": "RequirementInferability",
+        "role": "mediator",
+        "description": "The degree to which a requirement can be logically deduced from the task context."
+      },
+      {
+        "name": "AgentNonInferableHandling",
+        "role": "mediator",
+        "description": "The agent's capability to correctly address requirements that are not inferable from context."
+      },
+      {
+        "name": "BenchmarkScore",
+        "role": "outcome",
+        "description": "The performance metric measuring how well the agent satisfies all requirements."
+      },
+      {
+        "name": "PatternLearning",
+        "role": "confounder",
+        "description": "The agent learning to infer non-inferable requirements by recognizing patterns across benchmark tasks."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "TaskContext",
+        "relation": "determines",
+        "target": "RequirementInferability",
+        "explanation": "The context defines what can be inferred about requirements."
+      },
+      {
+        "step": "2",
+        "source": "RequirementSet",
+        "relation": "contains",
+        "target": "RequirementInferability",
+        "explanation": "Some requirements are explicitly stated, influencing their inferability."
+      },
+      {
+        "step": "3",
+        "source": "RequirementInferability",
+        "relation": "influences",
+        "target": "AgentNonInferableHandling",
+        "explanation": "If a requirement is inferable, the agent does not need to handle it as non-inferable."
+      },
+      {
+        "step": "4",
+        "source": "AgentNonInferableHandling",
+        "relation": "affects",
+        "target": "BenchmarkScore",
+        "explanation": "The agent's handling of non-inferable requirements directly impacts its performance."
+      },
+      {
+        "step": "5",
+        "source": "PatternLearning",
+        "relation": "confounds",
+        "target": "BenchmarkScore",
+        "explanation": "Agents may learn patterns that allow them to infer requirements, inflating scores without true handling."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Pattern leakage across tasks",
+        "why_it_matters": "If non-inferable requirements follow recognizable patterns, agents may infer them from repetition rather than genuine handling, undermining isolation."
+      },
+      {
+        "bottleneck": "Inadequate separation of inferable vs non-inferable in design",
+        "why_it_matters": "If benchmark designers do not clearly distinguish which requirements are inferable, the score conflates multiple abilities, making it impossible to attribute performance to non-inferable handling."
+      }
+    ],
+    "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the task context and requirement presentation to ensure that some requirements are clearly non-inferable from the given information, while others are inferable. The key is to design tasks where the agent must either request clarification or use external knowledge to satisfy non-inferable requirements. Confounds such as pattern learning must be mitigated by varying requirements and contexts. The benchmark score then reflects the agent's ability to handle non-inferable requirements, but only if the design successfully separates this capability from others."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Increasing the number of non-inferable requirements per task to improve thoroughness increases the risk of pattern learning, potentially invalidating isolation.",
+      "derived_from": [
+        "core_tradeoffs/0",
+        "mechanism_model/bottlenecks/0"
+      ],
+      "why_it_matters": "If pattern learning occurs, the benchmark cannot distinguish between true handling of non-inferable requirements and learned heuristics, undermining the goal of isolation.",
+      "what_existing_methods_may_miss": "Current benchmarks do not explicitly monitor or control for pattern learning across tasks, leading to overestimation of agent capability.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The assumption that non-inferable requirements cannot be deduced from context may be violated if the task context inadvertently contains implicit cues, blurring the separation between inferable and non-inferable.",
+      "derived_from": [
+        "primitive_definitions/1",
+        "assumptions/0"
+      ],
+      "why_it_matters": "If contexts implicitly contain cues, then requirements labeled as non-inferable may actually be inferable, confounding the measurement of non-inferable handling.",
+      "what_existing_methods_may_miss": "Existing methods may not systematically audit task contexts for all possible implicit cues, assuming a clean separation that may not hold.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Designing benchmarks that explicitly separate inferable and non-inferable requirements requires making subjective choices about what counts as non-inferable, which may not reflect real-world ambiguity.",
+      "derived_from": [
+        "assumptions/1",
+        "mechanism_model/variables/2"
+      ],
+      "why_it_matters": "Subjective separation can lead to benchmarks that either over- or under-represent the challenge of non-inferable requirements, affecting the validity of comparisons.",
+      "what_existing_methods_may_miss": "Current benchmarks often avoid this issue by not separating at all, but those that attempt separation may impose a false dichotomy, missing the continuum of inferability.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does systematically varying the type of non-inferable requirements across tasks (e.g., domain-specific vs. procedural) affect the rate of pattern learning and subsequent benchmark score inflation in LLM agents?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifying the impact of requirement diversity on pattern learning, enabling the design of benchmarks that preserve isolation by mitigating this confound."
+    },
+    {
+      "question": "Can LLMs inadvertently infer requirements labeled as non-inferable when task contexts contain implicit cues, and if so, how does the degree of cue explicitness modulate this effect?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Establishing diagnostic tests to detect implicit cue leakage in benchmark task contexts, improving the validity of non-inferable requirement separation."
+    },
+    {
+      "question": "What algorithmic procedure can automatically generate non-inferable requirements such that they are not deductible from any feasible combination of task context cues, thereby minimizing subjectivity in benchmark design?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Providing a reproducible method for creating valid non-inferable requirements, reducing designer bias and improving benchmark comparability."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines what the coding agent should accomplish, including functional behavior, constraints, and desired properties of the output.",
+          "why_primitive": "All benchmarks evaluate agents against requirements; understanding requirements is foundational to designing isolation methods."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically deduced from the provided context (e.g., code, documentation, task description) and must be explicitly given or assumed from external knowledge.",
+          "why_primitive": "The core concept to isolate; its definition determines what counts as 'non-inferable' and thus what needs special handling in benchmarks."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of ensuring that a benchmark specifically measures an agent's ability to handle non-inferable requirements without confounding with other abilities like code generation, comprehension, or knowledge retrieval.",
+          "why_primitive": "The central goal of the question; defines the separation needed to attribute performance to handling non-inferable requirements."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized evaluation framework with tasks, metrics, and procedures to measure and compare the performance of coding agents on specific capabilities.",
+          "why_primitive": "The artifact being designed; its structure must incorporate isolation mechanisms to be valid for the target capability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Some requirements are inherently non-inferable because they depend on unstated user preferences, domain knowledge not present in the task context, or underspecified goals.",
+          "rationale": "Real-world coding tasks often involve implicit assumptions and client-specific needs that cannot be derived solely from the written specification.",
+          "possible_failure": "If all requirements were inferable from sufficient context, then isolation would be unnecessary; but in practice, ambiguity exists."
+        },
+        {
+          "assumption": "Current benchmarks often conflate inferable and non-inferable requirements, making it impossible to attribute an agent's failure to inability to handle non-inferable requirements versus other factors.",
+          "rationale": "Benchmarks typically include requirements without distinguishing their source, mixing deduction and external specification in the same metric.",
+          "possible_failure": "Benchmarks might be designed with careful separation, but without explicit documentation, the conflation can persist and mislead interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskContext",
+            "role": "input",
+            "description": "The information provided to the agent, including code, documentation, and task description."
+          },
+          {
+            "name": "RequirementSet",
+            "role": "input",
+            "description": "All requirements for the task, some of which are inferable from context and some are not."
+          },
+          {
+            "name": "RequirementInferability",
+            "role": "mediator",
+            "description": "The degree to which a requirement can be logically deduced from the task context."
+          },
+          {
+            "name": "AgentNonInferableHandling",
+            "role": "mediator",
+            "description": "The agent's capability to correctly address requirements that are not inferable from context."
+          },
+          {
+            "name": "BenchmarkScore",
+            "role": "outcome",
+            "description": "The performance metric measuring how well the agent satisfies all requirements."
+          },
+          {
+            "name": "PatternLearning",
+            "role": "confounder",
+            "description": "The agent learning to infer non-inferable requirements by recognizing patterns across benchmark tasks."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "TaskContext",
+            "relation": "determines",
+            "target": "RequirementInferability",
+            "explanation": "The context defines what can be inferred about requirements."
+          },
+          {
+            "step": "2",
+            "source": "RequirementSet",
+            "relation": "contains",
+            "target": "RequirementInferability",
+            "explanation": "Some requirements are explicitly stated, influencing their inferability."
+          },
+          {
+            "step": "3",
+            "source": "RequirementInferability",
+            "relation": "influences",
+            "target": "AgentNonInferableHandling",
+            "explanation": "If a requirement is inferable, the agent does not need to handle it as non-inferable."
+          },
+          {
+            "step": "4",
+            "source": "AgentNonInferableHandling",
+            "relation": "affects",
+            "target": "BenchmarkScore",
+            "explanation": "The agent's handling of non-inferable requirements directly impacts its performance."
+          },
+          {
+            "step": "5",
+            "source": "PatternLearning",
+            "relation": "confounds",
+            "target": "BenchmarkScore",
+            "explanation": "Agents may learn patterns that allow them to infer requirements, inflating scores without true handling."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Pattern leakage across tasks",
+            "why_it_matters": "If non-inferable requirements follow recognizable patterns, agents may infer them from repetition rather than genuine handling, undermining isolation."
+          },
+          {
+            "bottleneck": "Inadequate separation of inferable vs non-inferable in design",
+            "why_it_matters": "If benchmark designers do not clearly distinguish which requirements are inferable, the score conflates multiple abilities, making it impossible to attribute performance to non-inferable handling."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the task context and requirement presentation to ensure that some requirements are clearly non-inferable from the given information, while others are inferable. The key is to design tasks where the agent must either request clarification or use external knowledge to satisfy non-inferable requirements. Confounds such as pattern learning must be mitigated by varying requirements and contexts. The benchmark score then reflects the agent's ability to handle non-inferable requirements, but only if the design successfully separates this capability from others."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Designing benchmarks that explicitly separate inferable and non-inferable requirements requires making subjective choices about what counts as non-inferable, which may not reflect real-world ambiguity.",
+        "derived_from": [
+          "assumptions/1",
+          "mechanism_model/variables/2"
+        ],
+        "why_it_matters": "Subjective separation can lead to benchmarks that either over- or under-represent the challenge of non-inferable requirements, affecting the validity of comparisons.",
+        "what_existing_methods_may_miss": "Current benchmarks often avoid this issue by not separating at all, but those that attempt separation may impose a false dichotomy, missing the continuum of inferability.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "What algorithmic procedure can automatically generate non-inferable requirements such that they are not deductible from any feasible combination of task context cues, thereby minimizing subjectivity in benchmark design?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Providing a reproducible method for creating valid non-inferable requirements, reducing designer bias and improving benchmark comparability."
+      },
+      "hypothesis": {
+        "statement": "An algorithmic procedure that uses domain-independent transformations (e.g., inversion, abstraction, or substitution) on a set of base requirements can generate non-inferable requirements that are not deductible from any feasible combination of task context cues, as validated by human evaluators.",
+        "predicted_effect": "Benchmarks constructed with such procedure will have higher validity in measuring agent handling of non-inferable requirements, as shown by lower correlation between agent performance on inferable vs non-inferable requirements compared to benchmarks using manually designed non-inferable requirements."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct two benchmark suites: one with non-inferable requirements manually designed by experts, and one with requirements generated by the proposed algorithmic procedure. Both suites share the same base task contexts and inferable requirements. Recruit human evaluators to rate each requirement on a Likert scale for inferability from the given context. Then evaluate a set of coding agents (including a baseline that uses pattern recognition to infer requirements across tasks) on both benchmarks. Measure the correlation between agent performance on inferable and non-inferable requirements for each benchmark.",
+        "independent_variables": [
+          "Benchmark type (manual vs automated)",
+          "Agent type (including pattern-learning baseline)"
+        ],
+        "dependent_variables": [
+          "Human-rated non-inferability consistency (inter-rater reliability and mean rating)",
+          "Correlation coefficient between agent scores on inferable and non-inferable requirements"
+        ],
+        "controls": [
+          "Same base task contexts and inferable requirements across benchmarks",
+          "Same set of agents evaluated",
+          "Randomized order of task presentation",
+          "Blinding of human evaluators to benchmark type"
+        ],
+        "falsifying_observation": "If human evaluators rate a significant proportion of automated requirements as inferable (e.g., mean rating above threshold), or if the correlation between agent performance on inferable and non-inferable requirements is not significantly lower for the automated benchmark compared to the manual benchmark, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Human evaluators consistently rate automated requirements as non-inferable (high inter-rater reliability and low mean inferability rating).",
+          "The correlation between agent performance on inferable and non-inferable requirements is significantly lower for the automated benchmark than for the manual benchmark.",
+          "Agents that rely on pattern recognition do not achieve higher scores on the automated benchmark relative to other agents."
+        ],
+        "rejects_hypothesis": [
+          "Human evaluators find many automated requirements to be inferable from context (low inter-rater reliability or high inferability ratings).",
+          "The correlation between agent performance on inferable and non-inferable requirements is not significantly different between the automated and manual benchmarks.",
+          "Pattern-learning agents achieve higher scores on the automated benchmark, indicating that requirements are deducible from repeated patterns."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (automated requirements are often inferable or do not improve benchmark validity), then the assumption that domain-independent transformations are sufficient to guarantee non-inferability is likely incorrect.",
+        "assumption_to_revise": "The assumption that domain-independent transformations (inversion, abstraction, substitution) can reliably generate requirements that are not deductible from any feasible combination of task context cues.",
+        "next_question": "What domain-specific factors must be incorporated into the automated procedure to ensure that generated requirements are truly non-inferable from the task context?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines what the coding agent should accomplish, including functional behavior, constraints, and desired properties of the output.",
+          "why_primitive": "All benchmarks evaluate agents against requirements; understanding requirements is foundational to designing isolation methods."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically deduced from the provided context (e.g., code, documentation, task description) and must be explicitly given or assumed from external knowledge.",
+          "why_primitive": "The core concept to isolate; its definition determines what counts as 'non-inferable' and thus what needs special handling in benchmarks."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of ensuring that a benchmark specifically measures an agent's ability to handle non-inferable requirements without confounding with other abilities like code generation, comprehension, or knowledge retrieval.",
+          "why_primitive": "The central goal of the question; defines the separation needed to attribute performance to handling non-inferable requirements."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized evaluation framework with tasks, metrics, and procedures to measure and compare the performance of coding agents on specific capabilities.",
+          "why_primitive": "The artifact being designed; its structure must incorporate isolation mechanisms to be valid for the target capability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Some requirements are inherently non-inferable because they depend on unstated user preferences, domain knowledge not present in the task context, or underspecified goals.",
+          "rationale": "Real-world coding tasks often involve implicit assumptions and client-specific needs that cannot be derived solely from the written specification.",
+          "possible_failure": "If all requirements were inferable from sufficient context, then isolation would be unnecessary; but in practice, ambiguity exists."
+        },
+        {
+          "assumption": "Current benchmarks often conflate inferable and non-inferable requirements, making it impossible to attribute an agent's failure to inability to handle non-inferable requirements versus other factors.",
+          "rationale": "Benchmarks typically include requirements without distinguishing their source, mixing deduction and external specification in the same metric.",
+          "possible_failure": "Benchmarks might be designed with careful separation, but without explicit documentation, the conflation can persist and mislead interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskContext",
+            "role": "input",
+            "description": "The information provided to the agent, including code, documentation, and task description."
+          },
+          {
+            "name": "RequirementSet",
+            "role": "input",
+            "description": "All requirements for the task, some of which are inferable from context and some are not."
+          },
+          {
+            "name": "RequirementInferability",
+            "role": "mediator",
+            "description": "The degree to which a requirement can be logically deduced from the task context."
+          },
+          {
+            "name": "AgentNonInferableHandling",
+            "role": "mediator",
+            "description": "The agent's capability to correctly address requirements that are not inferable from context."
+          },
+          {
+            "name": "BenchmarkScore",
+            "role": "outcome",
+            "description": "The performance metric measuring how well the agent satisfies all requirements."
+          },
+          {
+            "name": "PatternLearning",
+            "role": "confounder",
+            "description": "The agent learning to infer non-inferable requirements by recognizing patterns across benchmark tasks."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "TaskContext",
+            "relation": "determines",
+            "target": "RequirementInferability",
+            "explanation": "The context defines what can be inferred about requirements."
+          },
+          {
+            "step": "2",
+            "source": "RequirementSet",
+            "relation": "contains",
+            "target": "RequirementInferability",
+            "explanation": "Some requirements are explicitly stated, influencing their inferability."
+          },
+          {
+            "step": "3",
+            "source": "RequirementInferability",
+            "relation": "influences",
+            "target": "AgentNonInferableHandling",
+            "explanation": "If a requirement is inferable, the agent does not need to handle it as non-inferable."
+          },
+          {
+            "step": "4",
+            "source": "AgentNonInferableHandling",
+            "relation": "affects",
+            "target": "BenchmarkScore",
+            "explanation": "The agent's handling of non-inferable requirements directly impacts its performance."
+          },
+          {
+            "step": "5",
+            "source": "PatternLearning",
+            "relation": "confounds",
+            "target": "BenchmarkScore",
+            "explanation": "Agents may learn patterns that allow them to infer requirements, inflating scores without true handling."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Pattern leakage across tasks",
+            "why_it_matters": "If non-inferable requirements follow recognizable patterns, agents may infer them from repetition rather than genuine handling, undermining isolation."
+          },
+          {
+            "bottleneck": "Inadequate separation of inferable vs non-inferable in design",
+            "why_it_matters": "If benchmark designers do not clearly distinguish which requirements are inferable, the score conflates multiple abilities, making it impossible to attribute performance to non-inferable handling."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the task context and requirement presentation to ensure that some requirements are clearly non-inferable from the given information, while others are inferable. The key is to design tasks where the agent must either request clarification or use external knowledge to satisfy non-inferable requirements. Confounds such as pattern learning must be mitigated by varying requirements and contexts. The benchmark score then reflects the agent's ability to handle non-inferable requirements, but only if the design successfully separates this capability from others."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Increasing the number of non-inferable requirements per task to improve thoroughness increases the risk of pattern learning, potentially invalidating isolation.",
+        "derived_from": [
+          "core_tradeoffs/0",
+          "mechanism_model/bottlenecks/0"
+        ],
+        "why_it_matters": "If pattern learning occurs, the benchmark cannot distinguish between true handling of non-inferable requirements and learned heuristics, undermining the goal of isolation.",
+        "what_existing_methods_may_miss": "Current benchmarks do not explicitly monitor or control for pattern learning across tasks, leading to overestimation of agent capability.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does systematically varying the type of non-inferable requirements across tasks (e.g., domain-specific vs. procedural) affect the rate of pattern learning and subsequent benchmark score inflation in LLM agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifying the impact of requirement diversity on pattern learning, enabling the design of benchmarks that preserve isolation by mitigating this confound."
+      },
+      "hypothesis": {
+        "statement": "Systematically varying the type of non-inferable requirements across tasks (e.g., domain-specific vs. procedural vs. preference-based) reduces the rate of pattern learning and subsequent benchmark score inflation in LLM agents, compared to using a single type of non-inferable requirement.",
+        "predicted_effect": "Agents exposed to varied non-inferable requirement types will show a smaller improvement in performance on non-inferable requirements over successive tasks, indicating less pattern learning, and their benchmark scores will reflect more accurate measurement of true non-inferable handling ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create two sets of benchmark tasks: Set A (varied) contains tasks where non-inferable requirements are drawn from diverse categories (e.g., domain knowledge, procedural steps, user preferences), with each task having a different category; Set B (constant) contains tasks where all non-inferable requirements are of the same category (e.g., all domain-specific). Both sets have the same number of tasks and overall difficulty. Run each set on multiple LLM agents. Measure pattern learning by tracking the per-task success rate on non-inferable requirements over time; a rising trend indicates pattern learning. Measure benchmark score inflation as the difference in average success rate between the first half and second half of tasks. Compare the trends and inflation between Set A and Set B.",
+        "independent_variables": [
+          "Variation type: varied vs. constant category of non-inferable requirements across tasks"
+        ],
+        "dependent_variables": [
+          "Pattern learning rate: slope of success rate on non-inferable requirements over tasks",
+          "Benchmark score inflation: difference in average success rate between first and second halves of tasks"
+        ],
+        "controls": [
+          "Same number of tasks (e.g., 20 per set)",
+          "Same overall difficulty (validated by human raters)",
+          "Same set of inferable requirements across tasks",
+          "Same LLM agents used for both sets",
+          "Task order randomized within each set"
+        ],
+        "falsifying_observation": "If the pattern learning rate and benchmark score inflation in Set A are not significantly lower than in Set B (or are higher), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In Set A (varied), the success rate on non-inferable requirements shows no significant upward trend over tasks (slope near zero).",
+          "In Set B (constant), the success rate shows a significant upward trend over tasks (positive slope).",
+          "Benchmark score inflation in Set A is significantly less than in Set B (e.g., difference ≤ 5% vs. ≥ 20%).",
+          "Agents in Set A more often ask clarifying questions or explicitly state assumptions for non-inferable requirements, indicating genuine handling rather than pattern recognition."
+        ],
+        "rejects_hypothesis": [
+          "Both sets show similar positive trends in success rate over tasks.",
+          "Benchmark score inflation is similar in both sets (difference not statistically significant).",
+          "Agents in Set A do not exhibit more clarifying behavior; instead, they quickly adapt to varied requirements, suggesting pattern learning across types."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (i.e., varying requirement type does not reduce pattern learning), then the assumption that requirement type diversity is a key factor in mitigating pattern learning is revised.",
+        "assumption_to_revise": "The assumption that pattern learning is primarily driven by similarity of requirement types across tasks; alternative factors like the explicitness of requirement presentation or the presence of contextual cues may dominate.",
+        "next_question": "How does the level of detail in the task description (e.g., explicit vs. implicit non-inferable requirements) affect pattern learning, and can controlling for explicitness isolate non-inferable handling more effectively?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines what the coding agent should accomplish, including functional behavior, constraints, and desired properties of the output.",
+          "why_primitive": "All benchmarks evaluate agents against requirements; understanding requirements is foundational to designing isolation methods."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically deduced from the provided context (e.g., code, documentation, task description) and must be explicitly given or assumed from external knowledge.",
+          "why_primitive": "The core concept to isolate; its definition determines what counts as 'non-inferable' and thus what needs special handling in benchmarks."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of ensuring that a benchmark specifically measures an agent's ability to handle non-inferable requirements without confounding with other abilities like code generation, comprehension, or knowledge retrieval.",
+          "why_primitive": "The central goal of the question; defines the separation needed to attribute performance to handling non-inferable requirements."
+        },
+        {
+          "name": "Benchmark",
+          "definition": "A standardized evaluation framework with tasks, metrics, and procedures to measure and compare the performance of coding agents on specific capabilities.",
+          "why_primitive": "The artifact being designed; its structure must incorporate isolation mechanisms to be valid for the target capability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Some requirements are inherently non-inferable because they depend on unstated user preferences, domain knowledge not present in the task context, or underspecified goals.",
+          "rationale": "Real-world coding tasks often involve implicit assumptions and client-specific needs that cannot be derived solely from the written specification.",
+          "possible_failure": "If all requirements were inferable from sufficient context, then isolation would be unnecessary; but in practice, ambiguity exists."
+        },
+        {
+          "assumption": "Current benchmarks often conflate inferable and non-inferable requirements, making it impossible to attribute an agent's failure to inability to handle non-inferable requirements versus other factors.",
+          "rationale": "Benchmarks typically include requirements without distinguishing their source, mixing deduction and external specification in the same metric.",
+          "possible_failure": "Benchmarks might be designed with careful separation, but without explicit documentation, the conflation can persist and mislead interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "TaskContext",
+            "role": "input",
+            "description": "The information provided to the agent, including code, documentation, and task description."
+          },
+          {
+            "name": "RequirementSet",
+            "role": "input",
+            "description": "All requirements for the task, some of which are inferable from context and some are not."
+          },
+          {
+            "name": "RequirementInferability",
+            "role": "mediator",
+            "description": "The degree to which a requirement can be logically deduced from the task context."
+          },
+          {
+            "name": "AgentNonInferableHandling",
+            "role": "mediator",
+            "description": "The agent's capability to correctly address requirements that are not inferable from context."
+          },
+          {
+            "name": "BenchmarkScore",
+            "role": "outcome",
+            "description": "The performance metric measuring how well the agent satisfies all requirements."
+          },
+          {
+            "name": "PatternLearning",
+            "role": "confounder",
+            "description": "The agent learning to infer non-inferable requirements by recognizing patterns across benchmark tasks."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "TaskContext",
+            "relation": "determines",
+            "target": "RequirementInferability",
+            "explanation": "The context defines what can be inferred about requirements."
+          },
+          {
+            "step": "2",
+            "source": "RequirementSet",
+            "relation": "contains",
+            "target": "RequirementInferability",
+            "explanation": "Some requirements are explicitly stated, influencing their inferability."
+          },
+          {
+            "step": "3",
+            "source": "RequirementInferability",
+            "relation": "influences",
+            "target": "AgentNonInferableHandling",
+            "explanation": "If a requirement is inferable, the agent does not need to handle it as non-inferable."
+          },
+          {
+            "step": "4",
+            "source": "AgentNonInferableHandling",
+            "relation": "affects",
+            "target": "BenchmarkScore",
+            "explanation": "The agent's handling of non-inferable requirements directly impacts its performance."
+          },
+          {
+            "step": "5",
+            "source": "PatternLearning",
+            "relation": "confounds",
+            "target": "BenchmarkScore",
+            "explanation": "Agents may learn patterns that allow them to infer requirements, inflating scores without true handling."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Pattern leakage across tasks",
+            "why_it_matters": "If non-inferable requirements follow recognizable patterns, agents may infer them from repetition rather than genuine handling, undermining isolation."
+          },
+          {
+            "bottleneck": "Inadequate separation of inferable vs non-inferable in design",
+            "why_it_matters": "If benchmark designers do not clearly distinguish which requirements are inferable, the score conflates multiple abilities, making it impossible to attribute performance to non-inferable handling."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the task context and requirement presentation to ensure that some requirements are clearly non-inferable from the given information, while others are inferable. The key is to design tasks where the agent must either request clarification or use external knowledge to satisfy non-inferable requirements. Confounds such as pattern learning must be mitigated by varying requirements and contexts. The benchmark score then reflects the agent's ability to handle non-inferable requirements, but only if the design successfully separates this capability from others."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The assumption that non-inferable requirements cannot be deduced from context may be violated if the task context inadvertently contains implicit cues, blurring the separation between inferable and non-inferable.",
+        "derived_from": [
+          "primitive_definitions/1",
+          "assumptions/0"
+        ],
+        "why_it_matters": "If contexts implicitly contain cues, then requirements labeled as non-inferable may actually be inferable, confounding the measurement of non-inferable handling.",
+        "what_existing_methods_may_miss": "Existing methods may not systematically audit task contexts for all possible implicit cues, assuming a clean separation that may not hold.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Can LLMs inadvertently infer requirements labeled as non-inferable when task contexts contain implicit cues, and if so, how does the degree of cue explicitness modulate this effect?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Establishing diagnostic tests to detect implicit cue leakage in benchmark task contexts, improving the validity of non-inferable requirement separation."
+      },
+      "hypothesis": {
+        "statement": "LLMs can infer requirements labeled as non-inferable when task contexts contain implicit cues, with the probability of inference increasing monotonically with the explicitness of the cues.",
+        "predicted_effect": "Higher explicitness of implicit cues in the task context leads to a higher proportion of LLMs correctly satisfying non-inferable requirements, compared to a control condition with no cues."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of coding tasks each containing a requirement that is explicitly labeled as non-inferable (i.e., cannot be deduced from the code or documentation provided). Vary the task context to include implicit cues at three levels: no cues, weak cues (e.g., variable names hinting at the requirement), and strong cues (e.g., comments indirectly suggesting the requirement). For each task, prompt an LLM to produce code satisfying all requirements, then evaluate whether the requirement labeled non-inferable is correctly implemented. The key metric is the success rate per cue level.",
+        "independent_variables": [
+          "Explicitness of implicit cues (none, weak, strong)"
+        ],
+        "dependent_variables": [
+          "Proportion of tasks where the non-inferable requirement is correctly satisfied"
+        ],
+        "controls": [
+          "All tasks have identical non-inferable requirements across cue levels.",
+          "The task context (code and documentation) is kept constant except for the cues.",
+          "LLM model and hyperparameters are fixed across conditions.",
+          "Order of tasks is randomized to avoid learning effects."
+        ],
+        "falsifying_observation": "If the success rates for all cue levels are not significantly different from each other and from what would be expected by chance (i.e., no effect of cue explicitness), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Success rate is significantly higher for strong cues than for weak cues, and higher for weak cues than for no cues.",
+          "The differences are statistically significant (e.g., p < 0.05) and monotonic.",
+          "Qualitative analysis shows that LLMs cite the cues in their reasoning when inferring the requirement."
+        ],
+        "rejects_hypothesis": [
+          "No significant differences in success rates across cue levels.",
+          "Success rate for strong cues is not higher than for no cues (or even lower).",
+          "LLMs do not mention cues in their reasoning, or they fail to satisfy the requirement even with strong cues."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (no effect of cue explicitness), then the assumption that implicit cues can leak and be used by LLMs to infer non-inferable requirements is not supported.",
+        "assumption_to_revise": "The assumption that 'some requirements are inherently non-inferable because they depend on unstated user preferences, domain knowledge not present in the task context, or underspecified goals' may still hold, but the potential for context to inadvertently provide cues that make them inferable is invalid for these specific types of cues.",
+        "next_question": "Do LLMs infer non-inferable requirements through other mechanisms (e.g., common sense, pattern matching across tasks) rather than from implicit contextual cues, and how can those mechanisms be isolated?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Systematically varying the type of non-inferable requirements across tasks (e.g., domain-specific vs. procedural vs. preference-based) reduces the rate of pattern learning and subsequent benchmark score inflation in LLM agents, compared to using a single type of non-inferable requirement.",
+      "independent_variables": [
+        "Type of non-inferable requirement variation: varied across tasks vs. constant across tasks"
+      ],
+      "dependent_variables": [
+        "Pattern learning rate: slope of success rate on non-inferable requirements over tasks",
+        "Benchmark score inflation: difference in average success rate between first and second halves of tasks"
+      ],
+      "controlled_variables": [
+        "Number of tasks per set (20)",
+        "Overall difficulty of tasks (validated by human raters)",
+        "Set of inferable requirements across tasks",
+        "LLM agents used for both conditions",
+        "Task order randomization within each set",
+        "Number of non-inferable requirements per task"
+      ],
+      "baselines": [
+        {
+          "name": "Constant requirement type",
+          "description": "All tasks use the same category of non-inferable requirements (e.g., all domain-specific)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Success rate on non-inferable requirements",
+          "definition": "Proportion of non-inferable requirements correctly satisfied per task."
+        },
+        {
+          "name": "Pattern learning slope",
+          "definition": "Linear regression slope of success rate over task index (1 to 20) for each agent."
+        },
+        {
+          "name": "Benchmark score inflation",
+          "definition": "Difference in average success rate between second half (tasks 11-20) and first half (tasks 1-10)."
+        },
+        {
+          "name": "Clarifying question rate",
+          "definition": "Average number of clarifying questions asked per task across tasks in a condition."
+        }
+      ],
+      "expected_result": "The pattern learning slope and benchmark score inflation are significantly lower in the varied requirement type condition compared to the constant type condition. Additionally, agents in the varied condition ask more clarifying questions, indicating genuine handling rather than pattern recognition.",
+      "falsifying_result": "There is no significant difference in pattern learning slope or benchmark score inflation between the two conditions, or the varied condition shows higher inflation, or agents in the varied condition do not ask more clarifying questions.",
+      "minimum_viable_experiment": "Create two sets of 20 benchmark tasks each. Set A (varied) includes tasks where non-inferable requirements are drawn from diverse categories (domain knowledge, procedural steps, user preferences) with each task using a different category. Set B (constant) includes tasks where all non-inferable requirements are of the same category (e.g., all domain-specific). Both sets have the same number of tasks, overall difficulty, and inferable requirements. Run both sets on multiple LLM agents (e.g., 5 agents). Measure success rate on non-inferable requirements per task. Compare the slope of success rate over tasks and the inflation between halves between the two conditions.",
+      "risks_and_confounds": [
+        "Order effects may persist despite randomization.",
+        "Difficulty of varied vs constant sets may not be perfectly matched.",
+        "Agents may learn to infer non-inferable requirements from contextual cues rather than pattern learning.",
+        "Clarifying questions may be discouraged by task framing or instructions.",
+        "Small number of agents may limit statistical power."
+      ]
+    },
+    {
+      "hypothesis": "LLMs can infer requirements labeled as non-inferable when task contexts contain implicit cues, with the probability of inference increasing monotonically with the explicitness of the cues.",
+      "independent_variables": [
+        "Explicitness of implicit cues (none, weak, strong)"
+      ],
+      "dependent_variables": [
+        "Proportion of tasks where the non-inferable requirement is correctly satisfied"
+      ],
+      "controlled_variables": [
+        "All tasks have identical non-inferable requirements across cue levels",
+        "Task context (code and documentation) is kept constant except for the cues",
+        "LLM model and hyperparameters are fixed across conditions",
+        "Order of tasks is randomized to avoid learning effects"
+      ],
+      "baselines": [
+        {
+          "name": "No Cue Condition",
+          "description": "Task context contains no implicit cues related to the non-inferable requirement. This serves as the baseline for comparison."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Success Rate",
+          "definition": "Number of tasks where the LLM correctly implements the non-inferable requirement divided by the total number of tasks per cue level."
+        },
+        {
+          "name": "Statistical Significance (p-value)",
+          "definition": "Using a chi-squared test or Fisher's exact test to compare success rates across cue levels. A p-value < 0.05 indicates significant differences."
+        }
+      ],
+      "expected_result": "The success rate for the strong cue condition is significantly higher than for the weak cue condition, which is significantly higher than for the no cue condition. The differences are monotonic and statistically significant (p < 0.05). Additionally, qualitative analysis shows that LLMs cite the cues in their reasoning when inferring the requirement.",
+      "falsifying_result": "The success rates for all cue levels are not significantly different from each other (p >= 0.05) and are not higher than what would be expected by chance (e.g., no significant difference from a random baseline). Alternatively, the pattern is not monotonic (e.g., strong cues yield lower success than weak cues).",
+      "minimum_viable_experiment": "Construct 15 distinct coding tasks, each with a unique non-inferable requirement. For each task, create three versions of the task context: one with no implicit cues, one with weak cues (e.g., variable names hinting), and one with strong cues (e.g., comments indirectly suggesting the requirement). This yields 45 total test cases. Present these 45 cases in random order to the same LLM (e.g., GPT-4) with fixed temperature 0 and max tokens 1024. Evaluate each output for correct implementation of the non-inferable requirement. The entire experiment can be run in a single session.",
+      "risks_and_confounds": [
+        "Pattern learning: If the same requirement appears across cue levels in the same task, the LLM might learn the pattern; use different tasks for each condition to avoid repetition of the same requirement context.",
+        "Order effects: Randomization mitigates but does not eliminate; use a random order and consider blocking.",
+        "LLM's internal knowledge: The non-inferable requirement must be domain-specific and unlikely to be known a priori; select obscure or invented requirements.",
+        "Subjectivity in evaluating correct implementation: Use clear, binary criteria or automated tests to judge correctness.",
+        "Cue salience: Ensure that weak and strong cues are perceptually distinct; pilot test to validate cue levels."
+      ]
+    },
+    {
+      "hypothesis": "An algorithmic procedure that uses domain-independent transformations (e.g., inversion, abstraction, or substitution) on a set of base requirements can generate non-inferable requirements that are not deductible from any feasible combination of task context cues, as validated by human evaluators.",
+      "independent_variables": [
+        "Benchmark type (manual vs automated)",
+        "Agent type (including pattern-learning baseline)"
+      ],
+      "dependent_variables": [
+        "Human-rated non-inferability consistency (inter-rater reliability and mean rating)",
+        "Correlation coefficient between agent scores on inferable and non-inferable requirements"
+      ],
+      "controlled_variables": [
+        "Same base task contexts and inferable requirements across benchmarks",
+        "Same set of agents evaluated",
+        "Randomized order of task presentation",
+        "Blinding of human evaluators to benchmark type"
+      ],
+      "baselines": [
+        {
+          "name": "Manual Benchmark",
+          "description": "Benchmark with non-inferable requirements manually designed by experts."
+        },
+        {
+          "name": "Pattern-Learning Agent",
+          "description": "Agent baseline that uses pattern recognition to infer requirements across tasks."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inter-rater reliability of human evaluators on requirement inferability",
+          "definition": "Fleiss' kappa or similar measure of agreement among evaluators on whether a requirement is inferable from context."
+        },
+        {
+          "name": "Mean inferability rating",
+          "definition": "Average Likert scale rating (1-5) from evaluators on how inferable a requirement is from the given context."
+        },
+        {
+          "name": "Correlation between agent performance on inferable and non-inferable requirements",
+          "definition": "Pearson correlation coefficient between agent scores on inferable requirements and agent scores on non-inferable requirements."
+        }
+      ],
+      "expected_result": "Human evaluators consistently rate automated requirements as non-inferable (high inter-rater reliability and low mean inferability rating). The correlation between agent performance on inferable and non-inferable requirements is significantly lower for the automated benchmark than for the manual benchmark.",
+      "falsifying_result": "Human evaluators find many automated requirements to be inferable from context (low inter-rater reliability or high inferability ratings). Or the correlation between agent performance on inferable and non-inferable requirements is not significantly different between the automated and manual benchmarks.",
+      "minimum_viable_experiment": "Construct two benchmark suites with identical base task contexts and inferable requirements: one with non-inferable requirements manually designed by experts, and one with non-inferable requirements generated by the proposed algorithmic procedure. Recruit human evaluators to rate each requirement on a Likert scale for inferability from the given context. Evaluate a set of coding agents (including a pattern-learning baseline that attempts to infer requirements across tasks) on both benchmarks, measuring agent scores on inferable and non-inferable requirements separately. Compare inter-rater reliability, mean inferability ratings, and the correlation between agent performance on inferable vs. non-inferable requirements across the two benchmarks.",
+      "risks_and_confounds": [
+        "Pattern leakage across tasks if algorithmically generated requirements follow recognizable patterns",
+        "Subjectivity in human evaluators' interpretation of inferability",
+        "Potential familiarity of agents with manual benchmark patterns",
+        "Order effects despite randomization",
+        "Insufficient number of requirements for statistical power"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package addresses the important question of how to design coding-agent benchmarks that isolate the ability to handle non-inferable requirements—requirements that cannot be logically deduced from provided context. The work provides a first-principles decomposition of key concepts (requirement, non-inferable requirement, isolation, benchmark), a causal mechanism model identifying confounds like pattern learning, and three concrete tensions leading to testable hypotheses. Three full research proposals (certificates) are presented, each with detailed minimal decisive experiments. The work is rigorous and well-structured, with clear falsifiability and experimentability. However, the practical feasibility of the proposed algorithmic generation of non-inferable requirements may be limited, and some assumptions (e.g., binary inferability) oversimplify reality. The experiments, while well-controlled, are somewhat artificial and may not fully capture real-world ambiguity. Overall, the package makes a strong conceptual contribution but requires empirical validation.",
+    "strengths": [
+      "Timely and important topic: evaluating LLM agents on handling ambiguous requirements is crucial for real-world deployment.",
+      "Rigorous first-principles derivation with clear primitive definitions, assumptions, and tradeoffs.",
+      "Mechanism model explicitly identifies key variables and confounds (pattern learning), enabling targeted experimental design.",
+      "Tensions are well-grounded in the model and represent genuine challenges in benchmark design.",
+      "Three testable hypotheses with minimal decisive experiments that are falsifiable and have clear success/failure criteria.",
+      "Comprehensive attention to confounds, controls, and failure modes in experiment plans.",
+      "Reproducibility and objectivity emphasized through algorithmic generation and human evaluation."
+    ],
+    "weaknesses": [
+      "Some assumptions (e.g., non-inferable requirements are inherently non-inferable) are debatable; requirements often lie on a continuum of inferability rather than a binary classification.",
+      "Experiments, while well-designed, are still artificial and may not generalize to complex real-world coding tasks with evolving requirements.",
+      "The proposed algorithmic generation of non-inferable requirements via domain-independent transformations may yield requirements that are too constrained or still inferable by advanced models.",
+      "Missing baselines: experiments compare manual vs automated generation, but do not include baselines like 'no non-inferable requirements' or 'randomly generated non-inferable requirements' to contextualize the effect size.",
+      "Overclaiming slight: the package presents a systematic methodology but there is no empirical validation yet; the contribution is mainly conceptual.",
+      "The package is verbose and could be more concise; some sections (e.g., repeated definitions across certificates) are redundant."
+    ],
+    "questions": [
+      "How would you handle requirements that are partially inferable (e.g., a requirement that can be deduced with high confidence but not certainty)?",
+      "Could you provide examples of domain-independent transformations (inversion, abstraction, substitution) that reliably produce non-inferable requirements?",
+      "How do you ensure that human evaluators' ratings of inferability are not biased by their own knowledge or assumptions about the task context?"
+    ],
+    "missing_baselines": [
+      "A baseline with no non-inferable requirements (all inferable) to measure the confounding effect of inference ability on the overall benchmark score.",
+      "A baseline with randomly generated non-inferable requirements (e.g., from a list of unrelated specifications) to test whether any systematic generation is necessary.",
+      "A baseline comparing the proposed benchmarks against existing coding benchmarks (e.g., HumanEval, MBPP) to assess practical improvement in isolating non-inferable handling."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Conceptual oversimplification",
+    "root_cause": "The primitive definition of 'Non-inferable Requirement' assumes a binary classification (inferable or not), ignoring the continuum of inferability present in real-world tasks. This simplification undermines the validity of the benchmark design because requirements often have varying degrees of inferability, and agents may handle partial inferability differently.",
+    "violated_principle": "Principle of Fidelity to Real-World Complexity: Research constructs should capture the nuanced, continuous nature of real-world phenomena rather than relying on binary simplifications unless empirically justified.",
+    "new_or_updated_principle": "Principle of Continuous Inferability: When designing benchmarks to measure handling of non-inferable requirements, treat inferability as a continuous (or ordinal) variable rather than binary. Use human ratings or probabilistic models to quantify the degree of inferability for each requirement from the given context.",
+    "new_or_updated_skill": "Skill of Calibrated Inferability Assessment: The ability to design and execute experiments that elicit human judgments (e.g., Likert scales, pairwise comparisons) to assign inferability scores to requirements, and to validate the consistency and reliability of these scores (e.g., inter-rater reliability metrics). Then use these scores to stratify requirements or adjust scoring weights accordingly.",
+    "regression_test": "For any new benchmark suite or evaluation protocol that claims to isolate non-inferable requirements, the researcher must provide evidence that the classification of requirements into inferable vs. non-inferable is not arbitrary. Specifically, they must (a) collect human ratings of inferability on a continuous scale for each requirement given the task context, (b) report the distribution of ratings and inter-rater reliability (e.g., Fleiss' kappa), and (c) demonstrate that the chosen threshold for 'non-inferable' does not substantially affect the conclusions drawn from agent performance (e.g., via sensitivity analysis). Failure to provide such evidence constitutes a violation of the principle and renders the benchmark's isolation claim unsupported."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T183837Z"
+  }
+}

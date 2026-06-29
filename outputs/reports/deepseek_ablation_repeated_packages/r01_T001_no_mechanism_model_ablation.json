@@ -1,0 +1,810 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable, parameterized procedure that maps environmental states to actions to achieve a specific subgoal.",
+        "why_primitive": "Skills are the fundamental building blocks of agent behavior; all agent actions derive from either composing or discovering skills."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining existing skills in sequence or hierarchy to perform a more complex task without modifying the skills themselves.",
+        "why_primitive": "Composition is the basic operation for leveraging existing knowledge; it is distinct from creating new knowledge."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of inducing a new skill from interactions with the environment, typically through reinforcement learning, imitation, or search.",
+        "why_primitive": "Discovery is the alternative to composition, representing the creation of new behavioral primitives when existing ones are insufficient."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are modular and can be composed arbitrarily via well-defined interfaces.",
+        "rationale": "Composition assumes that skills have compatible input/output representations and that combining them does not lead to interference.",
+        "possible_failure": "If skills have hidden dependencies or side effects, composition may fail, forcing the need for discovery even when skills exist."
+      },
+      {
+        "assumption": "There is a finite, known set of existing skills available to the agent at any time.",
+        "rationale": "The decision between composition and discovery depends on the known repertoire; if the set is infinite or unknown, the problem becomes undefined.",
+        "possible_failure": "If the agent can continuously expand its skill set, the distinction between composition and discovery blurs, and the tradeoff may collapse."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Efficiency vs. Flexibility",
+        "variables": [
+          "composition_cost",
+          "discovery_cost",
+          "task novelty"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. Exploitation",
+        "variables": [
+          "expected reward of composition",
+          "expected reward of discovery",
+          "time horizon"
+        ]
+      },
+      {
+        "tradeoff": "Generalization vs. Specialization",
+        "variables": [
+          "skill generality",
+          "task specificity",
+          "transferability"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "topic condition",
+        "role": "input",
+        "description": "The observed condition in When should an agent discover a new skill rather than compose existing skills?."
+      },
+      {
+        "name": "research outcome",
+        "role": "outcome",
+        "description": "The measured outcome or failure mode proposed by the research question."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+        "source": null,
+        "relation": null,
+        "target": null,
+        "explanation": null
+      }
+    ],
+    "bottlenecks": [],
+    "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Composition assumes skills are modular with compatible interfaces, but hidden dependencies or side effects can cause composition to fail, forcing the agent to resort to discovery even when relevant skills exist.",
+      "derived_from": [
+        "Skill",
+        "Composition",
+        "assumption: Skills are modular and can be composed arbitrarily via well-defined interfaces",
+        "possible_failure of assumption"
+      ],
+      "why_it_matters": "If composition fails unpredictably, agents may unnecessarily engage in costly discovery, reducing efficiency. Understanding when composition breaks down is crucial for reliable skill reuse.",
+      "what_existing_methods_may_miss": "Existing skill composition methods often ignore hidden dependencies across skills, assuming clean interfaces. They may not account for emergent side effects from chaining skills.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a fundamental tradeoff between efficiency (composition) and flexibility (discovery): composition leverages existing knowledge quickly but may be brittle for novel tasks, while discovery adapts but incurs higher cost.",
+      "derived_from": [
+        "core_tradeoffs: Efficiency vs. Flexibility",
+        "composition_cost",
+        "discovery_cost",
+        "task novelty"
+      ],
+      "why_it_matters": "An agent must allocate limited resources between composing known skills and discovering new ones. Misjudging this tradeoff leads to suboptimal performance, especially in changing environments.",
+      "what_existing_methods_may_miss": "Most systems either always compose (e.g., classical planning) or always discover (e.g., RL from scratch), missing the point where a mixed strategy is optimal based on task novelty and cost bounds.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that the agent has a finite, known set of skills contradicts the possibility of continuous skill expansion through discovery, blurring the distinction between composition and discovery.",
+      "derived_from": [
+        "Discovery",
+        "assumption: There is a finite, known set of existing skills available to the agent at any time",
+        "possible_failure of assumption"
+      ],
+      "why_it_matters": "If the skill set is unbounded or unknown, the decision problem becomes ill-defined. Agents need a clear criteria for when to treat a behavior as a new skill versus a composition of existing ones.",
+      "what_existing_methods_may_miss": "Hierarchical RL or skill discovery methods often assume a fixed skill library or a predefined number of skills. They do not address the dynamic boundary between composition and discovery.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does introducing hidden dependencies between skills causally increase the frequency of composition failure in a reinforcement learning agent?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "This would quantify the impact of hidden dependencies on composition reliability, enabling diagnostic tools to predict when composition is risky."
+    },
+    {
+      "question": "What is the optimal dynamic allocation between composition and discovery as a function of task novelty and cost, and can an agent learn this allocation via reinforcement learning?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "This would provide a principled, adaptive strategy for balancing efficiency and flexibility, improving performance in non-stationary environments."
+    },
+    {
+      "question": "What criteria can be used to automatically determine whether a behavior should be treated as a new skill or as a composition of existing skills, given an expanding skill library?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "This would resolve the boundary between composition and discovery, enabling agents to maintain a coherent skill ontology over time."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized procedure that maps environmental states to actions to achieve a specific subgoal.",
+          "why_primitive": "Skills are the fundamental building blocks of agent behavior; all agent actions derive from either composing or discovering skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in sequence or hierarchy to perform a more complex task without modifying the skills themselves.",
+          "why_primitive": "Composition is the basic operation for leveraging existing knowledge; it is distinct from creating new knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of inducing a new skill from interactions with the environment, typically through reinforcement learning, imitation, or search.",
+          "why_primitive": "Discovery is the alternative to composition, representing the creation of new behavioral primitives when existing ones are insufficient."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and can be composed arbitrarily via well-defined interfaces.",
+          "rationale": "Composition assumes that skills have compatible input/output representations and that combining them does not lead to interference.",
+          "possible_failure": "If skills have hidden dependencies or side effects, composition may fail, forcing the need for discovery even when skills exist."
+        },
+        {
+          "assumption": "There is a finite, known set of existing skills available to the agent at any time.",
+          "rationale": "The decision between composition and discovery depends on the known repertoire; if the set is infinite or unknown, the problem becomes undefined.",
+          "possible_failure": "If the agent can continuously expand its skill set, the distinction between composition and discovery blurs, and the tradeoff may collapse."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When should an agent discover a new skill rather than compose existing skills?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that the agent has a finite, known set of skills contradicts the possibility of continuous skill expansion through discovery, blurring the distinction between composition and discovery.",
+        "derived_from": [
+          "Discovery",
+          "assumption: There is a finite, known set of existing skills available to the agent at any time",
+          "possible_failure of assumption"
+        ],
+        "why_it_matters": "If the skill set is unbounded or unknown, the decision problem becomes ill-defined. Agents need a clear criteria for when to treat a behavior as a new skill versus a composition of existing ones.",
+        "what_existing_methods_may_miss": "Hierarchical RL or skill discovery methods often assume a fixed skill library or a predefined number of skills. They do not address the dynamic boundary between composition and discovery.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "What is the critical threshold of task structure divergence at which the optimal decision shifts from composition to discovery, and does this threshold exhibit a phase transition?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "This would define a sharp boundary condition for skill acquisition, enabling agents to dynamically adjust their learning strategy based on a measurable task property."
+      },
+      "hypothesis": {
+        "statement": "The optimal decision to discover versus compose exhibits a phase transition at a critical divergence distance d* between the task's latent structure and the convex hull of existing skill representations; below d*, composition dominates, above d*, discovery dominates, with the transition becoming sharper as the skill library grows.",
+        "predicted_effect": "An agent using this threshold-based policy will achieve lower cumulative regret than agents using fixed thresholds or heuristic rules, especially in environments with varied task novelty."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a gridworld environment, define tasks by latent parameter vectors. Existing skills cover a subspace. New tasks have a divergence measure (e.g., cosine distance to hull). Vary the divergence continuously. Measure the agent's decision (compose/discover) and regret.",
+        "independent_variables": [
+          "task divergence distance from skill convex hull",
+          "size of skill library",
+          "discovery cost (learning steps)"
+        ],
+        "dependent_variables": [
+          "decision (compose/discover)",
+          "difference in cumulative reward between composition and discovery policy",
+          "derivative of decision probability with respect to divergence"
+        ],
+        "controls": [
+          "initial skill library composition",
+          "same environment dynamics",
+          "same discovery learning algorithm"
+        ],
+        "falsifying_observation": "The probability of discovery increases linearly with divergence, showing no sharp transition, or the transition point varies unpredictably with irrelevant factors."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Below a threshold d*, composition yields higher cumulative reward; above d*, discovery yields higher reward.",
+          "The probability of discovery jumps sharply near d* as library size increases."
+        ],
+        "rejects_hypothesis": [
+          "The agent's decision shows no sharp change, or the threshold is not consistent across different initial skill libraries."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the phase transition is not observed in at least 20% of trials across different library sizes.",
+        "assumption_to_revise": "The assumption that divergence alone determines the threshold; the expected future utility of the discovered skill may also be influential.",
+        "next_question": "How does the expected future utility of a new skill modulate the composition-discovery threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized procedure that maps environmental states to actions to achieve a specific subgoal.",
+          "why_primitive": "Skills are the fundamental building blocks of agent behavior; all agent actions derive from either composing or discovering skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in sequence or hierarchy to perform a more complex task without modifying the skills themselves.",
+          "why_primitive": "Composition is the basic operation for leveraging existing knowledge; it is distinct from creating new knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of inducing a new skill from interactions with the environment, typically through reinforcement learning, imitation, or search.",
+          "why_primitive": "Discovery is the alternative to composition, representing the creation of new behavioral primitives when existing ones are insufficient."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and can be composed arbitrarily via well-defined interfaces.",
+          "rationale": "Composition assumes that skills have compatible input/output representations and that combining them does not lead to interference.",
+          "possible_failure": "If skills have hidden dependencies or side effects, composition may fail, forcing the need for discovery even when skills exist."
+        },
+        {
+          "assumption": "There is a finite, known set of existing skills available to the agent at any time.",
+          "rationale": "The decision between composition and discovery depends on the known repertoire; if the set is infinite or unknown, the problem becomes undefined.",
+          "possible_failure": "If the agent can continuously expand its skill set, the distinction between composition and discovery blurs, and the tradeoff may collapse."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When should an agent discover a new skill rather than compose existing skills?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Composition assumes skills are modular with compatible interfaces, but hidden dependencies or side effects can cause composition to fail, forcing the agent to resort to discovery even when relevant skills exist.",
+        "derived_from": [
+          "Skill",
+          "Composition",
+          "assumption: Skills are modular and can be composed arbitrarily via well-defined interfaces",
+          "possible_failure of assumption"
+        ],
+        "why_it_matters": "If composition fails unpredictably, agents may unnecessarily engage in costly discovery, reducing efficiency. Understanding when composition breaks down is crucial for reliable skill reuse.",
+        "what_existing_methods_may_miss": "Existing skill composition methods often ignore hidden dependencies across skills, assuming clean interfaces. They may not account for emergent side effects from chaining skills.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of cross-skill interference above which composition failure rate exceeds discovery success rate, making discovery the preferred strategy?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "This would identify a sharp boundary condition for the composition-discovery tradeoff, enabling agents to autonomously decide when to compose or discover based on interference levels."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of cross-skill interference such that below it, composition is more reliable than discovery, and above it, discovery becomes more reliable.",
+        "predicted_effect": "A phase transition where composition failure rate surpasses discovery success rate as interference increases."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a gridworld environment, train an agent with a set of skills (e.g., move, pickup, drop). Introduce controlled cross-skill interference by making skill execution modify shared resources (e.g., a skill reduces a resource needed by another). Vary interference level from 0 to high in discrete steps. For each level, measure composition failure rate (tasks where composition fails) and discovery success rate (tasks where a newly discovered skill successfully completes the task). Find the interference level where the two rates cross.",
+        "independent_variables": [
+          "Cross-skill interference level (continuous variable, e.g., probability that using a skill degrades another's precondition)"
+        ],
+        "dependent_variables": [
+          "Composition failure rate (proportion of tasks where composition fails)",
+          "Discovery success rate (proportion of tasks where a newly discovered skill succeeds)"
+        ],
+        "controls": [
+          "Same gridworld layout and tasks",
+          "Same base skill set",
+          "Same RL algorithm and hyperparameters",
+          "Same budget for discovery (number of episodes allowed for discovery)",
+          "Random seed"
+        ],
+        "falsifying_observation": "If the composition failure rate never exceeds the discovery success rate for any interference level (or the two curves do not cross), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low interference levels, composition failure rate is lower than discovery success rate.",
+          "As interference increases, composition failure rate increases and discovery success rate may decrease or stay constant.",
+          "There is a clear interference threshold where composition failure rate becomes equal to or higher than discovery success rate.",
+          "Agent's learned decision (compose vs discover) aligns with the threshold."
+        ],
+        "rejects_hypothesis": [
+          "Composition failure rate remains below discovery success rate for all interference levels.",
+          "Composition failure rate and discovery success rate do not exhibit a crossing point.",
+          "Composition failure rate is always higher regardless of interference."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold exists, then the decision between composition and discovery may not be determined solely by cross-skill interference. Consider other factors like task novelty, skill reuse frequency, or computational cost.",
+        "assumption_to_revise": "The assumption that hidden dependencies (interference) are the primary cause of composition failure may need to be relaxed; other factors like skill interface complexity may dominate.",
+        "next_question": "What other factors (e.g., number of skills, task novelty) create a sharp boundary for the composition-discovery decision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized procedure that maps environmental states to actions to achieve a specific subgoal.",
+          "why_primitive": "Skills are the fundamental building blocks of agent behavior; all agent actions derive from either composing or discovering skills."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in sequence or hierarchy to perform a more complex task without modifying the skills themselves.",
+          "why_primitive": "Composition is the basic operation for leveraging existing knowledge; it is distinct from creating new knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of inducing a new skill from interactions with the environment, typically through reinforcement learning, imitation, or search.",
+          "why_primitive": "Discovery is the alternative to composition, representing the creation of new behavioral primitives when existing ones are insufficient."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and can be composed arbitrarily via well-defined interfaces.",
+          "rationale": "Composition assumes that skills have compatible input/output representations and that combining them does not lead to interference.",
+          "possible_failure": "If skills have hidden dependencies or side effects, composition may fail, forcing the need for discovery even when skills exist."
+        },
+        {
+          "assumption": "There is a finite, known set of existing skills available to the agent at any time.",
+          "rationale": "The decision between composition and discovery depends on the known repertoire; if the set is infinite or unknown, the problem becomes undefined.",
+          "possible_failure": "If the agent can continuously expand its skill set, the distinction between composition and discovery blurs, and the tradeoff may collapse."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When should an agent discover a new skill rather than compose existing skills?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a fundamental tradeoff between efficiency (composition) and flexibility (discovery): composition leverages existing knowledge quickly but may be brittle for novel tasks, while discovery adapts but incurs higher cost.",
+        "derived_from": [
+          "core_tradeoffs: Efficiency vs. Flexibility",
+          "composition_cost",
+          "discovery_cost",
+          "task novelty"
+        ],
+        "why_it_matters": "An agent must allocate limited resources between composing known skills and discovering new ones. Misjudging this tradeoff leads to suboptimal performance, especially in changing environments.",
+        "what_existing_methods_may_miss": "Most systems either always compose (e.g., classical planning) or always discover (e.g., RL from scratch), missing the point where a mixed strategy is optimal based on task novelty and cost bounds.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task novelty above which discovery of new skills yields higher expected utility than composition, and can an agent learn to detect and exploit this threshold online?",
+        "question_type": "algorithmic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp boundary condition (phase transition) in the composition-discovery tradeoff, enabling agents to switch strategies optimally in non-stationary environments."
+      },
+      "hypothesis": {
+        "statement": "An agent can learn a threshold-based policy that switches from composition to discovery when task novelty exceeds a critical value, achieving significantly higher cumulative reward than fixed strategies across varying novelty and cost conditions.",
+        "predicted_effect": "The learned policy will exhibit a clear discontinuity in the discovery proportion at a critical novelty threshold, and its performance will match the optimal oracle strategy."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a gridworld with parameterizable task novelty (fraction of subgoals not covered by existing skills), an RL agent with predefined skills (move, pick, place) can either compose them or explore to discover new skills. The agent receives reward for task completion and incurs a per-step cost for discovery. Vary task novelty from 0 to 1 in steps of 0.1 and discovery cost in {0.1, 0.5, 1.0}. Compare the learned policy's cumulative reward per episode against always-compose, always-discover, and random-switch baselines. Record the proportion of discovery actions as a function of novelty. The critical threshold is identified as the novelty at which the discovery proportion exceeds 0.5.",
+        "independent_variables": [
+          "task novelty (fraction of subgoals requiring new skills beyond existing repertoire, from 0 to 1)",
+          "discovery cost (steps required per discovered skill, set to 0.1, 0.5, or 1.0)"
+        ],
+        "dependent_variables": [
+          "cumulative reward per episode",
+          "proportion of discovery actions per novelty level",
+          "convergence time to stable policy"
+        ],
+        "controls": [
+          "always-compose baseline (attempt to solve all tasks by composing existing skills only)",
+          "always-discover baseline (always explore to discover new skills, ignoring existing repertoire)",
+          "random-switch baseline (choose composition or discovery with equal probability each episode)",
+          "same reward structure, grid layout, and skill interfaces across all conditions"
+        ],
+        "falsifying_observation": "There is no novelty level where the learned policy's discovery proportion exceeds 0.5 (i.e., no threshold); or the cumulative reward of the learned policy is not significantly higher than the best fixed baseline for any combination of novelty and cost."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The learned policy shows a sharp increase in discovery proportion at a novelty threshold, and this threshold shifts predictably with discovery cost.",
+          "Cumulative reward of the learned policy is significantly higher than all baselines across the novelty range, especially near the threshold.",
+          "The threshold matches the theoretically predicted optimal switching point derived from expected utility calculations."
+        ],
+        "rejects_hypothesis": [
+          "The discovery proportion changes gradually with novelty without a clear threshold, indicating a continuous tradeoff rather than a phase transition.",
+          "The learned policy never discovers skills even when novelty is high, or always discovers regardless of novelty.",
+          "The cumulative reward of the learned policy is not statistically better than the best baseline in any condition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no clear threshold is observed or the learned policy performs no better than baselines, the hypothesis of a sharp boundary condition is not supported.",
+        "assumption_to_revise": "The assumption that the tradeoff between composition and discovery exhibits a phase transition driven by novelty may be false; the tradeoff may be continuous or dominated by other factors like task complexity or skill modularity.",
+        "next_question": "What is the shape of the optimal allocation function for composition vs. discovery when the tradeoff is continuous, and can it be approximated by a simple parametric model?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical threshold of cross-skill interference such that below it, composition is more reliable than discovery, and above it, discovery becomes more reliable.",
+      "independent_variables": [
+        "Cross-skill interference level (continuous, e.g., probability that using a skill degrades another's precondition)"
+      ],
+      "dependent_variables": [
+        "Composition failure rate (proportion of tasks where composition fails)",
+        "Discovery success rate (proportion of tasks where a newly discovered skill succeeds)"
+      ],
+      "controlled_variables": [
+        "Same gridworld layout and tasks",
+        "Same base skill set (e.g., move, pickup, drop)",
+        "Same RL algorithm and hyperparameters",
+        "Same budget for discovery (number of episodes allowed)",
+        "Random seed"
+      ],
+      "baselines": [
+        {
+          "name": "Zero-interference baseline",
+          "description": "Measures composition failure rate and discovery success rate when cross-skill interference is absent (interference level = 0)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composition failure rate",
+          "definition": "Proportion of tasks where the agent attempts to compose existing skills but fails to complete the task due to interference or other issues."
+        },
+        {
+          "name": "Discovery success rate",
+          "definition": "Proportion of tasks where the agent successfully learns a new skill (via RL) that completes the task within the discovery budget."
+        }
+      ],
+      "expected_result": "At low interference levels, composition failure rate is lower than discovery success rate. As interference increases, composition failure rate increases and discovery success rate may decrease or remain constant. There exists a distinct interference level where the two rates cross, with composition becoming less reliable than discovery above that threshold.",
+      "falsifying_result": "If the composition failure rate never exceeds the discovery success rate for any interference level (i.e., the two curves do not cross), or if composition failure rate remains below discovery success rate for all levels, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "In a gridworld environment, equip an agent with a minimal set of skills (e.g., move, pickup, drop). Introduce controlled cross-skill interference by making skill execution modify shared resource variables (e.g., using 'move' reduces a fuel resource needed by 'pickup'). Vary interference level from 0 to high in 5 discrete steps. For each level, run 100 tasks: for each task, the agent must either compose existing skills or discover a new skill via RL (with a fixed budget of episodes). Measure composition failure rate and discovery success rate. Determine the interference level where the two rates intersect.",
+      "risks_and_confounds": [
+        "Discovery success rate may be low due to limited RL exploration budget, potentially masking a true crossing point.",
+        "Interference may not be the only cause of composition failure; skill interface mismatches or task novelty could confound results.",
+        "Gridworld simplicity may limit generalizability to more complex environments.",
+        "The chosen discrete interference steps might miss the exact threshold."
+      ]
+    },
+    {
+      "hypothesis": "An agent can learn a threshold-based policy that switches from composition to discovery when task novelty exceeds a critical value, achieving significantly higher cumulative reward than fixed strategies across varying novelty and cost conditions.",
+      "independent_variables": [
+        "task novelty (fraction of subgoals requiring new skills beyond existing repertoire, from 0 to 1)",
+        "discovery cost (steps required per discovered skill, set to 0.1, 0.5, or 1.0)"
+      ],
+      "dependent_variables": [
+        "cumulative reward per episode",
+        "proportion of discovery actions per novelty level",
+        "convergence time to stable policy"
+      ],
+      "controlled_variables": [
+        "grid size (e.g., 10x10)",
+        "existing skill set (move, pick, place) with fixed interfaces",
+        "reward structure (e.g., +100 for task completion, -1 per step, -cost per discovery step)",
+        "episode length (e.g., 200 steps)",
+        "RL algorithm and hyperparameters (e.g., Q-learning with epsilon-greedy, learning rate 0.1, discount 0.9)",
+        "random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "always-compose",
+          "description": "Attempt to solve all tasks by composing existing skills only; never discover new skills."
+        },
+        {
+          "name": "always-discover",
+          "description": "Always explore to discover new skills at each step, ignoring existing repertoire."
+        },
+        {
+          "name": "random-switch",
+          "description": "Choose composition or discovery with equal probability each episode."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "cumulative reward per episode",
+          "definition": "Sum of rewards obtained per episode, averaged over multiple runs."
+        },
+        {
+          "name": "discovery proportion",
+          "definition": "Fraction of episodes or steps where the agent chooses to discover a new skill rather than compose, as a function of novelty level."
+        },
+        {
+          "name": "convergence time",
+          "definition": "Number of episodes required for the policy to stabilize (e.g., moving average reward within 5% of final performance)."
+        },
+        {
+          "name": "threshold location",
+          "definition": "Novelty level at which the learned policy's discovery proportion exceeds 0.5, if such a clear threshold exists."
+        }
+      ],
+      "expected_result": "The learned policy will exhibit a sharp increase in discovery proportion at a critical novelty threshold, and its cumulative reward will be significantly higher than all baselines, especially near the threshold. The threshold will shift predictably with discovery cost.",
+      "falsifying_result": "There is no novelty level where the learned policy's discovery proportion exceeds 0.5 (i.e., no threshold), or the cumulative reward of the learned policy is not statistically significantly higher than the best fixed baseline for any combination of novelty and cost.",
+      "minimum_viable_experiment": "In a gridworld with parameterizable task novelty (fraction of subgoals not covered by existing skills), an RL agent with predefined skills (move, pick, place) can either compose them or explore to discover new skills. The agent receives reward for task completion and incurs a per-step cost for discovery. Vary task novelty from 0 to 1 in steps of 0.1 and discovery cost in {0.1, 0.5, 1.0}. Compare the learned policy's cumulative reward per episode and discovery proportion against always-compose, always-discover, and random-switch baselines across multiple random seeds.",
+      "risks_and_confounds": [
+        "Task novelty operationalization may be correlated with task difficulty, confounding results.",
+        "Discovery cost may interact with exploration efficiency (e.g., high cost may discourage exploration prematurely).",
+        "Convergence of RL may be unstable under some novelty-cost combinations, requiring many runs.",
+        "Order effects if novelty levels are not randomized across episodes.",
+        "The chosen gridworld may not generalize to other environments with different skill modularity."
+      ]
+    },
+    {
+      "hypothesis": "The optimal decision to discover versus compose exhibits a phase transition at a critical divergence distance d* between the task's latent structure and the convex hull of existing skill representations; below d*, composition dominates, above d*, discovery dominates, with the transition becoming sharper as the skill library grows.",
+      "independent_variables": [
+        "task divergence distance from skill convex hull",
+        "size of skill library",
+        "discovery cost (learning steps)"
+      ],
+      "dependent_variables": [
+        "decision (compose/discover)",
+        "difference in cumulative reward between composition and discovery policy",
+        "derivative of decision probability with respect to divergence"
+      ],
+      "controlled_variables": [
+        "initial skill library composition",
+        "same environment dynamics",
+        "same discovery learning algorithm"
+      ],
+      "baselines": [
+        {
+          "name": "Always Compose",
+          "description": "Agent always composes existing skills, never discovers new ones."
+        },
+        {
+          "name": "Always Discover",
+          "description": "Agent always discovers a new skill, never composes existing ones."
+        },
+        {
+          "name": "Random Decision",
+          "description": "Agent randomly chooses between compose and discover with equal probability."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cumulative Reward",
+          "definition": "Total reward accumulated over the episode."
+        },
+        {
+          "name": "Decision Probability",
+          "definition": "Probability that the agent chooses to discover new skill, estimated over trials."
+        },
+        {
+          "name": "Regret",
+          "definition": "Difference between cumulative reward of optimal policy and agent's policy."
+        }
+      ],
+      "expected_result": "The probability of discovery shows a sharp sigmoidal increase near a critical divergence d*, and the regret-minimizing policy switches from composition to discovery at d*. The transition sharpens as the skill library size increases.",
+      "falsifying_result": "The probability of discovery increases linearly with divergence, showing no sharp transition, or the transition point varies unpredictably with irrelevant factors such as library size or discovery cost.",
+      "minimum_viable_experiment": "In a gridworld with a 2D latent task parameter space, existing skills cover a simplex. New tasks are placed along a line from inside to outside the convex hull varying divergence continuously. For each divergence value, run the agent and record its decision and cumulative reward. Repeat for different library sizes and discovery costs.",
+      "risks_and_confounds": [
+        "Discovery cost may dominate the divergence effect, masking the transition.",
+        "Skill representations may not be convex, violating the divergence-from-hull assumption.",
+        "Divergence measure (e.g., cosine distance) may not capture task structure relevant for composition.",
+        "The phase transition may depend on the specific learning algorithm for discovery."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles analysis of the composition-discovery tradeoff in LLM agents, deriving primitive definitions, assumptions, and core tradeoffs. It identifies three tensions (hidden dependencies, efficiency vs. flexibility, finite vs. expanding skill sets) and proposes experiments to detect sharp thresholds or phase transitions. The work is well-structured and addresses a timely question, but the mechanism model is ablated, experiments are limited to simple gridworlds, and several confounds remain unaddressed.",
+    "strengths": [
+      "Clear first-principles derivation with explicit primitive definitions and assumptions.",
+      "Falsifiable hypotheses with well-designed experiments targeting sharp boundaries (phase transitions).",
+      "High novelty in exploring the boundary condition between composition and discovery.",
+      "The work directly addresses an open problem in skill-based RL and LLM agent design."
+    ],
+    "weaknesses": [
+      "The mechanism model is ablated (no explicit causal chain or bottleneck identification), weakening the theoretical grounding.",
+      "Experiments are confined to gridworld environments, limiting claims about generalizability to realistic LLM agent scenarios.",
+      "The assumed convex hull of skill representations may not hold in practice; skill spaces are often non-convex and high-dimensional.",
+      "Potential confounds: task novelty may correlate with task difficulty; discovery cost may interact with exploration efficiency.",
+      "The experiments do not account for the future utility of discovered skills beyond the current task, which could influence the tradeoff."
+    ],
+    "questions": [
+      "How is the 'distance' or 'divergence' measure defined in skill space, and is it guaranteed to be computable in real-world settings?",
+      "The assumption that skills are modular with compatible interfaces is strong; how do you handle skills with side effects or non-Markovian dependencies?",
+      "How would the proposed threshold detection method scale to tasks with continuous or infinite skill spaces?"
+    ],
+    "missing_baselines": [
+      "Hierarchical RL baselines such as feudal networks, HIRO, or HAC that automatically discover subpolicies.",
+      "Skill chaining methods like 'skills from demonstrations' or 'language-guided skill discovery'.",
+      "Meta-learning baselines that learn to decide between composition and discovery via a learned policy (e.g., MAML adapted for skill reuse).",
+      "Random skill composition baselines to isolate the effect of interference."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Missing mechanism model",
+    "root_cause": "The mechanism builder was disabled (enable_mechanism_builder: false), so no explicit causal chain or bottleneck analysis was constructed before tension finding.",
+    "violated_principle": "First-principles research must derive an explicit mechanism model (causal chain, variables, bottlenecks) to ground hypotheses and experiments.",
+    "new_or_updated_principle": "All research packages must include a mechanism model with at least one causal step linking input variables to outcome, and identify at least one bottleneck. The mechanism builder must be enabled.",
+    "new_or_updated_skill": "mechanism_builder: constructs a causal chain from primitive definitions and assumptions, identifying key variables, causal steps, and potential bottlenecks before proceeding to tension identification.",
+    "regression_test": "Given a research package with primitive definitions and assumptions, the mechanism builder must produce a non-empty list of causal steps, each with source, relation, target, and explanation. If the mechanism builder is disabled or returns an empty list, the package fails the regression test."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of cross-skill interference above which composition failure rate exceeds discovery success rate, making discovery the preferred strategy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "Is there a critical threshold of task novelty above which discovery of new skills yields higher expected utility than composition, and can an agent learn to detect and exploit this threshold online?",
+        "original_suggestions": [
+          "Make the mechanism variables and causal chain more explicit.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical threshold of task structure divergence at which the optimal decision shifts from composition to discovery, and does this threshold exhibit a phase transition?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": false,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_mechanism_model_ablation",
+    "ablation": "mechanism_builder_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

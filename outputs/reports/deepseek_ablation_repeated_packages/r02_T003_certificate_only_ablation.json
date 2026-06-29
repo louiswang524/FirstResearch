@@ -1,0 +1,1345 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool",
+        "definition": "An atomic functional unit that an agent can invoke to perform a specific operation, such as executing code, reading a file, or querying an API.",
+        "why_primitive": "Tool-use routing is fundamentally about choosing which tool to invoke; thus the concept of a tool is irreducible."
+      },
+      {
+        "name": "Routing",
+        "definition": "The decision process by which an agent selects which tool to use at a given step, based on its internal state and available context.",
+        "why_primitive": "Routing is the core mechanism under study; without it, the agent would have no way to choose among tools."
+      },
+      {
+        "name": "Task Progress",
+        "definition": "The measure of how much of the overall coding goal has been accomplished at any point, typically represented as a set of completed subtasks.",
+        "why_primitive": "Failure of routing is defined relative to task progress; a routing decision fails if it does not advance or hinders progress."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tool capabilities are static and well-defined.",
+        "rationale": "Agents rely on known input-output specifications of tools. If tools had dynamic or unpredictable effects, routing would be fundamentally unstable.",
+        "possible_failure": "In practice, tools may have side effects or non-deterministic behavior (e.g., network latency, random seeds), causing routing to fail unexpectedly."
+      },
+      {
+        "assumption": "The agent has a perfect representation of the current task state.",
+        "rationale": "Routing decisions are based on the agent's internal state. If the state is incomplete or inaccurate, the routing will be misinformed.",
+        "possible_failure": "Real-world coding tasks often involve ambiguous or incomplete specifications, leading to state misrepresentation and routing errors."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Speed vs Accuracy: Choosing a fast but approximate tool (e.g., quick search) vs a slow but precise tool (e.g., full code analysis).",
+        "variables": [
+          "tool cost",
+          "tool precision",
+          "task tolerance for error"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs Exploitation: Trying new tools or strategies vs sticking with known effective ones.",
+        "variables": [
+          "novelty of task",
+          "historical success rate",
+          "remaining task complexity"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "The inherent difficulty and ambiguity of the coding task, including number of subtasks and clarity of requirements."
+      },
+      {
+        "name": "tool_set",
+        "role": "input",
+        "description": "The collection of available tools with their static capabilities, costs, and precision characteristics."
+      },
+      {
+        "name": "state_accuracy",
+        "role": "mediator",
+        "description": "The degree to which the agent's internal representation matches the true task state."
+      },
+      {
+        "name": "routing_policy",
+        "role": "mediator",
+        "description": "The decision-making strategy used to select tools, influenced by tradeoffs like speed vs accuracy and exploration vs exploitation."
+      },
+      {
+        "name": "tool_selection",
+        "role": "mediator",
+        "description": "The specific tool chosen at a given decision step."
+      },
+      {
+        "name": "tool_execution_outcome",
+        "role": "mediator",
+        "description": "The result of executing the selected tool, which can be successful, partially successful, or failed."
+      },
+      {
+        "name": "task_progress",
+        "role": "output",
+        "description": "The cumulative completion of subtasks in the coding goal."
+      },
+      {
+        "name": "routing_failure",
+        "role": "outcome",
+        "description": "A binary indicator of whether the routing decision failed to advance or hindered task progress."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_complexity",
+        "relation": "negatively influences",
+        "target": "state_accuracy",
+        "explanation": "Higher task complexity increases the difficulty of maintaining an accurate internal state."
+      },
+      {
+        "step": "2",
+        "source": "state_accuracy",
+        "relation": "positively influences",
+        "target": "routing_policy",
+        "explanation": "Accurate state representation enables better informed routing decisions."
+      },
+      {
+        "step": "3",
+        "source": "routing_policy",
+        "relation": "determines",
+        "target": "tool_selection",
+        "explanation": "The policy selects a specific tool based on current state and tradeoffs."
+      },
+      {
+        "step": "4",
+        "source": "tool_selection",
+        "relation": "combined with tool_execution context",
+        "target": "tool_execution_outcome",
+        "explanation": "The chosen tool is executed, resulting in an outcome that may or may not meet expectations."
+      },
+      {
+        "step": "5",
+        "source": "tool_execution_outcome",
+        "relation": "affects",
+        "target": "task_progress",
+        "explanation": "The outcome directly impacts the advancement of subtasks."
+      },
+      {
+        "step": "6",
+        "source": "task_progress",
+        "relation": "updates",
+        "target": "state_accuracy",
+        "explanation": "Progress or lack thereof revises the agent's internal state."
+      },
+      {
+        "step": "7",
+        "source": "tool_execution_outcome",
+        "relation": "and routing_policy misalignment",
+        "target": "routing_failure",
+        "explanation": "If the outcome fails to improve progress due to poor tool selection, routing fails."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "State Misrepresentation",
+        "why_it_matters": "If the agent's internal state does not accurately reflect the true task progress and requirements, routing decisions become informed by incorrect information, leading to tool selections that do not advance the task."
+      },
+      {
+        "bottleneck": "Tradeoff Mismatch",
+        "why_it_matters": "When the routing policy overemphasizes speed over accuracy for tasks requiring high precision, or overemphasizes exploitation when exploration is needed to find an effective tool, the selected tool may be suboptimal, causing stagnation or errors in progress."
+      },
+      {
+        "bottleneck": "Tool Capability Mismatch",
+        "why_it_matters": "Even if routing is well-intentioned, if the selected tool's actual capabilities (despite assumed static) do not match the task requirement (e.g., tool has side effects or insufficient scope), execution fails to advance progress."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the routing decision leads to tool execution that does not measurably advance task progress. This failure arises primarily from three bottlenecks: (1) insufficient state accuracy due to task complexity, (2) inappropriate tradeoff balancing in the routing policy given task characteristics, and (3) a mismatch between the selected tool's capabilities and the actual subtask requirement. The causal chain shows that task complexity undermines state accuracy, which then misinforms routing policy, leading to suboptimal tool selection and execution outcomes that fail to improve progress."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Choosing between fast approximate tools and slow precise tools creates a tension that can lead to routing failure if the tradeoff is not aligned with task requirements.",
+      "derived_from": [
+        "core_tradeoffs[0]"
+      ],
+      "why_it_matters": "Misalignment can cause wasted time or errors, as the wrong tool may be selected for the given task tolerance for error.",
+      "what_existing_methods_may_miss": "Many routing policies fix a threshold or use a fixed strategy without dynamically adjusting based on task tolerance for error.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The need to explore new tools vs. exploit known effective ones creates a tension that can lead to suboptimal tool selection if the novelty of the task is not properly assessed.",
+      "derived_from": [
+        "core_tradeoffs[1]"
+      ],
+      "why_it_matters": "Over-exploitation may miss better tools; over-exploration may waste time on ineffective ones.",
+      "what_existing_methods_may_miss": "Static epsilon-greedy or simple heuristics may not adapt to changing task complexity or historical success rates.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that the agent has a perfect representation of the current task state is often violated due to task complexity, leading to misinformed routing decisions.",
+      "derived_from": [
+        "assumptions[1]"
+      ],
+      "why_it_matters": "Routing based on inaccurate state can cause selection of irrelevant tools, hindering task progress.",
+      "what_existing_methods_may_miss": "Many agents rely on a fixed context window without actively verifying or updating state, assuming perfect state.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Tool capabilities are assumed static, but in practice tools may have side effects or non-deterministic outcomes, creating a tension between expected and actual tool behavior.",
+      "derived_from": [
+        "assumptions[0]"
+      ],
+      "why_it_matters": "If a tool behaves unexpectedly, routing decisions based on static capabilities become invalid, leading to execution failures.",
+      "what_existing_methods_may_miss": "Most routing algorithms treat tools as pure functions without modeling side effects or stochastic outcomes.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the alignment between task precision requirement and the speed-accuracy tradeoff of tools causally influence the probability of routing failure?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Identify conditions under which speed-precision tradeoff leads to failure."
+    },
+    {
+      "question": "How can a routing policy dynamically adjust exploration-exploitation balance based on task novelty to minimize suboptimal tool selection?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "Develop a routing policy that adapts exploration to task novelty."
+    },
+    {
+      "question": "What is the quantitative impact of task complexity on state accuracy, and how does state misrepresentation mediate routing failure?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Quantify the impact of state inaccuracies on routing failures."
+    },
+    {
+      "question": "Which types of non-deterministic tool outcomes or side effects most disrupt the effectiveness of routing policies based on static tool capabilities?",
+      "question_type": "descriptive",
+      "source_tension": "T4",
+      "expected_contribution": "Characterize the types of tool side effects that most disrupt routing."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An atomic functional unit that an agent can invoke to perform a specific operation, such as executing code, reading a file, or querying an API.",
+          "why_primitive": "Tool-use routing is fundamentally about choosing which tool to invoke; thus the concept of a tool is irreducible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which an agent selects which tool to use at a given step, based on its internal state and available context.",
+          "why_primitive": "Routing is the core mechanism under study; without it, the agent would have no way to choose among tools."
+        },
+        {
+          "name": "Task Progress",
+          "definition": "The measure of how much of the overall coding goal has been accomplished at any point, typically represented as a set of completed subtasks.",
+          "why_primitive": "Failure of routing is defined relative to task progress; a routing decision fails if it does not advance or hinders progress."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tool capabilities are static and well-defined.",
+          "rationale": "Agents rely on known input-output specifications of tools. If tools had dynamic or unpredictable effects, routing would be fundamentally unstable.",
+          "possible_failure": "In practice, tools may have side effects or non-deterministic behavior (e.g., network latency, random seeds), causing routing to fail unexpectedly."
+        },
+        {
+          "assumption": "The agent has a perfect representation of the current task state.",
+          "rationale": "Routing decisions are based on the agent's internal state. If the state is incomplete or inaccurate, the routing will be misinformed.",
+          "possible_failure": "Real-world coding tasks often involve ambiguous or incomplete specifications, leading to state misrepresentation and routing errors."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty and ambiguity of the coding task, including number of subtasks and clarity of requirements."
+          },
+          {
+            "name": "tool_set",
+            "role": "input",
+            "description": "The collection of available tools with their static capabilities, costs, and precision characteristics."
+          },
+          {
+            "name": "state_accuracy",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal representation matches the true task state."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision-making strategy used to select tools, influenced by tradeoffs like speed vs accuracy and exploration vs exploitation."
+          },
+          {
+            "name": "tool_selection",
+            "role": "mediator",
+            "description": "The specific tool chosen at a given decision step."
+          },
+          {
+            "name": "tool_execution_outcome",
+            "role": "mediator",
+            "description": "The result of executing the selected tool, which can be successful, partially successful, or failed."
+          },
+          {
+            "name": "task_progress",
+            "role": "output",
+            "description": "The cumulative completion of subtasks in the coding goal."
+          },
+          {
+            "name": "routing_failure",
+            "role": "outcome",
+            "description": "A binary indicator of whether the routing decision failed to advance or hindered task progress."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "negatively influences",
+            "target": "state_accuracy",
+            "explanation": "Higher task complexity increases the difficulty of maintaining an accurate internal state."
+          },
+          {
+            "step": "2",
+            "source": "state_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy",
+            "explanation": "Accurate state representation enables better informed routing decisions."
+          },
+          {
+            "step": "3",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_selection",
+            "explanation": "The policy selects a specific tool based on current state and tradeoffs."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection",
+            "relation": "combined with tool_execution context",
+            "target": "tool_execution_outcome",
+            "explanation": "The chosen tool is executed, resulting in an outcome that may or may not meet expectations."
+          },
+          {
+            "step": "5",
+            "source": "tool_execution_outcome",
+            "relation": "affects",
+            "target": "task_progress",
+            "explanation": "The outcome directly impacts the advancement of subtasks."
+          },
+          {
+            "step": "6",
+            "source": "task_progress",
+            "relation": "updates",
+            "target": "state_accuracy",
+            "explanation": "Progress or lack thereof revises the agent's internal state."
+          },
+          {
+            "step": "7",
+            "source": "tool_execution_outcome",
+            "relation": "and routing_policy misalignment",
+            "target": "routing_failure",
+            "explanation": "If the outcome fails to improve progress due to poor tool selection, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State Misrepresentation",
+            "why_it_matters": "If the agent's internal state does not accurately reflect the true task progress and requirements, routing decisions become informed by incorrect information, leading to tool selections that do not advance the task."
+          },
+          {
+            "bottleneck": "Tradeoff Mismatch",
+            "why_it_matters": "When the routing policy overemphasizes speed over accuracy for tasks requiring high precision, or overemphasizes exploitation when exploration is needed to find an effective tool, the selected tool may be suboptimal, causing stagnation or errors in progress."
+          },
+          {
+            "bottleneck": "Tool Capability Mismatch",
+            "why_it_matters": "Even if routing is well-intentioned, if the selected tool's actual capabilities (despite assumed static) do not match the task requirement (e.g., tool has side effects or insufficient scope), execution fails to advance progress."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing decision leads to tool execution that does not measurably advance task progress. This failure arises primarily from three bottlenecks: (1) insufficient state accuracy due to task complexity, (2) inappropriate tradeoff balancing in the routing policy given task characteristics, and (3) a mismatch between the selected tool's capabilities and the actual subtask requirement. The causal chain shows that task complexity undermines state accuracy, which then misinforms routing policy, leading to suboptimal tool selection and execution outcomes that fail to improve progress."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Choosing between fast approximate tools and slow precise tools creates a tension that can lead to routing failure if the tradeoff is not aligned with task requirements.",
+        "derived_from": [
+          "core_tradeoffs[0]"
+        ],
+        "why_it_matters": "Misalignment can cause wasted time or errors, as the wrong tool may be selected for the given task tolerance for error.",
+        "what_existing_methods_may_miss": "Many routing policies fix a threshold or use a fixed strategy without dynamically adjusting based on task tolerance for error.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task complexity where misalignment between task precision requirement and tool precision causes a discontinuous increase in routing failure probability?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a phase transition in routing failure as a function of task complexity and precision mismatch, providing a sharper boundary condition than linear alignment effects."
+      },
+      "hypothesis": {
+        "statement": "Routing failure probability exhibits a sigmoidal (threshold) increase as task complexity increases when the tool's precision is mismatched with task precision, with the threshold occurring at a complexity level that depends on the degree of mismatch.",
+        "predicted_effect": "For a given mismatch, failure rate remains low below a complexity threshold and rises steeply above it, while for matched conditions failure rate remains low across all complexities."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate coding agents on tasks with continuous variation in task complexity (e.g., number of interdependent subtasks from 1 to 20). Agents are equipped with two tools: a fast approximate search tool (low precision) and a slow precise code analysis tool (high precision). For each task complexity level, the agent uses a fixed routing policy that either always selects the fast tool (speed-oriented) or always selects the precise tool (accuracy-oriented). Task precision requirement is either high (exact output) or low (approximate output). The independent variables are task complexity (continuous), routing policy (speed vs accuracy), and task precision requirement (high vs low). The dependent variable is the proportion of steps where tool execution fails to advance task progress (routing failure rate). Controls include tool set, state representation accuracy (perfect), and task structure (linear dependencies).",
+        "independent_variables": [
+          "task complexity (continuous, e.g., number of subtasks 1-20)",
+          "routing policy (speed-oriented vs accuracy-oriented)",
+          "task precision requirement (high vs low)"
+        ],
+        "dependent_variables": [
+          "routing failure rate (proportion of steps failing to advance progress)"
+        ],
+        "controls": [
+          "tool set (fast approximate and slow precise tools)",
+          "state representation accuracy (perfect)",
+          "task structure (linear subtask dependencies)"
+        ],
+        "falsifying_observation": "The routing failure rate increases linearly with task complexity for mismatched conditions, or does not show a clear threshold (e.g., failure rate changes smoothly with no inflection point)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In mismatched conditions (e.g., high precision task with speed-oriented policy), failure rate remains near zero for low complexity (e.g., <5 subtasks) and jumps to high levels (>0.8) for complexity above a critical threshold (e.g., >10 subtasks).",
+          "In matched conditions (e.g., high precision task with accuracy-oriented policy), failure rate remains low (<0.2) across all complexity levels.",
+          "The threshold complexity shifts with the degree of mismatch: larger mismatch yields a lower threshold."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases linearly with complexity for mismatched conditions, without any abrupt change.",
+          "The threshold does not depend on mismatch degree (e.g., same threshold for all mismatches).",
+          "In matched conditions, failure rate also shows a threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment fails to show a threshold (i.e., failure rate increases linearly or no discontinuity), then the hypothesis of a phase transition driven by complexity and precision mismatch is likely incorrect.",
+        "assumption_to_revise": "The assumption that there exists a critical complexity threshold where misalignment becomes catastrophic; the true mechanism may involve gradual degradation or other mediating factors.",
+        "next_question": "How does state accuracy moderate the relationship between task complexity and routing failure in the presence of precision mismatch?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An atomic functional unit that an agent can invoke to perform a specific operation, such as executing code, reading a file, or querying an API.",
+          "why_primitive": "Tool-use routing is fundamentally about choosing which tool to invoke; thus the concept of a tool is irreducible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which an agent selects which tool to use at a given step, based on its internal state and available context.",
+          "why_primitive": "Routing is the core mechanism under study; without it, the agent would have no way to choose among tools."
+        },
+        {
+          "name": "Task Progress",
+          "definition": "The measure of how much of the overall coding goal has been accomplished at any point, typically represented as a set of completed subtasks.",
+          "why_primitive": "Failure of routing is defined relative to task progress; a routing decision fails if it does not advance or hinders progress."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tool capabilities are static and well-defined.",
+          "rationale": "Agents rely on known input-output specifications of tools. If tools had dynamic or unpredictable effects, routing would be fundamentally unstable.",
+          "possible_failure": "In practice, tools may have side effects or non-deterministic behavior (e.g., network latency, random seeds), causing routing to fail unexpectedly."
+        },
+        {
+          "assumption": "The agent has a perfect representation of the current task state.",
+          "rationale": "Routing decisions are based on the agent's internal state. If the state is incomplete or inaccurate, the routing will be misinformed.",
+          "possible_failure": "Real-world coding tasks often involve ambiguous or incomplete specifications, leading to state misrepresentation and routing errors."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty and ambiguity of the coding task, including number of subtasks and clarity of requirements."
+          },
+          {
+            "name": "tool_set",
+            "role": "input",
+            "description": "The collection of available tools with their static capabilities, costs, and precision characteristics."
+          },
+          {
+            "name": "state_accuracy",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal representation matches the true task state."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision-making strategy used to select tools, influenced by tradeoffs like speed vs accuracy and exploration vs exploitation."
+          },
+          {
+            "name": "tool_selection",
+            "role": "mediator",
+            "description": "The specific tool chosen at a given decision step."
+          },
+          {
+            "name": "tool_execution_outcome",
+            "role": "mediator",
+            "description": "The result of executing the selected tool, which can be successful, partially successful, or failed."
+          },
+          {
+            "name": "task_progress",
+            "role": "output",
+            "description": "The cumulative completion of subtasks in the coding goal."
+          },
+          {
+            "name": "routing_failure",
+            "role": "outcome",
+            "description": "A binary indicator of whether the routing decision failed to advance or hindered task progress."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "negatively influences",
+            "target": "state_accuracy",
+            "explanation": "Higher task complexity increases the difficulty of maintaining an accurate internal state."
+          },
+          {
+            "step": "2",
+            "source": "state_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy",
+            "explanation": "Accurate state representation enables better informed routing decisions."
+          },
+          {
+            "step": "3",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_selection",
+            "explanation": "The policy selects a specific tool based on current state and tradeoffs."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection",
+            "relation": "combined with tool_execution context",
+            "target": "tool_execution_outcome",
+            "explanation": "The chosen tool is executed, resulting in an outcome that may or may not meet expectations."
+          },
+          {
+            "step": "5",
+            "source": "tool_execution_outcome",
+            "relation": "affects",
+            "target": "task_progress",
+            "explanation": "The outcome directly impacts the advancement of subtasks."
+          },
+          {
+            "step": "6",
+            "source": "task_progress",
+            "relation": "updates",
+            "target": "state_accuracy",
+            "explanation": "Progress or lack thereof revises the agent's internal state."
+          },
+          {
+            "step": "7",
+            "source": "tool_execution_outcome",
+            "relation": "and routing_policy misalignment",
+            "target": "routing_failure",
+            "explanation": "If the outcome fails to improve progress due to poor tool selection, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State Misrepresentation",
+            "why_it_matters": "If the agent's internal state does not accurately reflect the true task progress and requirements, routing decisions become informed by incorrect information, leading to tool selections that do not advance the task."
+          },
+          {
+            "bottleneck": "Tradeoff Mismatch",
+            "why_it_matters": "When the routing policy overemphasizes speed over accuracy for tasks requiring high precision, or overemphasizes exploitation when exploration is needed to find an effective tool, the selected tool may be suboptimal, causing stagnation or errors in progress."
+          },
+          {
+            "bottleneck": "Tool Capability Mismatch",
+            "why_it_matters": "Even if routing is well-intentioned, if the selected tool's actual capabilities (despite assumed static) do not match the task requirement (e.g., tool has side effects or insufficient scope), execution fails to advance progress."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing decision leads to tool execution that does not measurably advance task progress. This failure arises primarily from three bottlenecks: (1) insufficient state accuracy due to task complexity, (2) inappropriate tradeoff balancing in the routing policy given task characteristics, and (3) a mismatch between the selected tool's capabilities and the actual subtask requirement. The causal chain shows that task complexity undermines state accuracy, which then misinforms routing policy, leading to suboptimal tool selection and execution outcomes that fail to improve progress."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that the agent has a perfect representation of the current task state is often violated due to task complexity, leading to misinformed routing decisions.",
+        "derived_from": [
+          "assumptions[1]"
+        ],
+        "why_it_matters": "Routing based on inaccurate state can cause selection of irrelevant tools, hindering task progress.",
+        "what_existing_methods_may_miss": "Many agents rely on a fixed context window without actively verifying or updating state, assuming perfect state.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what critical threshold of state accuracy does tool-use routing failure transition from recoverable to catastrophic in coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a phase transition in routing failure driven by state accuracy degradation, enabling detection and mitigation of failure regimes."
+      },
+      "hypothesis": {
+        "statement": "There exists a quantifiable critical threshold of state accuracy (e.g., less than 0.3 on a 0-1 scale) below which routing failure becomes irrecoverable, meaning that subsequent tool selections fail to advance task progress with near certainty, independent of other factors.",
+        "predicted_effect": "As state accuracy decreases from high to moderate, routing failure rate increases linearly; but once state accuracy falls below a specific threshold, failure rate jumps abruptly to near 1, exhibiting a phase transition."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed routing policy (e.g., greedy based on state) and a fixed tool set. Vary task complexity to induce a range of state accuracy values. Continuously monitor state accuracy (via ground truth comparison) and routing failure rate (proportion of steps where tool selection does not advance progress). Use a fine-grained grid of state accuracy levels. Analyze the function f(accuracy) → failure_rate to detect a discontinuity or sharp inflection point.",
+        "independent_variables": [
+          "state_accuracy (continuous 0-1, manipulated via task complexity and injected noise)"
+        ],
+        "dependent_variables": [
+          "routing_failure_rate (continuous 0-1 per step or per episode)",
+          "task_progress (cumulative)"
+        ],
+        "controls": [
+          "tool set (same tools and order)",
+          "routing policy (same algorithm and hyperparameters)",
+          "environment deterministic",
+          "initial state and context window"
+        ],
+        "falsifying_observation": "If the relationship between state accuracy and routing failure rate is monotonic and continuous (no sharp threshold), or if a threshold exists but failure remains recoverable (i.e., not catastrophic), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A clear discontinuity or sharp inflection is observed in the failure rate as a function of state accuracy.",
+          "Below the threshold, failure rate is near 1 and task progress stalls permanently.",
+          "Above the threshold, failure rate is moderate and recoverable."
+        ],
+        "rejects_hypothesis": [
+          "No discontinuity or inflection is observed; failure rate changes linearly or smoothly.",
+          "Even at very low state accuracy, failures are not catastrophic (i.e., agent occasionally recovers).",
+          "The threshold, if present, depends on other uncontrolled factors."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then state accuracy alone does not cause a phase transition; routing failure is more gradual.",
+        "assumption_to_revise": "The assumption that state accuracy is the sole driver of catastrophic failure may be wrong; other factors like tool diversity or policy adaptivity dominate.",
+        "next_question": "What combination of factors (e.g., state accuracy, tool set size, policy explorability) produces catastrophic failure regimes in tool-use routing?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An atomic functional unit that an agent can invoke to perform a specific operation, such as executing code, reading a file, or querying an API.",
+          "why_primitive": "Tool-use routing is fundamentally about choosing which tool to invoke; thus the concept of a tool is irreducible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which an agent selects which tool to use at a given step, based on its internal state and available context.",
+          "why_primitive": "Routing is the core mechanism under study; without it, the agent would have no way to choose among tools."
+        },
+        {
+          "name": "Task Progress",
+          "definition": "The measure of how much of the overall coding goal has been accomplished at any point, typically represented as a set of completed subtasks.",
+          "why_primitive": "Failure of routing is defined relative to task progress; a routing decision fails if it does not advance or hinders progress."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tool capabilities are static and well-defined.",
+          "rationale": "Agents rely on known input-output specifications of tools. If tools had dynamic or unpredictable effects, routing would be fundamentally unstable.",
+          "possible_failure": "In practice, tools may have side effects or non-deterministic behavior (e.g., network latency, random seeds), causing routing to fail unexpectedly."
+        },
+        {
+          "assumption": "The agent has a perfect representation of the current task state.",
+          "rationale": "Routing decisions are based on the agent's internal state. If the state is incomplete or inaccurate, the routing will be misinformed.",
+          "possible_failure": "Real-world coding tasks often involve ambiguous or incomplete specifications, leading to state misrepresentation and routing errors."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty and ambiguity of the coding task, including number of subtasks and clarity of requirements."
+          },
+          {
+            "name": "tool_set",
+            "role": "input",
+            "description": "The collection of available tools with their static capabilities, costs, and precision characteristics."
+          },
+          {
+            "name": "state_accuracy",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal representation matches the true task state."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision-making strategy used to select tools, influenced by tradeoffs like speed vs accuracy and exploration vs exploitation."
+          },
+          {
+            "name": "tool_selection",
+            "role": "mediator",
+            "description": "The specific tool chosen at a given decision step."
+          },
+          {
+            "name": "tool_execution_outcome",
+            "role": "mediator",
+            "description": "The result of executing the selected tool, which can be successful, partially successful, or failed."
+          },
+          {
+            "name": "task_progress",
+            "role": "output",
+            "description": "The cumulative completion of subtasks in the coding goal."
+          },
+          {
+            "name": "routing_failure",
+            "role": "outcome",
+            "description": "A binary indicator of whether the routing decision failed to advance or hindered task progress."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "negatively influences",
+            "target": "state_accuracy",
+            "explanation": "Higher task complexity increases the difficulty of maintaining an accurate internal state."
+          },
+          {
+            "step": "2",
+            "source": "state_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy",
+            "explanation": "Accurate state representation enables better informed routing decisions."
+          },
+          {
+            "step": "3",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_selection",
+            "explanation": "The policy selects a specific tool based on current state and tradeoffs."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection",
+            "relation": "combined with tool_execution context",
+            "target": "tool_execution_outcome",
+            "explanation": "The chosen tool is executed, resulting in an outcome that may or may not meet expectations."
+          },
+          {
+            "step": "5",
+            "source": "tool_execution_outcome",
+            "relation": "affects",
+            "target": "task_progress",
+            "explanation": "The outcome directly impacts the advancement of subtasks."
+          },
+          {
+            "step": "6",
+            "source": "task_progress",
+            "relation": "updates",
+            "target": "state_accuracy",
+            "explanation": "Progress or lack thereof revises the agent's internal state."
+          },
+          {
+            "step": "7",
+            "source": "tool_execution_outcome",
+            "relation": "and routing_policy misalignment",
+            "target": "routing_failure",
+            "explanation": "If the outcome fails to improve progress due to poor tool selection, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State Misrepresentation",
+            "why_it_matters": "If the agent's internal state does not accurately reflect the true task progress and requirements, routing decisions become informed by incorrect information, leading to tool selections that do not advance the task."
+          },
+          {
+            "bottleneck": "Tradeoff Mismatch",
+            "why_it_matters": "When the routing policy overemphasizes speed over accuracy for tasks requiring high precision, or overemphasizes exploitation when exploration is needed to find an effective tool, the selected tool may be suboptimal, causing stagnation or errors in progress."
+          },
+          {
+            "bottleneck": "Tool Capability Mismatch",
+            "why_it_matters": "Even if routing is well-intentioned, if the selected tool's actual capabilities (despite assumed static) do not match the task requirement (e.g., tool has side effects or insufficient scope), execution fails to advance progress."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing decision leads to tool execution that does not measurably advance task progress. This failure arises primarily from three bottlenecks: (1) insufficient state accuracy due to task complexity, (2) inappropriate tradeoff balancing in the routing policy given task characteristics, and (3) a mismatch between the selected tool's capabilities and the actual subtask requirement. The causal chain shows that task complexity undermines state accuracy, which then misinforms routing policy, leading to suboptimal tool selection and execution outcomes that fail to improve progress."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The need to explore new tools vs. exploit known effective ones creates a tension that can lead to suboptimal tool selection if the novelty of the task is not properly assessed.",
+        "derived_from": [
+          "core_tradeoffs[1]"
+        ],
+        "why_it_matters": "Over-exploitation may miss better tools; over-exploration may waste time on ineffective ones.",
+        "what_existing_methods_may_miss": "Static epsilon-greedy or simple heuristics may not adapt to changing task complexity or historical success rates.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what level of task novelty does the exploration-exploitation tradeoff in tool-use routing cause a phase transition in the probability of routing failure?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a critical novelty threshold that predicts a sharp increase in routing failures due to insufficient exploration."
+      },
+      "hypothesis": {
+        "statement": "There exists a novelty threshold τ such that for task novelty > τ, the probability of routing failure increases nonlinearly (e.g., sigmoid) from a baseline to near-certainty, and this threshold is determined by the ratio of tool outcome entropy to the maximum possible entropy.",
+        "predicted_effect": "Tasks with novelty above τ exhibit a disproportionate increase in routing failures compared to those below τ, regardless of the routing policy."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement two coding agents with identical tool sets and base routing, except one uses a fixed epsilon=0.1 greedy policy and the other uses an adaptive epsilon = max(0.05, min(0.5, 1 - entropy_normalized)) where entropy is computed over the last 10 tool outcome categories. Test on 200 coding tasks with novelty levels evenly spaced from 0 to 1 (20 levels, 10 tasks each). Measure routing failure rate per novelty level. Fit a sigmoidal function to the failure rate vs. novelty and test for a statistically significant inflection point.",
+        "independent_variables": [
+          "novelty level (0 to 1 in steps of 0.05)",
+          "routing policy (fixed vs adaptive)"
+        ],
+        "dependent_variables": [
+          "routing failure rate per task",
+          "presence of a statistically significant sigmoidal threshold"
+        ],
+        "controls": [
+          "same tool set",
+          "same coding tasks per novelty level",
+          "same initial agent state",
+          "same training environment",
+          "same random seed for each task"
+        ],
+        "falsifying_observation": "If the failure rate increases linearly with novelty without a clear sigmoidal threshold, or if the adaptive policy does not exhibit a sharper threshold than the fixed policy."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Both policies show a sigmoidal increase in failure rate with novelty, with a clear inflection point.",
+          "The adaptive policy shows a higher novelty threshold τ_adaptive > τ_fixed, indicating better handling of moderate novelty.",
+          "The threshold is consistent across multiple random seeds."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases linearly with novelty, with no discernible threshold.",
+          "The adaptive policy shows no threshold or a lower threshold than the fixed policy.",
+          "The threshold is not statistically significant or not reproducible."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no significant threshold is found, or if the adaptive policy does not exhibit a higher threshold than the fixed policy.",
+        "assumption_to_revise": "The assumption that tool outcome entropy is a reliable and actionable measure of task novelty for routing adaptation.",
+        "next_question": "What alternative measures of task novelty (e.g., frequency of unseen tool combinations, variance in execution time) can produce a sharper phase transition in routing failure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An atomic functional unit that an agent can invoke to perform a specific operation, such as executing code, reading a file, or querying an API.",
+          "why_primitive": "Tool-use routing is fundamentally about choosing which tool to invoke; thus the concept of a tool is irreducible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which an agent selects which tool to use at a given step, based on its internal state and available context.",
+          "why_primitive": "Routing is the core mechanism under study; without it, the agent would have no way to choose among tools."
+        },
+        {
+          "name": "Task Progress",
+          "definition": "The measure of how much of the overall coding goal has been accomplished at any point, typically represented as a set of completed subtasks.",
+          "why_primitive": "Failure of routing is defined relative to task progress; a routing decision fails if it does not advance or hinders progress."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tool capabilities are static and well-defined.",
+          "rationale": "Agents rely on known input-output specifications of tools. If tools had dynamic or unpredictable effects, routing would be fundamentally unstable.",
+          "possible_failure": "In practice, tools may have side effects or non-deterministic behavior (e.g., network latency, random seeds), causing routing to fail unexpectedly."
+        },
+        {
+          "assumption": "The agent has a perfect representation of the current task state.",
+          "rationale": "Routing decisions are based on the agent's internal state. If the state is incomplete or inaccurate, the routing will be misinformed.",
+          "possible_failure": "Real-world coding tasks often involve ambiguous or incomplete specifications, leading to state misrepresentation and routing errors."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty and ambiguity of the coding task, including number of subtasks and clarity of requirements."
+          },
+          {
+            "name": "tool_set",
+            "role": "input",
+            "description": "The collection of available tools with their static capabilities, costs, and precision characteristics."
+          },
+          {
+            "name": "state_accuracy",
+            "role": "mediator",
+            "description": "The degree to which the agent's internal representation matches the true task state."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision-making strategy used to select tools, influenced by tradeoffs like speed vs accuracy and exploration vs exploitation."
+          },
+          {
+            "name": "tool_selection",
+            "role": "mediator",
+            "description": "The specific tool chosen at a given decision step."
+          },
+          {
+            "name": "tool_execution_outcome",
+            "role": "mediator",
+            "description": "The result of executing the selected tool, which can be successful, partially successful, or failed."
+          },
+          {
+            "name": "task_progress",
+            "role": "output",
+            "description": "The cumulative completion of subtasks in the coding goal."
+          },
+          {
+            "name": "routing_failure",
+            "role": "outcome",
+            "description": "A binary indicator of whether the routing decision failed to advance or hindered task progress."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "negatively influences",
+            "target": "state_accuracy",
+            "explanation": "Higher task complexity increases the difficulty of maintaining an accurate internal state."
+          },
+          {
+            "step": "2",
+            "source": "state_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy",
+            "explanation": "Accurate state representation enables better informed routing decisions."
+          },
+          {
+            "step": "3",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_selection",
+            "explanation": "The policy selects a specific tool based on current state and tradeoffs."
+          },
+          {
+            "step": "4",
+            "source": "tool_selection",
+            "relation": "combined with tool_execution context",
+            "target": "tool_execution_outcome",
+            "explanation": "The chosen tool is executed, resulting in an outcome that may or may not meet expectations."
+          },
+          {
+            "step": "5",
+            "source": "tool_execution_outcome",
+            "relation": "affects",
+            "target": "task_progress",
+            "explanation": "The outcome directly impacts the advancement of subtasks."
+          },
+          {
+            "step": "6",
+            "source": "task_progress",
+            "relation": "updates",
+            "target": "state_accuracy",
+            "explanation": "Progress or lack thereof revises the agent's internal state."
+          },
+          {
+            "step": "7",
+            "source": "tool_execution_outcome",
+            "relation": "and routing_policy misalignment",
+            "target": "routing_failure",
+            "explanation": "If the outcome fails to improve progress due to poor tool selection, routing fails."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "State Misrepresentation",
+            "why_it_matters": "If the agent's internal state does not accurately reflect the true task progress and requirements, routing decisions become informed by incorrect information, leading to tool selections that do not advance the task."
+          },
+          {
+            "bottleneck": "Tradeoff Mismatch",
+            "why_it_matters": "When the routing policy overemphasizes speed over accuracy for tasks requiring high precision, or overemphasizes exploitation when exploration is needed to find an effective tool, the selected tool may be suboptimal, causing stagnation or errors in progress."
+          },
+          {
+            "bottleneck": "Tool Capability Mismatch",
+            "why_it_matters": "Even if routing is well-intentioned, if the selected tool's actual capabilities (despite assumed static) do not match the task requirement (e.g., tool has side effects or insufficient scope), execution fails to advance progress."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the routing decision leads to tool execution that does not measurably advance task progress. This failure arises primarily from three bottlenecks: (1) insufficient state accuracy due to task complexity, (2) inappropriate tradeoff balancing in the routing policy given task characteristics, and (3) a mismatch between the selected tool's capabilities and the actual subtask requirement. The causal chain shows that task complexity undermines state accuracy, which then misinforms routing policy, leading to suboptimal tool selection and execution outcomes that fail to improve progress."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Tool capabilities are assumed static, but in practice tools may have side effects or non-deterministic outcomes, creating a tension between expected and actual tool behavior.",
+        "derived_from": [
+          "assumptions[0]"
+        ],
+        "why_it_matters": "If a tool behaves unexpectedly, routing decisions based on static capabilities become invalid, leading to execution failures.",
+        "what_existing_methods_may_miss": "Most routing algorithms treat tools as pure functions without modeling side effects or stochastic outcomes.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what threshold of task complexity do state-altering side effects cause a phase transition in routing failure rates compared to non-deterministic outputs?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a complexity threshold beyond which state-altering side effects cause a disproportionate increase in routing failures."
+      },
+      "hypothesis": {
+        "statement": "For coding tasks below a certain complexity threshold (e.g., number of interdependent subtasks), routing policies based on static tool capabilities experience similar failure rates regardless of whether tools produce non-deterministic outputs or state-altering side effects. Above that threshold, side effects cause a nonlinear increase in routing failure rates (a phase transition), while non-deterministic outputs lead to only a gradual linear degradation.",
+        "predicted_effect": "A clear inflection point in the failure rate vs. task complexity curve for side effects, but not for non-deterministic outputs."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated coding environment, vary task complexity (number of interdependent subtasks from 1 to 10) and tool unpredictability type (side effects vs. non-deterministic outputs). Use a fixed static routing policy. Measure routing failure rate per step and overall task progress. Repeat 50 runs per condition.",
+        "independent_variables": [
+          "task complexity (number of interdependent subtasks)",
+          "tool unpredictability type (side effect vs. non-deterministic output)"
+        ],
+        "dependent_variables": [
+          "routing failure rate",
+          "task progress (subtasks completed)"
+        ],
+        "controls": [
+          "same static routing policy",
+          "same tool set size",
+          "same initial state representation",
+          "same environment setup"
+        ],
+        "falsifying_observation": "If the failure rate vs. complexity curve for side effects does not exhibit a statistically significant inflection point (i.e., a threshold beyond which the slope increases sharply), while the non-deterministic curve remains linear, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Side effects condition shows a sigmoidal or exponential increase in failure rate after a complexity threshold (e.g., 5 subtasks).",
+          "Non-deterministic outputs condition shows a linear increase in failure rate with complexity.",
+          "Below threshold, failure rates are comparable between conditions."
+        ],
+        "rejects_hypothesis": [
+          "Both conditions show linear increases with similar slopes.",
+          "No clear threshold in side effects condition; failure rate increases gradually.",
+          "Side effects condition does not show a significantly steeper increase beyond any point."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed, revise the hypothesis that side effects are fundamentally different; perhaps cumulative frequency matters more than task complexity.",
+        "assumption_to_revise": "The assumption that the severity of side effects interacts with task complexity in a threshold manner.",
+        "next_question": "Does the frequency or magnitude of side effects, rather than task complexity per se, determine the onset of severe routing failures?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Routing failure probability exhibits a sigmoidal (threshold) increase as task complexity increases when the tool's precision is mismatched with task precision, with the threshold occurring at a complexity level that depends on the degree of mismatch.",
+      "independent_variables": [
+        "task complexity (number of interdependent subtasks)",
+        "routing policy (speed-oriented vs accuracy-oriented)",
+        "task precision requirement (high vs low)"
+      ],
+      "dependent_variables": [
+        "routing failure rate (proportion of steps where tool execution fails to advance task progress)"
+      ],
+      "controlled_variables": [
+        "tool set (fast approximate and slow precise tools)",
+        "state representation accuracy (perfect)",
+        "task structure (linear subtask dependencies)",
+        "agent architecture (identical across conditions)"
+      ],
+      "baselines": [
+        {
+          "name": "Matched Precision",
+          "description": "High precision task requirement with accuracy-oriented routing policy, ensuring tool precision matches task precision."
+        },
+        {
+          "name": "Low Complexity",
+          "description": "Task complexity set to 1 subtask, to establish baseline failure rate without complexity effects."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing Failure Rate",
+          "definition": "Proportion of decision steps where the selected tool's execution does not advance or hinders task progress, measured across multiple runs."
+        }
+      ],
+      "expected_result": "In the mismatched condition (high precision task with speed-oriented policy), routing failure rate remains below 0.2 for task complexity below a threshold (e.g., 5 subtasks) and rises sharply above 0.8 for complexity above the threshold (e.g., 10 subtasks). In the matched condition (high precision task with accuracy-oriented policy), failure rate remains below 0.2 across all complexity levels.",
+      "falsifying_result": "The routing failure rate increases linearly with task complexity in the mismatched condition, or the matched condition also shows a sigmoidal increase, or the threshold does not depend on the degree of mismatch.",
+      "minimum_viable_experiment": "Simulate a coding agent with perfect state representation and a fixed tool set (fast approximate and slow precise) on tasks of varying complexity (subtask counts 1, 5, 10, 15, 20) under two conditions: mismatched (high precision task with speed-oriented policy) and matched (high precision task with accuracy-oriented policy). Record routing failure rate per condition across multiple trials.",
+      "risks_and_confounds": [
+        "Tool execution time may vary and affect routing policy tradeoffs; use simulated deterministic execution times.",
+        "Definition of 'advancing progress' may be subjective; use objective subtask completion criteria.",
+        "Limited number of complexity levels may miss threshold; choose levels based on pilot experiments.",
+        "Perfect state representation may be unrealistic; but it's controlled to isolate routing failure causes."
+      ]
+    },
+    {
+      "hypothesis": "There exists a novelty threshold τ such that for task novelty > τ, the probability of routing failure increases nonlinearly (e.g., sigmoid) from a baseline to near-certainty, and this threshold is determined by the ratio of tool outcome entropy to the maximum possible entropy.",
+      "independent_variables": [
+        "novelty level (0 to 1 in steps of 0.05)",
+        "routing policy (fixed epsilon=0.1 greedy vs adaptive epsilon based on entropy ratio)"
+      ],
+      "dependent_variables": [
+        "routing failure rate per task",
+        "presence of a statistically significant sigmoidal threshold (inflection point)"
+      ],
+      "controlled_variables": [
+        "same tool set for both agents",
+        "same coding tasks per novelty level",
+        "same initial agent state",
+        "same training environment",
+        "same random seed for each task",
+        "same number of tasks per novelty level (10 tasks each)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed epsilon-greedy",
+          "description": "A routing policy using a constant exploration rate epsilon=0.1, serving as a baseline against which the adaptive policy is compared."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "The proportion of tasks at a given novelty level where the agent's tool selection fails to advance or hinders task progress (binary outcome per task)."
+        },
+        {
+          "name": "Sigmoidal inflection point",
+          "definition": "The novelty level at which the routing failure rate transitions from baseline to near-certainty, estimated by fitting a sigmoid function to the failure rate vs. novelty data."
+        }
+      ],
+      "expected_result": "Both routing policies exhibit a sigmoidal increase in failure rate with novelty, with a clear inflection point. The adaptive policy (entropy-based) shows a higher novelty threshold τ_adaptive > τ_fixed, indicating better handling of moderate novelty. The threshold is consistent across multiple random seeds.",
+      "falsifying_result": "The failure rate increases linearly with novelty without a clear sigmoidal threshold, or the adaptive policy does not exhibit a sharper threshold (i.e., τ_adaptive <= τ_fixed), or the inflection point is not statistically significant or not reproducible.",
+      "minimum_viable_experiment": "Implement two coding agents with identical tool sets and base routing: one uses a fixed epsilon=0.1 greedy policy, the other uses an adaptive epsilon = max(0.05, min(0.5, 1 - entropy_normalized)) where entropy is computed over the last 10 tool outcome categories. Test on 200 coding tasks with novelty levels evenly spaced from 0 to 1 (20 levels, 10 tasks each). Measure routing failure rate per novelty level. Fit a sigmoidal function to failure rate vs. novelty and test for a statistically significant inflection point.",
+      "risks_and_confounds": [
+        "Task difficulty may confound novelty; ensure novelty measure is independent of difficulty.",
+        "Random seed variation may affect robustness; use multiple seeds and aggregate.",
+        "The fixed epsilon value may not be optimal; use a commonly accepted baseline.",
+        "The adaptive policy's entropy computation may be sensitive to history length; verify with sensitivity analysis."
+      ]
+    },
+    {
+      "hypothesis": "There exists a quantifiable critical threshold of state accuracy (e.g., less than 0.3 on a 0-1 scale) below which routing failure becomes irrecoverable, meaning that subsequent tool selections fail to advance task progress with near certainty, independent of other factors.",
+      "independent_variables": [
+        "state_accuracy (continuous, 0-1, manipulated via injected noise into agent's state representation)"
+      ],
+      "dependent_variables": [
+        "routing_failure_rate (proportion of steps where tool selection does not advance task progress per episode)",
+        "task_progress (cumulative completion of subtasks)"
+      ],
+      "controlled_variables": [
+        "tool set (fixed set of 3-5 tools with static capabilities)",
+        "routing policy (greedy selection based on estimated state, no exploration)",
+        "environment (deterministic, no external randomness)",
+        "initial state and context window (fixed length, identical across trials)",
+        "task (a simple multi-step coding task, e.g., refactor a function with 5 subtasks)"
+      ],
+      "baselines": [
+        {
+          "name": "Oracle routing",
+          "description": "Routing decisions made using the true state (perfect accuracy) to establish optimal failure rate."
+        },
+        {
+          "name": "Random routing",
+          "description": "Tool selected uniformly at random to establish worst-case failure rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Mean routing failure rate per episode",
+          "definition": "Average proportion of decisions that do not advance task progress over multiple episodes at each accuracy level."
+        },
+        {
+          "name": "Catastrophic failure proportion",
+          "definition": "Fraction of episodes where task progress stalls permanently (no progress in last 10 steps)."
+        }
+      ],
+      "expected_result": "A sharp discontinuity (phase transition) in routing failure rate as a function of state accuracy, e.g., failure rate jumps from ~0.2 to ~0.95 at accuracy around 0.3. Below threshold, catastrophic failure dominates.",
+      "falsifying_result": "The relationship between state accuracy and routing failure rate is monotonic and continuous (e.g., linear or sigmoidal without abrupt jump), or a threshold exists but failure remains recoverable (episodes can still show progress even at very low accuracy).",
+      "minimum_viable_experiment": "Simulate a coding agent on a simple task (e.g., write a Python function that meets 5 requirements) with a fixed tool set (e.g., execute_code, read_file, write_file, search_docs) and a greedy routing policy. Systematically vary state accuracy by adding Gaussian noise to the true state vector, from 0.0 to 1.0 in steps of 0.1, with 100 episodes per accuracy level. Record per-step failure rate and cumulative progress. Analyze the function f(accuracy) -> failure_rate to detect a discontinuity.",
+      "risks_and_confounds": [
+        "Task complexity might naturally degrade state accuracy in a non-uniform way; use explicit noise injection to directly control accuracy and avoid confounding.",
+        "The threshold may depend on the routing policy (e.g., greedy vs. epsilon-greedy); use a single fixed policy to isolate state accuracy effect.",
+        "The tool set size and specificity might influence failure rates; keep tool set constant.",
+        "The deterministic environment may not generalize to stochastic settings; note this as a limitation."
+      ]
+    },
+    {
+      "hypothesis": "For coding tasks below a certain complexity threshold (e.g., number of interdependent subtasks), routing policies based on static tool capabilities experience similar failure rates regardless of whether tools produce non-deterministic outputs or state-altering side effects. Above that threshold, side effects cause a nonlinear increase in routing failure rates (a phase transition), while non-deterministic outputs lead to only a gradual linear degradation.",
+      "independent_variables": [
+        "task complexity (number of interdependent subtasks)",
+        "tool unpredictability type (side effect vs. non-deterministic output)"
+      ],
+      "dependent_variables": [
+        "routing failure rate",
+        "task progress (subtasks completed)"
+      ],
+      "controlled_variables": [
+        "same static routing policy",
+        "same tool set size",
+        "same initial state representation",
+        "same environment setup",
+        "same number of tools",
+        "same tool capabilities (except unpredictability type)"
+      ],
+      "baselines": [
+        {
+          "name": "deterministic tools",
+          "description": "Tools with no unpredictability, always producing the same output for given input."
+        },
+        {
+          "name": "random routing",
+          "description": "Routing policy that selects tools uniformly at random, as a lower bound on performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing failure rate",
+          "definition": "Proportion of decision steps where the tool execution outcome does not advance or hinders task progress, as judged by a ground-truth oracle."
+        },
+        {
+          "name": "task progress",
+          "definition": "Number of subtasks completed at the end of the episode, normalized by total subtasks."
+        }
+      ],
+      "expected_result": "For side effects, the failure rate vs. complexity curve shows a sharp increase (inflection point) beyond a threshold (e.g., 5 subtasks), while for non-deterministic outputs the increase is linear. Below threshold, failure rates are comparable between conditions.",
+      "falsifying_result": "The failure rate vs. complexity curve for side effects does not exhibit a statistically significant inflection point (i.e., slope does not increase sharply beyond any point), or both conditions show similar linear increases with no threshold difference.",
+      "minimum_viable_experiment": "In a simulated coding environment, vary task complexity (number of interdependent subtasks from 1 to 10) and tool unpredictability type (side effects vs. non-deterministic outputs). Use a fixed static routing policy. Measure routing failure rate per step and overall task progress. Repeat 50 runs per condition. Analyze the failure rate curve for side effects to detect a phase transition using piecewise linear regression or change-point detection.",
+      "risks_and_confounds": [
+        "Learning effects if the same agent is reused across conditions (use separate instances).",
+        "Confounding between complexity and number of steps needed (control for max steps).",
+        "Non-linearities due to tool execution time or cost (not relevant to failure rate).",
+        "Subjectivity in defining 'interdependent subtasks' (use clear dependency graph).",
+        "Possibility that side effects severity varies with complexity (standardize side effect magnitude)."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of task complexity where misalignment between task precision requirement and tool precision causes a discontinuous increase in routing failure probability?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of task novelty does the exploration-exploitation tradeoff in tool-use routing cause a phase transition in the probability of routing failure?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical threshold of state accuracy does tool-use routing failure transition from recoverable to catastrophic in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of task complexity do state-altering side effects cause a phase transition in routing failure rates compared to non-deterministic outputs?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

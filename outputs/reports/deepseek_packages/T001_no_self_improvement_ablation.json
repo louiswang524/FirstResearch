@@ -1,0 +1,1323 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable unit of behavior that maps states to actions, intended to achieve a specific subgoal or effect in an environment.",
+        "why_primitive": "It is the fundamental building block for agent capabilities; cannot be decomposed further without losing functional meaning."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of generating a new skill from scratch, typically through learning from interaction data, exploration, or self-supervised methods.",
+        "why_primitive": "Represents the fundamental act of acquiring novel capabilities, distinct from reusing existing ones."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a higher-level task that none alone can accomplish.",
+        "why_primitive": "Captures the essential mechanism of reusing and coordinating existing knowledge; a core operation for efficient behavior."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are modular and composable",
+        "rationale": "For composition to be viable, skills must have well-defined interfaces (preconditions and effects) such that they can be chained without unintended interference.",
+        "possible_failure": "If skills have side effects or tight coupling, composition may fail or lead to incorrect behavior, forcing discovery."
+      },
+      {
+        "assumption": "Discovery incurs a higher computational cost than composition",
+        "rationale": "Discovery typically involves exploration, optimization, or model fitting, which requires more resources (time, data, computation) than simply retrieving and executing known skills.",
+        "possible_failure": "If discovery becomes cheap (e.g., via rapid meta-learning), the tradeoff may shift, making discovery always preferable."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Discovery cost vs. composition shortfall",
+        "variables": [
+          "discovery_cost",
+          "composition_error",
+          "task_utility"
+        ]
+      },
+      {
+        "tradeoff": "Skill generality vs. task-specific optimality",
+        "variables": [
+          "skill_generality",
+          "task_specific_performance",
+          "reusability"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which the task is unfamiliar relative to existing skills"
+      },
+      {
+        "name": "discovery_cost",
+        "role": "input",
+        "description": "Computational and time cost of learning a new skill"
+      },
+      {
+        "name": "skill_generality",
+        "role": "input",
+        "description": "How general each existing skill is across different contexts"
+      },
+      {
+        "name": "composition_error",
+        "role": "mediator",
+        "description": "Expected error or failure probability when composing existing skills"
+      },
+      {
+        "name": "discover_utility",
+        "role": "mediator",
+        "description": "Expected utility from discovering a new skill"
+      },
+      {
+        "name": "compose_utility",
+        "role": "mediator",
+        "description": "Expected utility from composing existing skills"
+      },
+      {
+        "name": "decision",
+        "role": "output",
+        "description": "Binary decision: 1 for discovery, 0 for composition"
+      },
+      {
+        "name": "achieved_utility",
+        "role": "outcome",
+        "description": "Actual utility obtained after executing the decision"
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_novelty",
+        "relation": "increases",
+        "target": "discover_utility",
+        "explanation": "Higher novelty makes existing skills less applicable, increasing the expected benefit of discovering a new skill"
+      },
+      {
+        "step": "2",
+        "source": "discovery_cost",
+        "relation": "decreases",
+        "target": "discover_utility",
+        "explanation": "Higher cost reduces the net utility of discovery"
+      },
+      {
+        "step": "3",
+        "source": "skill_generality",
+        "relation": "decreases",
+        "target": "composition_error",
+        "explanation": "More general skills are more robust when composed, lowering error probability"
+      },
+      {
+        "step": "4",
+        "source": "composition_error",
+        "relation": "decreases",
+        "target": "compose_utility",
+        "explanation": "Higher expected error reduces the utility of composition"
+      },
+      {
+        "step": "5",
+        "source": "discover_utility",
+        "relation": "increases",
+        "target": "decision",
+        "explanation": "Higher utility from discovery makes the agent more likely to choose discovery"
+      },
+      {
+        "step": "6",
+        "source": "compose_utility",
+        "relation": "increases",
+        "target": "decision",
+        "explanation": "Higher utility from composition makes the agent more likely to choose composition"
+      },
+      {
+        "step": "7",
+        "source": "decision",
+        "relation": "determines",
+        "target": "achieved_utility",
+        "explanation": "The chosen action determines the final utility realized"
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Accurate estimation of composition error",
+        "why_it_matters": "If the agent overestimates composition error, it may unnecessarily discover a skill; if it underestimates, it may compose and fail."
+      },
+      {
+        "bottleneck": "Accurate estimation of discovery cost",
+        "why_it_matters": "Discovery cost is often unknown beforehand; underestimation can lead to wasted resources, overestimation can miss useful innovations."
+      },
+      {
+        "bottleneck": "Skill modularity assumption",
+        "why_it_matters": "If skills are not truly modular (e.g., have side effects), composition may fail even if individually correct, undermining the comparison."
+      }
+    ],
+    "mechanism_summary": "The agent decides to discover a new skill when the expected utility of discovery (based on task novelty and discovery cost) exceeds the expected utility of composition (based on composition error which depends on skill generality). The key tradeoff is between the cost of learning and the risk of composition failure."
+  },
+  "tensions": [
+    {
+      "tension_id": "tension-1",
+      "statement": "The assumption that skills are modular and composable is under-tested; in practice, skills may have side effects or dependencies that cause composition to fail, undermining the core mechanism.",
+      "derived_from": [
+        "Skills are modular and composable",
+        "Skill modularity assumption (bottleneck)"
+      ],
+      "why_it_matters": "If skills are not truly modular, the composition pathway may be unreliable, making the discovery vs. composition tradeoff invalid and potentially leading to catastrophic failures in multi-skill tasks.",
+      "what_existing_methods_may_miss": "Existing skill-based approaches often assume clean interfaces without rigorously testing for side effects or emergent interactions between skills.",
+      "testability": 4
+    },
+    {
+      "tension_id": "tension-2",
+      "statement": "The mechanism assumes discovery cost is higher than composition cost, but this may not hold if meta-learning or rapid adaptation reduces discovery cost, effectively making discovery always preferable.",
+      "derived_from": [
+        "Discovery incurs a higher computational cost than composition",
+        "Discovery cost vs. composition shortfall tradeoff"
+      ],
+      "why_it_matters": "If discovery becomes cheap, the tradeoff collapses, and the agent would never compose, reducing efficiency gains from reuse and possibly limiting long-term skill breadth.",
+      "what_existing_methods_may_miss": "Most models treat discovery cost as fixed, but advances in few-shot learning could invert the cost dynamic, making static assumptions obsolete.",
+      "testability": 5
+    },
+    {
+      "tension_id": "tension-3",
+      "statement": "The inverse relationship between skill generality and composition error is assumed monotonic, but highly general skills may introduce ambiguity or abstraction mismatch that increases composition error.",
+      "derived_from": [
+        "skill_generality decreases composition_error",
+        "Skill generality vs. task-specific optimality tradeoff"
+      ],
+      "why_it_matters": "If the relationship is non-monotonic, the agent's estimate of composition utility could be systematically wrong, leading to suboptimal decisions between discovery and composition.",
+      "what_existing_methods_may_miss": "Current algorithms typically assume generality is beneficial, ignoring potential negative effects such as over-generalization or loss of task-specific details.",
+      "testability": 3
+    },
+    {
+      "tension_id": "tension-4",
+      "statement": "The binary decision between discovery and composition ignores hybrid strategies (e.g., partial discovery with reuse), which may yield higher utility than either pure strategy.",
+      "derived_from": [
+        "decision is binary",
+        "Core tradeoffs: discovery cost vs. composition shortfall"
+      ],
+      "why_it_matters": "Binary choices restrict the agent to suboptimal extremes; a continuum of strategies could better balance cost and error, but the model cannot capture this.",
+      "what_existing_methods_may_miss": "Many real systems use curriculum learning or progressive skill acquisition that blends discovery and composition; a binary model fails to account for these strategies.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does the presence of side effects between skills (e.g., shared parameters or hidden state) causally increase composition error beyond the additive error of individual skills, thereby reducing the utility of composition relative to discovery?",
+      "question_type": "causal",
+      "source_tension": "tension-1",
+      "expected_contribution": "Tests whether skill non-modularity undermines the core composition mechanism, which would invalidate the discovery vs. composition tradeoff and motivate explicit modeling of skill interactions."
+    },
+    {
+      "question": "How does meta-learning that reduces discovery cost affect the relative frequency of discovery vs. composition decisions in an agent trained on a sequence of tasks with varying novelty?",
+      "question_type": "descriptive",
+      "source_tension": "tension-2",
+      "expected_contribution": "Empirically assesses whether dynamic discovery costs can invert the assumed cost hierarchy, revealing conditions under which the agent might always prefer discovery and lose reuse benefits."
+    },
+    {
+      "question": "Is the relationship between skill generality and composition error monotonic, or does increasing generality beyond a threshold increase composition error due to abstraction mismatch or ambiguity?",
+      "question_type": "diagnostic",
+      "source_tension": "tension-3",
+      "expected_contribution": "Identifies whether the agent's utility estimate for composition can be systematically biased by non-monotonicity, which would require revising how generality is incorporated into decision rules."
+    },
+    {
+      "question": "Can a decision policy that allows partial discovery (e.g., fine-tuning existing skills) achieve higher achieved utility than a binary discovery-or-compose policy across a range of task distributions?",
+      "question_type": "benchmark",
+      "source_tension": "tension-4",
+      "expected_contribution": "Provides evidence that the binary decision assumption limits performance, motivating the development of continuous or hybrid strategies and updating the core tradeoff model."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior that maps states to actions, intended to achieve a specific subgoal or effect in an environment.",
+          "why_primitive": "It is the fundamental building block for agent capabilities; cannot be decomposed further without losing functional meaning."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill from scratch, typically through learning from interaction data, exploration, or self-supervised methods.",
+          "why_primitive": "Represents the fundamental act of acquiring novel capabilities, distinct from reusing existing ones."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a higher-level task that none alone can accomplish.",
+          "why_primitive": "Captures the essential mechanism of reusing and coordinating existing knowledge; a core operation for efficient behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable",
+          "rationale": "For composition to be viable, skills must have well-defined interfaces (preconditions and effects) such that they can be chained without unintended interference.",
+          "possible_failure": "If skills have side effects or tight coupling, composition may fail or lead to incorrect behavior, forcing discovery."
+        },
+        {
+          "assumption": "Discovery incurs a higher computational cost than composition",
+          "rationale": "Discovery typically involves exploration, optimization, or model fitting, which requires more resources (time, data, computation) than simply retrieving and executing known skills.",
+          "possible_failure": "If discovery becomes cheap (e.g., via rapid meta-learning), the tradeoff may shift, making discovery always preferable."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task is unfamiliar relative to existing skills"
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Computational and time cost of learning a new skill"
+          },
+          {
+            "name": "skill_generality",
+            "role": "input",
+            "description": "How general each existing skill is across different contexts"
+          },
+          {
+            "name": "composition_error",
+            "role": "mediator",
+            "description": "Expected error or failure probability when composing existing skills"
+          },
+          {
+            "name": "discover_utility",
+            "role": "mediator",
+            "description": "Expected utility from discovering a new skill"
+          },
+          {
+            "name": "compose_utility",
+            "role": "mediator",
+            "description": "Expected utility from composing existing skills"
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary decision: 1 for discovery, 0 for composition"
+          },
+          {
+            "name": "achieved_utility",
+            "role": "outcome",
+            "description": "Actual utility obtained after executing the decision"
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "discover_utility",
+            "explanation": "Higher novelty makes existing skills less applicable, increasing the expected benefit of discovering a new skill"
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "discover_utility",
+            "explanation": "Higher cost reduces the net utility of discovery"
+          },
+          {
+            "step": "3",
+            "source": "skill_generality",
+            "relation": "decreases",
+            "target": "composition_error",
+            "explanation": "More general skills are more robust when composed, lowering error probability"
+          },
+          {
+            "step": "4",
+            "source": "composition_error",
+            "relation": "decreases",
+            "target": "compose_utility",
+            "explanation": "Higher expected error reduces the utility of composition"
+          },
+          {
+            "step": "5",
+            "source": "discover_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from discovery makes the agent more likely to choose discovery"
+          },
+          {
+            "step": "6",
+            "source": "compose_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from composition makes the agent more likely to choose composition"
+          },
+          {
+            "step": "7",
+            "source": "decision",
+            "relation": "determines",
+            "target": "achieved_utility",
+            "explanation": "The chosen action determines the final utility realized"
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of composition error",
+            "why_it_matters": "If the agent overestimates composition error, it may unnecessarily discover a skill; if it underestimates, it may compose and fail."
+          },
+          {
+            "bottleneck": "Accurate estimation of discovery cost",
+            "why_it_matters": "Discovery cost is often unknown beforehand; underestimation can lead to wasted resources, overestimation can miss useful innovations."
+          },
+          {
+            "bottleneck": "Skill modularity assumption",
+            "why_it_matters": "If skills are not truly modular (e.g., have side effects), composition may fail even if individually correct, undermining the comparison."
+          }
+        ],
+        "mechanism_summary": "The agent decides to discover a new skill when the expected utility of discovery (based on task novelty and discovery cost) exceeds the expected utility of composition (based on composition error which depends on skill generality). The key tradeoff is between the cost of learning and the risk of composition failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "tension-1",
+        "statement": "The assumption that skills are modular and composable is under-tested; in practice, skills may have side effects or dependencies that cause composition to fail, undermining the core mechanism.",
+        "derived_from": [
+          "Skills are modular and composable",
+          "Skill modularity assumption (bottleneck)"
+        ],
+        "why_it_matters": "If skills are not truly modular, the composition pathway may be unreliable, making the discovery vs. composition tradeoff invalid and potentially leading to catastrophic failures in multi-skill tasks.",
+        "what_existing_methods_may_miss": "Existing skill-based approaches often assume clean interfaces without rigorously testing for side effects or emergent interactions between skills.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the presence of side effects between skills (e.g., shared parameters or hidden state) causally increase composition error beyond the additive error of individual skills, thereby reducing the utility of composition relative to discovery?",
+        "question_type": "causal",
+        "source_tension": "tension-1",
+        "expected_contribution": "Tests whether skill non-modularity undermines the core composition mechanism, which would invalidate the discovery vs. composition tradeoff and motivate explicit modeling of skill interactions."
+      },
+      "hypothesis": {
+        "statement": "The presence of side effects between skills, such as shared parameters or hidden state, causally increases composition error beyond the sum of individual skill errors, thereby reducing the utility of composition relative to discovery.",
+        "predicted_effect": "When skills have side effects, the observed composition error will be significantly greater than the additive error of individual skills, leading to lower task performance compared to discovering a new skill that avoids these interactions."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated grid-world environment with modular skills for navigation and manipulation, define two skills with partial overlap in internal state (e.g., shared memory buffer). For a set of tasks requiring sequential execution of both skills, compare the composition error (e.g., task failure rate or deviation from optimal) against the error when skills are independent (no side effects). Include a baseline where the agent discovers a new skill for the same task. Vary the degree of side effects (e.g., degree of parameter sharing) across trials.",
+        "independent_variables": [
+          "Presence of side effects between skills (binary: yes/no)",
+          "Degree of side effects (e.g., proportion of shared parameters)"
+        ],
+        "dependent_variables": [
+          "Composition error (misalignment between expected and actual outcome)",
+          "Task success rate",
+          "Composition utility (reward minus cost)"
+        ],
+        "controls": [
+          "Task complexity and length",
+          "Skill capabilities (same skill modules used)"
+        ],
+        "falsifying_observation": "If composition error does not significantly increase when side effects are present, or if composition utility remains higher than discovery utility despite side effects, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Composition error with side effects is greater than the sum of individual skill errors.",
+          "Task success rate decreases when skills share parameters or hidden state.",
+          "Discovery utility surpasses composition utility only when side effects are high."
+        ],
+        "rejects_hypothesis": [
+          "Composition error with side effects is not significantly different from the additive baseline.",
+          "Task success remains high regardless of side effects.",
+          "Discovery never outperforms composition, even with strong side effects."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (side effects do not significantly increase composition error), then the assumption that skills are modular and composable may still hold, but the mechanism of composition utility reduction due to side effects is incorrect.",
+        "assumption_to_revise": "The assumption that side effects between skills cause non-additive composition error. Instead, composition error may be dominated by other factors like task alignment or skill generality.",
+        "next_question": "What factors, beyond side effects, determine when composition error exceeds individual skill error?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior that maps states to actions, intended to achieve a specific subgoal or effect in an environment.",
+          "why_primitive": "It is the fundamental building block for agent capabilities; cannot be decomposed further without losing functional meaning."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill from scratch, typically through learning from interaction data, exploration, or self-supervised methods.",
+          "why_primitive": "Represents the fundamental act of acquiring novel capabilities, distinct from reusing existing ones."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a higher-level task that none alone can accomplish.",
+          "why_primitive": "Captures the essential mechanism of reusing and coordinating existing knowledge; a core operation for efficient behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable",
+          "rationale": "For composition to be viable, skills must have well-defined interfaces (preconditions and effects) such that they can be chained without unintended interference.",
+          "possible_failure": "If skills have side effects or tight coupling, composition may fail or lead to incorrect behavior, forcing discovery."
+        },
+        {
+          "assumption": "Discovery incurs a higher computational cost than composition",
+          "rationale": "Discovery typically involves exploration, optimization, or model fitting, which requires more resources (time, data, computation) than simply retrieving and executing known skills.",
+          "possible_failure": "If discovery becomes cheap (e.g., via rapid meta-learning), the tradeoff may shift, making discovery always preferable."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task is unfamiliar relative to existing skills"
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Computational and time cost of learning a new skill"
+          },
+          {
+            "name": "skill_generality",
+            "role": "input",
+            "description": "How general each existing skill is across different contexts"
+          },
+          {
+            "name": "composition_error",
+            "role": "mediator",
+            "description": "Expected error or failure probability when composing existing skills"
+          },
+          {
+            "name": "discover_utility",
+            "role": "mediator",
+            "description": "Expected utility from discovering a new skill"
+          },
+          {
+            "name": "compose_utility",
+            "role": "mediator",
+            "description": "Expected utility from composing existing skills"
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary decision: 1 for discovery, 0 for composition"
+          },
+          {
+            "name": "achieved_utility",
+            "role": "outcome",
+            "description": "Actual utility obtained after executing the decision"
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "discover_utility",
+            "explanation": "Higher novelty makes existing skills less applicable, increasing the expected benefit of discovering a new skill"
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "discover_utility",
+            "explanation": "Higher cost reduces the net utility of discovery"
+          },
+          {
+            "step": "3",
+            "source": "skill_generality",
+            "relation": "decreases",
+            "target": "composition_error",
+            "explanation": "More general skills are more robust when composed, lowering error probability"
+          },
+          {
+            "step": "4",
+            "source": "composition_error",
+            "relation": "decreases",
+            "target": "compose_utility",
+            "explanation": "Higher expected error reduces the utility of composition"
+          },
+          {
+            "step": "5",
+            "source": "discover_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from discovery makes the agent more likely to choose discovery"
+          },
+          {
+            "step": "6",
+            "source": "compose_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from composition makes the agent more likely to choose composition"
+          },
+          {
+            "step": "7",
+            "source": "decision",
+            "relation": "determines",
+            "target": "achieved_utility",
+            "explanation": "The chosen action determines the final utility realized"
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of composition error",
+            "why_it_matters": "If the agent overestimates composition error, it may unnecessarily discover a skill; if it underestimates, it may compose and fail."
+          },
+          {
+            "bottleneck": "Accurate estimation of discovery cost",
+            "why_it_matters": "Discovery cost is often unknown beforehand; underestimation can lead to wasted resources, overestimation can miss useful innovations."
+          },
+          {
+            "bottleneck": "Skill modularity assumption",
+            "why_it_matters": "If skills are not truly modular (e.g., have side effects), composition may fail even if individually correct, undermining the comparison."
+          }
+        ],
+        "mechanism_summary": "The agent decides to discover a new skill when the expected utility of discovery (based on task novelty and discovery cost) exceeds the expected utility of composition (based on composition error which depends on skill generality). The key tradeoff is between the cost of learning and the risk of composition failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "tension-2",
+        "statement": "The mechanism assumes discovery cost is higher than composition cost, but this may not hold if meta-learning or rapid adaptation reduces discovery cost, effectively making discovery always preferable.",
+        "derived_from": [
+          "Discovery incurs a higher computational cost than composition",
+          "Discovery cost vs. composition shortfall tradeoff"
+        ],
+        "why_it_matters": "If discovery becomes cheap, the tradeoff collapses, and the agent would never compose, reducing efficiency gains from reuse and possibly limiting long-term skill breadth.",
+        "what_existing_methods_may_miss": "Most models treat discovery cost as fixed, but advances in few-shot learning could invert the cost dynamic, making static assumptions obsolete.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "How does meta-learning that reduces discovery cost affect the relative frequency of discovery vs. composition decisions in an agent trained on a sequence of tasks with varying novelty?",
+        "question_type": "descriptive",
+        "source_tension": "tension-2",
+        "expected_contribution": "Empirically assesses whether dynamic discovery costs can invert the assumed cost hierarchy, revealing conditions under which the agent might always prefer discovery and lose reuse benefits."
+      },
+      "hypothesis": {
+        "statement": "When meta-learning reduces the cost of discovering new skills, the agent will increase its frequency of discovery decisions relative to composition decisions, and this effect will be more pronounced for tasks of medium novelty.",
+        "predicted_effect": "The proportion of discovery decisions increases as discovery cost decreases, and the novelty level at which discovery becomes dominant shifts downward."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent in a gridworld with a set of primitive skills and train it on a sequence of tasks with varying novelty (low, medium, high). Manipulate discovery cost by using a meta-learning module that reduces the number of examples needed to learn a new skill (e.g., 1-shot vs. 10-shot). Measure the proportion of discovery vs. composition decisions across tasks.",
+        "independent_variables": [
+          "discovery cost (low vs high via meta-learning)",
+          "task novelty (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "proportion of discovery decisions",
+          "average utility per episode"
+        ],
+        "controls": [
+          "fixed set of initial skills",
+          "same task distribution across conditions",
+          "same environment dynamics",
+          "same agent architecture except meta-learning"
+        ],
+        "falsifying_observation": "If the proportion of discovery decisions does not increase significantly when discovery cost is lowered, or if utility decreases due to over-discovery, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In the low discovery cost condition, the agent chooses discovery significantly more often than in the high cost condition, especially for medium novelty tasks.",
+          "The overall utility is similar or higher in low cost condition because discovery avoids composition errors, but only up to the point where excessive discovery wastes resources."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in discovery frequency between low and high discovery cost conditions.",
+          "Discovery frequency decreases in low cost condition due to overfitting to meta-learning or poor skill quality."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment shows no effect of discovery cost on decision frequency, then the assumption that discovery cost is a primary driver of the tradeoff may be incorrect.",
+        "assumption_to_revise": "The assumption 'Discovery incurs a higher computational cost than composition' might be too simplistic; other factors like skill quality or task dynamics may dominate.",
+        "next_question": "What other factors (e.g., skill generality, task structure) influence the discovery vs composition decision when discovery cost is not the main driver?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior that maps states to actions, intended to achieve a specific subgoal or effect in an environment.",
+          "why_primitive": "It is the fundamental building block for agent capabilities; cannot be decomposed further without losing functional meaning."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill from scratch, typically through learning from interaction data, exploration, or self-supervised methods.",
+          "why_primitive": "Represents the fundamental act of acquiring novel capabilities, distinct from reusing existing ones."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a higher-level task that none alone can accomplish.",
+          "why_primitive": "Captures the essential mechanism of reusing and coordinating existing knowledge; a core operation for efficient behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable",
+          "rationale": "For composition to be viable, skills must have well-defined interfaces (preconditions and effects) such that they can be chained without unintended interference.",
+          "possible_failure": "If skills have side effects or tight coupling, composition may fail or lead to incorrect behavior, forcing discovery."
+        },
+        {
+          "assumption": "Discovery incurs a higher computational cost than composition",
+          "rationale": "Discovery typically involves exploration, optimization, or model fitting, which requires more resources (time, data, computation) than simply retrieving and executing known skills.",
+          "possible_failure": "If discovery becomes cheap (e.g., via rapid meta-learning), the tradeoff may shift, making discovery always preferable."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task is unfamiliar relative to existing skills"
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Computational and time cost of learning a new skill"
+          },
+          {
+            "name": "skill_generality",
+            "role": "input",
+            "description": "How general each existing skill is across different contexts"
+          },
+          {
+            "name": "composition_error",
+            "role": "mediator",
+            "description": "Expected error or failure probability when composing existing skills"
+          },
+          {
+            "name": "discover_utility",
+            "role": "mediator",
+            "description": "Expected utility from discovering a new skill"
+          },
+          {
+            "name": "compose_utility",
+            "role": "mediator",
+            "description": "Expected utility from composing existing skills"
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary decision: 1 for discovery, 0 for composition"
+          },
+          {
+            "name": "achieved_utility",
+            "role": "outcome",
+            "description": "Actual utility obtained after executing the decision"
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "discover_utility",
+            "explanation": "Higher novelty makes existing skills less applicable, increasing the expected benefit of discovering a new skill"
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "discover_utility",
+            "explanation": "Higher cost reduces the net utility of discovery"
+          },
+          {
+            "step": "3",
+            "source": "skill_generality",
+            "relation": "decreases",
+            "target": "composition_error",
+            "explanation": "More general skills are more robust when composed, lowering error probability"
+          },
+          {
+            "step": "4",
+            "source": "composition_error",
+            "relation": "decreases",
+            "target": "compose_utility",
+            "explanation": "Higher expected error reduces the utility of composition"
+          },
+          {
+            "step": "5",
+            "source": "discover_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from discovery makes the agent more likely to choose discovery"
+          },
+          {
+            "step": "6",
+            "source": "compose_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from composition makes the agent more likely to choose composition"
+          },
+          {
+            "step": "7",
+            "source": "decision",
+            "relation": "determines",
+            "target": "achieved_utility",
+            "explanation": "The chosen action determines the final utility realized"
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of composition error",
+            "why_it_matters": "If the agent overestimates composition error, it may unnecessarily discover a skill; if it underestimates, it may compose and fail."
+          },
+          {
+            "bottleneck": "Accurate estimation of discovery cost",
+            "why_it_matters": "Discovery cost is often unknown beforehand; underestimation can lead to wasted resources, overestimation can miss useful innovations."
+          },
+          {
+            "bottleneck": "Skill modularity assumption",
+            "why_it_matters": "If skills are not truly modular (e.g., have side effects), composition may fail even if individually correct, undermining the comparison."
+          }
+        ],
+        "mechanism_summary": "The agent decides to discover a new skill when the expected utility of discovery (based on task novelty and discovery cost) exceeds the expected utility of composition (based on composition error which depends on skill generality). The key tradeoff is between the cost of learning and the risk of composition failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "tension-3",
+        "statement": "The inverse relationship between skill generality and composition error is assumed monotonic, but highly general skills may introduce ambiguity or abstraction mismatch that increases composition error.",
+        "derived_from": [
+          "skill_generality decreases composition_error",
+          "Skill generality vs. task-specific optimality tradeoff"
+        ],
+        "why_it_matters": "If the relationship is non-monotonic, the agent's estimate of composition utility could be systematically wrong, leading to suboptimal decisions between discovery and composition.",
+        "what_existing_methods_may_miss": "Current algorithms typically assume generality is beneficial, ignoring potential negative effects such as over-generalization or loss of task-specific details.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is the relationship between skill generality and composition error monotonic, or does increasing generality beyond a threshold increase composition error due to abstraction mismatch or ambiguity?",
+        "question_type": "diagnostic",
+        "source_tension": "tension-3",
+        "expected_contribution": "Identifies whether the agent's utility estimate for composition can be systematically biased by non-monotonicity, which would require revising how generality is incorporated into decision rules."
+      },
+      "hypothesis": {
+        "statement": "For skill-based agents, the relationship between skill generality and composition error is non-monotonic: as generality increases, composition error initially decreases but eventually increases due to abstraction mismatch.",
+        "predicted_effect": "Increasing generality beyond a threshold will lead to higher composition error compared to the error at moderate generality levels."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated gridworld environment with composable skills, systematically vary the generality of existing skills (e.g., by controlling the number of distinct contexts they cover). For each generality level, have the agent compose skills to achieve a set of held-out tasks, and measure the composition error (e.g., failure rate or deviation from optimal). Repeat multiple runs with different random seeds.",
+        "independent_variables": [
+          "skill generality (measured by the number of distinct contexts a skill covers, or entropy of applicability)"
+        ],
+        "dependent_variables": [
+          "composition error (e.g., task failure rate, or deviation from optimal reward)"
+        ],
+        "controls": [
+          "task difficulty fixed (same set of tasks across generality levels)",
+          "number of skills fixed",
+          "discovery cost set to zero (to isolate the effect of generality on composition)",
+          "same environment dynamics"
+        ],
+        "falsifying_observation": "If the composition error monotonically decreases with increasing generality, or remains constant, or decreases then plateaus without increasing, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low generality, composition error is high (skills are too specific, require many compositions).",
+          "At moderate generality, composition error is low (skills are general enough to match tasks).",
+          "At very high generality, composition error increases again (skills are too abstract, causing mismatches or ambiguity)."
+        ],
+        "rejects_hypothesis": [
+          "Composition error monotonically decreases as generality increases.",
+          "Composition error is constant across all generality levels.",
+          "Composition error increases from low to moderate generality but then decreases, or any pattern that is not U-shaped."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., no non-monotonic relationship is observed), then the assumption that 'skill generality decreases composition error' in the causal chain is likely invalid or needs refinement.",
+        "assumption_to_revise": "The assumed monotonic negative relationship between skill generality and composition error (step 3 in causal chain) should be revised to allow for non-monotonicity or a different functional form.",
+        "next_question": "What is the exact functional form of the relationship between skill generality and composition error? Does it depend on the complexity of the task or the diversity of skills?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior that maps states to actions, intended to achieve a specific subgoal or effect in an environment.",
+          "why_primitive": "It is the fundamental building block for agent capabilities; cannot be decomposed further without losing functional meaning."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill from scratch, typically through learning from interaction data, exploration, or self-supervised methods.",
+          "why_primitive": "Represents the fundamental act of acquiring novel capabilities, distinct from reusing existing ones."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence or parallel to achieve a higher-level task that none alone can accomplish.",
+          "why_primitive": "Captures the essential mechanism of reusing and coordinating existing knowledge; a core operation for efficient behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are modular and composable",
+          "rationale": "For composition to be viable, skills must have well-defined interfaces (preconditions and effects) such that they can be chained without unintended interference.",
+          "possible_failure": "If skills have side effects or tight coupling, composition may fail or lead to incorrect behavior, forcing discovery."
+        },
+        {
+          "assumption": "Discovery incurs a higher computational cost than composition",
+          "rationale": "Discovery typically involves exploration, optimization, or model fitting, which requires more resources (time, data, computation) than simply retrieving and executing known skills.",
+          "possible_failure": "If discovery becomes cheap (e.g., via rapid meta-learning), the tradeoff may shift, making discovery always preferable."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task is unfamiliar relative to existing skills"
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Computational and time cost of learning a new skill"
+          },
+          {
+            "name": "skill_generality",
+            "role": "input",
+            "description": "How general each existing skill is across different contexts"
+          },
+          {
+            "name": "composition_error",
+            "role": "mediator",
+            "description": "Expected error or failure probability when composing existing skills"
+          },
+          {
+            "name": "discover_utility",
+            "role": "mediator",
+            "description": "Expected utility from discovering a new skill"
+          },
+          {
+            "name": "compose_utility",
+            "role": "mediator",
+            "description": "Expected utility from composing existing skills"
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary decision: 1 for discovery, 0 for composition"
+          },
+          {
+            "name": "achieved_utility",
+            "role": "outcome",
+            "description": "Actual utility obtained after executing the decision"
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_novelty",
+            "relation": "increases",
+            "target": "discover_utility",
+            "explanation": "Higher novelty makes existing skills less applicable, increasing the expected benefit of discovering a new skill"
+          },
+          {
+            "step": "2",
+            "source": "discovery_cost",
+            "relation": "decreases",
+            "target": "discover_utility",
+            "explanation": "Higher cost reduces the net utility of discovery"
+          },
+          {
+            "step": "3",
+            "source": "skill_generality",
+            "relation": "decreases",
+            "target": "composition_error",
+            "explanation": "More general skills are more robust when composed, lowering error probability"
+          },
+          {
+            "step": "4",
+            "source": "composition_error",
+            "relation": "decreases",
+            "target": "compose_utility",
+            "explanation": "Higher expected error reduces the utility of composition"
+          },
+          {
+            "step": "5",
+            "source": "discover_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from discovery makes the agent more likely to choose discovery"
+          },
+          {
+            "step": "6",
+            "source": "compose_utility",
+            "relation": "increases",
+            "target": "decision",
+            "explanation": "Higher utility from composition makes the agent more likely to choose composition"
+          },
+          {
+            "step": "7",
+            "source": "decision",
+            "relation": "determines",
+            "target": "achieved_utility",
+            "explanation": "The chosen action determines the final utility realized"
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate estimation of composition error",
+            "why_it_matters": "If the agent overestimates composition error, it may unnecessarily discover a skill; if it underestimates, it may compose and fail."
+          },
+          {
+            "bottleneck": "Accurate estimation of discovery cost",
+            "why_it_matters": "Discovery cost is often unknown beforehand; underestimation can lead to wasted resources, overestimation can miss useful innovations."
+          },
+          {
+            "bottleneck": "Skill modularity assumption",
+            "why_it_matters": "If skills are not truly modular (e.g., have side effects), composition may fail even if individually correct, undermining the comparison."
+          }
+        ],
+        "mechanism_summary": "The agent decides to discover a new skill when the expected utility of discovery (based on task novelty and discovery cost) exceeds the expected utility of composition (based on composition error which depends on skill generality). The key tradeoff is between the cost of learning and the risk of composition failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "tension-4",
+        "statement": "The binary decision between discovery and composition ignores hybrid strategies (e.g., partial discovery with reuse), which may yield higher utility than either pure strategy.",
+        "derived_from": [
+          "decision is binary",
+          "Core tradeoffs: discovery cost vs. composition shortfall"
+        ],
+        "why_it_matters": "Binary choices restrict the agent to suboptimal extremes; a continuum of strategies could better balance cost and error, but the model cannot capture this.",
+        "what_existing_methods_may_miss": "Many real systems use curriculum learning or progressive skill acquisition that blends discovery and composition; a binary model fails to account for these strategies.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Can a decision policy that allows partial discovery (e.g., fine-tuning existing skills) achieve higher achieved utility than a binary discovery-or-compose policy across a range of task distributions?",
+        "question_type": "benchmark",
+        "source_tension": "tension-4",
+        "expected_contribution": "Provides evidence that the binary decision assumption limits performance, motivating the development of continuous or hybrid strategies and updating the core tradeoff model."
+      },
+      "hypothesis": {
+        "statement": "A decision policy that allows partial discovery (e.g., fine-tuning existing skills) achieves higher average achieved utility than a binary discovery-or-compose policy across a range of task distributions, where task novelty varies.",
+        "predicted_effect": "Hybrid policy outperforms binary policy, especially when task novelty is moderate, because it balances discovery cost and composition error."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent in a gridworld with a set of pre-trained skills (e.g., navigation, pickup). Tasks are generated with varying novelty (distance from existing skill effects). Compare two policies: (1) binary: either discover a new skill via RL from scratch or compose existing skills; (2) hybrid: allowed to fine-tune the most relevant existing skill (partial discovery). Measure achieved utility over 1000 tasks per novelty level.",
+        "independent_variables": [
+          "task_novelty (low, medium, high)",
+          "policy type (binary vs. hybrid)"
+        ],
+        "dependent_variables": [
+          "average achieved utility per task",
+          "average computational cost (steps or time)"
+        ],
+        "controls": [
+          "same environment dynamics",
+          "same set of initial skills",
+          "same discovery cost function",
+          "same composition function"
+        ],
+        "falsifying_observation": "The hybrid policy does not achieve statistically significantly higher average utility than the binary policy across all novelty levels (p > 0.05)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Hybrid policy achieves higher average utility than binary policy at medium and high novelty levels.",
+          "Hybrid policy has lower computational cost than discovery-only and higher utility than composition-only.",
+          "The advantage of hybrid policy increases as task novelty increases beyond a threshold."
+        ],
+        "rejects_hypothesis": [
+          "Binary policy outperforms hybrid policy across all novelty levels.",
+          "Hybrid policy yields similar utility to binary policy but at higher computational cost.",
+          "No significant difference between hybrid and binary policies in any novelty condition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hybrid policy does not outperform the binary policy, the assumption that hybrid strategies are beneficial is challenged.",
+        "assumption_to_revise": "The assumption that partial discovery (fine-tuning) is cost-effective relative to full discovery or composition.",
+        "next_question": "Under what conditions does the cost of fine-tuning outweigh its benefits, making binary decision optimal?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The presence of side effects between skills, such as shared parameters or hidden state, causally increases composition error beyond the sum of individual skill errors, thereby reducing the utility of composition relative to discovery.",
+      "independent_variables": [
+        "Presence of side effects between skills (yes/no)",
+        "Degree of side effects (e.g., proportion of shared parameters)"
+      ],
+      "dependent_variables": [
+        "Composition error (misalignment between expected and actual outcome)",
+        "Task success rate",
+        "Composition utility (reward minus cost)"
+      ],
+      "controlled_variables": [
+        "Task complexity and length",
+        "Skill capabilities (same skill modules used)"
+      ],
+      "baselines": [
+        {
+          "name": "No side effects condition",
+          "description": "Skills are independent with no shared parameters or hidden state, serving as the baseline for additive error."
+        },
+        {
+          "name": "Discovery baseline",
+          "description": "Agent discovers a new skill for the same task, providing comparison for utility tradeoff."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composition error",
+          "definition": "The deviation of the actual task outcome from the optimal outcome, measured as a normalized distance in state space."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of trials where the task is completed successfully (binary: success/failure)."
+        },
+        {
+          "name": "Composition utility",
+          "definition": "Total reward obtained minus the computational cost (time or computation units) of executing the skills."
+        }
+      ],
+      "expected_result": "When side effects are present, composition error will be significantly greater than the sum of individual skill errors, and composition utility will be lower than discovery utility.",
+      "falsifying_result": "If composition error does not significantly increase when side effects are present, or if composition utility remains higher than discovery utility despite side effects, the hypothesis is falsified.",
+      "minimum_viable_experiment": "In a simulated grid-world environment, define two skills (navigation and manipulation) with shared memory buffer as the side effect. For a set of tasks requiring sequential execution of both skills, compare composition error under conditions with and without side effects. Use 100 trials per condition. Measure composition error, success rate, and utility. Include a discovery baseline where a new skill is learned for the same task.",
+      "risks_and_confounds": [
+        "Side effects may be confounded with skill complexity; ensure skills are identical except for sharing.",
+        "Discovery cost may vary; use fixed number of episodes for discovery.",
+        "Task ordering may influence results; randomize task order."
+      ]
+    },
+    {
+      "hypothesis": "When meta-learning reduces the cost of discovering new skills, the agent will increase its frequency of discovery decisions relative to composition decisions, and this effect will be more pronounced for tasks of medium novelty.",
+      "independent_variables": [
+        "discovery cost (low vs high via meta-learning)",
+        "task novelty (medium only)"
+      ],
+      "dependent_variables": [
+        "proportion of discovery decisions",
+        "average utility per episode"
+      ],
+      "controlled_variables": [
+        "fixed set of initial skills",
+        "same task distribution (medium novelty only)",
+        "same environment dynamics",
+        "same agent architecture except meta-learning"
+      ],
+      "baselines": [
+        {
+          "name": "high discovery cost baseline",
+          "description": "Agent with standard meta-learning requiring many examples (e.g., 10-shot) to discover a new skill"
+        },
+        {
+          "name": "no discovery baseline",
+          "description": "Agent that does not discover new skills, only composes existing ones"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "discovery proportion",
+          "definition": "Fraction of tasks where agent chooses to discover a new skill over composing existing skills"
+        },
+        {
+          "name": "average utility",
+          "definition": "Mean reward obtained per episode across all tasks"
+        }
+      ],
+      "expected_result": "In the low discovery cost condition, the proportion of discovery decisions is significantly higher than in the high cost condition. Average utility is similar or higher in low cost condition, indicating that increased discovery does not harm performance.",
+      "falsifying_result": "If the proportion of discovery decisions does not increase significantly when discovery cost is lowered, or if utility decreases due to over-discovery, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Run 50 episodes of medium novelty gridworld tasks for each cost condition (low and high). Compute discovery proportion and average utility. Use a t-test to compare proportions between conditions. Ensure that the only difference is the meta-learning module's efficiency.",
+      "risks_and_confounds": [
+        "Meta-learning module may not effectively reduce discovery cost as intended",
+        "Task novelty might not be perceived as medium by the agent",
+        "Small sample size may lead to high variance",
+        "The agent's composition strategy might be suboptimal, affecting baseline performance"
+      ]
+    },
+    {
+      "hypothesis": "For skill-based agents, the relationship between skill generality and composition error is non-monotonic: as generality increases, composition error initially decreases but eventually increases due to abstraction mismatch.",
+      "independent_variables": [
+        "skill generality (measured by the number of distinct contexts a skill covers, or entropy of applicability)"
+      ],
+      "dependent_variables": [
+        "composition error (e.g., task failure rate, or deviation from optimal reward)"
+      ],
+      "controlled_variables": [
+        "task difficulty fixed (same set of tasks across generality levels)",
+        "number of skills fixed",
+        "discovery cost set to zero",
+        "same environment dynamics"
+      ],
+      "baselines": [
+        {
+          "name": "Low generality",
+          "description": "Skills cover only a single context each, requiring many compositions to achieve tasks."
+        },
+        {
+          "name": "High generality",
+          "description": "Skills cover all contexts, potentially causing abstraction mismatch."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composition error rate",
+          "definition": "Proportion of held-out tasks where the composed skill sequence fails to achieve the goal within the allowed steps."
+        }
+      ],
+      "expected_result": "Composition error will be high at low generality, decrease at moderate generality, and increase again at high generality (U-shaped curve).",
+      "falsifying_result": "Composition error monotonically decreases with generality, remains constant, or shows any pattern that is not U-shaped (e.g., decreases then plateaus).",
+      "minimum_viable_experiment": "In a simulated gridworld with composable skills, systematically vary skill generality (e.g., by changing the number of contexts a skill is trained on). For each generality level, have the agent compose skills to achieve a set of held-out tasks, measuring composition error. Repeat multiple runs with random seeds. Use a fixed set of tasks, fixed number of skills, and set discovery cost to zero.",
+      "risks_and_confounds": [
+        "If the number of skills is too small, the effect may be masked by high variance.",
+        "If tasks are too simple, composition error may be negligible regardless of generality.",
+        "The measurement of generality may be confounded with other skill properties like size or complexity."
+      ]
+    },
+    {
+      "hypothesis": "A decision policy that allows partial discovery (e.g., fine-tuning existing skills) achieves higher average achieved utility than a binary discovery-or-compose policy across a range of task distributions, where task novelty varies.",
+      "independent_variables": [
+        "task_novelty (low, medium, high)",
+        "policy type (binary vs. hybrid)"
+      ],
+      "dependent_variables": [
+        "average achieved utility per task",
+        "average computational cost (steps or time)"
+      ],
+      "controlled_variables": [
+        "same environment dynamics (gridworld)",
+        "same set of initial skills (navigation, pickup)",
+        "same discovery cost function",
+        "same composition function",
+        "same random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Binary Discovery-or-Compose Policy",
+          "description": "Agent chooses either to discover a new skill via RL from scratch or to compose existing skills; no partial discovery allowed."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average Achieved Utility",
+          "definition": "Mean of the utility (e.g., reward) obtained per task across all tasks in a given novelty condition."
+        },
+        {
+          "name": "Average Computational Cost",
+          "definition": "Mean number of environment steps taken per task across all tasks."
+        }
+      ],
+      "expected_result": "The hybrid policy (allowing fine-tuning) achieves statistically significantly higher average utility than the binary policy, particularly at medium and high task novelty levels (p < 0.05).",
+      "falsifying_result": "The hybrid policy does not achieve statistically significantly higher average utility than the binary policy across all novelty levels (p > 0.05), or the binary policy outperforms the hybrid policy in any condition.",
+      "minimum_viable_experiment": "Simulate an agent in a gridworld with pre-trained skills (navigation, pickup). Generate 1000 tasks at each novelty level (low, medium, high) by varying the distance of the task goal from the effects of existing skills. Compare two policies: (1) binary: if task is novel, discover a new skill via RL from scratch, otherwise compose; (2) hybrid: fine-tune the most relevant existing skill for a limited number of steps (partial discovery) or compose. Measure average utility and computational cost. Use 30 independent runs per condition.",
+      "risks_and_confounds": [
+        "Initial skill set quality may bias results; ensure skills are robust.",
+        "Discovery cost function must match both policies; ensure fair comparison.",
+        "Task novelty levels must be clearly defined and separated.",
+        "Randomness in RL and task generation may require sufficient runs to achieve statistical power."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles decomposition of the discovery vs. composition tradeoff in LLM agents, with clear definitions, assumptions, and a causal mechanism model. It identifies four key tensions and proposes testable hypotheses with detailed experiments. The framework is well-structured and addresses an important problem in skill-based agents, though some assumptions and the binary decision model may limit generality.",
+    "strengths": [
+      "Strong first-principles derivation with explicit primitive definitions and assumptions.",
+      "Clear causal chain linking inputs to decision via mediators.",
+      "Tensions are well-motivated and translated into falsifiable hypotheses.",
+      "Experiment plans include controls, baselines, and falsification criteria.",
+      "Addresses a timely and significant topic in LLM agents and robotics."
+    ],
+    "weaknesses": [
+      "The mechanism model assumes a binary decision (discover vs. compose), which may be oversimplified despite noting hybrid strategies as a tension.",
+      "Some experiments (e.g., side effects) are highly environment-dependent and may lack external validity.",
+      "The novelty of the cost tradeoff and generality assumptions is moderate; similar ideas appear in hierarchical RL and curriculum learning.",
+      "Lacks practical guidance on how to estimate key variables like discovery cost or composition error in real systems."
+    ],
+    "questions": [
+      "How would the model change if the agent could also partially discover by finetuning, as noted in tension-4?",
+      "Are the proposed experiments feasible with current LLM agent architectures, or are they limited to simulated gridworlds?",
+      "How sensitive are the results to the choice of environment dynamics and skill definitions?"
+    ],
+    "missing_baselines": [
+      "A baseline where the agent uses a fixed budget for discovery (e.g., always discover after N composition failures).",
+      "Comparison to hierarchical RL methods that learn to chain skills without explicit discovery/composition decisions.",
+      "A baseline using an oracle that knows the true utility of each option to bound performance."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "ablation": "self_improvement_removed"
+  }
+}

@@ -1,0 +1,1299 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool",
+        "definition": "A function or API that performs a specific operation (e.g., execute code, search files).",
+        "why_primitive": "It is the atomic unit of capability that the agent can invoke."
+      },
+      {
+        "name": "Routing",
+        "definition": "The decision process that selects which tool to invoke given a natural language or intermediate query.",
+        "why_primitive": "It is the core mechanism that determines tool selection."
+      },
+      {
+        "name": "Tool-Use Failure",
+        "definition": "A situation where the selected tool does not achieve the intended effect, leading to suboptimal or incorrect output.",
+        "why_primitive": "It is the fundamental outcome of interest in the research question."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tools have well-defined, deterministic input-output specifications.",
+        "rationale": "Without a clear mapping from input to output, routing decisions cannot be reliably evaluated.",
+        "possible_failure": "Tools may have ambiguous or hidden behaviors, leading to mismatches between expected and actual outcomes."
+      },
+      {
+        "assumption": "Routing decisions are made statically based on the current query alone, without considering interaction history or environmental changes.",
+        "rationale": "Typical routing approaches rely on classification of the query at the time of invocation.",
+        "possible_failure": "Dynamic contexts (e.g., previous tool outputs, evolving code state) can invalidate static routing decisions."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Specificity vs. Generality: More specific tools reduce ambiguity but may be underutilized; general tools cover more cases but risk incorrect routing.",
+        "variables": [
+          "tool_specificity",
+          "tool_coverage",
+          "routing_accuracy"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. Accuracy: Faster routing (e.g., rule-based) may misclassify; slower methods (e.g., deliberation) improve accuracy but increase latency.",
+        "variables": [
+          "routing_time",
+          "decision_accuracy"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "query_complexity",
+        "role": "input",
+        "description": "The complexity of the user's natural language query, affecting routing difficulty."
+      },
+      {
+        "name": "tool_specificity",
+        "role": "input",
+        "description": "The degree to which a tool is designed for a specific task."
+      },
+      {
+        "name": "tool_coverage",
+        "role": "input",
+        "description": "The range of tasks a tool can handle."
+      },
+      {
+        "name": "routing_time",
+        "role": "mediator",
+        "description": "The time taken to make a routing decision."
+      },
+      {
+        "name": "routing_accuracy",
+        "role": "mediator",
+        "description": "The precision of the routing decision in selecting the appropriate tool."
+      },
+      {
+        "name": "context_drift",
+        "role": "confounder",
+        "description": "The difference between the static query used for routing and the actual dynamic context (e.g., code state, history)."
+      },
+      {
+        "name": "tool_use_failure",
+        "role": "outcome",
+        "description": "The occurrence of the selected tool not achieving the intended effect."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "query_complexity",
+        "relation": "negatively affects",
+        "target": "routing_accuracy",
+        "explanation": "Higher query complexity makes it harder to select the correct tool, reducing routing accuracy."
+      },
+      {
+        "step": "2",
+        "source": "tool_specificity",
+        "relation": "positively affects",
+        "target": "routing_accuracy",
+        "explanation": "More specific tools reduce ambiguity, improving routing accuracy."
+      },
+      {
+        "step": "3",
+        "source": "tool_coverage",
+        "relation": "positively affects",
+        "target": "routing_accuracy",
+        "explanation": "Broader tool coverage increases the chance of matching the query, improving routing accuracy."
+      },
+      {
+        "step": "4",
+        "source": "routing_time",
+        "relation": "negatively affects",
+        "target": "routing_accuracy",
+        "explanation": "Faster routing decisions often sacrifice accuracy, decreasing routing accuracy."
+      },
+      {
+        "step": "5",
+        "source": "routing_accuracy",
+        "relation": "negatively affects (reduces)",
+        "target": "tool_use_failure",
+        "explanation": "Higher routing accuracy reduces the likelihood of tool-use failure."
+      },
+      {
+        "step": "6",
+        "source": "context_drift",
+        "relation": "moderates (amplifies)",
+        "target": "tool_use_failure",
+        "explanation": "Context drift increases the chance of failure even when routing accuracy is high."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Static routing assumptions",
+        "why_it_matters": "Routing decisions made without considering interaction history or environmental changes can lead to failures in dynamic coding environments."
+      },
+      {
+        "bottleneck": "Speed-accuracy tradeoff",
+        "why_it_matters": "The need for low latency may force agents to use fast but inaccurate routing, increasing failure rate."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when static routing decisions, based solely on query features, are mismatched with dynamic context, or when the tradeoff between routing speed and accuracy leads to suboptimal tool selection. The accuracy of routing depends on query complexity, tool specificity, and coverage; however, even accurate routing can fail if context drift occurs."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Static routing decisions ignore dynamic context (context drift), which can cause tool-use failures even when initial routing accuracy is high.",
+      "derived_from": [
+        "Routing",
+        "Assumption: Routing decisions are made statically based on the current query alone",
+        "context_drift"
+      ],
+      "why_it_matters": "In coding agents, tool outputs and code state evolve, so static routing may select a tool that is no longer appropriate, leading to failures.",
+      "what_existing_methods_may_miss": "Existing benchmarks often evaluate routing on static queries without simulating state changes.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Faster routing decisions (lower routing_time) reduce accuracy, creating a tradeoff between speed and correctness in tool selection.",
+      "derived_from": [
+        "Tradeoff: Speed vs. Accuracy",
+        "routing_time",
+        "routing_accuracy"
+      ],
+      "why_it_matters": "Many real-time agents require low latency, forcing reliance on fast but inaccurate routing, increasing failure rates.",
+      "what_existing_methods_may_miss": "Research often optimizes accuracy in isolation, ignoring latency constraints that break assumptions in deployment.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "More specific tools improve routing accuracy but reduce coverage, while more general tools cover more tasks but increase ambiguity, making it difficult to design an optimal tool set.",
+      "derived_from": [
+        "Tradeoff: Specificity vs. Generality",
+        "tool_specificity",
+        "tool_coverage"
+      ],
+      "why_it_matters": "Tool designers must balance specificity to avoid failures due to ambiguity and generality to handle diverse queries, a key engineering challenge.",
+      "what_existing_methods_may_miss": "Many systems assume a fixed set of tools without evaluating the impact of specificity-coverage balance on routing accuracy.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that tools have deterministic, well-defined input-output specifications may be violated in practice, leading to unexpected tool behavior and routing failures.",
+      "derived_from": [
+        "Assumption: Tools have well-defined, deterministic input-output specifications",
+        "Tool"
+      ],
+      "why_it_matters": "If tools are non-deterministic or have hidden behaviors, the routing decision cannot be reliably evaluated, undermining the entire mechanism.",
+      "what_existing_methods_may_miss": "Most evaluations treat tools as black boxes with fixed behavior, ignoring nondeterminism or side effects.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does updating routing decisions based on dynamic context (e.g., recent tool outputs, code state) reduce tool-use failure rates compared to static routing, and how does the effect vary with the degree of context drift?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Reveals the causal impact of context-aware routing on failure rates and establishes conditions under which static routing fails."
+    },
+    {
+      "question": "What is the quantitative relationship between routing time and routing accuracy in tool selection, and at what point does increased speed lead to a statistically significant increase in tool-use failures in real-time coding tasks?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Provides empirical bounds on the speed-accuracy tradeoff, enabling designers to tune latency constraints without excessive failures."
+    },
+    {
+      "question": "How does the specificity-coverage balance of a tool set affect routing accuracy, and can a dynamically selected tool set (e.g., combining general and specific tools) outperform a fixed set in minimizing tool-use failures across diverse queries?",
+      "question_type": "algorithmic",
+      "source_tension": "T3",
+      "expected_contribution": "Offers design principles for tool sets that balance ambiguity and coverage to improve routing robustness."
+    },
+    {
+      "question": "To what extent does nondeterministic tool behavior (e.g., varying outputs for same input) increase routing failure rates, and can a routing strategy that accounts for output distribution (e.g., by sampling multiple times) outperform deterministic routing?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Identifies the vulnerability of routers to nondeterministic tools and tests mitigation strategies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A function or API that performs a specific operation (e.g., execute code, search files).",
+          "why_primitive": "It is the atomic unit of capability that the agent can invoke."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects which tool to invoke given a natural language or intermediate query.",
+          "why_primitive": "It is the core mechanism that determines tool selection."
+        },
+        {
+          "name": "Tool-Use Failure",
+          "definition": "A situation where the selected tool does not achieve the intended effect, leading to suboptimal or incorrect output.",
+          "why_primitive": "It is the fundamental outcome of interest in the research question."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have well-defined, deterministic input-output specifications.",
+          "rationale": "Without a clear mapping from input to output, routing decisions cannot be reliably evaluated.",
+          "possible_failure": "Tools may have ambiguous or hidden behaviors, leading to mismatches between expected and actual outcomes."
+        },
+        {
+          "assumption": "Routing decisions are made statically based on the current query alone, without considering interaction history or environmental changes.",
+          "rationale": "Typical routing approaches rely on classification of the query at the time of invocation.",
+          "possible_failure": "Dynamic contexts (e.g., previous tool outputs, evolving code state) can invalidate static routing decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "query_complexity",
+            "role": "input",
+            "description": "The complexity of the user's natural language query, affecting routing difficulty."
+          },
+          {
+            "name": "tool_specificity",
+            "role": "input",
+            "description": "The degree to which a tool is designed for a specific task."
+          },
+          {
+            "name": "tool_coverage",
+            "role": "input",
+            "description": "The range of tasks a tool can handle."
+          },
+          {
+            "name": "routing_time",
+            "role": "mediator",
+            "description": "The time taken to make a routing decision."
+          },
+          {
+            "name": "routing_accuracy",
+            "role": "mediator",
+            "description": "The precision of the routing decision in selecting the appropriate tool."
+          },
+          {
+            "name": "context_drift",
+            "role": "confounder",
+            "description": "The difference between the static query used for routing and the actual dynamic context (e.g., code state, history)."
+          },
+          {
+            "name": "tool_use_failure",
+            "role": "outcome",
+            "description": "The occurrence of the selected tool not achieving the intended effect."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "query_complexity",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Higher query complexity makes it harder to select the correct tool, reducing routing accuracy."
+          },
+          {
+            "step": "2",
+            "source": "tool_specificity",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "More specific tools reduce ambiguity, improving routing accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_coverage",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "Broader tool coverage increases the chance of matching the query, improving routing accuracy."
+          },
+          {
+            "step": "4",
+            "source": "routing_time",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Faster routing decisions often sacrifice accuracy, decreasing routing accuracy."
+          },
+          {
+            "step": "5",
+            "source": "routing_accuracy",
+            "relation": "negatively affects (reduces)",
+            "target": "tool_use_failure",
+            "explanation": "Higher routing accuracy reduces the likelihood of tool-use failure."
+          },
+          {
+            "step": "6",
+            "source": "context_drift",
+            "relation": "moderates (amplifies)",
+            "target": "tool_use_failure",
+            "explanation": "Context drift increases the chance of failure even when routing accuracy is high."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Static routing assumptions",
+            "why_it_matters": "Routing decisions made without considering interaction history or environmental changes can lead to failures in dynamic coding environments."
+          },
+          {
+            "bottleneck": "Speed-accuracy tradeoff",
+            "why_it_matters": "The need for low latency may force agents to use fast but inaccurate routing, increasing failure rate."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when static routing decisions, based solely on query features, are mismatched with dynamic context, or when the tradeoff between routing speed and accuracy leads to suboptimal tool selection. The accuracy of routing depends on query complexity, tool specificity, and coverage; however, even accurate routing can fail if context drift occurs."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "More specific tools improve routing accuracy but reduce coverage, while more general tools cover more tasks but increase ambiguity, making it difficult to design an optimal tool set.",
+        "derived_from": [
+          "Tradeoff: Specificity vs. Generality",
+          "tool_specificity",
+          "tool_coverage"
+        ],
+        "why_it_matters": "Tool designers must balance specificity to avoid failures due to ambiguity and generality to handle diverse queries, a key engineering challenge.",
+        "what_existing_methods_may_miss": "Many systems assume a fixed set of tools without evaluating the impact of specificity-coverage balance on routing accuracy.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical ratio of specific-to-general tools does routing accuracy undergo a phase transition, shifting from ambiguity-dominated failures to coverage-dominated failures, and can a dynamically adaptive tool set that adjusts this ratio based on query complexity outperform any fixed-ratio set?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a sharp phase transition boundary in tool-set composition that governs failure modes, enabling principled design of adaptive tool sets that minimize failures."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ratio of specific-to-general tools (R*) such that below R* routing accuracy is limited by ambiguity (specificity deficit) and above R* it is limited by coverage (generality deficit), and a dynamically adaptive tool set that tunes its ratio around R* based on query complexity achieves lower tool-use failure rates than any fixed-ratio tool set.",
+        "predicted_effect": "Dynamic adaptation stabilizes routing accuracy across a wider range of query complexities, avoiding the failure regimes observed at fixed ratios."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with tool sets of varying specific-to-general tool ratios (e.g., 0:10, 2:8, 4:6, 5:5, 6:4, 8:2, 10:0) and a dynamic set that adapts the ratio per query based on predicted complexity. Measure routing accuracy and failure rate on 1000 coding queries spanning low to high complexity. Identify the critical ratio R* where the dominant failure type shifts from ambiguity to coverage using a breakpoint analysis.",
+        "independent_variables": [
+          "specific-to-general tool ratio (0:10, 2:8, 4:6, 5:5, 6:4, 8:2, 10:0; dynamic adaptation)"
+        ],
+        "dependent_variables": [
+          "routing accuracy (proportion of correct tool selections)",
+          "failure-type proportion (ambiguity vs coverage failures)",
+          "overall tool-use failure rate"
+        ],
+        "controls": [
+          "same query set",
+          "same agent architecture (embedding and classification module)",
+          "same evaluation metrics"
+        ],
+        "falsifying_observation": "No clear breakpoint exists in the failure-type proportion across ratios, or the dynamic adaptive set does not outperform the best fixed-ratio set by a statistically significant margin (p<0.05) in terms of overall failure rate."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A clear breakpoint R* is observed where failures shift from ambiguity-dominated to coverage-dominated as ratio increases.",
+          "Dynamic adaptive set achieves a failure rate at least 5% lower (absolute) than the best fixed-ratio set.",
+          "Dynamic adaptive set maintains high accuracy across all complexity levels, while fixed sets show a U-shaped or monotonic failure curve."
+        ],
+        "rejects_hypothesis": [
+          "Failure-type proportions change linearly without a distinct breakpoint.",
+          "Dynamic adaptive set is not significantly better than the best fixed set.",
+          "Best fixed set (e.g., 5:5) already achieves high accuracy with no evidence of phase transition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no breakpoint or dynamic adaptation fails to outperform fixed sets, then the hypothesized phase transition and benefit of dynamic ratio adjustment are unsupported.",
+        "assumption_to_revise": "The assumption that tool-set composition alone drives a two-regime failure dynamic. The real bottleneck may be context drift or temporal dependencies not captured by static query features.",
+        "next_question": "How does interaction history (context drift) shift the critical ratio R* over time, and can a recurrent routing policy that accounts for past tool use outperform static adaptation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A function or API that performs a specific operation (e.g., execute code, search files).",
+          "why_primitive": "It is the atomic unit of capability that the agent can invoke."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects which tool to invoke given a natural language or intermediate query.",
+          "why_primitive": "It is the core mechanism that determines tool selection."
+        },
+        {
+          "name": "Tool-Use Failure",
+          "definition": "A situation where the selected tool does not achieve the intended effect, leading to suboptimal or incorrect output.",
+          "why_primitive": "It is the fundamental outcome of interest in the research question."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have well-defined, deterministic input-output specifications.",
+          "rationale": "Without a clear mapping from input to output, routing decisions cannot be reliably evaluated.",
+          "possible_failure": "Tools may have ambiguous or hidden behaviors, leading to mismatches between expected and actual outcomes."
+        },
+        {
+          "assumption": "Routing decisions are made statically based on the current query alone, without considering interaction history or environmental changes.",
+          "rationale": "Typical routing approaches rely on classification of the query at the time of invocation.",
+          "possible_failure": "Dynamic contexts (e.g., previous tool outputs, evolving code state) can invalidate static routing decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "query_complexity",
+            "role": "input",
+            "description": "The complexity of the user's natural language query, affecting routing difficulty."
+          },
+          {
+            "name": "tool_specificity",
+            "role": "input",
+            "description": "The degree to which a tool is designed for a specific task."
+          },
+          {
+            "name": "tool_coverage",
+            "role": "input",
+            "description": "The range of tasks a tool can handle."
+          },
+          {
+            "name": "routing_time",
+            "role": "mediator",
+            "description": "The time taken to make a routing decision."
+          },
+          {
+            "name": "routing_accuracy",
+            "role": "mediator",
+            "description": "The precision of the routing decision in selecting the appropriate tool."
+          },
+          {
+            "name": "context_drift",
+            "role": "confounder",
+            "description": "The difference between the static query used for routing and the actual dynamic context (e.g., code state, history)."
+          },
+          {
+            "name": "tool_use_failure",
+            "role": "outcome",
+            "description": "The occurrence of the selected tool not achieving the intended effect."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "query_complexity",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Higher query complexity makes it harder to select the correct tool, reducing routing accuracy."
+          },
+          {
+            "step": "2",
+            "source": "tool_specificity",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "More specific tools reduce ambiguity, improving routing accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_coverage",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "Broader tool coverage increases the chance of matching the query, improving routing accuracy."
+          },
+          {
+            "step": "4",
+            "source": "routing_time",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Faster routing decisions often sacrifice accuracy, decreasing routing accuracy."
+          },
+          {
+            "step": "5",
+            "source": "routing_accuracy",
+            "relation": "negatively affects (reduces)",
+            "target": "tool_use_failure",
+            "explanation": "Higher routing accuracy reduces the likelihood of tool-use failure."
+          },
+          {
+            "step": "6",
+            "source": "context_drift",
+            "relation": "moderates (amplifies)",
+            "target": "tool_use_failure",
+            "explanation": "Context drift increases the chance of failure even when routing accuracy is high."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Static routing assumptions",
+            "why_it_matters": "Routing decisions made without considering interaction history or environmental changes can lead to failures in dynamic coding environments."
+          },
+          {
+            "bottleneck": "Speed-accuracy tradeoff",
+            "why_it_matters": "The need for low latency may force agents to use fast but inaccurate routing, increasing failure rate."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when static routing decisions, based solely on query features, are mismatched with dynamic context, or when the tradeoff between routing speed and accuracy leads to suboptimal tool selection. The accuracy of routing depends on query complexity, tool specificity, and coverage; however, even accurate routing can fail if context drift occurs."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Static routing decisions ignore dynamic context (context drift), which can cause tool-use failures even when initial routing accuracy is high.",
+        "derived_from": [
+          "Routing",
+          "Assumption: Routing decisions are made statically based on the current query alone",
+          "context_drift"
+        ],
+        "why_it_matters": "In coding agents, tool outputs and code state evolve, so static routing may select a tool that is no longer appropriate, leading to failures.",
+        "what_existing_methods_may_miss": "Existing benchmarks often evaluate routing on static queries without simulating state changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical threshold of context drift relative to tool specificity beyond which static routing yields a >50% tool-use failure rate, and how does dynamic routing alter this threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Reveals a phase transition in static routing reliability and quantifies how dynamic routing shifts the boundary, providing a principled regime for when context-aware routing is necessary."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold ratio of context drift to tool specificity (D/S) beyond which static routing yields >50% tool-use failure rate, while dynamic routing maintains <10% failure rate; below the threshold both methods perform similarly.",
+        "predicted_effect": "The failure rate of static routing increases sharply after a critical D/S value, whereas dynamic routing remains low and relatively flat across the range."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed set of tools of varying specificity (e.g., low, medium, high). For each tool specificity level, introduce context drift at multiple levels (e.g., 0, 0.2, 0.4, ..., 1.0) by modifying code state after initial routing. Measure tool-use failure rate for both static and dynamic routing across 100 trials per condition. Use a binary search to identify the D/S threshold where static routing failure rate crosses 50%.",
+        "independent_variables": [
+          "routing_method (static vs dynamic)",
+          "degree_of_context_drift (continuous, 0 to 1)",
+          "tool_specificity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "tool_use_failure_rate"
+        ],
+        "controls": [
+          "query_complexity (fixed across conditions)",
+          "tool_set (same tools, different specificity defined by function range)",
+          "agent architecture (same base model except routing module)",
+          "number of tasks per condition (100 independent episodes)"
+        ],
+        "falsifying_observation": "If there is no critical threshold (i.e., failure rate increases linearly with drift) or if dynamic routing does not reduce failure rate below 10% above the threshold, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Static routing failure rate remains below 50% for D/S values below a critical threshold, then jumps above 50% sharply.",
+          "Dynamic routing failure rate stays below 10% across all D/S levels.",
+          "The critical D/S threshold is lower for lower tool specificity.",
+          "Below the threshold, both routing methods have statistically indistinguishable failure rates (p > 0.05)."
+        ],
+        "rejects_hypothesis": [
+          "Static routing failure rate increases gradually with no clear threshold.",
+          "Dynamic routing also fails above some D/S level (e.g., >10% failure).",
+          "The critical threshold does not vary with tool specificity.",
+          "Static routing is always better than dynamic routing at some D/S region."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed, the assumption that tool specificity moderates the effect of context drift is incorrect.",
+        "assumption_to_revise": "The interaction between context drift and tool specificity may be additive rather than multiplicative, or other variables (e.g., query complexity) dominate.",
+        "next_question": "How does query complexity interact with context drift and tool specificity to determine routing failure? Is there a saturation effect at high drift?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A function or API that performs a specific operation (e.g., execute code, search files).",
+          "why_primitive": "It is the atomic unit of capability that the agent can invoke."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects which tool to invoke given a natural language or intermediate query.",
+          "why_primitive": "It is the core mechanism that determines tool selection."
+        },
+        {
+          "name": "Tool-Use Failure",
+          "definition": "A situation where the selected tool does not achieve the intended effect, leading to suboptimal or incorrect output.",
+          "why_primitive": "It is the fundamental outcome of interest in the research question."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have well-defined, deterministic input-output specifications.",
+          "rationale": "Without a clear mapping from input to output, routing decisions cannot be reliably evaluated.",
+          "possible_failure": "Tools may have ambiguous or hidden behaviors, leading to mismatches between expected and actual outcomes."
+        },
+        {
+          "assumption": "Routing decisions are made statically based on the current query alone, without considering interaction history or environmental changes.",
+          "rationale": "Typical routing approaches rely on classification of the query at the time of invocation.",
+          "possible_failure": "Dynamic contexts (e.g., previous tool outputs, evolving code state) can invalidate static routing decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "query_complexity",
+            "role": "input",
+            "description": "The complexity of the user's natural language query, affecting routing difficulty."
+          },
+          {
+            "name": "tool_specificity",
+            "role": "input",
+            "description": "The degree to which a tool is designed for a specific task."
+          },
+          {
+            "name": "tool_coverage",
+            "role": "input",
+            "description": "The range of tasks a tool can handle."
+          },
+          {
+            "name": "routing_time",
+            "role": "mediator",
+            "description": "The time taken to make a routing decision."
+          },
+          {
+            "name": "routing_accuracy",
+            "role": "mediator",
+            "description": "The precision of the routing decision in selecting the appropriate tool."
+          },
+          {
+            "name": "context_drift",
+            "role": "confounder",
+            "description": "The difference between the static query used for routing and the actual dynamic context (e.g., code state, history)."
+          },
+          {
+            "name": "tool_use_failure",
+            "role": "outcome",
+            "description": "The occurrence of the selected tool not achieving the intended effect."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "query_complexity",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Higher query complexity makes it harder to select the correct tool, reducing routing accuracy."
+          },
+          {
+            "step": "2",
+            "source": "tool_specificity",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "More specific tools reduce ambiguity, improving routing accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_coverage",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "Broader tool coverage increases the chance of matching the query, improving routing accuracy."
+          },
+          {
+            "step": "4",
+            "source": "routing_time",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Faster routing decisions often sacrifice accuracy, decreasing routing accuracy."
+          },
+          {
+            "step": "5",
+            "source": "routing_accuracy",
+            "relation": "negatively affects (reduces)",
+            "target": "tool_use_failure",
+            "explanation": "Higher routing accuracy reduces the likelihood of tool-use failure."
+          },
+          {
+            "step": "6",
+            "source": "context_drift",
+            "relation": "moderates (amplifies)",
+            "target": "tool_use_failure",
+            "explanation": "Context drift increases the chance of failure even when routing accuracy is high."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Static routing assumptions",
+            "why_it_matters": "Routing decisions made without considering interaction history or environmental changes can lead to failures in dynamic coding environments."
+          },
+          {
+            "bottleneck": "Speed-accuracy tradeoff",
+            "why_it_matters": "The need for low latency may force agents to use fast but inaccurate routing, increasing failure rate."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when static routing decisions, based solely on query features, are mismatched with dynamic context, or when the tradeoff between routing speed and accuracy leads to suboptimal tool selection. The accuracy of routing depends on query complexity, tool specificity, and coverage; however, even accurate routing can fail if context drift occurs."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Faster routing decisions (lower routing_time) reduce accuracy, creating a tradeoff between speed and correctness in tool selection.",
+        "derived_from": [
+          "Tradeoff: Speed vs. Accuracy",
+          "routing_time",
+          "routing_accuracy"
+        ],
+        "why_it_matters": "Many real-time agents require low latency, forcing reliance on fast but inaccurate routing, increasing failure rates.",
+        "what_existing_methods_may_miss": "Research often optimizes accuracy in isolation, ignoring latency constraints that break assumptions in deployment.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in the interaction between routing time and context drift beyond which tool-use failure rates in coding agents undergo a phase transition from low to high?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp boundary condition where the speed-accuracy tradeoff is dominated by context drift, enabling agents to avoid catastrophic failure regions."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold boundary defined by a specific ratio of routing time to context drift, below which tool-use failure rates remain low and above which they increase sharply (phase transition).",
+        "predicted_effect": "A nonlinear increase in failure rate when the product of routing time and context drift exceeds a critical value."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a set of real-time coding tasks (e.g., from SWE-bench) with varying context drift (e.g., stateless vs. stateful queries). Manipulate routing time via artificial delays (e.g., 50ms, 100ms, 200ms, 500ms). For each (drift, time) condition, measure tool-use failure rate. Fit a piecewise model to detect a change point. Control for query complexity and tool set.",
+        "independent_variables": [
+          "routing_time (manipulated via time limits: 50ms, 100ms, 200ms, 500ms)",
+          "context_drift (manipulated via task statefulness: stateless, low drift; stateful, high drift)"
+        ],
+        "dependent_variables": [
+          "tool_use_failure_rate"
+        ],
+        "controls": [
+          "query_complexity (constant per task set)",
+          "tool_specificity (constant set of tools)",
+          "tool_coverage (fixed tool library)",
+          "task difficulty (balanced across conditions)"
+        ],
+        "falsifying_observation": "No statistically significant change point or nonlinearity; failure rate varies linearly or monotonically across conditions without a sharp threshold."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low drift conditions, failure rate decreases gradually with routing time.",
+          "For high drift conditions, failure rate remains high across routing times, but a sharp drop occurs at a specific routing time threshold.",
+          "A clear interaction effect with a discontinuity in the drift-time plane."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate changes monotonically without a sharp threshold.",
+          "No interaction between routing time and drift; failure rate is additive.",
+          "Threshold is not replicable across different task sets."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold or phase transition is observed, the assumption that context drift moderates the speed-accuracy tradeoff in a discontinuous manner is false.",
+        "assumption_to_revise": "Assumption: The interaction is nonlinear with a sharp boundary. Revised: The interaction is continuous (e.g., linear moderation) or dominated entirely by one factor.",
+        "next_question": "Under what continuous functional form does context drift moderate the effect of routing time on tool-use failures?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A function or API that performs a specific operation (e.g., execute code, search files).",
+          "why_primitive": "It is the atomic unit of capability that the agent can invoke."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects which tool to invoke given a natural language or intermediate query.",
+          "why_primitive": "It is the core mechanism that determines tool selection."
+        },
+        {
+          "name": "Tool-Use Failure",
+          "definition": "A situation where the selected tool does not achieve the intended effect, leading to suboptimal or incorrect output.",
+          "why_primitive": "It is the fundamental outcome of interest in the research question."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have well-defined, deterministic input-output specifications.",
+          "rationale": "Without a clear mapping from input to output, routing decisions cannot be reliably evaluated.",
+          "possible_failure": "Tools may have ambiguous or hidden behaviors, leading to mismatches between expected and actual outcomes."
+        },
+        {
+          "assumption": "Routing decisions are made statically based on the current query alone, without considering interaction history or environmental changes.",
+          "rationale": "Typical routing approaches rely on classification of the query at the time of invocation.",
+          "possible_failure": "Dynamic contexts (e.g., previous tool outputs, evolving code state) can invalidate static routing decisions."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "query_complexity",
+            "role": "input",
+            "description": "The complexity of the user's natural language query, affecting routing difficulty."
+          },
+          {
+            "name": "tool_specificity",
+            "role": "input",
+            "description": "The degree to which a tool is designed for a specific task."
+          },
+          {
+            "name": "tool_coverage",
+            "role": "input",
+            "description": "The range of tasks a tool can handle."
+          },
+          {
+            "name": "routing_time",
+            "role": "mediator",
+            "description": "The time taken to make a routing decision."
+          },
+          {
+            "name": "routing_accuracy",
+            "role": "mediator",
+            "description": "The precision of the routing decision in selecting the appropriate tool."
+          },
+          {
+            "name": "context_drift",
+            "role": "confounder",
+            "description": "The difference between the static query used for routing and the actual dynamic context (e.g., code state, history)."
+          },
+          {
+            "name": "tool_use_failure",
+            "role": "outcome",
+            "description": "The occurrence of the selected tool not achieving the intended effect."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "query_complexity",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Higher query complexity makes it harder to select the correct tool, reducing routing accuracy."
+          },
+          {
+            "step": "2",
+            "source": "tool_specificity",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "More specific tools reduce ambiguity, improving routing accuracy."
+          },
+          {
+            "step": "3",
+            "source": "tool_coverage",
+            "relation": "positively affects",
+            "target": "routing_accuracy",
+            "explanation": "Broader tool coverage increases the chance of matching the query, improving routing accuracy."
+          },
+          {
+            "step": "4",
+            "source": "routing_time",
+            "relation": "negatively affects",
+            "target": "routing_accuracy",
+            "explanation": "Faster routing decisions often sacrifice accuracy, decreasing routing accuracy."
+          },
+          {
+            "step": "5",
+            "source": "routing_accuracy",
+            "relation": "negatively affects (reduces)",
+            "target": "tool_use_failure",
+            "explanation": "Higher routing accuracy reduces the likelihood of tool-use failure."
+          },
+          {
+            "step": "6",
+            "source": "context_drift",
+            "relation": "moderates (amplifies)",
+            "target": "tool_use_failure",
+            "explanation": "Context drift increases the chance of failure even when routing accuracy is high."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Static routing assumptions",
+            "why_it_matters": "Routing decisions made without considering interaction history or environmental changes can lead to failures in dynamic coding environments."
+          },
+          {
+            "bottleneck": "Speed-accuracy tradeoff",
+            "why_it_matters": "The need for low latency may force agents to use fast but inaccurate routing, increasing failure rate."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when static routing decisions, based solely on query features, are mismatched with dynamic context, or when the tradeoff between routing speed and accuracy leads to suboptimal tool selection. The accuracy of routing depends on query complexity, tool specificity, and coverage; however, even accurate routing can fail if context drift occurs."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that tools have deterministic, well-defined input-output specifications may be violated in practice, leading to unexpected tool behavior and routing failures.",
+        "derived_from": [
+          "Assumption: Tools have well-defined, deterministic input-output specifications",
+          "Tool"
+        ],
+        "why_it_matters": "If tools are non-deterministic or have hidden behaviors, the routing decision cannot be reliably evaluated, undermining the entire mechanism.",
+        "what_existing_methods_may_miss": "Most evaluations treat tools as black boxes with fixed behavior, ignoring nondeterminism or side effects.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a threshold level of tool output entropy (number of distinct outputs per input for a nondeterministic tool) beyond which deterministic routing failure rate increases nonlinearly, and can a sampling-based routing strategy with adaptive sample size outperform at the cost of increased latency only above that entropy level?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a phase transition in routing failure due to tool nondeterminism and tests a cost-aware mitigation strategy."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical entropy threshold (e.g., >5 distinct outputs per input) where deterministic routing failure rate spikes nonlinearly (e.g., from <10% to >50%), and a sampling-based routing strategy that adapts sample size to entropy can reduce failure rate but only exceeds deterministic latency by a constant factor; below the threshold, deterministic routing is sufficient.",
+        "predicted_effect": "Above the entropy threshold, deterministic routing failure rate increases significantly, while adaptive sampling maintains low failure at the cost of latency; below threshold, both strategies perform similarly."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of coding tasks with a tool that produces varying levels of nondeterminism (entropy: 1,2,3,4,5,6,7,8,9,10 distinct outputs per fixed input). For each entropy level, run a deterministic router (chooses tool once) and an adaptive sampling router (uses sample size proportional to entropy, max 5 samples) on 100 queries per level. Hold all other factors constant: same queries, base tool interface, agent architecture, latency budget (10 seconds per query). Measure tool-use failure rate (output does not match expected) and latency per query.",
+        "independent_variables": [
+          "tool_output_entropy (integer from 1 to 10)",
+          "routing_strategy (deterministic vs adaptive sampling)"
+        ],
+        "dependent_variables": [
+          "tool_use_failure_rate",
+          "latency_per_query"
+        ],
+        "controls": [
+          "same coding tasks",
+          "same base tool functionality",
+          "same set of 100 queries",
+          "same agent architecture",
+          "same latency budget of 10 seconds",
+          "same definition of tool-use failure"
+        ],
+        "falsifying_observation": "Failure rate increases linearly with entropy for both strategies (no threshold), or adaptive sampling fails to reduce failure rate below deterministic at high entropy, or adaptive sampling always outperforms regardless of entropy without added latency cost."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Deterministic routing failure rate shows a nonlinear increase (e.g., from <10% to >50%) above entropy threshold (e.g., 5).",
+          "Adaptive sampling routing maintains failure rate below 10% for all entropy levels.",
+          "Latency of adaptive sampling is below 10 seconds and increases only modestly (e.g., 2-3x deterministic) even at high entropy."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases linearly with entropy for both strategies.",
+          "No entropy level shows a sharp increase in failure rate for deterministic routing.",
+          "Adaptive sampling fails to achieve lower failure rate than deterministic at any entropy level.",
+          "Adaptive sampling latency exceeds 10 seconds for entropy levels above 7, making it impractical."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no nonlinear threshold is observed, or if adaptive sampling does not improve over deterministic at high entropy.",
+        "assumption_to_revise": "The assumption that entropy of tool outputs is a primary driver of routing failure, and that adaptive sampling is an effective mitigation within a latency budget.",
+        "next_question": "What other tool characteristics (e.g., context dependence, side effects) interact with routing strategies to cause failures, and can a meta-learning approach that predicts tool behavior from history outperform sampling?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold ratio of context drift to tool specificity (D/S) beyond which static routing yields >50% tool-use failure rate, while dynamic routing maintains <10% failure rate; below the threshold both methods perform similarly.",
+      "independent_variables": [
+        "routing_method (static vs dynamic)",
+        "degree_of_context_drift (continuous, 0 to 1)",
+        "tool_specificity (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "tool_use_failure_rate"
+      ],
+      "controlled_variables": [
+        "query_complexity (fixed across conditions)",
+        "tool_set (same tools, different specificity defined by function range)",
+        "agent architecture (same base model except routing module)",
+        "number of tasks per condition (100 independent episodes)"
+      ],
+      "baselines": [
+        {
+          "name": "Static routing at zero context drift",
+          "description": "Standard static routing without context drift, serving as baseline for comparison with drift conditions."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "tool_use_failure_rate",
+          "definition": "Proportion of trials where the selected tool fails to achieve the intended effect, measured as binary outcome per trial."
+        }
+      ],
+      "expected_result": "Static routing failure rate increases sharply after a critical D/S threshold (crossing 50%), while dynamic routing remains below 10% across all drift levels. Below threshold, both methods perform similarly with low failure rates.",
+      "falsifying_result": "If no critical threshold exists (failure rate increases linearly with drift) or dynamic routing also exceeds 10% failure above the threshold, or static routing does not cross 50% at any D/S level, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a coding agent with tools of low, medium, and high specificity. For each specificity, vary context drift from 0 to 1 in steps of 0.2. For each condition, run 100 trials with static and dynamic routing. Measure failure rate. Use binary search to find the D/S ratio where static failure rate crosses 50%. If no such threshold exists or dynamic routing fails >10%, reject hypothesis.",
+      "risks_and_confounds": [
+        "Limited number of tool specificities may miss nonlinear effects",
+        "Fixed query complexity may not generalize to all scenarios",
+        "Simulated environment may not capture real-world coding dynamics",
+        "Noise in failure rate estimates may affect threshold detection"
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold boundary defined by a specific ratio of routing time to context drift, below which tool-use failure rates remain low and above which they increase sharply (phase transition).",
+      "independent_variables": [
+        "routing_time (discrete levels: 50ms, 200ms, 500ms)",
+        "context_drift (low vs high)"
+      ],
+      "dependent_variables": [
+        "tool_use_failure_rate"
+      ],
+      "controlled_variables": [
+        "query_complexity (fixed per task set)",
+        "tool_specificity (fixed set of tools)",
+        "tool_coverage (fixed library)",
+        "task difficulty (balanced across conditions)"
+      ],
+      "baselines": [
+        {
+          "name": "No delay routing",
+          "description": "Default routing without artificial delay, reflecting natural routing time."
+        },
+        {
+          "name": "Oracle routing",
+          "description": "Optimal tool selection using ground truth, establishing lower bound failure rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Tool-use failure rate",
+          "definition": "Proportion of tasks where selected tool fails to achieve intended effect."
+        },
+        {
+          "name": "Routing accuracy",
+          "definition": "Proportion of trials where the correct tool was selected (optional)."
+        }
+      ],
+      "expected_result": "For low drift, failure rate decreases gradually with routing time. For high drift, failure rate stays high except at the fastest routing time where it drops sharply, indicating a threshold near low routing time. A significant interaction effect with a discontinuity in the drift-time plane.",
+      "falsifying_result": "No statistically significant change point or nonlinearity; failure rate varies linearly or monotonically across conditions without a sharp threshold. Alternatively, no interaction between routing time and drift; failure rate is additive.",
+      "minimum_viable_experiment": "Use 2 levels of context drift (stateless vs stateful tasks from SWE-bench) and 3 levels of routing time (50ms, 200ms, 500ms) implemented via artificial delays. For each condition, measure tool-use failure rate over multiple trials. Compare pairwise and fit piecewise regression to detect change point. Control for query complexity and tool set.",
+      "risks_and_confounds": [
+        "Artificial delays may not capture natural routing time variations.",
+        "Context drift operationalization may be confounded with task difficulty.",
+        "Small number of levels may miss threshold if it lies outside chosen values.",
+        "Learning effects if agents are tested repeatedly."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ratio of specific-to-general tools (R*) such that below R* routing accuracy is limited by ambiguity (specificity deficit) and above R* it is limited by coverage (generality deficit), and a dynamically adaptive tool set that tunes its ratio around R* based on query complexity achieves lower tool-use failure rates than any fixed-ratio tool set.",
+      "independent_variables": [
+        "specific-to-general tool ratio (levels: 0:10, 2:8, 4:6, 5:5, 6:4, 8:2, 10:0, and dynamic adaptation)"
+      ],
+      "dependent_variables": [
+        "routing accuracy (proportion of correct tool selections)",
+        "failure-type proportion (ambiguity vs coverage failures)",
+        "overall tool-use failure rate"
+      ],
+      "controlled_variables": [
+        "same query set (1000 coding queries spanning low to high complexity)",
+        "same agent architecture (embedding and classification module)",
+        "same evaluation metrics"
+      ],
+      "baselines": [
+        {
+          "name": "fixed-ratio 0:10",
+          "description": "Tool set with 0 specific and 10 general tools."
+        },
+        {
+          "name": "fixed-ratio 2:8",
+          "description": "Tool set with 2 specific and 8 general tools."
+        },
+        {
+          "name": "fixed-ratio 4:6",
+          "description": "Tool set with 4 specific and 6 general tools."
+        },
+        {
+          "name": "fixed-ratio 5:5",
+          "description": "Tool set with 5 specific and 5 general tools (balanced)."
+        },
+        {
+          "name": "fixed-ratio 6:4",
+          "description": "Tool set with 6 specific and 4 general tools."
+        },
+        {
+          "name": "fixed-ratio 8:2",
+          "description": "Tool set with 8 specific and 2 general tools."
+        },
+        {
+          "name": "fixed-ratio 10:0",
+          "description": "Tool set with 10 specific and 0 general tools."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing accuracy",
+          "definition": "Proportion of queries where the selected tool is correct according to ground truth."
+        },
+        {
+          "name": "failure-type proportion",
+          "definition": "Among failures, proportion due to ambiguity (tool not specific enough) vs coverage (tool cannot handle task)."
+        },
+        {
+          "name": "overall tool-use failure rate",
+          "definition": "Proportion of queries where tool use fails to achieve intended effect."
+        },
+        {
+          "name": "breakpoint detection",
+          "definition": "Statistical change-point detection on failure-type proportion across ratios to identify R*."
+        }
+      ],
+      "expected_result": "A clear breakpoint R* is observed where failure-type proportion shifts from ambiguity-dominated to coverage-dominated as the specific-to-general ratio increases. The dynamic adaptive tool set achieves a failure rate at least 5% absolute lower than the best fixed-ratio set, and maintains high accuracy across all query complexities.",
+      "falsifying_result": "No distinct breakpoint is found in failure-type proportion across ratios (e.g., linear change), or the dynamic adaptive set does not outperform the best fixed-ratio set by a statistically significant margin (p<0.05) in overall failure rate.",
+      "minimum_viable_experiment": "Simulate a coding agent with tool sets of varying specific-to-general tool ratios (0:10, 2:8, 4:6, 5:5, 6:4, 8:2, 10:0) and a dynamic set that adapts the ratio per query based on predicted complexity. Measure routing accuracy, failure-type proportion, and overall failure rate on 1000 coding queries spanning low to high complexity. Identify the critical ratio R* using breakpoint analysis (e.g., piecewise regression on failure-type proportion). Compare dynamic set vs each fixed set using paired statistical tests (e.g., McNemar's or bootstrap).",
+      "risks_and_confounds": [
+        "Query set may not adequately span the complexity spectrum, reducing external validity.",
+        "Dynamic adaptation method (e.g., based on predicted complexity) may be suboptimal and not representative of best possible adaptive policy.",
+        "Agent architecture (embedding and classifier) may introduce biases that affect routing accuracy independent of tool set composition.",
+        "Order effects if queries are not randomized across runs.",
+        "Statistical power may be insufficient to detect small differences; ensure 1000 queries and appropriate tests.",
+        "Ground truth for correct tool selection and failure type may be ambiguous for some queries."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical entropy threshold (e.g., >5 distinct outputs per input) where deterministic routing failure rate spikes nonlinearly (e.g., from <10% to >50%), and a sampling-based routing strategy that adapts sample size to entropy can reduce failure rate but only exceeds deterministic latency by a constant factor; below the threshold, deterministic routing is sufficient.",
+      "independent_variables": [
+        "tool_output_entropy (integer from 1 to 10)",
+        "routing_strategy (deterministic vs adaptive sampling)"
+      ],
+      "dependent_variables": [
+        "tool_use_failure_rate",
+        "latency_per_query"
+      ],
+      "controlled_variables": [
+        "same coding tasks",
+        "same base tool functionality",
+        "same set of 100 queries",
+        "same agent architecture",
+        "same latency budget of 10 seconds",
+        "same definition of tool-use failure"
+      ],
+      "baselines": [
+        {
+          "name": "Deterministic routing",
+          "description": "A router that selects a single tool based on the query without sampling, used as the baseline for comparison."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Tool-use failure rate",
+          "definition": "Proportion of queries where the selected tool does not achieve the intended effect, i.e., the output does not match the expected result."
+        },
+        {
+          "name": "Latency per query",
+          "definition": "Time taken from query submission to final output, measured in seconds."
+        }
+      ],
+      "expected_result": "Deterministic routing failure rate shows a nonlinear increase (e.g., from <10% to >50%) above entropy threshold (e.g., 5). Adaptive sampling routing maintains failure rate below 10% for all entropy levels. Latency of adaptive sampling is below 10 seconds and increases only modestly (e.g., 2-3x deterministic) even at high entropy.",
+      "falsifying_result": "Failure rate increases linearly with entropy for both strategies; no entropy level shows a sharp increase for deterministic routing; adaptive sampling fails to achieve lower failure rate than deterministic at any entropy level; adaptive sampling latency exceeds 10 seconds for entropy levels above 7.",
+      "minimum_viable_experiment": "Construct a set of coding tasks with a tool that produces varying levels of nondeterminism (entropy: 1 to 10 distinct outputs per fixed input). For each entropy level, run a deterministic router and an adaptive sampling router (sample size proportional to entropy, max 5 samples) on 100 queries per level. Hold all other factors constant: same queries, base tool interface, agent architecture, latency budget (10 seconds per query). Measure tool-use failure rate and latency per query.",
+      "risks_and_confounds": [
+        "Controlling tool output entropy precisely may be difficult due to inherent randomness; use seeded pseudo-randomness to ensure reproducibility.",
+        "Query complexity might interact with entropy; ensure queries are uniformly distributed across difficulty levels to avoid confounding.",
+        "The adaptive sampling strategy's performance depends on the sample size scaling function; poor tuning could lead to suboptimal results.",
+        "Latency budget may be exceeded if entropy is very high and sample size is too large; consider a hard cap on samples."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "What is the critical threshold of context drift relative to tool specificity beyond which static routing yields a >50% tool-use failure rate, and how does dynamic routing alter this threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold in the interaction between routing time and context drift beyond which tool-use failure rates in coding agents undergo a phase transition from low to high?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical ratio of specific-to-general tools does routing accuracy undergo a phase transition, shifting from ambiguity-dominated failures to coverage-dominated failures, and can a dynamically adaptive tool set that adjusts this ratio based on query complexity outperform any fixed-ratio set?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a threshold level of tool output entropy (number of distinct outputs per input for a nondeterministic tool) beyond which deterministic routing failure rate increases nonlinearly, and can a sampling-based routing strategy with adaptive sample size outperform at the cost of increased latency only above that entropy level?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false,
+      "enable_question_debate_refinement": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T212839Z"
+  }
+}

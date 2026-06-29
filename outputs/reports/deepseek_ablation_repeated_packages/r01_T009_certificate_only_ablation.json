@@ -1,0 +1,913 @@
+{
+  "topic": {
+    "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+    "topic_id": "T009",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should coding-agent benchmarks isolate non-inferable requirements?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Requirement",
+        "definition": "A condition or capability that a solution must satisfy to be considered correct.",
+        "why_primitive": "All benchmarks evaluate solutions against a set of requirements; it is the foundational unit of specification."
+      },
+      {
+        "name": "Inferable Requirement",
+        "definition": "A requirement that can be logically deduced or reasonably guessed from the provided context, prior knowledge, or common sense.",
+        "why_primitive": "The core distinction in the topic is between requirements that can be inferred and those that cannot; this primitive captures the former."
+      },
+      {
+        "name": "Non-inferable Requirement",
+        "definition": "A requirement that cannot be deduced from the given context or any reasonable prior knowledge; it requires external query or explicit elicitation.",
+        "why_primitive": "The topic focuses on isolating such requirements; this primitive defines the concept that benchmarks must specifically target."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Benchmark tasks are intentionally under-specified, containing at least some non-inferable requirements.",
+        "rationale": "If all requirements were inferable, there would be no need to isolate non-inferable ones. The benchmark design must assume incompleteness to test how agents handle missing information.",
+        "possible_failure": "If the task is actually fully specified, the benchmark does not measure handling of non-inferable requirements, invalidating the test."
+      },
+      {
+        "assumption": "The coding agent has a mechanism to interact with the evaluator or environment (e.g., asking clarification questions, reading external documentation) to resolve ambiguities.",
+        "rationale": "To isolate non-inferable requirements, the agent must be able to act on them, typically by querying. Without such a mechanism, the agent must guess, and benchmark results become noisy.",
+        "possible_failure": "If no interaction is possible, the agent can only rely on inference, which conflates inferable and non-inferable requirements."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Completeness of the task specification versus realism of the evaluation scenario.",
+        "variables": [
+          "Degree of specification detail",
+          "Agent's need to infer versus query"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Degree of under-specification",
+        "role": "input",
+        "description": "The extent to which the task specification deliberately omits necessary details to create non-inferable requirements."
+      },
+      {
+        "name": "Non-inferable requirement presence",
+        "role": "mediator",
+        "description": "Whether the task contains at least one requirement that cannot be inferred from context."
+      },
+      {
+        "name": "Agent's query capability",
+        "role": "mediator",
+        "description": "Ability of the agent to ask clarifying questions or access external information to resolve ambiguities."
+      },
+      {
+        "name": "Agent's inference ability",
+        "role": "confounder",
+        "description": "The agent's capacity to deduce requirements from given context, which may inadvertently solve non-inferable ones."
+      },
+      {
+        "name": "Benchmark validity",
+        "role": "outcome",
+        "description": "The degree to which the benchmark accurately measures the agent's handling of non-inferable requirements."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": null,
+        "source": "Degree of under-specification",
+        "relation": "determines",
+        "target": "Non-inferable requirement presence",
+        "explanation": "Higher under-specification ensures that some requirements are non-inferable."
+      },
+      {
+        "step": null,
+        "source": "Non-inferable requirement presence",
+        "relation": "combined with",
+        "target": "Agent's query capability",
+        "explanation": "The agent must use its query capability to address these requirements."
+      },
+      {
+        "step": null,
+        "source": "Agent's query capability",
+        "relation": "and",
+        "target": "Agent's inference ability",
+        "explanation": "Both inference and query influence whether the agent correctly handles non-inferable requirements."
+      },
+      {
+        "step": null,
+        "source": "Agent's inference ability",
+        "relation": "confounds",
+        "target": "Benchmark validity",
+        "explanation": "If the agent can infer what is intended to be non-inferable, the benchmark fails to isolate them."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Inference leakage",
+        "why_it_matters": "If an agent can infer a so-called non-inferable requirement using common sense or prior knowledge, the benchmark does not actually test non-inferable requirements. This invalidates the isolation."
+      },
+      {
+        "bottleneck": "Query ambiguity",
+        "why_it_matters": "If the agent's queries are not properly interpreted by the benchmark environment, the agent may get misleading feedback, confounding results."
+      }
+    ],
+    "mechanism_summary": "The benchmark design must ensure that non-inferable requirements are truly not deducible from the task context. This is achieved by careful under-specification and by providing a means for agents to query. The causal chain shows that under-specification determines presence of non-inferable requirements, which then require query capability. However, agents' inference ability can confound the outcome, so benchmarks must verify that requirements are indeed non-inferable. The key bottlenecks are inference leakage and query ambiguity, which must be controlled to maintain benchmark validity."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Ensuring that a requirement is truly non-inferable (avoiding inference leakage) often requires the task context to be artificially obscure, which reduces the ecological validity and realism of the benchmark.",
+      "derived_from": [
+        "bottlenecks: inference leakage",
+        "core_tradeoffs: completeness vs realism"
+      ],
+      "why_it_matters": "If the benchmark sacrifices realism to ensure non-inferability, the results may not generalize to real-world scenarios where context is richer and more natural.",
+      "what_existing_methods_may_miss": "Existing methods often assume that requirements labeled as non-inferable are truly not deducible, without systematically checking for inference leakage.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Allowing the agent to query the environment to resolve non-inferable requirements conflates the measurement of handling non-inferable requirements with the agent's ability to ask effective questions, potentially bypassing inference evaluation.",
+      "derived_from": [
+        "assumptions: agent has query mechanism",
+        "variables: Agent's query capability",
+        "variables: Agent's inference ability"
+      ],
+      "why_it_matters": "Benchmarks designed to isolate non-inferable requirements must carefully control whether querying is allowed; otherwise, the metric may reflect interaction skills rather than handling of missing information.",
+      "what_existing_methods_may_miss": "Existing benchmarks often do not distinguish between requirements that could be inferred but were queried, and those that are truly non-inferable, leading to misinterpretation of agent performance.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "High degree of under-specification is needed to guarantee non-inferable requirements, but can render the task too ambiguous for any agent to succeed, reducing the discriminative power of the benchmark.",
+      "derived_from": [
+        "mechanism: Degree of under-specification",
+        "core_tradeoffs: completeness vs realism"
+      ],
+      "why_it_matters": "If under-specification is too extreme, even the best agents may fail randomly, yielding noisy and uninformative results.",
+      "what_existing_methods_may_miss": "Existing methods often set under-specification level arbitrarily without empirical calibration, potentially missing the optimal trade-off that maximizes benchmark sensitivity.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the degree of context obscurity (under-specification) impact the rate of inference leakage in non-inferable requirements, and at what point does the trade-off between preventing leakage and maintaining ecological validity become critical?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "This question seeks to quantify the causal effect of under-specification on inference leakage, thereby informing the optimal level of obscurity that balances non-inferability and realism."
+    },
+    {
+      "question": "To what extent does an agent's query capability mediate the relationship between the presence of non-inferable requirements and benchmark performance, and how can we isolate the measurement of inference ability from query ability?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "By decomposing the variance in performance attributable to query vs. inference, this question would enable the design of benchmarks that cleanly separate these two abilities."
+    },
+    {
+      "question": "What is the optimal level of under-specification that maximizes the discriminative power of a benchmark for non-inferable requirements, and how does that level vary across different agent architectures?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "This question would yield a principled method for calibrating under-specification, improving the sensitivity and reliability of benchmarks for evaluating agents handling of non-inferable information."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A condition or capability that a solution must satisfy to be considered correct.",
+          "why_primitive": "All benchmarks evaluate solutions against a set of requirements; it is the foundational unit of specification."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be logically deduced or reasonably guessed from the provided context, prior knowledge, or common sense.",
+          "why_primitive": "The core distinction in the topic is between requirements that can be inferred and those that cannot; this primitive captures the former."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context or any reasonable prior knowledge; it requires external query or explicit elicitation.",
+          "why_primitive": "The topic focuses on isolating such requirements; this primitive defines the concept that benchmarks must specifically target."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Benchmark tasks are intentionally under-specified, containing at least some non-inferable requirements.",
+          "rationale": "If all requirements were inferable, there would be no need to isolate non-inferable ones. The benchmark design must assume incompleteness to test how agents handle missing information.",
+          "possible_failure": "If the task is actually fully specified, the benchmark does not measure handling of non-inferable requirements, invalidating the test."
+        },
+        {
+          "assumption": "The coding agent has a mechanism to interact with the evaluator or environment (e.g., asking clarification questions, reading external documentation) to resolve ambiguities.",
+          "rationale": "To isolate non-inferable requirements, the agent must be able to act on them, typically by querying. Without such a mechanism, the agent must guess, and benchmark results become noisy.",
+          "possible_failure": "If no interaction is possible, the agent can only rely on inference, which conflates inferable and non-inferable requirements."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Degree of under-specification",
+            "role": "input",
+            "description": "The extent to which the task specification deliberately omits necessary details to create non-inferable requirements."
+          },
+          {
+            "name": "Non-inferable requirement presence",
+            "role": "mediator",
+            "description": "Whether the task contains at least one requirement that cannot be inferred from context."
+          },
+          {
+            "name": "Agent's query capability",
+            "role": "mediator",
+            "description": "Ability of the agent to ask clarifying questions or access external information to resolve ambiguities."
+          },
+          {
+            "name": "Agent's inference ability",
+            "role": "confounder",
+            "description": "The agent's capacity to deduce requirements from given context, which may inadvertently solve non-inferable ones."
+          },
+          {
+            "name": "Benchmark validity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's handling of non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Degree of under-specification",
+            "relation": "determines",
+            "target": "Non-inferable requirement presence",
+            "explanation": "Higher under-specification ensures that some requirements are non-inferable."
+          },
+          {
+            "step": null,
+            "source": "Non-inferable requirement presence",
+            "relation": "combined with",
+            "target": "Agent's query capability",
+            "explanation": "The agent must use its query capability to address these requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's query capability",
+            "relation": "and",
+            "target": "Agent's inference ability",
+            "explanation": "Both inference and query influence whether the agent correctly handles non-inferable requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's inference ability",
+            "relation": "confounds",
+            "target": "Benchmark validity",
+            "explanation": "If the agent can infer what is intended to be non-inferable, the benchmark fails to isolate them."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inference leakage",
+            "why_it_matters": "If an agent can infer a so-called non-inferable requirement using common sense or prior knowledge, the benchmark does not actually test non-inferable requirements. This invalidates the isolation."
+          },
+          {
+            "bottleneck": "Query ambiguity",
+            "why_it_matters": "If the agent's queries are not properly interpreted by the benchmark environment, the agent may get misleading feedback, confounding results."
+          }
+        ],
+        "mechanism_summary": "The benchmark design must ensure that non-inferable requirements are truly not deducible from the task context. This is achieved by careful under-specification and by providing a means for agents to query. The causal chain shows that under-specification determines presence of non-inferable requirements, which then require query capability. However, agents' inference ability can confound the outcome, so benchmarks must verify that requirements are indeed non-inferable. The key bottlenecks are inference leakage and query ambiguity, which must be controlled to maintain benchmark validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Allowing the agent to query the environment to resolve non-inferable requirements conflates the measurement of handling non-inferable requirements with the agent's ability to ask effective questions, potentially bypassing inference evaluation.",
+        "derived_from": [
+          "assumptions: agent has query mechanism",
+          "variables: Agent's query capability",
+          "variables: Agent's inference ability"
+        ],
+        "why_it_matters": "Benchmarks designed to isolate non-inferable requirements must carefully control whether querying is allowed; otherwise, the metric may reflect interaction skills rather than handling of missing information.",
+        "what_existing_methods_may_miss": "Existing benchmarks often do not distinguish between requirements that could be inferred but were queried, and those that are truly non-inferable, leading to misinterpretation of agent performance.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of non-inferable requirement density does an agent's query capability become necessary for acceptable performance, and how does the interaction between query cost and inference error create a failure regime where benchmarks fail to isolate non-inferable requirements?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "By identifying a critical density threshold and a failure regime where query cost and inference error interact, this question enables the design of benchmarks that explicitly control these parameters to avoid conflating inference and query abilities, leading to cleaner isolation of non-inferable requirements."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical density of non-inferable requirements (d*) beyond which agents without query capability exhibit a sharp, nonlinear drop in success rate (phase transition), while agents with query capability maintain performance up to a higher density threshold (d_q*) determined by query budget constraints. Furthermore, when query cost is high and inference error is moderate, a failure regime emerges where the benchmark incorrectly attributes performance differences to inference ability rather than query capability.",
+        "predicted_effect": "Across a density sweep, success rate of no-query agents will show a sigmoidal drop around d*, while query agents will show a later drop around d_q*; in the failure regime (high query cost, moderate inference error), the performance gap between query and no-query agents will be indistinguishable from the gap due to inference alone, confounding measurement."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct 20 coding tasks with varying density of non-inferable requirements (0% to 100% of total requirements). For each density level, test agents under two conditions: (A) no query capability, (B) query capability with a fixed budget (e.g., 5 queries per task). Measure task success rate and number of queries made. Additionally, measure each agent's inference ability on a separate set of fully specifiable tasks. Vary query cost (e.g., by introducing a time penalty per query) to explore the failure regime. Perform 5 runs per condition to ensure statistical power.",
+        "independent_variables": [
+          "Density of non-inferable requirements (0%, 20%, 40%, 60%, 80%, 100%)",
+          "Query capability (with vs. without)",
+          "Query cost (low: 0 penalty, high: 10-second delay per query)"
+        ],
+        "dependent_variables": [
+          "Task success rate",
+          "Number of queries made",
+          "Time to completion"
+        ],
+        "controls": [
+          "Same base coding tasks (only varying requirement density)",
+          "Same base agent architecture (same model)",
+          "Separate measurement of inference ability via 10 fully specified tasks",
+          "Fixed query budget for query-capable condition (5 queries)",
+          "Temperature=0 for deterministic responses"
+        ],
+        "falsifying_observation": "If the success rate of no-query agents decreases linearly (not sharply) with density, or if the performance of query agents does not show a second threshold, or if the failure regime does not produce a measurable confounding effect (i.e., inference ability alone explains all variance in the failure regime), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Success rate of no-query agents drops sharply around density 40-60% (d* ≈ 0.5)",
+          "Success rate of query agents remains high until density ~80% (d_q* ≈ 0.8) under low cost, then drops",
+          "Under high query cost, query agents show earlier decline and the failure regime occurs between density 60-80% where inference ability correlates highly with performance",
+          "Number of queries increases linearly with density until budget exhausted, then plateaus"
+        ],
+        "rejects_hypothesis": [
+          "No sharp drop in success rate for no-query agents (smooth linear decline)",
+          "Query agents perform equally across densities (suggesting queries are not used effectively)",
+          "No difference in performance between low and high query cost conditions",
+          "Inference ability fully mediates the performance gap in all conditions (no separate failure regime)"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold or phase transition is observed, or if the failure regime does not appear, then the assumption that density and query cost are the key boundary conditions may be incorrect.",
+        "assumption_to_revise": "Assumption that non-inferable requirement density and query cost are the primary drivers of the mediation. Perhaps the type of non-inferable requirement (e.g., domain-specific vs. procedural) matters more.",
+        "next_question": "How does the type of non-inferable requirement (domain knowledge vs. procedural specification) interact with query capability and inference ability to produce different failure regimes?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A condition or capability that a solution must satisfy to be considered correct.",
+          "why_primitive": "All benchmarks evaluate solutions against a set of requirements; it is the foundational unit of specification."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be logically deduced or reasonably guessed from the provided context, prior knowledge, or common sense.",
+          "why_primitive": "The core distinction in the topic is between requirements that can be inferred and those that cannot; this primitive captures the former."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context or any reasonable prior knowledge; it requires external query or explicit elicitation.",
+          "why_primitive": "The topic focuses on isolating such requirements; this primitive defines the concept that benchmarks must specifically target."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Benchmark tasks are intentionally under-specified, containing at least some non-inferable requirements.",
+          "rationale": "If all requirements were inferable, there would be no need to isolate non-inferable ones. The benchmark design must assume incompleteness to test how agents handle missing information.",
+          "possible_failure": "If the task is actually fully specified, the benchmark does not measure handling of non-inferable requirements, invalidating the test."
+        },
+        {
+          "assumption": "The coding agent has a mechanism to interact with the evaluator or environment (e.g., asking clarification questions, reading external documentation) to resolve ambiguities.",
+          "rationale": "To isolate non-inferable requirements, the agent must be able to act on them, typically by querying. Without such a mechanism, the agent must guess, and benchmark results become noisy.",
+          "possible_failure": "If no interaction is possible, the agent can only rely on inference, which conflates inferable and non-inferable requirements."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Degree of under-specification",
+            "role": "input",
+            "description": "The extent to which the task specification deliberately omits necessary details to create non-inferable requirements."
+          },
+          {
+            "name": "Non-inferable requirement presence",
+            "role": "mediator",
+            "description": "Whether the task contains at least one requirement that cannot be inferred from context."
+          },
+          {
+            "name": "Agent's query capability",
+            "role": "mediator",
+            "description": "Ability of the agent to ask clarifying questions or access external information to resolve ambiguities."
+          },
+          {
+            "name": "Agent's inference ability",
+            "role": "confounder",
+            "description": "The agent's capacity to deduce requirements from given context, which may inadvertently solve non-inferable ones."
+          },
+          {
+            "name": "Benchmark validity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's handling of non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Degree of under-specification",
+            "relation": "determines",
+            "target": "Non-inferable requirement presence",
+            "explanation": "Higher under-specification ensures that some requirements are non-inferable."
+          },
+          {
+            "step": null,
+            "source": "Non-inferable requirement presence",
+            "relation": "combined with",
+            "target": "Agent's query capability",
+            "explanation": "The agent must use its query capability to address these requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's query capability",
+            "relation": "and",
+            "target": "Agent's inference ability",
+            "explanation": "Both inference and query influence whether the agent correctly handles non-inferable requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's inference ability",
+            "relation": "confounds",
+            "target": "Benchmark validity",
+            "explanation": "If the agent can infer what is intended to be non-inferable, the benchmark fails to isolate them."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inference leakage",
+            "why_it_matters": "If an agent can infer a so-called non-inferable requirement using common sense or prior knowledge, the benchmark does not actually test non-inferable requirements. This invalidates the isolation."
+          },
+          {
+            "bottleneck": "Query ambiguity",
+            "why_it_matters": "If the agent's queries are not properly interpreted by the benchmark environment, the agent may get misleading feedback, confounding results."
+          }
+        ],
+        "mechanism_summary": "The benchmark design must ensure that non-inferable requirements are truly not deducible from the task context. This is achieved by careful under-specification and by providing a means for agents to query. The causal chain shows that under-specification determines presence of non-inferable requirements, which then require query capability. However, agents' inference ability can confound the outcome, so benchmarks must verify that requirements are indeed non-inferable. The key bottlenecks are inference leakage and query ambiguity, which must be controlled to maintain benchmark validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "High degree of under-specification is needed to guarantee non-inferable requirements, but can render the task too ambiguous for any agent to succeed, reducing the discriminative power of the benchmark.",
+        "derived_from": [
+          "mechanism: Degree of under-specification",
+          "core_tradeoffs: completeness vs realism"
+        ],
+        "why_it_matters": "If under-specification is too extreme, even the best agents may fail randomly, yielding noisy and uninformative results.",
+        "what_existing_methods_may_miss": "Existing methods often set under-specification level arbitrarily without empirical calibration, potentially missing the optimal trade-off that maximizes benchmark sensitivity.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the threshold under-specification level beyond which coding agents must switch from inference to query to correctly handle non-inferable requirements, and how does this threshold vary with agent inference ability?",
+        "question_type": "benchmark",
+        "source_tension": "T3",
+        "expected_contribution": "This question isolates a sharp phase transition in benchmark design, yielding a principled threshold for calibrating under-specification that maximally separates agent strategies (inference vs. query). It moves beyond arbitrary calibration to a mechanism-grounded cutoff."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold under-specification level θ such that for under-specification < θ, agents predominantly rely on inference and maintain high performance; for under-specification > θ, agents must resort to queries to succeed, and performance drops if queries are ineffective. θ increases with the agent's inference ability (e.g., stronger LLMs have higher θ).",
+        "predicted_effect": "As under-specification increases, the fraction of correctly resolved requirements that are answered via inference will drop sharply at a critical level; the query rate will spike at that same level. The critical level is positively correlated with inference ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a set of 50 benchmark coding tasks with a fixed base specification. For each task, produce 10 variants with under-specification levels from 0% to 90% in 10% increments (by deleting a fraction of key requirement details). Test two agent architectures: a weak LLM (e.g., GPT-3.5) and a strong LLM (e.g., GPT-4). For each agent and each variant, measure: (i) proportion of requirements resolved via inference (agent provides correct solution without querying) and (ii) query rate (number of queries per requirement). Identify the under-specification level where the inference success rate first drops below 50% (or the query rate first exceeds 50%). This is the estimated threshold.",
+        "independent_variables": [
+          "Under-specification level (0%–90% in 10% steps)",
+          "Agent architecture (weak vs. strong inference ability)"
+        ],
+        "dependent_variables": [
+          "Inference success rate (fraction of requirements solved without queries)",
+          "Query rate (queries per requirement)"
+        ],
+        "controls": [
+          "Base task complexity (fixed by same core requirements)",
+          "Number of tasks per level (50)",
+          "Task randomization seed",
+          "Query interface clarity (standardized prompt for queries)"
+        ],
+        "falsifying_observation": "If inference success rate declines smoothly rather than showing a sharp drop, or if the threshold does not differ between the two architectures, or if no clear threshold exists (e.g., variance too high)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each agent, the inference success rate exhibits a sigmoidal drop near a critical under-specification level, with a clear inflection point.",
+          "The critical level for GPT-4 is higher (e.g., 70%) than for GPT-3.5 (e.g., 40%).",
+          "Query rate shows a complementary sharp increase at the same critical level."
+        ],
+        "rejects_hypothesis": [
+          "The inference success rate declines linearly or gradually with no single sharp transition across architectures.",
+          "Both agents show the same threshold level.",
+          "No significant difference in query rate before and after the hypothesized threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, we will examine whether the definition of 'inference' and 'query' is too coarse. We will refine by distinguishing types of inference (deductive, inductive, analogical) and query types (clarification, confirmation).",
+        "assumption_to_revise": "The assumption that inference and query are cleanly separable strategies; they might be used in combination, blurring the threshold.",
+        "next_question": "How do agents combine inference and query under varying degrees of under-specification, and can a composite metric (e.g., inference-query ratio) reveal a more nuanced strategy shift?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A condition or capability that a solution must satisfy to be considered correct.",
+          "why_primitive": "All benchmarks evaluate solutions against a set of requirements; it is the foundational unit of specification."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be logically deduced or reasonably guessed from the provided context, prior knowledge, or common sense.",
+          "why_primitive": "The core distinction in the topic is between requirements that can be inferred and those that cannot; this primitive captures the former."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be deduced from the given context or any reasonable prior knowledge; it requires external query or explicit elicitation.",
+          "why_primitive": "The topic focuses on isolating such requirements; this primitive defines the concept that benchmarks must specifically target."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Benchmark tasks are intentionally under-specified, containing at least some non-inferable requirements.",
+          "rationale": "If all requirements were inferable, there would be no need to isolate non-inferable ones. The benchmark design must assume incompleteness to test how agents handle missing information.",
+          "possible_failure": "If the task is actually fully specified, the benchmark does not measure handling of non-inferable requirements, invalidating the test."
+        },
+        {
+          "assumption": "The coding agent has a mechanism to interact with the evaluator or environment (e.g., asking clarification questions, reading external documentation) to resolve ambiguities.",
+          "rationale": "To isolate non-inferable requirements, the agent must be able to act on them, typically by querying. Without such a mechanism, the agent must guess, and benchmark results become noisy.",
+          "possible_failure": "If no interaction is possible, the agent can only rely on inference, which conflates inferable and non-inferable requirements."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Degree of under-specification",
+            "role": "input",
+            "description": "The extent to which the task specification deliberately omits necessary details to create non-inferable requirements."
+          },
+          {
+            "name": "Non-inferable requirement presence",
+            "role": "mediator",
+            "description": "Whether the task contains at least one requirement that cannot be inferred from context."
+          },
+          {
+            "name": "Agent's query capability",
+            "role": "mediator",
+            "description": "Ability of the agent to ask clarifying questions or access external information to resolve ambiguities."
+          },
+          {
+            "name": "Agent's inference ability",
+            "role": "confounder",
+            "description": "The agent's capacity to deduce requirements from given context, which may inadvertently solve non-inferable ones."
+          },
+          {
+            "name": "Benchmark validity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's handling of non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Degree of under-specification",
+            "relation": "determines",
+            "target": "Non-inferable requirement presence",
+            "explanation": "Higher under-specification ensures that some requirements are non-inferable."
+          },
+          {
+            "step": null,
+            "source": "Non-inferable requirement presence",
+            "relation": "combined with",
+            "target": "Agent's query capability",
+            "explanation": "The agent must use its query capability to address these requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's query capability",
+            "relation": "and",
+            "target": "Agent's inference ability",
+            "explanation": "Both inference and query influence whether the agent correctly handles non-inferable requirements."
+          },
+          {
+            "step": null,
+            "source": "Agent's inference ability",
+            "relation": "confounds",
+            "target": "Benchmark validity",
+            "explanation": "If the agent can infer what is intended to be non-inferable, the benchmark fails to isolate them."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inference leakage",
+            "why_it_matters": "If an agent can infer a so-called non-inferable requirement using common sense or prior knowledge, the benchmark does not actually test non-inferable requirements. This invalidates the isolation."
+          },
+          {
+            "bottleneck": "Query ambiguity",
+            "why_it_matters": "If the agent's queries are not properly interpreted by the benchmark environment, the agent may get misleading feedback, confounding results."
+          }
+        ],
+        "mechanism_summary": "The benchmark design must ensure that non-inferable requirements are truly not deducible from the task context. This is achieved by careful under-specification and by providing a means for agents to query. The causal chain shows that under-specification determines presence of non-inferable requirements, which then require query capability. However, agents' inference ability can confound the outcome, so benchmarks must verify that requirements are indeed non-inferable. The key bottlenecks are inference leakage and query ambiguity, which must be controlled to maintain benchmark validity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Ensuring that a requirement is truly non-inferable (avoiding inference leakage) often requires the task context to be artificially obscure, which reduces the ecological validity and realism of the benchmark.",
+        "derived_from": [
+          "bottlenecks: inference leakage",
+          "core_tradeoffs: completeness vs realism"
+        ],
+        "why_it_matters": "If the benchmark sacrifices realism to ensure non-inferability, the results may not generalize to real-world scenarios where context is richer and more natural.",
+        "what_existing_methods_may_miss": "Existing methods often assume that requirements labeled as non-inferable are truly not deducible, without systematically checking for inference leakage.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what specific threshold of context obscurity (under-specification) does the inference leakage rate drop below 20% for non-inferable requirements, and how does ecological validity degrade at that threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise, replicable boundary for optimal under-specification that minimizes leakage while maintaining ecological validity, providing actionable design guidelines for benchmark creators."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold level of under-specification (defined by a specific number of context clues removed) such that inference leakage rate decreases from >50% at lower levels to <20% at the threshold, while ecological validity remains at or above 3.5 on a 5-point scale. Crossing this threshold results in a phase transition where both metrics change sharply.",
+        "predicted_effect": "Inference leakage rate drops abruptly at the threshold, while ecological validity shows a corresponding sharp decline beyond the threshold, indicating a critical point for trade-off."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a benchmark coding task with 10 non-inferable requirements. Systematically remove context clues to create 7 levels of under-specification (from fully specified to extremely obscure). Use the same agent model (e.g., GPT-4) to attempt the task at each level. Measure inference leakage rate (percentage of non-inferable requirements correctly inferred) and ecological validity (average human judge rating on a 1-5 scale). Identify the level where leakage first drops below 20% and check if validity ≥3.5 at that level.",
+        "independent_variables": [
+          "Degree of under-specification (7 levels: none, very low, low, medium, high, very high, extreme)"
+        ],
+        "dependent_variables": [
+          "Inference leakage rate (%)",
+          "Ecological validity score (1-5)"
+        ],
+        "controls": [
+          "Same set of 10 non-inferable requirements across all levels",
+          "Same agent model (GPT-4) and version",
+          "Same task domain (e.g., web API development)",
+          "Same evaluation procedure for leakage (expert review blinded to condition)",
+          "Same number of total requirements (20 total, 10 inferable, 10 non-inferable)",
+          "Same set of human judges for validity ratings (n=10, blinded to condition)"
+        ],
+        "falsifying_observation": "If no threshold exists such that leakage <20% and validity ≥3.5 simultaneously, or if leakage and validity change gradually without a sharp transition, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Inference leakage rate drops below 20% at the 'medium' under-specification level, from >50% at lower levels.",
+          "Ecological validity at that level is ≥3.5, while at the next higher level (high) it drops below 3.0.",
+          "The transition from low to medium shows a sharp decrease in leakage (>30% point drop) and a moderate decrease in validity (<0.5 point drop)."
+        ],
+        "rejects_hypothesis": [
+          "Inference leakage rate never drops below 20% even at extreme under-specification, remaining >30%.",
+          "Ecological validity is already below 3.5 at the level where leakage first drops below 20%.",
+          "Leakage and validity change gradually (less than 10% point change per level) without a sharp transition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, the hypothesis that a sharp boundary exists is falsified.",
+        "assumption_to_revise": "Assumption that under-specification effects are discontinuous, and that a critical point for trade-off exists.",
+        "next_question": "Is the trade-off between inference leakage and ecological validity actually continuous, or does it depend on specific task characteristics such as domain or agent architecture?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold level of under-specification (defined by a specific number of context clues removed) such that inference leakage rate decreases from >50% at lower levels to <20% at the threshold, while ecological validity remains at or above 3.5 on a 5-point scale. Crossing this threshold results in a phase transition where both metrics change sharply.",
+      "independent_variables": [
+        "Degree of under-specification (7 levels: none, very low, low, medium, high, very high, extreme)"
+      ],
+      "dependent_variables": [
+        "Inference leakage rate (%)",
+        "Ecological validity score (1-5)"
+      ],
+      "controlled_variables": [
+        "Same set of 10 non-inferable requirements across all levels",
+        "Same agent model (GPT-4) and version",
+        "Same task domain (e.g., web API development)",
+        "Same evaluation procedure for leakage (expert review blinded to condition)",
+        "Same number of total requirements (20 total, 10 inferable, 10 non-inferable)",
+        "Same set of human judges for validity ratings (n=10, blinded to condition)"
+      ],
+      "baselines": [
+        {
+          "name": "Fully specified condition (no under-specification)",
+          "description": "The task is presented with all context clues present, corresponding to the 'none' level of under-specification. Expect high inference leakage because non-inferable requirements may be inferred from abundant context."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inference leakage rate",
+          "definition": "Percentage of the 10 non-inferable requirements that are correctly inferred by the agent, as determined by expert review of the agent's behavior and output."
+        },
+        {
+          "name": "Ecological validity score",
+          "definition": "Average rating on a 1-5 scale by a panel of human judges assessing how realistic and natural the task context appears, with 5 being most realistic."
+        }
+      ],
+      "expected_result": "Inference leakage rate drops below 20% at the 'medium' under-specification level, from >50% at lower levels, while ecological validity at that level is ≥3.5. The transition from 'low' to 'medium' shows a sharp decrease in leakage (>30% point drop) and a moderate decrease in validity (<0.5 point drop).",
+      "falsifying_result": "No threshold exists such that inference leakage <20% and validity ≥3.5 simultaneously, or leakage and validity change gradually without a sharp transition (less than 10% point change per level). Specifically, if leakage never drops below 20% even at extreme under-specification, or validity is already below 3.5 at the level where leakage first drops below 20%, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct a benchmark coding task with 10 non-inferable requirements. Systematically remove context clues to create 7 levels of under-specification (from fully specified to extremely obscure). Use the same agent model (e.g., GPT-4) to attempt the task at each level. Measure inference leakage rate (percentage of non-inferable requirements correctly inferred) and ecological validity (average human judge rating on a 1-5 scale). Identify the level where leakage first drops below 20% and check if validity ≥3.5 at that level.",
+      "risks_and_confounds": [
+        "Inference leakage due to agent's prior knowledge or common sense may vary with model version or fine-tuning.",
+        "Ambiguity in human judge ratings of ecological validity may introduce noise; using multiple judges and averaging reduces but does not eliminate this.",
+        "The chosen task domain may not generalize; results might be domain-specific.",
+        "The number of levels (7) may be insufficient to detect a sharp transition; a finer granularity might be needed."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical density of non-inferable requirements (d*) beyond which agents without query capability exhibit a sharp, nonlinear drop in success rate (phase transition), while agents with query capability maintain performance up to a higher density threshold (d_q*) determined by query budget constraints. Furthermore, when query cost is high and inference error is moderate, a failure regime emerges where the benchmark incorrectly attributes performance differences to inference ability rather than query capability.",
+      "independent_variables": [
+        "Density of non-inferable requirements (0%, 20%, 40%, 60%, 80%, 100%)",
+        "Query capability (with vs. without)",
+        "Query cost (low: 0 penalty, high: 10-second delay per query)"
+      ],
+      "dependent_variables": [
+        "Task success rate",
+        "Number of queries made",
+        "Time to completion"
+      ],
+      "controlled_variables": [
+        "Same base coding tasks (only varying requirement density)",
+        "Same base agent architecture (same model)",
+        "Separate measurement of inference ability via 10 fully specified tasks",
+        "Fixed query budget for query-capable condition (5 queries)",
+        "Temperature=0 for deterministic responses"
+      ],
+      "baselines": [
+        {
+          "name": "No-query agent",
+          "description": "Agent with no query capability, used as baseline to isolate effect of query capability."
+        },
+        {
+          "name": "Low query cost",
+          "description": "Query cost set to 0 penalty, used as baseline to compare with high cost."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks completed correctly by the agent."
+        },
+        {
+          "name": "Number of queries made",
+          "definition": "Total number of queries made by the agent per task."
+        },
+        {
+          "name": "Time to completion",
+          "definition": "Time taken by the agent to complete each task."
+        },
+        {
+          "name": "Inference ability score",
+          "definition": "Score on a separate set of 10 fully specifiable tasks, used to assess agent's inference capability."
+        }
+      ],
+      "expected_result": "Success rate of no-query agents drops sharply around density 40-60% (d* ≈ 0.5); success rate of query agents remains high until density ~80% (d_q* ≈ 0.8) under low cost, then drops; under high query cost, query agents show earlier decline and the failure regime occurs between density 60-80% where inference ability correlates highly with performance.",
+      "falsifying_result": "If the success rate of no-query agents decreases linearly (not sharply) with density, or if the performance of query agents does not show a second threshold, or if the failure regime does not produce a measurable confounding effect (i.e., inference ability alone explains all variance in the failure regime), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct 20 coding tasks with varying density of non-inferable requirements (0% to 100% of total requirements). For each density level, test agents under two conditions: (A) no query capability, (B) query capability with a fixed budget (e.g., 5 queries per task). Measure task success rate and number of queries made. Additionally, measure each agent's inference ability on a separate set of 10 fully specifiable tasks. Vary query cost (e.g., by introducing a time penalty per query) to explore the failure regime. Perform 5 runs per condition to ensure statistical power.",
+      "risks_and_confounds": [
+        "Inference leakage: if non-inferable requirements are actually inferable by the agent, the benchmark fails to isolate them.",
+        "Query ambiguity: if the agent's queries are not properly interpreted, the agent may get misleading feedback.",
+        "Order effects: varying density might reveal pattern learning across tasks.",
+        "Carryover effects: repeated testing of the same agent may affect performance."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold under-specification level θ such that for under-specification < θ, agents predominantly rely on inference and maintain high performance; for under-specification > θ, agents must resort to queries to succeed, and performance drops if queries are ineffective. θ increases with the agent's inference ability.",
+      "independent_variables": [
+        "Under-specification level (0%, 25%, 50%, 75%, 90%)",
+        "Agent architecture (weak LLM: GPT-3.5; strong LLM: GPT-4)"
+      ],
+      "dependent_variables": [
+        "Inference success rate (fraction of requirements solved without queries)",
+        "Query rate (number of queries per requirement)"
+      ],
+      "controlled_variables": [
+        "Base task complexity (fixed set of 10 core coding tasks)",
+        "Number of tasks per under-specification level (10)",
+        "Task randomization seed",
+        "Query interface clarity (standardized prompt for queries)",
+        "Maximum number of queries allowed per task"
+      ],
+      "baselines": [
+        {
+          "name": "Fully specified baseline",
+          "description": "Tasks with 0% under-specification (all requirements explicitly given) to establish ceiling performance for inference."
+        },
+        {
+          "name": "No-query baseline",
+          "description": "Agents are not allowed to query; must infer all requirements, to measure pure inference ability."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inference success rate",
+          "definition": "Proportion of requirements that the agent correctly implements without issuing a query."
+        },
+        {
+          "name": "Query rate",
+          "definition": "Average number of queries made per requirement."
+        }
+      ],
+      "expected_result": "For each agent, the inference success rate remains high and relatively constant up to a critical under-specification level, then drops sharply. The query rate shows a complementary sharp increase at the same level. The critical level for GPT-4 is higher (e.g., around 75%) than for GPT-3.5 (e.g., around 50%).",
+      "falsifying_result": "Inference success rate declines linearly across under-specification levels without a sharp transition, or both agents exhibit the same critical level, or no clear threshold is observed (e.g., high variance, gradual decline).",
+      "minimum_viable_experiment": "Create 10 base coding tasks. For each, generate 5 variants with under-specification levels: 0%, 25%, 50%, 75%, 90% (by omitting a fraction of requirement details). Test two agents: GPT-3.5 (weak inference) and GPT-4 (strong inference). For each agent and each variant, measure inference success rate and query rate. This gives 10 tasks × 5 levels × 2 agents = 100 experimental runs. The threshold is identified as the under-specification level where inference success rate first drops below 50% (or query rate exceeds 50%).",
+      "risks_and_confounds": [
+        "Inference leakage: requirements intended as non-inferable might be deducible from the task context or prior knowledge; need careful pilot testing.",
+        "Query ambiguity: agents' queries may be misinterpreted by the environment; use a clear, standardized query-response mechanism.",
+        "Small number of tasks per level (10) may lead to noisy estimates; use bootstrap confidence intervals.",
+        "Difference between GPT-3.5 and GPT-4 may be due to other factors (e.g., training data, fine-tuning); control by using same prompt template."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "At what specific threshold of context obscurity (under-specification) does the inference leakage rate drop below 20% for non-inferable requirements, and how does ecological validity degrade at that threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of non-inferable requirement density does an agent's query capability become necessary for acceptable performance, and how does the interaction between query cost and inference error create a failure regime where benchmarks fail to isolate non-inferable requirements?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the threshold under-specification level beyond which coding agents must switch from inference to query to correctly handle non-inferable requirements, and how does this threshold vary with agent inference ability?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T185850Z"
+  }
+}

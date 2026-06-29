@@ -1,0 +1,1012 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Coding Agent",
+        "definition": "An autonomous software system that interprets natural language instructions and generates executable code, often employing large language models and iterative self-correction.",
+        "why_primitive": "The coding agent is the fundamental entity under study; all failures originate from its decisions and internal processes."
+      },
+      {
+        "name": "Tool-Use Routing",
+        "definition": "The decision mechanism within an agent that selects, for each step of code generation, whether to produce code directly or to invoke an external tool (e.g., code interpreter, web search, static analyzer).",
+        "why_primitive": "Routing determines when and how tools are used, directly impacting agent capability; its failure modes are the core of the research question."
+      },
+      {
+        "name": "Failure Mode",
+        "definition": "A specific type of undesirable outcome in code generation, including functional errors, security vulnerabilities, performance inefficiencies, or inability to complete the task.",
+        "why_primitive": "Failure modes are the observable events we aim to predict; they are defined independently of any routing policy."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The coding agent operates under bounded computation, with limited time and budget per task, forcing trade-offs between direct generation and tool use.",
+        "rationale": "Real-world agents have resource constraints; without bounds, all tasks could theoretically be done with perfect tool use, eliminating failures.",
+        "possible_failure": "If the resource bound is too tight, routing may become brittle, leading to frequent failures when tools are too slow."
+      },
+      {
+        "assumption": "The routing policy is either learned or heuristically fixed, and its quality directly controls the balance between correctness and efficiency.",
+        "rationale": "Routing is a policy; its design determines tool invocation patterns. Failure occurs when this policy misjudges the need for a tool.",
+        "possible_failure": "A policy that overfits to common tools may fail on novel tasks, or a policy that always uses tools may be too slow."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Accuracy vs. Latency: Using tools improves correctness but increases runtime; direct generation is fast but error-prone.",
+        "variables": [
+          "tool invocation cost",
+          "generation accuracy penalty"
+        ]
+      },
+      {
+        "tradeoff": "Generality vs. Specialization: Routing over-optimized for a specific tool set may fail on tasks requiring unfamiliar tools or new APIs.",
+        "variables": [
+          "tool set diversity",
+          "task distribution shift"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. Exploitation: The agent must explore new tools to discover useful ones but exploit known tools for efficiency; poor exploration leads to missed opportunities.",
+        "variables": [
+          "novelty bonus",
+          "exploration budget"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "resource_budget",
+        "role": "input",
+        "description": "The available compute time and cost per task, constraining tool use frequency."
+      },
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "The inherent difficulty of the coding task, affecting the need for tool assistance."
+      },
+      {
+        "name": "tool_set_diversity",
+        "role": "input",
+        "description": "The variety and coverage of external tools available to the agent."
+      },
+      {
+        "name": "routing_policy",
+        "role": "mediator",
+        "description": "The decision rule (learned or heuristic) that selects between direct generation and tool invocation."
+      },
+      {
+        "name": "tool_invocation_cost",
+        "role": "mediator",
+        "description": "The latency and resource overhead incurred by using an external tool."
+      },
+      {
+        "name": "generation_accuracy_penalty",
+        "role": "mediator",
+        "description": "The expected error rate when generating code directly without tool support."
+      },
+      {
+        "name": "failure_mode",
+        "role": "output",
+        "description": "The observed type and frequency of failures in code generation (e.g., functional errors, security issues)."
+      },
+      {
+        "name": "task_success_rate",
+        "role": "outcome",
+        "description": "The overall proportion of tasks completed without failure, reflecting agent effectiveness."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Routing Decision",
+        "source": "task_complexity",
+        "relation": "combined with",
+        "target": "resource_budget",
+        "explanation": "The agent's routing policy evaluates task complexity and available budget to decide tool use."
+      },
+      {
+        "step": "Tool Invocation Outcome",
+        "source": "routing_policy",
+        "relation": "determines",
+        "target": "tool_invocation_cost",
+        "explanation": "If the policy invokes a tool, the cost is incurred; otherwise, no tool cost."
+      },
+      {
+        "step": "Generation Accuracy Impact",
+        "source": "routing_policy",
+        "relation": "affects",
+        "target": "generation_accuracy_penalty",
+        "explanation": "Direct generation without tool support increases error likelihood."
+      },
+      {
+        "step": "Failure Emergence",
+        "source": "tool_invocation_cost",
+        "relation": "interacts with",
+        "target": "generation_accuracy_penalty",
+        "explanation": "Excessive tool cost may exceed budget, forcing premature direct generation, while high accuracy penalty leads to errors when tools are skipped."
+      },
+      {
+        "step": "Tool Set Limitation",
+        "source": "tool_set_diversity",
+        "relation": "moderates",
+        "target": "failure_mode",
+        "explanation": "Insufficient tool coverage can cause even well-routed invocations to fail due to missing capabilities."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Resource Budget Constraint",
+        "why_it_matters": "When the budget is too tight, agents are forced to skip tools, increasing error rates; when too loose, they may overuse slow tools."
+      },
+      {
+        "bottleneck": "Routing Policy-Environment Mismatch",
+        "why_it_matters": "A policy optimized for typical tasks often fails on outliers, leading to systematic failures under distribution shift."
+      },
+      {
+        "bottleneck": "Tool Set Incompleteness",
+        "why_it_matters": "Even perfect routing fails if no suitable tool exists for the required operation, causing the agent to attempt impossible tasks."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing fails in coding agents due to a misalignment between the routing policy, resource constraints, and task requirements. The agent's decision to invoke tools is mediated by its policy, which balances accuracy and latency. Failures emerge when (a) resource budgets force premature direct generation, (b) the policy misjudges the need for tools under novel conditions, or (c) the available tool set lacks coverage for the task. These bottlenecks interact: budget constraints exacerbate policy mismatches, and tool incompleteness renders optimal routing futile. The mechanism explains how failures propagate from input conditions through routing decisions to observable errors."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Using external tools improves accuracy but increases latency, forcing a tradeoff between correctness and speed when deciding whether to invoke a tool.",
+      "derived_from": [
+        "Tool-Use Routing",
+        "Accuracy vs. Latency tradeoff",
+        "resource_budget",
+        "tool_invocation_cost",
+        "generation_accuracy_penalty"
+      ],
+      "why_it_matters": "This tension is central to routing failures: if the agent prioritizes speed, it may skip tools and make errors; if it prioritizes accuracy, it may exceed time budgets and fail to complete tasks.",
+      "what_existing_methods_may_miss": "Many evaluations assume a fixed accuracy-latency balance, ignoring that the optimal tradeoff varies per task and resource constraint.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "A routing policy optimized for common tasks and tools may fail under distribution shift when novel tasks or unfamiliar APIs appear, creating a tension between generality and specialization.",
+      "derived_from": [
+        "Generality vs. Specialization tradeoff",
+        "Routing Policy",
+        "Failure Mode",
+        "tool_set_diversity"
+      ],
+      "why_it_matters": "This causes systematic failures in real-world deployments where task distributions are not stationary, leading to brittle agent behavior.",
+      "what_existing_methods_may_miss": "Benchmark evaluations often use fixed task sets and tool inventories, masking this tension's impact on agent robustness.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Agents must explore unfamiliar tools to discover their utility but exploit known efficient tools to meet resource budgets; poor exploration leads to missed opportunities for improving accuracy, while over-exploration wastes time.",
+      "derived_from": [
+        "Exploration vs. Exploitation tradeoff",
+        "Routing Policy",
+        "resource_budget",
+        "Tool-Use Routing"
+      ],
+      "why_it_matters": "This tension directly affects the agent's ability to adapt to new tasks and tools, and failure to balance it can result in suboptimal routing and increased failure rates.",
+      "what_existing_methods_may_miss": "Standard routing policies (e.g., rule-based or supervised) often lack an exploration mechanism, assuming tool utility is known in advance.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the resource budget constraint moderate the effect of tool invocation cost on generation accuracy penalty, and under what budget levels does the tradeoff become detrimental to task success rate?",
+      "question_type": "causal",
+      "source_tension": "Using external tools improves accuracy but increases latency, forcing a tradeoff between correctness and speed when deciding whether to invoke a tool.",
+      "expected_contribution": "Clarifies the threshold at which latency costs outweigh accuracy gains, enabling budget-aware routing policies."
+    },
+    {
+      "question": "Does the performance of a routing policy trained on a fixed task set degrade under distribution shift to novel tasks and tools, and is this degradation mediated by tool_set_diversity?",
+      "question_type": "diagnostic",
+      "source_tension": "A routing policy optimized for common tasks and tools may fail under distribution shift when novel tasks or unfamiliar APIs appear, creating a tension between generality and specialization.",
+      "expected_contribution": "Reveals the sensitivity of routing policies to task distribution shifts and identifies tool coverage as a critical moderator."
+    },
+    {
+      "question": "To what extent does an exploration mechanism for tool discovery improve task success rate under resource budget constraints, compared to a purely exploitative policy that uses only known effective tools?",
+      "question_type": "algorithmic",
+      "source_tension": "Agents must explore unfamiliar tools to discover their utility but exploit known efficient tools to meet resource budgets; poor exploration leads to missed opportunities for improving accuracy, while over-exploration wastes time.",
+      "expected_contribution": "Quantifies the benefit of exploration in dynamic tool environments and informs design of adaptive routing policies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous software system that interprets natural language instructions and generates executable code, often employing large language models and iterative self-correction.",
+          "why_primitive": "The coding agent is the fundamental entity under study; all failures originate from its decisions and internal processes."
+        },
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision mechanism within an agent that selects, for each step of code generation, whether to produce code directly or to invoke an external tool (e.g., code interpreter, web search, static analyzer).",
+          "why_primitive": "Routing determines when and how tools are used, directly impacting agent capability; its failure modes are the core of the research question."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A specific type of undesirable outcome in code generation, including functional errors, security vulnerabilities, performance inefficiencies, or inability to complete the task.",
+          "why_primitive": "Failure modes are the observable events we aim to predict; they are defined independently of any routing policy."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent operates under bounded computation, with limited time and budget per task, forcing trade-offs between direct generation and tool use.",
+          "rationale": "Real-world agents have resource constraints; without bounds, all tasks could theoretically be done with perfect tool use, eliminating failures.",
+          "possible_failure": "If the resource bound is too tight, routing may become brittle, leading to frequent failures when tools are too slow."
+        },
+        {
+          "assumption": "The routing policy is either learned or heuristically fixed, and its quality directly controls the balance between correctness and efficiency.",
+          "rationale": "Routing is a policy; its design determines tool invocation patterns. Failure occurs when this policy misjudges the need for a tool.",
+          "possible_failure": "A policy that overfits to common tools may fail on novel tasks, or a policy that always uses tools may be too slow."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "resource_budget",
+            "role": "input",
+            "description": "The available compute time and cost per task, constraining tool use frequency."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty of the coding task, affecting the need for tool assistance."
+          },
+          {
+            "name": "tool_set_diversity",
+            "role": "input",
+            "description": "The variety and coverage of external tools available to the agent."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision rule (learned or heuristic) that selects between direct generation and tool invocation."
+          },
+          {
+            "name": "tool_invocation_cost",
+            "role": "mediator",
+            "description": "The latency and resource overhead incurred by using an external tool."
+          },
+          {
+            "name": "generation_accuracy_penalty",
+            "role": "mediator",
+            "description": "The expected error rate when generating code directly without tool support."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The observed type and frequency of failures in code generation (e.g., functional errors, security issues)."
+          },
+          {
+            "name": "task_success_rate",
+            "role": "outcome",
+            "description": "The overall proportion of tasks completed without failure, reflecting agent effectiveness."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Routing Decision",
+            "source": "task_complexity",
+            "relation": "combined with",
+            "target": "resource_budget",
+            "explanation": "The agent's routing policy evaluates task complexity and available budget to decide tool use."
+          },
+          {
+            "step": "Tool Invocation Outcome",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_invocation_cost",
+            "explanation": "If the policy invokes a tool, the cost is incurred; otherwise, no tool cost."
+          },
+          {
+            "step": "Generation Accuracy Impact",
+            "source": "routing_policy",
+            "relation": "affects",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Direct generation without tool support increases error likelihood."
+          },
+          {
+            "step": "Failure Emergence",
+            "source": "tool_invocation_cost",
+            "relation": "interacts with",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Excessive tool cost may exceed budget, forcing premature direct generation, while high accuracy penalty leads to errors when tools are skipped."
+          },
+          {
+            "step": "Tool Set Limitation",
+            "source": "tool_set_diversity",
+            "relation": "moderates",
+            "target": "failure_mode",
+            "explanation": "Insufficient tool coverage can cause even well-routed invocations to fail due to missing capabilities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Resource Budget Constraint",
+            "why_it_matters": "When the budget is too tight, agents are forced to skip tools, increasing error rates; when too loose, they may overuse slow tools."
+          },
+          {
+            "bottleneck": "Routing Policy-Environment Mismatch",
+            "why_it_matters": "A policy optimized for typical tasks often fails on outliers, leading to systematic failures under distribution shift."
+          },
+          {
+            "bottleneck": "Tool Set Incompleteness",
+            "why_it_matters": "Even perfect routing fails if no suitable tool exists for the required operation, causing the agent to attempt impossible tasks."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails in coding agents due to a misalignment between the routing policy, resource constraints, and task requirements. The agent's decision to invoke tools is mediated by its policy, which balances accuracy and latency. Failures emerge when (a) resource budgets force premature direct generation, (b) the policy misjudges the need for tools under novel conditions, or (c) the available tool set lacks coverage for the task. These bottlenecks interact: budget constraints exacerbate policy mismatches, and tool incompleteness renders optimal routing futile. The mechanism explains how failures propagate from input conditions through routing decisions to observable errors."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Using external tools improves accuracy but increases latency, forcing a tradeoff between correctness and speed when deciding whether to invoke a tool.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "Accuracy vs. Latency tradeoff",
+          "resource_budget",
+          "tool_invocation_cost",
+          "generation_accuracy_penalty"
+        ],
+        "why_it_matters": "This tension is central to routing failures: if the agent prioritizes speed, it may skip tools and make errors; if it prioritizes accuracy, it may exceed time budgets and fail to complete tasks.",
+        "what_existing_methods_may_miss": "Many evaluations assume a fixed accuracy-latency balance, ignoring that the optimal tradeoff varies per task and resource constraint.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Under what resource budget conditions does an exploration mechanism for tool discovery transition from being detrimental to beneficial for task success rate in coding agents, and how does this threshold depend on initial tool set coverage?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical resource budget threshold where the benefit of exploration flips, and quantifies how this threshold depends on tool coverage, providing a design principle for adaptive routing."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical resource budget threshold τ such that when the budget is below τ, introducing exploration reduces task success rate relative to a purely exploitative policy, while when the budget is above τ, exploration improves success rate. Moreover, τ increases as initial tool set coverage decreases.",
+        "predicted_effect": "The threshold τ is negatively correlated with initial tool diversity; lower coverage raises the budget needed for exploration to be beneficial."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with a base routing policy that selects between direct generation and a fixed set of known tools. Two conditions: (1) exploitative: no exploration; (2) exploration: periodically tests a randomly selected new tool from a larger pool, incurring a cost. Run both conditions on a benchmark of coding tasks with varying complexity. Vary resource budget continuously (e.g., 5 levels) and initial tool set coverage (low, medium, high). For each combination, measure task success rate. Compute the crossing point where the exploration curve crosses the exploitative curve. Test whether this crossing point shifts with coverage.",
+        "independent_variables": [
+          "Resource budget level (continuous, e.g., scaled compute time)",
+          "Initial tool set coverage (low, medium, high)",
+          "Exploration mechanism (present/absent)"
+        ],
+        "dependent_variables": [
+          "Task success rate",
+          "Crossing point (budget level where success rates equal)"
+        ],
+        "controls": [
+          "Same initial known tool set for non-explored tools",
+          "Same base routing policy (excluding exploration)",
+          "Same tool pool for exploration (size fixed)",
+          "Same task distribution"
+        ],
+        "falsifying_observation": "If the observed crossing point does not exist (i.e., exploration never outperforms or never underperforms) or the crossing point does not shift monotonically with initial tool coverage, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under low budgets, exploitative policy outperforms exploration; under high budgets, exploration outperforms exploitative.",
+          "The crossing budget τ increases as initial tool coverage decreases.",
+          "The exploration policy discovers new tools that improve subsequent task success, but only when budget allows sufficient exploration."
+        ],
+        "rejects_hypothesis": [
+          "Exploration always outperforms exploitative regardless of budget (no crossing point).",
+          "Exploration never outperforms exploitative (no crossing point).",
+          "Crossing point does not shift with initial coverage, or shifts in opposite direction."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no crossing point is found or the shift with coverage is not monotonic, then the hypothesis that exploration's benefit has a budget-dependent threshold is rejected.",
+        "assumption_to_revise": "The assumption that the fixed cost of exploration scales linearly with budget and that tool discovery benefit is monotonic.",
+        "next_question": "What is the functional form of the relationship between exploration benefit and resource budget, and how does risk of premature tool failure interact with exploration?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous software system that interprets natural language instructions and generates executable code, often employing large language models and iterative self-correction.",
+          "why_primitive": "The coding agent is the fundamental entity under study; all failures originate from its decisions and internal processes."
+        },
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision mechanism within an agent that selects, for each step of code generation, whether to produce code directly or to invoke an external tool (e.g., code interpreter, web search, static analyzer).",
+          "why_primitive": "Routing determines when and how tools are used, directly impacting agent capability; its failure modes are the core of the research question."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A specific type of undesirable outcome in code generation, including functional errors, security vulnerabilities, performance inefficiencies, or inability to complete the task.",
+          "why_primitive": "Failure modes are the observable events we aim to predict; they are defined independently of any routing policy."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent operates under bounded computation, with limited time and budget per task, forcing trade-offs between direct generation and tool use.",
+          "rationale": "Real-world agents have resource constraints; without bounds, all tasks could theoretically be done with perfect tool use, eliminating failures.",
+          "possible_failure": "If the resource bound is too tight, routing may become brittle, leading to frequent failures when tools are too slow."
+        },
+        {
+          "assumption": "The routing policy is either learned or heuristically fixed, and its quality directly controls the balance between correctness and efficiency.",
+          "rationale": "Routing is a policy; its design determines tool invocation patterns. Failure occurs when this policy misjudges the need for a tool.",
+          "possible_failure": "A policy that overfits to common tools may fail on novel tasks, or a policy that always uses tools may be too slow."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "resource_budget",
+            "role": "input",
+            "description": "The available compute time and cost per task, constraining tool use frequency."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty of the coding task, affecting the need for tool assistance."
+          },
+          {
+            "name": "tool_set_diversity",
+            "role": "input",
+            "description": "The variety and coverage of external tools available to the agent."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision rule (learned or heuristic) that selects between direct generation and tool invocation."
+          },
+          {
+            "name": "tool_invocation_cost",
+            "role": "mediator",
+            "description": "The latency and resource overhead incurred by using an external tool."
+          },
+          {
+            "name": "generation_accuracy_penalty",
+            "role": "mediator",
+            "description": "The expected error rate when generating code directly without tool support."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The observed type and frequency of failures in code generation (e.g., functional errors, security issues)."
+          },
+          {
+            "name": "task_success_rate",
+            "role": "outcome",
+            "description": "The overall proportion of tasks completed without failure, reflecting agent effectiveness."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Routing Decision",
+            "source": "task_complexity",
+            "relation": "combined with",
+            "target": "resource_budget",
+            "explanation": "The agent's routing policy evaluates task complexity and available budget to decide tool use."
+          },
+          {
+            "step": "Tool Invocation Outcome",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_invocation_cost",
+            "explanation": "If the policy invokes a tool, the cost is incurred; otherwise, no tool cost."
+          },
+          {
+            "step": "Generation Accuracy Impact",
+            "source": "routing_policy",
+            "relation": "affects",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Direct generation without tool support increases error likelihood."
+          },
+          {
+            "step": "Failure Emergence",
+            "source": "tool_invocation_cost",
+            "relation": "interacts with",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Excessive tool cost may exceed budget, forcing premature direct generation, while high accuracy penalty leads to errors when tools are skipped."
+          },
+          {
+            "step": "Tool Set Limitation",
+            "source": "tool_set_diversity",
+            "relation": "moderates",
+            "target": "failure_mode",
+            "explanation": "Insufficient tool coverage can cause even well-routed invocations to fail due to missing capabilities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Resource Budget Constraint",
+            "why_it_matters": "When the budget is too tight, agents are forced to skip tools, increasing error rates; when too loose, they may overuse slow tools."
+          },
+          {
+            "bottleneck": "Routing Policy-Environment Mismatch",
+            "why_it_matters": "A policy optimized for typical tasks often fails on outliers, leading to systematic failures under distribution shift."
+          },
+          {
+            "bottleneck": "Tool Set Incompleteness",
+            "why_it_matters": "Even perfect routing fails if no suitable tool exists for the required operation, causing the agent to attempt impossible tasks."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails in coding agents due to a misalignment between the routing policy, resource constraints, and task requirements. The agent's decision to invoke tools is mediated by its policy, which balances accuracy and latency. Failures emerge when (a) resource budgets force premature direct generation, (b) the policy misjudges the need for tools under novel conditions, or (c) the available tool set lacks coverage for the task. These bottlenecks interact: budget constraints exacerbate policy mismatches, and tool incompleteness renders optimal routing futile. The mechanism explains how failures propagate from input conditions through routing decisions to observable errors."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Using external tools improves accuracy but increases latency, forcing a tradeoff between correctness and speed when deciding whether to invoke a tool.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "Accuracy vs. Latency tradeoff",
+          "resource_budget",
+          "tool_invocation_cost",
+          "generation_accuracy_penalty"
+        ],
+        "why_it_matters": "This tension is central to routing failures: if the agent prioritizes speed, it may skip tools and make errors; if it prioritizes accuracy, it may exceed time budgets and fail to complete tasks.",
+        "what_existing_methods_may_miss": "Many evaluations assume a fixed accuracy-latency balance, ignoring that the optimal tradeoff varies per task and resource constraint.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical resource budget threshold below which tool-use routing in coding agents inevitably fails, and does this threshold increase monotonically with task complexity?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in routing viability as a function of resource constraints, establishing a fundamental boundary condition for tool-use routing."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical resource budget threshold such that for any budget below this threshold, the task success rate of a coding agent using tool-use routing is zero (or near-zero), and for any budget above, success rate is positive. This threshold increases linearly with task complexity.",
+        "predicted_effect": "As resource budget increases, success rate jumps from near-zero to a positive value at a task-complexity-dependent threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Fix a routing policy (e.g., a learned policy from a training set). For a set of tasks spanning low to high complexity, vary resource budget (e.g., time limit per task) logarithmically across a range. For each (task, budget) combination, measure task success rate (binary: complete without failure). Plot success rate vs. budget for each complexity level. Fit a sigmoid to locate the threshold (budget at which success rate reaches 0.5). Test monotonicity of threshold with task complexity.",
+        "independent_variables": [
+          "resource budget (continuous, e.g., 5,10,20,40,80 seconds)",
+          "task complexity (three levels: low, medium, high)"
+        ],
+        "dependent_variables": [
+          "task success rate (binary per trial, aggregated per condition)"
+        ],
+        "controls": [
+          "tool set diversity (fixed, e.g., 10 diverse tools)",
+          "tool invocation cost (fixed per tool)",
+          "routing policy (same pretrained policy)",
+          "number of trials per condition (e.g., 100)"
+        ],
+        "falsifying_observation": "Success rate increases gradually with budget without a sharp transition, or the threshold does not increase with task complexity (i.e., remains flat or decreases)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each complexity level, success rate shows a clear sigmoidal transition from near-zero to near-perfect around a threshold budget.",
+          "The threshold budget is higher for higher task complexity."
+        ],
+        "rejects_hypothesis": [
+          "Success rate increases gradually with budget without a sharp threshold (linear or power-law increase).",
+          "Threshold budget does not vary systematically with task complexity.",
+          "Even at very high budgets, success rate remains below a ceiling (e.g., 80%) indicating other failure modes dominate."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, or if threshold is independent of complexity, then the assumption that resource budget is the primary bottleneck for routing failure is weakened.",
+        "assumption_to_revise": "Perhaps routing failure is not determined by a single budget threshold but by a more nuanced interplay of multiple factors (e.g., tool quality, policy adaptation).",
+        "next_question": "Is tool-use routing failure better characterized by a probabilistic frontier rather than a threshold, and can we predict failure probability from a combination of budget, complexity, and tool diversity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous software system that interprets natural language instructions and generates executable code, often employing large language models and iterative self-correction.",
+          "why_primitive": "The coding agent is the fundamental entity under study; all failures originate from its decisions and internal processes."
+        },
+        {
+          "name": "Tool-Use Routing",
+          "definition": "The decision mechanism within an agent that selects, for each step of code generation, whether to produce code directly or to invoke an external tool (e.g., code interpreter, web search, static analyzer).",
+          "why_primitive": "Routing determines when and how tools are used, directly impacting agent capability; its failure modes are the core of the research question."
+        },
+        {
+          "name": "Failure Mode",
+          "definition": "A specific type of undesirable outcome in code generation, including functional errors, security vulnerabilities, performance inefficiencies, or inability to complete the task.",
+          "why_primitive": "Failure modes are the observable events we aim to predict; they are defined independently of any routing policy."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent operates under bounded computation, with limited time and budget per task, forcing trade-offs between direct generation and tool use.",
+          "rationale": "Real-world agents have resource constraints; without bounds, all tasks could theoretically be done with perfect tool use, eliminating failures.",
+          "possible_failure": "If the resource bound is too tight, routing may become brittle, leading to frequent failures when tools are too slow."
+        },
+        {
+          "assumption": "The routing policy is either learned or heuristically fixed, and its quality directly controls the balance between correctness and efficiency.",
+          "rationale": "Routing is a policy; its design determines tool invocation patterns. Failure occurs when this policy misjudges the need for a tool.",
+          "possible_failure": "A policy that overfits to common tools may fail on novel tasks, or a policy that always uses tools may be too slow."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "resource_budget",
+            "role": "input",
+            "description": "The available compute time and cost per task, constraining tool use frequency."
+          },
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The inherent difficulty of the coding task, affecting the need for tool assistance."
+          },
+          {
+            "name": "tool_set_diversity",
+            "role": "input",
+            "description": "The variety and coverage of external tools available to the agent."
+          },
+          {
+            "name": "routing_policy",
+            "role": "mediator",
+            "description": "The decision rule (learned or heuristic) that selects between direct generation and tool invocation."
+          },
+          {
+            "name": "tool_invocation_cost",
+            "role": "mediator",
+            "description": "The latency and resource overhead incurred by using an external tool."
+          },
+          {
+            "name": "generation_accuracy_penalty",
+            "role": "mediator",
+            "description": "The expected error rate when generating code directly without tool support."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The observed type and frequency of failures in code generation (e.g., functional errors, security issues)."
+          },
+          {
+            "name": "task_success_rate",
+            "role": "outcome",
+            "description": "The overall proportion of tasks completed without failure, reflecting agent effectiveness."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Routing Decision",
+            "source": "task_complexity",
+            "relation": "combined with",
+            "target": "resource_budget",
+            "explanation": "The agent's routing policy evaluates task complexity and available budget to decide tool use."
+          },
+          {
+            "step": "Tool Invocation Outcome",
+            "source": "routing_policy",
+            "relation": "determines",
+            "target": "tool_invocation_cost",
+            "explanation": "If the policy invokes a tool, the cost is incurred; otherwise, no tool cost."
+          },
+          {
+            "step": "Generation Accuracy Impact",
+            "source": "routing_policy",
+            "relation": "affects",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Direct generation without tool support increases error likelihood."
+          },
+          {
+            "step": "Failure Emergence",
+            "source": "tool_invocation_cost",
+            "relation": "interacts with",
+            "target": "generation_accuracy_penalty",
+            "explanation": "Excessive tool cost may exceed budget, forcing premature direct generation, while high accuracy penalty leads to errors when tools are skipped."
+          },
+          {
+            "step": "Tool Set Limitation",
+            "source": "tool_set_diversity",
+            "relation": "moderates",
+            "target": "failure_mode",
+            "explanation": "Insufficient tool coverage can cause even well-routed invocations to fail due to missing capabilities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Resource Budget Constraint",
+            "why_it_matters": "When the budget is too tight, agents are forced to skip tools, increasing error rates; when too loose, they may overuse slow tools."
+          },
+          {
+            "bottleneck": "Routing Policy-Environment Mismatch",
+            "why_it_matters": "A policy optimized for typical tasks often fails on outliers, leading to systematic failures under distribution shift."
+          },
+          {
+            "bottleneck": "Tool Set Incompleteness",
+            "why_it_matters": "Even perfect routing fails if no suitable tool exists for the required operation, causing the agent to attempt impossible tasks."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing fails in coding agents due to a misalignment between the routing policy, resource constraints, and task requirements. The agent's decision to invoke tools is mediated by its policy, which balances accuracy and latency. Failures emerge when (a) resource budgets force premature direct generation, (b) the policy misjudges the need for tools under novel conditions, or (c) the available tool set lacks coverage for the task. These bottlenecks interact: budget constraints exacerbate policy mismatches, and tool incompleteness renders optimal routing futile. The mechanism explains how failures propagate from input conditions through routing decisions to observable errors."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Using external tools improves accuracy but increases latency, forcing a tradeoff between correctness and speed when deciding whether to invoke a tool.",
+        "derived_from": [
+          "Tool-Use Routing",
+          "Accuracy vs. Latency tradeoff",
+          "resource_budget",
+          "tool_invocation_cost",
+          "generation_accuracy_penalty"
+        ],
+        "why_it_matters": "This tension is central to routing failures: if the agent prioritizes speed, it may skip tools and make errors; if it prioritizes accuracy, it may exceed time budgets and fail to complete tasks.",
+        "what_existing_methods_may_miss": "Many evaluations assume a fixed accuracy-latency balance, ignoring that the optimal tradeoff varies per task and resource constraint.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical ratio of resource budget to tool invocation cost does the accuracy-latency tradeoff cause a sharp increase in failure rates for coding agents, and how does the routing policy's adaptability shift this threshold?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in routing failure, enabling budget-aware policy design with a direct threshold prediction."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ratio R* (budget/tool cost) such that for R < R*, the generation accuracy penalty exceeds a tolerable threshold and task success rate drops sharply, while for R >= R*, the system is robust. An adaptive routing policy shifts R* to a lower value compared to a fixed heuristic.",
+        "predicted_effect": "As the ratio R decreases below R*, failure rate discontinuously increases; adaptive policies tolerate lower R values before failure onset."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a set of coding tasks with fixed complexity. Vary resource budget (10s, 20s, 40s, 80s) and tool invocation cost (1s, 2s, 4s, 8s) in a full factorial design to create a range of R values (1.25 to 80). Two routing policies: fixed heuristic (threshold on confidence) and adaptive (learned online). Measure generation accuracy penalty (error rate when tool is skipped) and task success rate. Control for tool set diversity (fixed) and task type.",
+        "independent_variables": [
+          "resource budget (seconds per task)",
+          "tool invocation cost (seconds per call)",
+          "routing policy (fixed vs adaptive)"
+        ],
+        "dependent_variables": [
+          "generation accuracy penalty (error rate of direct generation)",
+          "task success rate"
+        ],
+        "controls": [
+          "tool set (identical set of three common tools)",
+          "task complexity (moderate, same set of 50 tasks)",
+          "agent base model (same LLM)"
+        ],
+        "falsifying_observation": "No discontinuous drop in success rate as R varies, or no difference in threshold between fixed and adaptive policies."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Clear sigmoidal relationship between R and success rate, with a steep drop at a critical R*.",
+          "R* is lower for adaptive policy than for fixed policy.",
+          "Generation accuracy penalty increases sharply below R*, remains low above R*."
+        ],
+        "rejects_hypothesis": [
+          "Success rate decreases linearly without a clear threshold as R decreases.",
+          "No significant difference in failure rate between fixed and adaptive policies across R values.",
+          "Generation accuracy penalty is independent of R."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold effect is observed or policy does not shift it, the hypothesis that resource budget-to-cost ratio is the primary driver is unsupported.",
+        "assumption_to_revise": "Replace the assumption that resource constraint is the dominant bottleneck with the assumption that tool set diversity or task complexity is the key moderator.",
+        "next_question": "How does tool set diversity moderate the critical ratio R* and the emergence of routing failures?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical ratio R* (budget/tool cost) such that for R < R*, the generation accuracy penalty exceeds a tolerable threshold and task success rate drops sharply, while for R >= R*, the system is robust. An adaptive routing policy shifts R* to a lower value compared to a fixed heuristic.",
+      "independent_variables": [
+        "resource_budget (seconds per task)",
+        "tool_invocation_cost (seconds per call)",
+        "routing_policy (fixed vs adaptive)"
+      ],
+      "dependent_variables": [
+        "generation_accuracy_penalty (error rate when tool is skipped)",
+        "task_success_rate"
+      ],
+      "controlled_variables": [
+        "tool_set (identical set of three common tools)",
+        "task_complexity (moderate, same set of 50 tasks)",
+        "agent_base_model (same LLM)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed heuristic policy",
+          "description": "A routing policy using a fixed confidence threshold to decide tool invocation."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "generation_accuracy_penalty",
+          "definition": "Error rate of direct generation when tool is skipped."
+        },
+        {
+          "name": "task_success_rate",
+          "definition": "Proportion of tasks completed without failure."
+        }
+      ],
+      "expected_result": "Success rate shows a sigmoidal drop around a critical ratio R*, with a steeper drop for the fixed heuristic than the adaptive policy, and the adaptive policy exhibits a lower R* compared to the fixed heuristic.",
+      "falsifying_result": "No discontinuous drop in success rate as R varies, or no significant difference in threshold between fixed and adaptive policies.",
+      "minimum_viable_experiment": "Conduct 50 coding tasks of moderate complexity with a fixed set of 3 tools. Vary resource budget (10s, 20s, 40s, 80s) and tool invocation cost (1s, 2s, 4s, 8s) in a full factorial design, creating R values from 1.25 to 80. For each R, run both a fixed heuristic routing policy (confidence threshold) and an adaptive routing policy (trained online). Measure generation accuracy penalty and task success rate, controlling for agent base model and task set.",
+      "risks_and_confounds": [
+        "Task complexity may interact with R; moderate tasks may not generalize to easy or hard tasks.",
+        "The adaptive policy may not be truly adaptive; ensure it is trained online to avoid confounding.",
+        "Tool set diversity may affect results; fixed tool set may limit external validity."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical resource budget threshold such that for any budget below this threshold, the task success rate of a coding agent using tool-use routing is zero (or near-zero), and for any budget above, success rate is positive. This threshold increases linearly with task complexity.",
+      "independent_variables": [
+        "resource budget (seconds): 5, 10, 20, 40, 80",
+        "task complexity: low (sorting an array), high (implementing a web server)"
+      ],
+      "dependent_variables": [
+        "task success rate (binary per trial, aggregated per condition)"
+      ],
+      "controlled_variables": [
+        "tool set diversity: fixed set of 10 diverse tools",
+        "tool invocation cost: fixed per tool",
+        "routing policy: same pretrained policy",
+        "number of trials per condition: 100"
+      ],
+      "baselines": [
+        {
+          "name": "No-tool baseline",
+          "description": "Same tasks and budgets but agent always generates code directly without tool invocation."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task Success Rate",
+          "definition": "Proportion of trials where the task is completed without any functional error, security vulnerability, performance inefficiency, or inability to complete."
+        }
+      ],
+      "expected_result": "For each complexity level, success rate shows a clear sigmoidal transition from near-zero to near-perfect around a threshold budget. The threshold budget for high complexity is higher than for low complexity.",
+      "falsifying_result": "Success rate increases gradually without a sharp threshold, or the threshold budget for high complexity is not higher than for low complexity (i.e., same or lower).",
+      "minimum_viable_experiment": "Fix a pretrained routing policy. Choose two coding tasks: one low complexity (e.g., sorting an array) and one high complexity (e.g., implementing a web server). For each task, run the agent with resource budgets of 5, 10, 20, 40, and 80 seconds. For each (task, budget) combination, run 100 independent trials and record whether the task was completed without failure. Compute success rate per condition. Determine the threshold budget where success rate first exceeds 0.5. Compare thresholds for low and high complexity. If the threshold for high complexity is not greater than for low complexity, or if no sharp threshold exists, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "The routing policy may have been trained on tasks similar to the test tasks, biasing results.",
+        "The tool set may not adequately cover the high complexity task, causing failures even with tool use.",
+        "Stochasticity in the agent's generation may cause variance in success rate; 100 trials per condition mitigates but not eliminates.",
+        "Budget measurement precision may affect threshold detection; use precise timing.",
+        "The binary definition of success may overlook partial successes or different failure modes."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical resource budget threshold τ such that when the budget is below τ, introducing exploration reduces task success rate relative to a purely exploitative policy, while when the budget is above τ, exploration improves success rate. Moreover, τ increases as initial tool set coverage decreases.",
+      "independent_variables": [
+        "Resource budget level (3 levels: low, medium, high, corresponding to e.g., 1x, 2x, 4x the average task compute time)",
+        "Initial tool set coverage (2 levels: low (3 tools), high (10 tools))",
+        "Exploration mechanism (2 levels: exploitation (no exploration) vs. exploration (periodically test a random new tool from a pool of 20, incurring a cost equivalent to 0.2x budget per test))"
+      ],
+      "dependent_variables": [
+        "Task success rate (proportion of tasks completed without failure)",
+        "Crossing point budget level (inferred from success rate curves across budget levels)"
+      ],
+      "controlled_variables": [
+        "Same set of known tools (non-explored) for both conditions within each coverage level",
+        "Same base routing policy (heuristic: use tool if estimated accuracy gain exceeds 0.1 * normalized latency cost)",
+        "Same tool pool for exploration (20 diverse tools, e.g., code interpreter, static analyzer, web search, etc.)",
+        "Same set of 100 coding tasks sampled from a fixed benchmark (e.g., HumanEval variants) with known complexity distribution",
+        "Same agent architecture (LLM with identical parameters, temperature=0.2, max tokens per step)",
+        "Same runtime environment and resource measurement methodology"
+      ],
+      "baselines": [
+        {
+          "name": "Exploitative Policy",
+          "description": "The base routing policy with no exploration; always uses the initial known tool set."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task Success Rate",
+          "definition": "Fraction of tasks where the generated code passes all unit tests and adheres to security and performance constraints within the resource budget."
+        }
+      ],
+      "expected_result": "For low coverage, at low budget exploitative outperforms exploration; at high budget exploration outperforms exploitative; crossing point τ_low > τ_high. For high coverage, crossing points shift left (lower budget). Specifically, the crossing point τ for low coverage is higher than for high coverage.",
+      "falsifying_result": "If exploration never outperforms exploitative at any budget level (i.e., no crossing), or exploration always outperforms exploitative (no crossing), or the crossing point does not increase as coverage decreases (i.e., τ_low ≤ τ_high), the hypothesis is falsified.",
+      "minimum_viable_experiment": "We implement a coding agent with a base routing policy that chooses between direct generation and using one of the known tools based on a heuristic. Two conditions: (1) exploitation: never explore new tools; (2) exploration: at the start of each task, with probability 0.1, test a randomly selected new tool from a pool of 20, incurring a cost of 0.2x the average task budget. We vary resource budget at three levels (low, medium, high) relative to the average task compute time, and initial tool coverage at two levels (3 tools vs 10 tools). For each combination of budget, coverage, and exploration condition, we run the agent on 100 benchmark coding tasks and measure task success rate. We then plot success rate vs. budget for each coverage and condition. We identify the crossing point (if any) as the budget where exploration success rate equals exploitation success rate. We repeat the experiment with random seeds to assess stability. The crossing point is expected to decrease with increasing coverage. If no crossing is observed (e.g., exploration always lower or always higher) or the crossing point does not move monotonically with coverage, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Task selection bias: tasks may not cover the full spectrum of complexity; we mitigate by using a diverse benchmark.",
+        "Stochasticity of LLM outputs: multiple runs with different seeds needed to assess variance.",
+        "Definition of resource budget: we use normalized compute time, but latency may vary with tool usage; we ensure consistent measurement.",
+        "Exploration cost model: the fixed cost of exploration may not scale linearly with budget; we assume it does for simplicity.",
+        "Tool set coverage: low coverage may include tools that are often useless; we select tools from common categories to ensure some utility."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "At what critical ratio of resource budget to tool invocation cost does the accuracy-latency tradeoff cause a sharp increase in failure rates for coding agents, and how does the routing policy's adaptability shift this threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical resource budget threshold below which tool-use routing in coding agents inevitably fails, and does this threshold increase monotonically with task complexity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Under what resource budget conditions does an exploration mechanism for tool discovery transition from being detrimental to beneficial for task success rate in coding agents, and how does this threshold depend on initial tool set coverage?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

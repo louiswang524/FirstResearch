@@ -1,0 +1,1163 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An entity that perceives its environment and takes actions based on its internal state and goals.",
+        "why_primitive": "The concept of an agent is fundamental to any discussion of process fidelity, as it is the entity whose process we are measuring."
+      },
+      {
+        "name": "Process",
+        "definition": "The sequence of internal computations, decisions, or reasoning steps that lead from perception to action.",
+        "why_primitive": "Fidelity is about the process, so defining what constitutes a process is essential to measuring it."
+      },
+      {
+        "name": "Fidelity",
+        "definition": "The degree to which an observed process matches a reference or ideal process.",
+        "why_primitive": "Fidelity is the target of measurement; without a clear definition, measurement is impossible."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent's process is observable or inferable from its outputs and possibly internal logs.",
+        "rationale": "If the process cannot be observed or inferred, then measuring fidelity is impossible. This assumption allows us to define measurement methods.",
+        "possible_failure": "The agent's process may be opaque (e.g., due to black-box models), leading to epistemic uncertainty in measurement."
+      },
+      {
+        "assumption": "There exists a reference process that is considered correct or optimal.",
+        "rationale": "Fidelity is a comparative measure; without a reference, the concept of 'fidelity' is meaningless. This assumption grounds the measurement.",
+        "possible_failure": "The reference process may be subjective, context-dependent, or unavailable, making objective measurement challenging."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity vs. tractability: High-fidelity measurement requires detailed process tracking but may be computationally expensive or invasive.",
+        "variables": [
+          "granularity",
+          "computational cost",
+          "invasiveness"
+        ]
+      },
+      {
+        "tradeoff": "Objectivity vs. alignment: Objective metrics may not capture alignment with human values; subjective measures may be biased.",
+        "variables": [
+          "objectivity",
+          "alignment with human values",
+          "bias"
+        ]
+      },
+      {
+        "tradeoff": "Static vs. dynamic: Process fidelity may vary across tasks; measuring across diverse tasks may be costly.",
+        "variables": [
+          "task diversity",
+          "measurement cost",
+          "generalizability"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "agent_behavior",
+        "role": "input",
+        "description": "Observable outputs or logged internal states of the agent that serve as evidence of its process."
+      },
+      {
+        "name": "reference_process",
+        "role": "input",
+        "description": "The ideal or standard process against which the agent's process is compared."
+      },
+      {
+        "name": "extracted_process",
+        "role": "mediator",
+        "description": "The inferred process derived from agent_behavior, subject to observability constraints."
+      },
+      {
+        "name": "process_comparison",
+        "role": "mediator",
+        "description": "The comparison between extracted_process and reference_process, modulated by granularity."
+      },
+      {
+        "name": "fidelity_measure",
+        "role": "output",
+        "description": "The computed degree of match between observed and reference process."
+      },
+      {
+        "name": "observability",
+        "role": "confounder",
+        "description": "The degree to which the agent's internal process can be inferred from its behavior; affects extraction."
+      },
+      {
+        "name": "granularity",
+        "role": "mediator",
+        "description": "The level of detail at which the process is tracked and compared; influences comparison quality and cost."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Extraction",
+        "source": "agent_behavior",
+        "relation": "informs",
+        "target": "extracted_process",
+        "explanation": "The agent's behavior and logs are used to infer its internal process, subject to observability limitations."
+      },
+      {
+        "step": "Comparison",
+        "source": "extracted_process",
+        "relation": "compared to",
+        "target": "process_comparison",
+        "explanation": "The extracted process is compared against the reference process, with granularity determining the level of detail."
+      },
+      {
+        "step": "Measurement",
+        "source": "process_comparison",
+        "relation": "yields",
+        "target": "fidelity_measure",
+        "explanation": "The comparison results in a quantitative or qualitative measure of fidelity."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Observability limitation",
+        "why_it_matters": "If the agent's internal process is opaque, extraction becomes noisy or impossible, undermining measurement validity."
+      },
+      {
+        "bottleneck": "Reference process ambiguity",
+        "why_it_matters": "Without a clear, objective reference process, fidelity comparisons are subjective and context-dependent, reducing reliability."
+      },
+      {
+        "bottleneck": "Granularity tradeoff",
+        "why_it_matters": "Choosing an inappropriate granularity can either miss important process details or be computationally prohibitive, affecting cost and accuracy."
+      }
+    ],
+    "mechanism_summary": "Agent process fidelity is measured by first inferring the agent's internal process from its observable behavior (extraction), then comparing that inferred process to a reference process (comparison), and finally computing a fidelity measure. The extraction quality depends on observability, while the comparison is modulated by granularity. Bottlenecks include opacity of the agent, ambiguity of the reference, and the granularity tradeoff between detail and cost."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "High-fidelity measurement requires detailed process tracking (high granularity) but such detail is computationally expensive and invasive, making it impractical for large-scale or real-time systems.",
+      "derived_from": [
+        "Granularity vs. tractability tradeoff",
+        "Granularity tradeoff bottleneck"
+      ],
+      "why_it_matters": "This tension forces a compromise between accuracy and feasibility; choosing low granularity may miss crucial process details, while high granularity may be infeasible.",
+      "what_existing_methods_may_miss": "Existing fidelity metrics often assume a fixed granularity without addressing the tradeoff, leading to either over-simplified or overly complex measurements.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Objective metrics for fidelity may not capture alignment with human values or context, while subjective measures introduce bias.",
+      "derived_from": [
+        "Objectivity vs. alignment tradeoff"
+      ],
+      "why_it_matters": "If we prioritize objectivity, we risk ignoring aspects that matter to humans; if we prioritize alignment, we lose reproducibility.",
+      "what_existing_methods_may_miss": "Many methods focus on either purely objective measures (e.g., similarity scores) or human evaluations, but rarely combine both.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Process fidelity may vary across tasks and contexts, so measuring it statically for one task may not generalize, but measuring across diverse tasks is costly.",
+      "derived_from": [
+        "Static vs. dynamic tradeoff"
+      ],
+      "why_it_matters": "Without understanding task-specific variation, fidelity measurements may be misleading when applied to new tasks.",
+      "what_existing_methods_may_miss": "Existing benchmarks often test on limited tasks, ignoring transferability.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The agent's internal process may be opaque (low observability), but accurate extraction is necessary for fidelity measurement, creating a tension between what can be observed and what must be inferred.",
+      "derived_from": [
+        "Observability limitation bottleneck",
+        "Assumption: agent's process is observable or inferable (possible failure)"
+      ],
+      "why_it_matters": "If observability is low, extracted processes are noisy, leading to unreliable fidelity measures.",
+      "what_existing_methods_may_miss": "Many fidelity methods assume full observability, ignoring black-box scenarios.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T5",
+      "statement": "Fidelity requires a reference process, but such a reference may be subjective, context-dependent, or unavailable, making objective measurement challenging.",
+      "derived_from": [
+        "Reference process ambiguity bottleneck",
+        "Assumption: exists a reference process (possible failure)"
+      ],
+      "why_it_matters": "Without a clear reference, fidelity measures become arbitrary or contested.",
+      "what_existing_methods_may_miss": "Existing methods often assume a single correct reference, ignoring multiple valid processes.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying the granularity of process tracking in automated agents affect the accuracy of fidelity measurement, given a fixed computational budget?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the tradeoff between detail and tractability, allowing practitioners to choose optimal granularity for their constraints."
+    },
+    {
+      "question": "To what extent do objective process fidelity metrics (e.g., sequence alignment) correlate with human-judged alignment across tasks with varying complexity?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Reveals where objective metrics fall short in capturing human values, guiding hybrid metric development."
+    },
+    {
+      "question": "Does process fidelity measured on a navigation task generalize to a puzzle-solving task for the same reinforcement learning agent?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Tests cross-task transferability of fidelity measures, highlighting need for context-aware metrics."
+    },
+    {
+      "question": "How does the level of observability of an agent's internal process (from full logging to black-box behavior) influence the reliability of process extraction and subsequent fidelity measurement?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Provides guidelines for when inference-based fidelity is trustworthy, addressing the observability bottleneck."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions based on its internal state and goals.",
+          "why_primitive": "The concept of an agent is fundamental to any discussion of process fidelity, as it is the entity whose process we are measuring."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, or reasoning steps that lead from perception to action.",
+          "why_primitive": "Fidelity is about the process, so defining what constitutes a process is essential to measuring it."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an observed process matches a reference or ideal process.",
+          "why_primitive": "Fidelity is the target of measurement; without a clear definition, measurement is impossible."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its outputs and possibly internal logs.",
+          "rationale": "If the process cannot be observed or inferred, then measuring fidelity is impossible. This assumption allows us to define measurement methods.",
+          "possible_failure": "The agent's process may be opaque (e.g., due to black-box models), leading to epistemic uncertainty in measurement."
+        },
+        {
+          "assumption": "There exists a reference process that is considered correct or optimal.",
+          "rationale": "Fidelity is a comparative measure; without a reference, the concept of 'fidelity' is meaningless. This assumption grounds the measurement.",
+          "possible_failure": "The reference process may be subjective, context-dependent, or unavailable, making objective measurement challenging."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_behavior",
+            "role": "input",
+            "description": "Observable outputs or logged internal states of the agent that serve as evidence of its process."
+          },
+          {
+            "name": "reference_process",
+            "role": "input",
+            "description": "The ideal or standard process against which the agent's process is compared."
+          },
+          {
+            "name": "extracted_process",
+            "role": "mediator",
+            "description": "The inferred process derived from agent_behavior, subject to observability constraints."
+          },
+          {
+            "name": "process_comparison",
+            "role": "mediator",
+            "description": "The comparison between extracted_process and reference_process, modulated by granularity."
+          },
+          {
+            "name": "fidelity_measure",
+            "role": "output",
+            "description": "The computed degree of match between observed and reference process."
+          },
+          {
+            "name": "observability",
+            "role": "confounder",
+            "description": "The degree to which the agent's internal process can be inferred from its behavior; affects extraction."
+          },
+          {
+            "name": "granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is tracked and compared; influences comparison quality and cost."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Extraction",
+            "source": "agent_behavior",
+            "relation": "informs",
+            "target": "extracted_process",
+            "explanation": "The agent's behavior and logs are used to infer its internal process, subject to observability limitations."
+          },
+          {
+            "step": "Comparison",
+            "source": "extracted_process",
+            "relation": "compared to",
+            "target": "process_comparison",
+            "explanation": "The extracted process is compared against the reference process, with granularity determining the level of detail."
+          },
+          {
+            "step": "Measurement",
+            "source": "process_comparison",
+            "relation": "yields",
+            "target": "fidelity_measure",
+            "explanation": "The comparison results in a quantitative or qualitative measure of fidelity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability limitation",
+            "why_it_matters": "If the agent's internal process is opaque, extraction becomes noisy or impossible, undermining measurement validity."
+          },
+          {
+            "bottleneck": "Reference process ambiguity",
+            "why_it_matters": "Without a clear, objective reference process, fidelity comparisons are subjective and context-dependent, reducing reliability."
+          },
+          {
+            "bottleneck": "Granularity tradeoff",
+            "why_it_matters": "Choosing an inappropriate granularity can either miss important process details or be computationally prohibitive, affecting cost and accuracy."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by first inferring the agent's internal process from its observable behavior (extraction), then comparing that inferred process to a reference process (comparison), and finally computing a fidelity measure. The extraction quality depends on observability, while the comparison is modulated by granularity. Bottlenecks include opacity of the agent, ambiguity of the reference, and the granularity tradeoff between detail and cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "High-fidelity measurement requires detailed process tracking (high granularity) but such detail is computationally expensive and invasive, making it impractical for large-scale or real-time systems.",
+        "derived_from": [
+          "Granularity vs. tractability tradeoff",
+          "Granularity tradeoff bottleneck"
+        ],
+        "why_it_matters": "This tension forces a compromise between accuracy and feasibility; choosing low granularity may miss crucial process details, while high granularity may be infeasible.",
+        "what_existing_methods_may_miss": "Existing fidelity metrics often assume a fixed granularity without addressing the tradeoff, leading to either over-simplified or overly complex measurements.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does varying the granularity of process tracking in automated agents affect the accuracy of fidelity measurement, given a fixed computational budget?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the tradeoff between detail and tractability, allowing practitioners to choose optimal granularity for their constraints."
+      },
+      "hypothesis": {
+        "statement": "Increasing the granularity of process tracking in automated agents increases the accuracy of fidelity measurement, but with diminishing returns: after a certain threshold, further increases in granularity yield negligible gains in accuracy while substantially increasing computational cost.",
+        "predicted_effect": "Accuracy of fidelity measurement improves as granularity increases, but the rate of improvement decreases. Computational cost increases monotonically with granularity, potentially superlinearly, leading to an optimal granularity that balances accuracy and cost."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Take a set of 100 agents performing a standardized reasoning task (e.g., solving math problems step-by-step) with known ground truth processes. Vary the granularity of process tracking across 5 levels (e.g., step-level, sub-step-level, token-level, etc.) using a fixed computational budget. For each level, compute fidelity accuracy (e.g., normalized edit distance between extracted and reference process) and record actual computational cost (time or FLOPs). Repeat 10 times for statistical power.",
+        "independent_variables": [
+          "Granularity level (5 levels: coarse to fine)"
+        ],
+        "dependent_variables": [
+          "Accuracy of fidelity measure",
+          "Computational cost (time or FLOPs)"
+        ],
+        "controls": [
+          "Same agents and tasks",
+          "Same reference process",
+          "Same evaluation metric",
+          "Fixed computational budget (but allow cost to vary as outcome)"
+        ],
+        "falsifying_observation": "If accuracy does not increase with granularity (e.g., flat or decreasing) OR if computational cost does not increase with granularity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Accuracy increases from coarse to medium granularity, then plateaus at fine granularity.",
+          "Computational cost increases significantly from coarse to fine granularity.",
+          "The incremental accuracy gain per unit cost decreases as granularity increases."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy remains constant across all granularity levels.",
+          "Accuracy decreases with increasing granularity (e.g., due to noise).",
+          "Computational cost does not increase with granularity (e.g., due to sparse sampling).",
+          "There is no plateau; accuracy continues to increase linearly with granularity without diminishing returns."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, the core assumption that granularity directly affects accuracy may be incorrect.",
+        "assumption_to_revise": "The assumption that observability is sufficient to extract process at any granularity. Instead, observability limitations may dominate, making finer granularity not useful.",
+        "next_question": "How does the observability of agent internal processes (e.g., due to model opaqueness) moderate the relationship between granularity and fidelity measurement accuracy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions based on its internal state and goals.",
+          "why_primitive": "The concept of an agent is fundamental to any discussion of process fidelity, as it is the entity whose process we are measuring."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, or reasoning steps that lead from perception to action.",
+          "why_primitive": "Fidelity is about the process, so defining what constitutes a process is essential to measuring it."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an observed process matches a reference or ideal process.",
+          "why_primitive": "Fidelity is the target of measurement; without a clear definition, measurement is impossible."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its outputs and possibly internal logs.",
+          "rationale": "If the process cannot be observed or inferred, then measuring fidelity is impossible. This assumption allows us to define measurement methods.",
+          "possible_failure": "The agent's process may be opaque (e.g., due to black-box models), leading to epistemic uncertainty in measurement."
+        },
+        {
+          "assumption": "There exists a reference process that is considered correct or optimal.",
+          "rationale": "Fidelity is a comparative measure; without a reference, the concept of 'fidelity' is meaningless. This assumption grounds the measurement.",
+          "possible_failure": "The reference process may be subjective, context-dependent, or unavailable, making objective measurement challenging."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_behavior",
+            "role": "input",
+            "description": "Observable outputs or logged internal states of the agent that serve as evidence of its process."
+          },
+          {
+            "name": "reference_process",
+            "role": "input",
+            "description": "The ideal or standard process against which the agent's process is compared."
+          },
+          {
+            "name": "extracted_process",
+            "role": "mediator",
+            "description": "The inferred process derived from agent_behavior, subject to observability constraints."
+          },
+          {
+            "name": "process_comparison",
+            "role": "mediator",
+            "description": "The comparison between extracted_process and reference_process, modulated by granularity."
+          },
+          {
+            "name": "fidelity_measure",
+            "role": "output",
+            "description": "The computed degree of match between observed and reference process."
+          },
+          {
+            "name": "observability",
+            "role": "confounder",
+            "description": "The degree to which the agent's internal process can be inferred from its behavior; affects extraction."
+          },
+          {
+            "name": "granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is tracked and compared; influences comparison quality and cost."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Extraction",
+            "source": "agent_behavior",
+            "relation": "informs",
+            "target": "extracted_process",
+            "explanation": "The agent's behavior and logs are used to infer its internal process, subject to observability limitations."
+          },
+          {
+            "step": "Comparison",
+            "source": "extracted_process",
+            "relation": "compared to",
+            "target": "process_comparison",
+            "explanation": "The extracted process is compared against the reference process, with granularity determining the level of detail."
+          },
+          {
+            "step": "Measurement",
+            "source": "process_comparison",
+            "relation": "yields",
+            "target": "fidelity_measure",
+            "explanation": "The comparison results in a quantitative or qualitative measure of fidelity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability limitation",
+            "why_it_matters": "If the agent's internal process is opaque, extraction becomes noisy or impossible, undermining measurement validity."
+          },
+          {
+            "bottleneck": "Reference process ambiguity",
+            "why_it_matters": "Without a clear, objective reference process, fidelity comparisons are subjective and context-dependent, reducing reliability."
+          },
+          {
+            "bottleneck": "Granularity tradeoff",
+            "why_it_matters": "Choosing an inappropriate granularity can either miss important process details or be computationally prohibitive, affecting cost and accuracy."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by first inferring the agent's internal process from its observable behavior (extraction), then comparing that inferred process to a reference process (comparison), and finally computing a fidelity measure. The extraction quality depends on observability, while the comparison is modulated by granularity. Bottlenecks include opacity of the agent, ambiguity of the reference, and the granularity tradeoff between detail and cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Objective metrics for fidelity may not capture alignment with human values or context, while subjective measures introduce bias.",
+        "derived_from": [
+          "Objectivity vs. alignment tradeoff"
+        ],
+        "why_it_matters": "If we prioritize objectivity, we risk ignoring aspects that matter to humans; if we prioritize alignment, we lose reproducibility.",
+        "what_existing_methods_may_miss": "Many methods focus on either purely objective measures (e.g., similarity scores) or human evaluations, but rarely combine both.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "To what extent do objective process fidelity metrics (e.g., sequence alignment) correlate with human-judged alignment across tasks with varying complexity?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Reveals where objective metrics fall short in capturing human values, guiding hybrid metric development."
+      },
+      "hypothesis": {
+        "statement": "Objective process fidelity metrics (e.g., sequence alignment) positively correlate with human-judged alignment, but the correlation decreases as task complexity increases.",
+        "predicted_effect": "For simple tasks, the correlation is strong (r > 0.7), while for complex tasks, the correlation is weak (r < 0.3)."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select N=100 tasks across three complexity levels (low, medium, high) from a standardized benchmark. For each task, compute objective fidelity using sequence alignment of agent process traces against a reference trace. Obtain human judgments from M=30 raters on alignment on a Likert scale. Compute Pearson correlation per complexity level.",
+        "independent_variables": [
+          "task complexity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation coefficient between objective fidelity score and average human alignment score"
+        ],
+        "controls": [
+          "use same agent model across tasks",
+          "randomize task order",
+          "ensure raters are blind to objective scores",
+          "use inter-rater reliability check (ICC > 0.8)"
+        ],
+        "falsifying_observation": "Correlation is uniformly high (r > 0.7) across all complexity levels, or uniformly low (r < 0.3) across all levels."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Correlation is high for low complexity tasks (r > 0.7)",
+          "Correlation is moderate for medium complexity (r ~ 0.5)",
+          "Correlation is low for high complexity (r < 0.3)"
+        ],
+        "rejects_hypothesis": [
+          "Correlation is high across all complexity levels",
+          "Correlation is low across all complexity levels",
+          "Correlation is not monotonic with complexity (e.g., higher for medium than low)"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the correlation is uniformly low (r < 0.3) across all levels, the hypothesis is falsified.",
+        "assumption_to_revise": "Assumption that objective metrics can capture alignment at any level of complexity.",
+        "next_question": "Which aspects of process fidelity do human judges prioritize that objective metrics miss, and how can they be incorporated?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions based on its internal state and goals.",
+          "why_primitive": "The concept of an agent is fundamental to any discussion of process fidelity, as it is the entity whose process we are measuring."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, or reasoning steps that lead from perception to action.",
+          "why_primitive": "Fidelity is about the process, so defining what constitutes a process is essential to measuring it."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an observed process matches a reference or ideal process.",
+          "why_primitive": "Fidelity is the target of measurement; without a clear definition, measurement is impossible."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its outputs and possibly internal logs.",
+          "rationale": "If the process cannot be observed or inferred, then measuring fidelity is impossible. This assumption allows us to define measurement methods.",
+          "possible_failure": "The agent's process may be opaque (e.g., due to black-box models), leading to epistemic uncertainty in measurement."
+        },
+        {
+          "assumption": "There exists a reference process that is considered correct or optimal.",
+          "rationale": "Fidelity is a comparative measure; without a reference, the concept of 'fidelity' is meaningless. This assumption grounds the measurement.",
+          "possible_failure": "The reference process may be subjective, context-dependent, or unavailable, making objective measurement challenging."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_behavior",
+            "role": "input",
+            "description": "Observable outputs or logged internal states of the agent that serve as evidence of its process."
+          },
+          {
+            "name": "reference_process",
+            "role": "input",
+            "description": "The ideal or standard process against which the agent's process is compared."
+          },
+          {
+            "name": "extracted_process",
+            "role": "mediator",
+            "description": "The inferred process derived from agent_behavior, subject to observability constraints."
+          },
+          {
+            "name": "process_comparison",
+            "role": "mediator",
+            "description": "The comparison between extracted_process and reference_process, modulated by granularity."
+          },
+          {
+            "name": "fidelity_measure",
+            "role": "output",
+            "description": "The computed degree of match between observed and reference process."
+          },
+          {
+            "name": "observability",
+            "role": "confounder",
+            "description": "The degree to which the agent's internal process can be inferred from its behavior; affects extraction."
+          },
+          {
+            "name": "granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is tracked and compared; influences comparison quality and cost."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Extraction",
+            "source": "agent_behavior",
+            "relation": "informs",
+            "target": "extracted_process",
+            "explanation": "The agent's behavior and logs are used to infer its internal process, subject to observability limitations."
+          },
+          {
+            "step": "Comparison",
+            "source": "extracted_process",
+            "relation": "compared to",
+            "target": "process_comparison",
+            "explanation": "The extracted process is compared against the reference process, with granularity determining the level of detail."
+          },
+          {
+            "step": "Measurement",
+            "source": "process_comparison",
+            "relation": "yields",
+            "target": "fidelity_measure",
+            "explanation": "The comparison results in a quantitative or qualitative measure of fidelity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability limitation",
+            "why_it_matters": "If the agent's internal process is opaque, extraction becomes noisy or impossible, undermining measurement validity."
+          },
+          {
+            "bottleneck": "Reference process ambiguity",
+            "why_it_matters": "Without a clear, objective reference process, fidelity comparisons are subjective and context-dependent, reducing reliability."
+          },
+          {
+            "bottleneck": "Granularity tradeoff",
+            "why_it_matters": "Choosing an inappropriate granularity can either miss important process details or be computationally prohibitive, affecting cost and accuracy."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by first inferring the agent's internal process from its observable behavior (extraction), then comparing that inferred process to a reference process (comparison), and finally computing a fidelity measure. The extraction quality depends on observability, while the comparison is modulated by granularity. Bottlenecks include opacity of the agent, ambiguity of the reference, and the granularity tradeoff between detail and cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Process fidelity may vary across tasks and contexts, so measuring it statically for one task may not generalize, but measuring across diverse tasks is costly.",
+        "derived_from": [
+          "Static vs. dynamic tradeoff"
+        ],
+        "why_it_matters": "Without understanding task-specific variation, fidelity measurements may be misleading when applied to new tasks.",
+        "what_existing_methods_may_miss": "Existing benchmarks often test on limited tasks, ignoring transferability.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does process fidelity measured on a navigation task generalize to a puzzle-solving task for the same reinforcement learning agent?",
+        "question_type": "benchmark",
+        "source_tension": "T3",
+        "expected_contribution": "Tests cross-task transferability of fidelity measures, highlighting need for context-aware metrics."
+      },
+      "hypothesis": {
+        "statement": "Process fidelity measured on a navigation task does not generalize to a puzzle-solving task for the same reinforcement learning agent; i.e., the fidelity scores will significantly differ between tasks.",
+        "predicted_effect": "The fidelity measure on the navigation task will be significantly different from the fidelity measure on the puzzle-solving task."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train a reinforcement learning agent on both a navigation task and a puzzle-solving task. Measure process fidelity for each task using the same observation method and reference process. Compare the fidelity scores statistically.",
+        "independent_variables": [
+          "task type (navigation vs. puzzle-solving)"
+        ],
+        "dependent_variables": [
+          "process fidelity score"
+        ],
+        "controls": [
+          "same agent",
+          "same measurement method",
+          "same reference process definition (task-appropriate)",
+          "same observability conditions"
+        ],
+        "falsifying_observation": "The fidelity scores are not significantly different between the two tasks (e.g., t-test p > 0.05)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Fidelity scores on navigation and puzzle-solving tasks are significantly different (p <= 0.05) and the effect size is large enough to indicate practical significance."
+        ],
+        "rejects_hypothesis": [
+          "Fidelity scores are not significantly different (p > 0.05) or the difference is negligible in magnitude."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the fidelity scores are not significantly different across tasks,",
+        "assumption_to_revise": "revise the assumption that process fidelity is strongly task-specific.",
+        "next_question": "Does the generalizability of process fidelity depend on the similarity of the tasks' underlying cognitive demands?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment and takes actions based on its internal state and goals.",
+          "why_primitive": "The concept of an agent is fundamental to any discussion of process fidelity, as it is the entity whose process we are measuring."
+        },
+        {
+          "name": "Process",
+          "definition": "The sequence of internal computations, decisions, or reasoning steps that lead from perception to action.",
+          "why_primitive": "Fidelity is about the process, so defining what constitutes a process is essential to measuring it."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree to which an observed process matches a reference or ideal process.",
+          "why_primitive": "Fidelity is the target of measurement; without a clear definition, measurement is impossible."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's process is observable or inferable from its outputs and possibly internal logs.",
+          "rationale": "If the process cannot be observed or inferred, then measuring fidelity is impossible. This assumption allows us to define measurement methods.",
+          "possible_failure": "The agent's process may be opaque (e.g., due to black-box models), leading to epistemic uncertainty in measurement."
+        },
+        {
+          "assumption": "There exists a reference process that is considered correct or optimal.",
+          "rationale": "Fidelity is a comparative measure; without a reference, the concept of 'fidelity' is meaningless. This assumption grounds the measurement.",
+          "possible_failure": "The reference process may be subjective, context-dependent, or unavailable, making objective measurement challenging."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "agent_behavior",
+            "role": "input",
+            "description": "Observable outputs or logged internal states of the agent that serve as evidence of its process."
+          },
+          {
+            "name": "reference_process",
+            "role": "input",
+            "description": "The ideal or standard process against which the agent's process is compared."
+          },
+          {
+            "name": "extracted_process",
+            "role": "mediator",
+            "description": "The inferred process derived from agent_behavior, subject to observability constraints."
+          },
+          {
+            "name": "process_comparison",
+            "role": "mediator",
+            "description": "The comparison between extracted_process and reference_process, modulated by granularity."
+          },
+          {
+            "name": "fidelity_measure",
+            "role": "output",
+            "description": "The computed degree of match between observed and reference process."
+          },
+          {
+            "name": "observability",
+            "role": "confounder",
+            "description": "The degree to which the agent's internal process can be inferred from its behavior; affects extraction."
+          },
+          {
+            "name": "granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is tracked and compared; influences comparison quality and cost."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Extraction",
+            "source": "agent_behavior",
+            "relation": "informs",
+            "target": "extracted_process",
+            "explanation": "The agent's behavior and logs are used to infer its internal process, subject to observability limitations."
+          },
+          {
+            "step": "Comparison",
+            "source": "extracted_process",
+            "relation": "compared to",
+            "target": "process_comparison",
+            "explanation": "The extracted process is compared against the reference process, with granularity determining the level of detail."
+          },
+          {
+            "step": "Measurement",
+            "source": "process_comparison",
+            "relation": "yields",
+            "target": "fidelity_measure",
+            "explanation": "The comparison results in a quantitative or qualitative measure of fidelity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability limitation",
+            "why_it_matters": "If the agent's internal process is opaque, extraction becomes noisy or impossible, undermining measurement validity."
+          },
+          {
+            "bottleneck": "Reference process ambiguity",
+            "why_it_matters": "Without a clear, objective reference process, fidelity comparisons are subjective and context-dependent, reducing reliability."
+          },
+          {
+            "bottleneck": "Granularity tradeoff",
+            "why_it_matters": "Choosing an inappropriate granularity can either miss important process details or be computationally prohibitive, affecting cost and accuracy."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by first inferring the agent's internal process from its observable behavior (extraction), then comparing that inferred process to a reference process (comparison), and finally computing a fidelity measure. The extraction quality depends on observability, while the comparison is modulated by granularity. Bottlenecks include opacity of the agent, ambiguity of the reference, and the granularity tradeoff between detail and cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The agent's internal process may be opaque (low observability), but accurate extraction is necessary for fidelity measurement, creating a tension between what can be observed and what must be inferred.",
+        "derived_from": [
+          "Observability limitation bottleneck",
+          "Assumption: agent's process is observable or inferable (possible failure)"
+        ],
+        "why_it_matters": "If observability is low, extracted processes are noisy, leading to unreliable fidelity measures.",
+        "what_existing_methods_may_miss": "Many fidelity methods assume full observability, ignoring black-box scenarios.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "How does the level of observability of an agent's internal process (from full logging to black-box behavior) influence the reliability of process extraction and subsequent fidelity measurement?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Provides guidelines for when inference-based fidelity is trustworthy, addressing the observability bottleneck."
+      },
+      "hypothesis": {
+        "statement": "Decreasing observability of an agent's internal process (from full logging to black-box) reduces the reliability of process extraction and thus reduces the accuracy of fidelity measurement.",
+        "predicted_effect": "For agents with lower observability (e.g., black-box models), the extracted process will diverge more from the ground truth reference, resulting in lower fidelity scores compared to agents with full transparency."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of agents with varying levels of observability (e.g., full internal state logging, partial logging, and black-box). Each agent performs a fixed set of reasoning tasks. For each agent, extract its process from available observations using a standard inference method, compare it to a ground truth reference (known by design), and compute a fidelity score. Measure the correlation between observability level and extraction accuracy.",
+        "independent_variables": [
+          "Observability level (full, partial, black-box)"
+        ],
+        "dependent_variables": [
+          "Extraction accuracy (e.g., similarity between extracted and reference process)",
+          "Fidelity score"
+        ],
+        "controls": [
+          "Same reasoning tasks",
+          "Same reference process",
+          "Same extraction method",
+          "Same task complexity"
+        ],
+        "falsifying_observation": "If agents with low observability (black-box) achieve extraction accuracy comparable to agents with full observability, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Agents with full logging yield extracted processes that closely match the reference.",
+          "Agents with partial logging show moderate deviations.",
+          "Black-box agents produce extracted processes with significant errors, leading to low fidelity scores."
+        ],
+        "rejects_hypothesis": [
+          "All agents, regardless of observability, show similar extraction accuracy.",
+          "Black-box agents unexpectedly yield more accurate extractions than partial logging agents."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (i.e., observability does not significantly affect extraction reliability), then",
+        "assumption_to_revise": "the assumption that observability is a necessary condition for accurate process extraction may be wrong; alternative signals such as output patterns may provide sufficient information.",
+        "next_question": "What non-observability signals (e.g., output behavior, latency patterns) can compensate for opacity in process extraction?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Increasing the granularity of process tracking in automated agents increases the accuracy of fidelity measurement, but with diminishing returns: after a certain threshold, further increases in granularity yield negligible gains in accuracy while substantially increasing computational cost.",
+      "independent_variables": [
+        "Granularity level (at least 3 levels: coarse, medium, fine)"
+      ],
+      "dependent_variables": [
+        "Accuracy of fidelity measure (e.g., normalized edit distance between extracted and reference process)",
+        "Computational cost (e.g., time in seconds or FLOPs)"
+      ],
+      "controlled_variables": [
+        "Same set of agents (e.g., 100 agents performing standardized reasoning tasks with known ground truth processes)",
+        "Same reference process for each task",
+        "Same evaluation metric for fidelity",
+        "Fixed computational budget (e.g., maximum allowed time per granularity level)"
+      ],
+      "baselines": [
+        {
+          "name": "Coarse granularity baseline",
+          "description": "Fidelity measured using only final answer (no internal process tracking)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Accuracy of fidelity measure",
+          "definition": "Normalized edit distance between the extracted process (from agent behavior) and the reference process, with values between 0 and 1 where 1 is perfect match."
+        },
+        {
+          "name": "Computational cost",
+          "definition": "Total time or FLOPs required to track the process at the given granularity level for all agents."
+        }
+      ],
+      "expected_result": "Accuracy increases from coarse to medium granularity, then plateaus at fine granularity. Computational cost increases significantly with granularity. The incremental accuracy gain per unit cost decreases with granularity.",
+      "falsifying_result": "Accuracy remains constant across granularity levels, or decreases with increasing granularity, or increases linearly without a plateau. Alternatively, computational cost does not increase with granularity (e.g., if finer tracking is cheaper).",
+      "minimum_viable_experiment": "Select 30 agents (instead of 100) performing a single standardized reasoning task (e.g., solving arithmetic word problems step-by-step) with a known ground truth process. Define three granularity levels: coarse (only final answer), medium (step-level), fine (sub-step-level). For each level, run all agents and compute fidelity accuracy and computational cost. Repeat 5 times. If accuracy does not increase from coarse to medium to fine, or if cost is not monotonic, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Observability limitations may make extraction inaccurate at fine granularity, reducing accuracy.",
+        "The reference process may not be perfectly specified, introducing noise.",
+        "Granularity levels may not be independent of computational cost due to implementation details."
+      ]
+    },
+    {
+      "hypothesis": "Objective process fidelity metrics (e.g., sequence alignment) positively correlate with human-judged alignment, but the correlation decreases as task complexity increases.",
+      "independent_variables": [
+        "task complexity (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation coefficient between objective fidelity score and average human alignment score"
+      ],
+      "controlled_variables": [
+        "same agent model across all tasks",
+        "randomize task order",
+        "raters are blind to objective scores",
+        "inter-rater reliability check (ICC > 0.8)"
+      ],
+      "baselines": [
+        {
+          "name": "Random agent baseline",
+          "description": "Agent that selects actions uniformly at random for each task; used to verify that objective metric is not trivially correlated with human alignment."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Objective fidelity (sequence alignment)",
+          "definition": "Sequence alignment score between agent's action trace and reference trace, normalized to [0,1]."
+        },
+        {
+          "name": "Human alignment rating",
+          "definition": "Average Likert-scale (1-5) rating by 30 raters on how well the agent's process aligns with human expectations, after viewing agent's trace."
+        }
+      ],
+      "expected_result": "Pearson correlation r > 0.7 for low complexity, r ≈ 0.5 for medium complexity, r < 0.3 for high complexity.",
+      "falsifying_result": "Pearson correlation is uniformly high (r > 0.7) or uniformly low (r < 0.3) across all complexity levels.",
+      "minimum_viable_experiment": "Select 100 tasks from a standardized benchmark, stratified into low, medium, and high complexity (33/33/34). For each task, compute objective fidelity using sequence alignment of agent's action trace against a reference trace. Obtain human judgments from 30 raters on alignment using a 5-point Likert scale. Compute Pearson correlation between objective fidelity and average human rating separately for each complexity level. Use same agent model across tasks, randomize task order, ensure raters blind to objective scores, and check inter-rater reliability (ICC > 0.8).",
+      "risks_and_confounds": [
+        "Selection of tasks may not sufficiently differentiate complexity levels.",
+        "Human raters may have inconsistent understanding of 'alignment'.",
+        "Sequence alignment may not capture all relevant process aspects.",
+        "Reference trace availability and quality may vary by task."
+      ]
+    },
+    {
+      "hypothesis": "Process fidelity measured on a navigation task does not generalize to a puzzle-solving task for the same reinforcement learning agent; i.e., the fidelity scores will significantly differ between tasks.",
+      "independent_variables": [
+        "Task type (navigation vs. puzzle-solving)"
+      ],
+      "dependent_variables": [
+        "Process fidelity score"
+      ],
+      "controlled_variables": [
+        "Same reinforcement learning agent",
+        "Same measurement method for extracting process",
+        "Same reference process definition (adapted to task)",
+        "Same observability conditions (e.g., access to internal logs)",
+        "Same training algorithm and hyperparameters",
+        "Same environment dimensions and complexity level"
+      ],
+      "baselines": [
+        {
+          "name": "Repeated measurement on navigation task",
+          "description": "Measure fidelity on the navigation task multiple times to establish measurement reliability and within-task variance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process fidelity score",
+          "definition": "The proportion of decision steps where the agent's chosen action matches the optimal action, averaged over episodes."
+        }
+      ],
+      "expected_result": "The fidelity scores on navigation and puzzle-solving tasks are significantly different (p ≤ 0.05, two-tailed t-test) with a large effect size (Cohen's d > 0.8).",
+      "falsifying_result": "The fidelity scores on navigation and puzzle-solving tasks are not significantly different (p > 0.05) or the effect size is negligible (d < 0.2).",
+      "minimum_viable_experiment": "Train a single deep Q-network agent on a simple grid navigation task (e.g., 5x5 grid with obstacles) and a simple puzzle task (e.g., Tower of Hanoi with 3 disks). For each task, run the agent for 100 episodes, recording the sequence of actions taken. Compute fidelity as the proportion of actions matching an optimal policy derived from value iteration. Compare the two sets of fidelity scores using a paired t-test (since same agent) or independent t-test if tasks are run independently.",
+      "risks_and_confounds": [
+        "The agent's internal process may not be fully observable, leading to noisy extraction.",
+        "Reference process definition may be arbitrary for puzzle-solving if multiple optimal solutions exist.",
+        "Order effects if the agent learns from one task before the other (mitigate by counterbalancing or separate agents).",
+        "Task difficulty differences may confound the comparison (mitigate by choosing tasks of similar complexity).",
+        "Measurement fidelity may be affected by stochasticity in the agent's policy (use many episodes to average)."
+      ]
+    },
+    {
+      "hypothesis": "Decreasing observability of an agent's internal process (from full logging to black-box) reduces the reliability of process extraction and thus reduces the accuracy of fidelity measurement.",
+      "independent_variables": [
+        "Observability level (full logging, partial logging, black-box)"
+      ],
+      "dependent_variables": [
+        "Extraction accuracy (normalized similarity between extracted process and reference process)"
+      ],
+      "controlled_variables": [
+        "Same reasoning tasks (10 fixed tasks with known ground truth reference processes)",
+        "Same reference process for each task",
+        "Same extraction method (e.g., prompting agent to provide step-by-step reasoning)",
+        "Same task complexity",
+        "Same underlying agent architecture (same model, same training)"
+      ],
+      "baselines": [
+        {
+          "name": "Full observability agent",
+          "description": "Agent with full internal state logging; serves as the high-observability baseline."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Extraction accuracy",
+          "definition": "Normalized Levenshtein distance between the extracted process sequence and the reference process sequence, averaged across tasks."
+        }
+      ],
+      "expected_result": "Extraction accuracy decreases from full logging to partial logging to black-box, with a statistically significant negative correlation between observability level and accuracy.",
+      "falsifying_result": "There is no significant difference in extraction accuracy between the three observability levels, or black-box agents achieve accuracy comparable to full logging agents.",
+      "minimum_viable_experiment": "Construct three agents with identical underlying reasoning algorithm but differing in observability: (1) full internal state logging, (2) partial logging (only final action sequence), (3) black-box (only final answer). Each agent performs 10 reasoning tasks for which a ground-truth reference process is known. For each task, extract the agent's process using a standard inference method (e.g., ask the agent to explain its steps in natural language). Measure the normalized Levenshtein distance between the extracted sequence and the reference sequence. Average across tasks per agent. Compare the three averages to determine if accuracy declines with observability.",
+      "risks_and_confounds": [
+        "Extraction method may not be equally effective across observability levels (e.g., prompting may fail for complex internal states).",
+        "Ground truth reference process may not be unique; multiple valid processes could exist.",
+        "Order effects or learning effects across tasks due to repeated execution.",
+        "Small number of tasks may lead to insufficient statistical power."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package systematically addresses the measurement of agent process fidelity through a first-principles approach, defining core concepts, assumptions, and a causal mechanism model. It identifies key tensions (e.g., granularity vs. tractability, objectivity vs. alignment) and proposes testable hypotheses with well-designed experiments. The work is timely and relevant for LLM agent evaluation, with clear falsifiability and practical experiments.",
+    "strengths": [
+      "Strong first-principles derivation that grounds the problem in primitive definitions and explicit assumptions.",
+      "Clear causal mechanism model with identified bottlenecks (observability, reference ambiguity, granularity tradeoff).",
+      "Experiments are well-controlled with falsifiable hypotheses and minimal decisive tests, enhancing replicability."
+    ],
+    "weaknesses": [
+      "Some tensions (e.g., T5 on reference process ambiguity) are noted but not deeply addressed in experiments; proposed tests could be expanded.",
+      "The scope of experiments may be limited to specific tasks and agent types, potentially reducing generalizability.",
+      "Lack of explicit comparison to existing fidelity metrics (e.g., behavioral cloning accuracy, task success) in baselines."
+    ],
+    "questions": [
+      "How would the proposed fidelity measures handle agents with multiple valid solution paths (non-unique reference processes)?",
+      "What is the expected effect size for the observability experiment, and is the sample size sufficient to detect it?",
+      "Could the experiments be adapted to evaluate fidelity in open-ended or generative tasks beyond structured problems?"
+    ],
+    "missing_baselines": [
+      "Comparison with existing process fidelity metrics (e.g., reward prediction, causality-based measures) is missing.",
+      "In the granularity experiment, a baseline using no process tracking (only outcome-based measure) could be included."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient handling of observability assumption",
+    "root_cause": "The research plan does not adequately test or account for scenarios where the agent's process is completely opaque (e.g., black-box LLMs with no access to chain-of-thought or internal logs). The experiments assume that extraction methods can always infer processes, but they do not compare different inference techniques or quantify uncertainty in low-observability settings.",
+    "violated_principle": "First principle assumption: 'The agent's process is observable or inferable from its outputs and possibly internal logs' — violated when agents are black-box and inference methods are unreliable.",
+    "new_or_updated_principle": "Process fidelity measurement must explicitly account for the level of observability and provide methods for each level, including fully black-box scenarios. For black-box agents, fidelity should be reported with an uncertainty interval, and inference methods should be validated against known ground truth processes.",
+    "new_or_updated_skill": "Designing experiments that compare extraction reliability across different observability regimes using multiple inference techniques (e.g., prompt-based explanation, saliency maps, probing classifiers) and evaluating their accuracy against a ground truth process.",
+    "regression_test": "Given an agent that only outputs final answers (black-box), the fidelity measurement pipeline should output an uncertainty interval (e.g., 95% confidence interval from bootstrapping) rather than a point estimate. The experiment should compare at least two distinct inference methods on a set of tasks with known reference processes, and the hypothesis is that extraction accuracy varies significantly across methods and observability levels. If a single method yields accuracy comparable to full observability, the pipeline should flag it as potentially overfitting to the inference method."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

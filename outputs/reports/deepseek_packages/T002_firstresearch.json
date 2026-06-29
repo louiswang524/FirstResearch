@@ -1,0 +1,1145 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Process",
+        "definition": "The sequence of intermediate states, decisions, and actions taken by an agent from initial input to final output.",
+        "why_primitive": "It is the fundamental object being evaluated; without a process to measure, the concept of process fidelity is meaningless."
+      },
+      {
+        "name": "Fidelity",
+        "definition": "The degree of correspondence between the actual process of an agent and a reference process (e.g., an ideal or expert trace).",
+        "why_primitive": "Fidelity is the core attribute we seek to quantify; it directly answers what we mean by 'fidelity' in agent evaluation."
+      },
+      {
+        "name": "Measurement",
+        "definition": "A systematic procedure that assigns a quantitative value to the fidelity of a process relative to a reference.",
+        "why_primitive": "Measurement is the operationalization of fidelity assessment; without it, we cannot compare or improve agent processes."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "A consistent and well-defined reference process exists for the task.",
+        "rationale": "To measure fidelity, we need a gold standard to compare against; otherwise, fidelity is undefined.",
+        "possible_failure": "For many tasks, there may be multiple valid processes or no single authoritative reference, making the measurement arbitrary."
+      },
+      {
+        "assumption": "The agent's full process can be observed or inferred with sufficient detail.",
+        "rationale": "Measurement requires access to the process; if only partial information is available, fidelity estimates may be incomplete.",
+        "possible_failure": "Agents may have opaque internal states (e.g., black-box models) or may not produce interpretable traces, hindering measurement."
+      },
+      {
+        "assumption": "Fidelity correlates positively with desirable outcomes such as correctness or robustness.",
+        "rationale": "The justification for measuring fidelity is that higher fidelity processes lead to better performance.",
+        "possible_failure": "An agent might take a different but equally valid path (low fidelity) while achieving high-quality outcomes, challenging the assumption."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Measurement accuracy vs. cost",
+        "variables": [
+          "accuracy",
+          "cost"
+        ]
+      },
+      {
+        "tradeoff": "Granularity vs. generalizability",
+        "variables": [
+          "granularity",
+          "generalizability"
+        ]
+      },
+      {
+        "tradeoff": "Objectivity vs. richness",
+        "variables": [
+          "objectivity",
+          "richness"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Reference Process",
+        "role": "input",
+        "description": "The ideal or expert process that serves as the gold standard for comparison."
+      },
+      {
+        "name": "Agent Process",
+        "role": "input",
+        "description": "The actual process executed by the agent from input to output."
+      },
+      {
+        "name": "Observability",
+        "role": "mediator",
+        "description": "The degree to which the agent's process can be fully observed or inferred."
+      },
+      {
+        "name": "Granularity",
+        "role": "mediator",
+        "description": "The level of detail at which the process is measured (e.g., step-level vs. high-level)."
+      },
+      {
+        "name": "Alignment Metric",
+        "role": "mediator",
+        "description": "The specific method used to quantify the correspondence between the reference and agent processes."
+      },
+      {
+        "name": "Process Fidelity Score",
+        "role": "output",
+        "description": "The quantitative measure of fidelity resulting from the comparison."
+      },
+      {
+        "name": "Downstream Task Performance",
+        "role": "outcome",
+        "description": "The agent's performance on the task, which fidelity is assumed to correlate with."
+      },
+      {
+        "name": "Task Complexity",
+        "role": "confounder",
+        "description": "The inherent difficulty of the task, which can affect both the process and the measurement."
+      },
+      {
+        "name": "Noise in Observation",
+        "role": "confounder",
+        "description": "Random errors or incomplete information in observing the agent's process."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Representation of Reference and Agent Processes",
+        "source": "Reference Process",
+        "relation": "and",
+        "target": "Agent Process",
+        "explanation": "Both processes must be represented in a comparable format."
+      },
+      {
+        "step": "Measurement Setup",
+        "source": "Observability",
+        "relation": "moderates",
+        "target": "Representation of Reference and Agent Processes",
+        "explanation": "Observability determines how much of the agent's process can be captured."
+      },
+      {
+        "step": "Choice of Alignment Metric",
+        "source": "Granularity",
+        "relation": "influences",
+        "target": "Alignment Metric",
+        "explanation": "Granularity affects which metric is appropriate (e.g., exact match vs. embedding similarity)."
+      },
+      {
+        "step": "Computation of Fidelity Score",
+        "source": "Alignment Metric",
+        "relation": "computes",
+        "target": "Process Fidelity Score",
+        "explanation": "The metric compares the two process representations to produce a score."
+      },
+      {
+        "step": "Correlation with Performance",
+        "source": "Process Fidelity Score",
+        "relation": "predicts",
+        "target": "Downstream Task Performance",
+        "explanation": "Higher fidelity is assumed to lead to better task performance."
+      },
+      {
+        "step": "Confounding Effects",
+        "source": "Task Complexity",
+        "relation": "confounds",
+        "target": "Downstream Task Performance",
+        "explanation": "Task complexity directly influences performance independent of fidelity."
+      },
+      {
+        "step": "Confounding Effects on Measurement",
+        "source": "Noise in Observation",
+        "relation": "confounds",
+        "target": "Process Fidelity Score",
+        "explanation": "Noise can distort the fidelity score regardless of true process alignment."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Observability of Agent Process",
+        "why_it_matters": "Without full observability, fidelity estimates may be biased or incomplete, undermining the validity of the measurement."
+      },
+      {
+        "bottleneck": "Existence of a Valid Reference Process",
+        "why_it_matters": "If no single canonical process exists, measuring fidelity becomes arbitrary and may not reflect actual process quality."
+      },
+      {
+        "bottleneck": "Granularity vs. Generalizability Trade-off",
+        "why_it_matters": "Fine-grained metrics may overfit to specific steps, while coarse metrics may miss critical differences; balancing this is crucial for meaningful fidelity scores."
+      }
+    ],
+    "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed process to a reference process using an alignment metric, which yields a fidelity score. This score is assumed to correlate with downstream task performance. The process is influenced by observability of the agent's actions, the granularity of the comparison, and confounded by task complexity and observation noise. Key bottlenecks include limited observability, lack of a valid reference, and the challenge of choosing an appropriate level of granularity."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that higher process fidelity always leads to better downstream task performance may be invalid because agents can achieve high performance via divergent processes.",
+      "derived_from": [
+        "assumptions.assumption_3",
+        "mechanism_model.causal_chain.step_5"
+      ],
+      "why_it_matters": "If this assumption fails, fidelity becomes a poor proxy for quality, undermining the justification for measuring it.",
+      "what_existing_methods_may_miss": "Existing fidelity metrics are often validated by correlation with performance, but they may penalize valid alternative paths that also yield high performance.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Choosing a fine granularity for process measurement may capture precise steps but overfit to specific tasks, while coarse granularity may lose critical differences, making fidelity scores less generalizable.",
+      "derived_from": [
+        "decomposition.core_tradeoffs.tradeoff_2",
+        "mechanism_model.variables.Granularity",
+        "mechanism_model.bottlenecks.bottleneck_3"
+      ],
+      "why_it_matters": "The granularity choice directly affects the validity and applicability of fidelity scores across different tasks or domains.",
+      "what_existing_methods_may_miss": "Existing methods often fix granularity without considering the task context, leading to either overfitting or loss of information.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Full observability of an agent's process is often impossible, especially for black-box models, leading to biased or incomplete fidelity estimates that may not reflect true process quality.",
+      "derived_from": [
+        "decomposition.assumptions.assumption_2",
+        "mechanism_model.variables.Observability",
+        "mechanism_model.bottlenecks.bottleneck_1"
+      ],
+      "why_it_matters": "Without reliable observation, fidelity measurement is fundamentally limited and may produce misleading conclusions.",
+      "what_existing_methods_may_miss": "Methods that assume full process access may ignore hidden states or internal reasoning, biasing fidelity scores.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing process fidelity necessarily lead to improved downstream task performance when agents can achieve high performance via divergent processes?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Test the assumption that fidelity and performance are monotonically related; identify conditions under which divergent processes yield high performance despite low fidelity."
+    },
+    {
+      "question": "How does the granularity at which process fidelity is measured affect the generalizability of fidelity scores across tasks with different complexities?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Characterize the trade-off between fine and coarse granularity; determine optimal granularity for cross-task fidelity comparisons."
+    },
+    {
+      "question": "To what extent does limited observability of agent processes bias fidelity estimates, and can these biases be corrected using partially observed data?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Quantify the bias introduced by partial observability and propose or validate correction methods for more accurate fidelity measurement."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "The sequence of intermediate states, decisions, and actions taken by an agent from initial input to final output.",
+          "why_primitive": "It is the fundamental object being evaluated; without a process to measure, the concept of process fidelity is meaningless."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the actual process of an agent and a reference process (e.g., an ideal or expert trace).",
+          "why_primitive": "Fidelity is the core attribute we seek to quantify; it directly answers what we mean by 'fidelity' in agent evaluation."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure that assigns a quantitative value to the fidelity of a process relative to a reference.",
+          "why_primitive": "Measurement is the operationalization of fidelity assessment; without it, we cannot compare or improve agent processes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "A consistent and well-defined reference process exists for the task.",
+          "rationale": "To measure fidelity, we need a gold standard to compare against; otherwise, fidelity is undefined.",
+          "possible_failure": "For many tasks, there may be multiple valid processes or no single authoritative reference, making the measurement arbitrary."
+        },
+        {
+          "assumption": "The agent's full process can be observed or inferred with sufficient detail.",
+          "rationale": "Measurement requires access to the process; if only partial information is available, fidelity estimates may be incomplete.",
+          "possible_failure": "Agents may have opaque internal states (e.g., black-box models) or may not produce interpretable traces, hindering measurement."
+        },
+        {
+          "assumption": "Fidelity correlates positively with desirable outcomes such as correctness or robustness.",
+          "rationale": "The justification for measuring fidelity is that higher fidelity processes lead to better performance.",
+          "possible_failure": "An agent might take a different but equally valid path (low fidelity) while achieving high-quality outcomes, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The ideal or expert process that serves as the gold standard for comparison."
+          },
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual process executed by the agent from input to output."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's process can be fully observed or inferred."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is measured (e.g., step-level vs. high-level)."
+          },
+          {
+            "name": "Alignment Metric",
+            "role": "mediator",
+            "description": "The specific method used to quantify the correspondence between the reference and agent processes."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "The quantitative measure of fidelity resulting from the comparison."
+          },
+          {
+            "name": "Downstream Task Performance",
+            "role": "outcome",
+            "description": "The agent's performance on the task, which fidelity is assumed to correlate with."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, which can affect both the process and the measurement."
+          },
+          {
+            "name": "Noise in Observation",
+            "role": "confounder",
+            "description": "Random errors or incomplete information in observing the agent's process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Representation of Reference and Agent Processes",
+            "source": "Reference Process",
+            "relation": "and",
+            "target": "Agent Process",
+            "explanation": "Both processes must be represented in a comparable format."
+          },
+          {
+            "step": "Measurement Setup",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Representation of Reference and Agent Processes",
+            "explanation": "Observability determines how much of the agent's process can be captured."
+          },
+          {
+            "step": "Choice of Alignment Metric",
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Alignment Metric",
+            "explanation": "Granularity affects which metric is appropriate (e.g., exact match vs. embedding similarity)."
+          },
+          {
+            "step": "Computation of Fidelity Score",
+            "source": "Alignment Metric",
+            "relation": "computes",
+            "target": "Process Fidelity Score",
+            "explanation": "The metric compares the two process representations to produce a score."
+          },
+          {
+            "step": "Correlation with Performance",
+            "source": "Process Fidelity Score",
+            "relation": "predicts",
+            "target": "Downstream Task Performance",
+            "explanation": "Higher fidelity is assumed to lead to better task performance."
+          },
+          {
+            "step": "Confounding Effects",
+            "source": "Task Complexity",
+            "relation": "confounds",
+            "target": "Downstream Task Performance",
+            "explanation": "Task complexity directly influences performance independent of fidelity."
+          },
+          {
+            "step": "Confounding Effects on Measurement",
+            "source": "Noise in Observation",
+            "relation": "confounds",
+            "target": "Process Fidelity Score",
+            "explanation": "Noise can distort the fidelity score regardless of true process alignment."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of Agent Process",
+            "why_it_matters": "Without full observability, fidelity estimates may be biased or incomplete, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Existence of a Valid Reference Process",
+            "why_it_matters": "If no single canonical process exists, measuring fidelity becomes arbitrary and may not reflect actual process quality."
+          },
+          {
+            "bottleneck": "Granularity vs. Generalizability Trade-off",
+            "why_it_matters": "Fine-grained metrics may overfit to specific steps, while coarse metrics may miss critical differences; balancing this is crucial for meaningful fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed process to a reference process using an alignment metric, which yields a fidelity score. This score is assumed to correlate with downstream task performance. The process is influenced by observability of the agent's actions, the granularity of the comparison, and confounded by task complexity and observation noise. Key bottlenecks include limited observability, lack of a valid reference, and the challenge of choosing an appropriate level of granularity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that higher process fidelity always leads to better downstream task performance may be invalid because agents can achieve high performance via divergent processes.",
+        "derived_from": [
+          "assumptions.assumption_3",
+          "mechanism_model.causal_chain.step_5"
+        ],
+        "why_it_matters": "If this assumption fails, fidelity becomes a poor proxy for quality, undermining the justification for measuring it.",
+        "what_existing_methods_may_miss": "Existing fidelity metrics are often validated by correlation with performance, but they may penalize valid alternative paths that also yield high performance.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is the relationship between process fidelity and downstream performance moderated by task complexity such that there exists a complexity threshold beyond which higher fidelity leads to lower performance?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a complexity threshold that governs whether fidelity helps or hurts performance, and explain the trade-off between adherence and flexibility."
+      },
+      "hypothesis": {
+        "statement": "For tasks below a complexity threshold, higher process fidelity improves downstream performance; for tasks above that threshold, higher fidelity degrades performance due to reduced flexibility.",
+        "predicted_effect": "We predict a crossover interaction: at low complexity, high-fidelity agents outperform low-fidelity agents; at high complexity, low-fidelity agents outperform high-fidelity agents. The correlation between fidelity and performance changes sign at the threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "We will use three task families varying in complexity (low/medium/high), each with a validated reference process. For each task, we create two agent versions: one trained/prompted to follow the reference exactly (high fidelity) and one allowed to freely explore alternatives (low fidelity). We measure process fidelity via a chosen alignment metric and downstream performance (e.g., success rate). We compare performance across conditions and test for a significant interaction.",
+        "independent_variables": [
+          "Fidelity level (high vs. low)",
+          "Task complexity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Downstream task performance",
+          "Process fidelity score"
+        ],
+        "controls": [
+          "Task domain (held constant across complexity levels)",
+          "Observability of agent process (full logging)",
+          "Reference process quality (expert-validated)"
+        ],
+        "falsifying_observation": "If, across all complexity levels, high-fidelity agents consistently achieve performance at least as high as low-fidelity agents with no crossover, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At high complexity, low-fidelity agents significantly outperform high-fidelity agents.",
+          "At low complexity, high-fidelity agents significantly outperform low-fidelity agents.",
+          "A significant interaction effect is observed between fidelity and complexity on performance."
+        ],
+        "rejects_hypothesis": [
+          "High-fidelity agents outperform or match low-fidelity agents across all complexity levels.",
+          "No significant interaction effect is found."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., no crossover or high fidelity always better), we must conclude that fidelity is universally beneficial or neutral.",
+        "assumption_to_revise": "The assumption that task complexity moderates the fidelity–performance relationship would be rejected. Instead, we would adopt the assumption that higher fidelity generally improves performance regardless of complexity.",
+        "next_question": "Under what conditions, if any, does process fidelity become detrimental, and what alternative mechanisms (e.g., noise, memorization) might explain its negative effects?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "The sequence of intermediate states, decisions, and actions taken by an agent from initial input to final output.",
+          "why_primitive": "It is the fundamental object being evaluated; without a process to measure, the concept of process fidelity is meaningless."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the actual process of an agent and a reference process (e.g., an ideal or expert trace).",
+          "why_primitive": "Fidelity is the core attribute we seek to quantify; it directly answers what we mean by 'fidelity' in agent evaluation."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure that assigns a quantitative value to the fidelity of a process relative to a reference.",
+          "why_primitive": "Measurement is the operationalization of fidelity assessment; without it, we cannot compare or improve agent processes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "A consistent and well-defined reference process exists for the task.",
+          "rationale": "To measure fidelity, we need a gold standard to compare against; otherwise, fidelity is undefined.",
+          "possible_failure": "For many tasks, there may be multiple valid processes or no single authoritative reference, making the measurement arbitrary."
+        },
+        {
+          "assumption": "The agent's full process can be observed or inferred with sufficient detail.",
+          "rationale": "Measurement requires access to the process; if only partial information is available, fidelity estimates may be incomplete.",
+          "possible_failure": "Agents may have opaque internal states (e.g., black-box models) or may not produce interpretable traces, hindering measurement."
+        },
+        {
+          "assumption": "Fidelity correlates positively with desirable outcomes such as correctness or robustness.",
+          "rationale": "The justification for measuring fidelity is that higher fidelity processes lead to better performance.",
+          "possible_failure": "An agent might take a different but equally valid path (low fidelity) while achieving high-quality outcomes, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The ideal or expert process that serves as the gold standard for comparison."
+          },
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual process executed by the agent from input to output."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's process can be fully observed or inferred."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is measured (e.g., step-level vs. high-level)."
+          },
+          {
+            "name": "Alignment Metric",
+            "role": "mediator",
+            "description": "The specific method used to quantify the correspondence between the reference and agent processes."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "The quantitative measure of fidelity resulting from the comparison."
+          },
+          {
+            "name": "Downstream Task Performance",
+            "role": "outcome",
+            "description": "The agent's performance on the task, which fidelity is assumed to correlate with."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, which can affect both the process and the measurement."
+          },
+          {
+            "name": "Noise in Observation",
+            "role": "confounder",
+            "description": "Random errors or incomplete information in observing the agent's process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Representation of Reference and Agent Processes",
+            "source": "Reference Process",
+            "relation": "and",
+            "target": "Agent Process",
+            "explanation": "Both processes must be represented in a comparable format."
+          },
+          {
+            "step": "Measurement Setup",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Representation of Reference and Agent Processes",
+            "explanation": "Observability determines how much of the agent's process can be captured."
+          },
+          {
+            "step": "Choice of Alignment Metric",
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Alignment Metric",
+            "explanation": "Granularity affects which metric is appropriate (e.g., exact match vs. embedding similarity)."
+          },
+          {
+            "step": "Computation of Fidelity Score",
+            "source": "Alignment Metric",
+            "relation": "computes",
+            "target": "Process Fidelity Score",
+            "explanation": "The metric compares the two process representations to produce a score."
+          },
+          {
+            "step": "Correlation with Performance",
+            "source": "Process Fidelity Score",
+            "relation": "predicts",
+            "target": "Downstream Task Performance",
+            "explanation": "Higher fidelity is assumed to lead to better task performance."
+          },
+          {
+            "step": "Confounding Effects",
+            "source": "Task Complexity",
+            "relation": "confounds",
+            "target": "Downstream Task Performance",
+            "explanation": "Task complexity directly influences performance independent of fidelity."
+          },
+          {
+            "step": "Confounding Effects on Measurement",
+            "source": "Noise in Observation",
+            "relation": "confounds",
+            "target": "Process Fidelity Score",
+            "explanation": "Noise can distort the fidelity score regardless of true process alignment."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of Agent Process",
+            "why_it_matters": "Without full observability, fidelity estimates may be biased or incomplete, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Existence of a Valid Reference Process",
+            "why_it_matters": "If no single canonical process exists, measuring fidelity becomes arbitrary and may not reflect actual process quality."
+          },
+          {
+            "bottleneck": "Granularity vs. Generalizability Trade-off",
+            "why_it_matters": "Fine-grained metrics may overfit to specific steps, while coarse metrics may miss critical differences; balancing this is crucial for meaningful fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed process to a reference process using an alignment metric, which yields a fidelity score. This score is assumed to correlate with downstream task performance. The process is influenced by observability of the agent's actions, the granularity of the comparison, and confounded by task complexity and observation noise. Key bottlenecks include limited observability, lack of a valid reference, and the challenge of choosing an appropriate level of granularity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Full observability of an agent's process is often impossible, especially for black-box models, leading to biased or incomplete fidelity estimates that may not reflect true process quality.",
+        "derived_from": [
+          "decomposition.assumptions.assumption_2",
+          "mechanism_model.variables.Observability",
+          "mechanism_model.bottlenecks.bottleneck_1"
+        ],
+        "why_it_matters": "Without reliable observation, fidelity measurement is fundamentally limited and may produce misleading conclusions.",
+        "what_existing_methods_may_miss": "Methods that assume full process access may ignore hidden states or internal reasoning, biasing fidelity scores.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical observability threshold at which the sign of bias in agent process fidelity estimates flips, and does this threshold depend on the alignment metric used?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a phase transition in fidelity estimation accuracy as observability decreases, revealing a nonlinear tradeoff between missing data and bias direction, and demonstrating metric-dependent sensitivity."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical observability threshold (between 40% and 60% of steps observed) below which the bias in fidelity estimates changes sign from overestimation to underestimation, and this threshold is modulated by the alignment metric (e.g., exact match vs. edit distance).",
+        "predicted_effect": "As the proportion of observed steps decreases, the mean bias will first be positive (overestimation) for high observability, then cross zero at a specific threshold and become negative (underestimation) for low observability. The threshold location will differ between exact match and edit distance metrics, with exact match crossing at a higher observability level."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate 1000 agents with known full processes (chain-of-thought traces) on a multi-step reasoning task. For each agent, compute true fidelity using exact match (step-level) and edit distance (Levenshtein) against a reference process. Then systematically hide steps in increments of 10% from 0% to 90%. For each hiding level and each metric, compute the bias as (partial fidelity - true fidelity). Fit a sigmoid model to bias vs. observability for each metric and estimate the inflection point (threshold where bias crosses zero).",
+        "independent_variables": [
+          "Proportion of observed steps (0% to 90% in 10% increments)",
+          "Alignment metric (exact match, edit distance)"
+        ],
+        "dependent_variables": [
+          "Bias in fidelity score (mean difference across agents)",
+          "Threshold (inflection point of sigmoid fit)",
+          "Sign of bias"
+        ],
+        "controls": [
+          "Task complexity (all agents on same task)",
+          "Reference process (fixed expert trace)",
+          "Agent process length (normalized to 10 steps)",
+          "Random seed for hiding steps",
+          "Number of agents (1000 to ensure statistical power)"
+        ],
+        "falsifying_observation": "If the bias does not cross zero (i.e., remains same sign across all observability levels) for either metric, or if the inflection point is not statistically different from the extreme bounds (0% or 100%), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For exact match, bias is positive at 80% observed, near zero at 50% observed, and negative at 20% observed.",
+          "For edit distance, bias is positive at 90% observed, crosses zero around 30% observed, and negative at 10% observed.",
+          "The estimated threshold for exact match is significantly higher (p<0.05) than for edit distance, as confirmed by bootstrap confidence intervals."
+        ],
+        "rejects_hypothesis": [
+          "Bias remains positive (or negative) for all observability levels for both metrics.",
+          "Bias crosses zero multiple times (non-monotonic) or the crossing point is non-significant.",
+          "Threshold estimates for the two metrics are not significantly different."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sign change or no metric-dependent threshold is observed, then the bias is not characterized by a phase transition but by a monotonic trend, and the earlier hypothesis of monotonic bias may hold, or the effect is too small to detect.",
+        "assumption_to_revise": "The assumption that partial observability introduces a simple linear bias may be sufficient; the hypothesized nonlinear threshold may be an artifact of metric choice or task structure.",
+        "next_question": "What features of the alignment metric (e.g., sensitivity to order vs. content) determine the shape of the bias-observability curve, and can we predict the threshold from metric properties?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process",
+          "definition": "The sequence of intermediate states, decisions, and actions taken by an agent from initial input to final output.",
+          "why_primitive": "It is the fundamental object being evaluated; without a process to measure, the concept of process fidelity is meaningless."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the actual process of an agent and a reference process (e.g., an ideal or expert trace).",
+          "why_primitive": "Fidelity is the core attribute we seek to quantify; it directly answers what we mean by 'fidelity' in agent evaluation."
+        },
+        {
+          "name": "Measurement",
+          "definition": "A systematic procedure that assigns a quantitative value to the fidelity of a process relative to a reference.",
+          "why_primitive": "Measurement is the operationalization of fidelity assessment; without it, we cannot compare or improve agent processes."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "A consistent and well-defined reference process exists for the task.",
+          "rationale": "To measure fidelity, we need a gold standard to compare against; otherwise, fidelity is undefined.",
+          "possible_failure": "For many tasks, there may be multiple valid processes or no single authoritative reference, making the measurement arbitrary."
+        },
+        {
+          "assumption": "The agent's full process can be observed or inferred with sufficient detail.",
+          "rationale": "Measurement requires access to the process; if only partial information is available, fidelity estimates may be incomplete.",
+          "possible_failure": "Agents may have opaque internal states (e.g., black-box models) or may not produce interpretable traces, hindering measurement."
+        },
+        {
+          "assumption": "Fidelity correlates positively with desirable outcomes such as correctness or robustness.",
+          "rationale": "The justification for measuring fidelity is that higher fidelity processes lead to better performance.",
+          "possible_failure": "An agent might take a different but equally valid path (low fidelity) while achieving high-quality outcomes, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The ideal or expert process that serves as the gold standard for comparison."
+          },
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual process executed by the agent from input to output."
+          },
+          {
+            "name": "Observability",
+            "role": "mediator",
+            "description": "The degree to which the agent's process can be fully observed or inferred."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is measured (e.g., step-level vs. high-level)."
+          },
+          {
+            "name": "Alignment Metric",
+            "role": "mediator",
+            "description": "The specific method used to quantify the correspondence between the reference and agent processes."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "The quantitative measure of fidelity resulting from the comparison."
+          },
+          {
+            "name": "Downstream Task Performance",
+            "role": "outcome",
+            "description": "The agent's performance on the task, which fidelity is assumed to correlate with."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, which can affect both the process and the measurement."
+          },
+          {
+            "name": "Noise in Observation",
+            "role": "confounder",
+            "description": "Random errors or incomplete information in observing the agent's process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Representation of Reference and Agent Processes",
+            "source": "Reference Process",
+            "relation": "and",
+            "target": "Agent Process",
+            "explanation": "Both processes must be represented in a comparable format."
+          },
+          {
+            "step": "Measurement Setup",
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Representation of Reference and Agent Processes",
+            "explanation": "Observability determines how much of the agent's process can be captured."
+          },
+          {
+            "step": "Choice of Alignment Metric",
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Alignment Metric",
+            "explanation": "Granularity affects which metric is appropriate (e.g., exact match vs. embedding similarity)."
+          },
+          {
+            "step": "Computation of Fidelity Score",
+            "source": "Alignment Metric",
+            "relation": "computes",
+            "target": "Process Fidelity Score",
+            "explanation": "The metric compares the two process representations to produce a score."
+          },
+          {
+            "step": "Correlation with Performance",
+            "source": "Process Fidelity Score",
+            "relation": "predicts",
+            "target": "Downstream Task Performance",
+            "explanation": "Higher fidelity is assumed to lead to better task performance."
+          },
+          {
+            "step": "Confounding Effects",
+            "source": "Task Complexity",
+            "relation": "confounds",
+            "target": "Downstream Task Performance",
+            "explanation": "Task complexity directly influences performance independent of fidelity."
+          },
+          {
+            "step": "Confounding Effects on Measurement",
+            "source": "Noise in Observation",
+            "relation": "confounds",
+            "target": "Process Fidelity Score",
+            "explanation": "Noise can distort the fidelity score regardless of true process alignment."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of Agent Process",
+            "why_it_matters": "Without full observability, fidelity estimates may be biased or incomplete, undermining the validity of the measurement."
+          },
+          {
+            "bottleneck": "Existence of a Valid Reference Process",
+            "why_it_matters": "If no single canonical process exists, measuring fidelity becomes arbitrary and may not reflect actual process quality."
+          },
+          {
+            "bottleneck": "Granularity vs. Generalizability Trade-off",
+            "why_it_matters": "Fine-grained metrics may overfit to specific steps, while coarse metrics may miss critical differences; balancing this is crucial for meaningful fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed process to a reference process using an alignment metric, which yields a fidelity score. This score is assumed to correlate with downstream task performance. The process is influenced by observability of the agent's actions, the granularity of the comparison, and confounded by task complexity and observation noise. Key bottlenecks include limited observability, lack of a valid reference, and the challenge of choosing an appropriate level of granularity."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Choosing a fine granularity for process measurement may capture precise steps but overfit to specific tasks, while coarse granularity may lose critical differences, making fidelity scores less generalizable.",
+        "derived_from": [
+          "decomposition.core_tradeoffs.tradeoff_2",
+          "mechanism_model.variables.Granularity",
+          "mechanism_model.bottlenecks.bottleneck_3"
+        ],
+        "why_it_matters": "The granularity choice directly affects the validity and applicability of fidelity scores across different tasks or domains.",
+        "what_existing_methods_may_miss": "Existing methods often fix granularity without considering the task context, leading to either overfitting or loss of information.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical granularity threshold that marks a phase transition in the cross-task generalizability of process fidelity scores?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a specific granularity level (functional subgoal level) where fidelity scores shift from task-specific to generalizable, revealing a phase transition in measurement validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a granularity threshold, corresponding to the level of functional subgoals, below which process fidelity scores are highly task-specific and above which they become generalizable across tasks of varying complexity; this threshold marks a phase transition in the predictive power of fidelity for downstream performance.",
+        "predicted_effect": "As granularity is refined from coarse to fine, cross-task consistency of fidelity scores will remain low and then suddenly increase at the subgoal level, while correlation with performance across tasks will peak near that threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select three distinct tasks (e.g., math reasoning, text summarization, code generation) with known reference processes. For each task, run a fixed agent (e.g., GPT-4) multiple times. Extract processes at five granularity levels: full output (coarse), paragraph/section, subgoal, action-step, and token-level (fine). For each level, compute fidelity scores against the reference. Measure cross-task consistency as the inverse variance of fidelity scores across tasks for the same agent. Also compute correlation between fidelity and task performance within and across tasks. Plot these metrics against granularity level to identify sharp changes.",
+        "independent_variables": [
+          "Granularity level (5 levels: output, paragraph, subgoal, action-step, token)"
+        ],
+        "dependent_variables": [
+          "Cross-task consistency (1/variance of fidelity scores across tasks)",
+          "Average within-task correlation between fidelity and performance",
+          "Average cross-task correlation between fidelity and performance"
+        ],
+        "controls": [
+          "Same reference process construction method across tasks",
+          "Same agent model and version",
+          "Minimum 100 runs per task",
+          "Randomized task order"
+        ],
+        "falsifying_observation": "If cross-task consistency increases monotonically with granularity without a sharp change, or if the threshold does not align with the subgoal level, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Cross-task consistency shows a sharp increase at the subgoal granularity level, with low consistency at finer and coarser levels.",
+          "Cross-task correlation between fidelity and performance peaks at the subgoal level.",
+          "Within-task correlation remains high at finer levels but drops at coarser levels; at subgoal level, both within- and cross-task correlations are balanced."
+        ],
+        "rejects_hypothesis": [
+          "Cross-task consistency increases smoothly with no clear threshold.",
+          "The highest cross-task consistency occurs at the finest or coarsest level.",
+          "No granularity level yields both high within- and cross-task performance correlation."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed or the threshold is not at the subgoal level,",
+        "assumption_to_revise": "Revise the assumption that a single universal threshold exists; the threshold may depend on task structure or agent architecture.",
+        "next_question": "How does the optimal granularity threshold depend on agent architecture (e.g., chain-of-thought vs. tool-use) or task domain?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "For tasks below a complexity threshold, higher process fidelity improves downstream performance; for tasks above that threshold, higher fidelity degrades performance due to reduced flexibility.",
+      "independent_variables": [
+        "Fidelity level (high vs. low)",
+        "Task complexity (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "Downstream task performance",
+        "Process fidelity score"
+      ],
+      "controlled_variables": [
+        "Task domain (held constant across complexity levels)",
+        "Observability of agent process (full logging)",
+        "Reference process quality (expert-validated)"
+      ],
+      "baselines": [
+        {
+          "name": "High-fidelity agent",
+          "description": "Agent trained/prompted to follow the expert reference process exactly."
+        },
+        {
+          "name": "Low-fidelity agent",
+          "description": "Agent allowed to freely explore alternative processes."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of trials where the agent achieves the correct final output."
+        },
+        {
+          "name": "Process fidelity score",
+          "definition": "Quantitative measure of correspondence between agent process and reference process via a chosen alignment metric (e.g., step-wise accuracy)."
+        }
+      ],
+      "expected_result": "A crossover interaction: at low complexity, high-fidelity agents outperform low-fidelity agents; at high complexity, low-fidelity agents outperform high-fidelity agents. A significant interaction effect between fidelity and complexity on performance.",
+      "falsifying_result": "If high-fidelity agents outperform or match low-fidelity agents across all complexity levels, with no significant crossover interaction (i.e., high fidelity always at least as good), the hypothesis is falsified.",
+      "minimum_viable_experiment": "Create three task families (low, medium, high complexity) each with a validated expert reference process. For each task, implement two agent versions: high-fidelity (trained to follow reference exactly) and low-fidelity (free exploration). Ensure full logging for process observability. Measure process fidelity via a chosen alignment metric and task success rate. Compare performance using factorial ANOVA to test for interaction between fidelity and complexity.",
+      "risks_and_confounds": [
+        "Reference process may not be truly optimal for high-complexity tasks, potentially biasing fidelity measurement.",
+        "Observation noise in process logging could distort fidelity scores, though full logging mitigates this.",
+        "Low-fidelity agents might incidentally produce high-fidelity processes, diluting the manipulation.",
+        "Task complexity levels may not be sufficiently distinct to reveal the threshold effect."
+      ]
+    },
+    {
+      "hypothesis": "There exists a granularity threshold, corresponding to the level of functional subgoals, below which process fidelity scores are highly task-specific and above which they become generalizable across tasks of varying complexity; this threshold marks a phase transition in the predictive power of fidelity for downstream performance.",
+      "independent_variables": [
+        "Granularity level (5 levels: output, paragraph, subgoal, action-step, token)"
+      ],
+      "dependent_variables": [
+        "Cross-task consistency (1/variance of fidelity scores across tasks)",
+        "Average within-task correlation between fidelity and performance",
+        "Average cross-task correlation between fidelity and performance"
+      ],
+      "controlled_variables": [
+        "Same reference process construction method across tasks",
+        "Same agent model and version",
+        "Minimum 100 runs per task",
+        "Randomized task order",
+        "Same set of tasks for all conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Random agent",
+          "description": "An agent that selects actions randomly to provide a baseline fidelity score at each granularity."
+        },
+        {
+          "name": "Fixed granularity (action-step)",
+          "description": "Process measured at action-step granularity as a reference point for comparison."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity Score",
+          "definition": "Quantitative measure of correspondence between agent and reference process at a given granularity using a chosen alignment metric (e.g., exact match, embedding similarity)."
+        },
+        {
+          "name": "Cross-task Consistency",
+          "definition": "Inverse variance of fidelity scores across tasks for the same agent and granularity; higher values indicate more generalizable scores."
+        },
+        {
+          "name": "Within-task Correlation",
+          "definition": "Pearson correlation between fidelity scores and task performance (e.g., correctness) across multiple runs of the same task."
+        },
+        {
+          "name": "Cross-task Correlation",
+          "definition": "Pearson correlation between fidelity scores and task performance across different tasks for the same agent and granularity."
+        }
+      ],
+      "expected_result": "We expect to observe a sharp increase in cross-task consistency and peak in cross-task correlation at the subgoal granularity level, with lower values at coarser and finer levels, indicating a phase transition.",
+      "falsifying_result": "If cross-task consistency increases monotonically with granularity without a sharp change, or if the threshold does not align with the subgoal level, or if no granularity level yields both high within- and cross-task performance correlation, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Select three distinct tasks (e.g., math reasoning, text summarization, code generation) with constructed reference processes. For each task, run a fixed agent (e.g., GPT-4) a minimum of 100 times. Extract processes at five granularity levels: full output (coarse), paragraph/section, subgoal, action-step, and token-level (fine). Compute fidelity scores against the reference using a suitable alignment metric (e.g., embedding similarity for semantic equivalence). Calculate cross-task consistency, within-task correlation, and cross-task correlation. Plot these metrics against granularity level to identify sharp changes.",
+      "risks_and_confounds": [
+        "Choice of tasks may bias results if tasks are not sufficiently diverse.",
+        "Reference processes may be arbitrary; for some tasks, multiple valid references exist.",
+        "Agent behavior may vary due to non-determinism (temperature settings).",
+        "Observability of agent process may be limited (e.g., internal chain-of-thought not fully exposed).",
+        "The alignment metric choice may affect fidelity scores at different granularities.",
+        "Task performance metric may not perfectly correlate with process fidelity."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical observability threshold (between 40% and 60% of steps observed) below which the bias in fidelity estimates changes sign from overestimation to underestimation, and this threshold is modulated by the alignment metric (e.g., exact match vs. edit distance).",
+      "independent_variables": [
+        "Proportion of observed steps (0% to 90% in 10% increments)",
+        "Alignment metric (exact match, edit distance)"
+      ],
+      "dependent_variables": [
+        "Bias in fidelity score (mean difference across agents)",
+        "Threshold (inflection point of sigmoid fit)",
+        "Sign of bias"
+      ],
+      "controlled_variables": [
+        "Task complexity (all agents on same multi-step reasoning task)",
+        "Reference process (fixed expert trace)",
+        "Agent process length (normalized to 10 steps)",
+        "Random seed for hiding steps",
+        "Number of agents (1000)"
+      ],
+      "baselines": [
+        {
+          "name": "Full observability (0% hidden)",
+          "description": "Baseline condition where all steps are observed, yielding true fidelity with zero bias."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Exact match",
+          "definition": "Proportion of steps where agent action exactly matches reference action."
+        },
+        {
+          "name": "Edit distance (Levenshtein)",
+          "definition": "Normalized Levenshtein distance between the sequence of agent actions and reference actions."
+        }
+      ],
+      "expected_result": "For exact match: bias positive at 80% observed, near zero at 50%, negative at 20%. For edit distance: bias positive at 90% observed, crosses zero around 30%, negative at 10%. Estimated threshold for exact match is significantly higher than for edit distance (p<0.05).",
+      "falsifying_result": "Bias does not cross zero (remains same sign across all observability levels) for either metric, or the inflection point is not statistically different from extreme bounds (0% or 100%), or threshold estimates for the two metrics are not significantly different.",
+      "minimum_viable_experiment": "Simulate 1000 agents with known full processes (chain-of-thought traces) on a multi-step reasoning task. For each agent, compute true fidelity using exact match and edit distance against a fixed reference. Systematically hide steps in increments of 10% from 0% to 90%. For each hiding level and metric, compute bias as (partial fidelity - true fidelity). Fit a sigmoid model to bias vs. observability for each metric and estimate the inflection point. Determine if the threshold lies between 40% and 60% and differs between metrics.",
+      "risks_and_confounds": [
+        "Task-specific effects: The threshold may depend on the reasoning task structure.",
+        "Random seed sensitivity: Different seeds for hiding steps could affect bias estimates; use multiple seeds.",
+        "Metric definition: Alternative metrics (e.g., sequence alignment with gaps) might yield different thresholds.",
+        "Non-monotonic bias: The relationship between observability and bias may not be strictly sigmoidal.",
+        "Sample size: 1000 agents may be insufficient for stable inflection point estimation; power analysis needed."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles approach to measuring agent process fidelity, including a formal decomposition, mechanism model, tensions, and three falsifiable hypotheses with experiments. The work is methodical and identifies key trade-offs and bottlenecks.",
+    "strengths": [
+      "Thorough first-principles derivation with clear primitive definitions and assumptions.",
+      "Well-structured mechanism model with causal chains and identified bottlenecks.",
+      "Tensions are relevant and derived from the model.",
+      "Hypotheses are falsifiable with well-designed experiments testing threshold effects.",
+      "High novelty in proposing phase transitions in fidelity measurement."
+    ],
+    "weaknesses": [
+      "Strong assumptions (existence of reference process, full observability) may not be realistic.",
+      "Experiments are simulation-based; real-world validation is limited.",
+      "The trade-off between granularity and generalizability is identified but not fully addressed.",
+      "Missing baselines: no comparison with existing process fidelity metrics."
+    ],
+    "questions": [
+      "How do you ensure the reference process is optimal or authoritative?",
+      "How can the approach handle tasks with multiple valid processes?"
+    ],
+    "missing_baselines": [
+      "Comparison with existing metrics like BLEU, ROUGE, or process-centric metrics (e.g., step-wise accuracy).",
+      "Random agent or minimal-fidelity agent as lower bound."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "overreliance on unrealistic assumptions",
+    "root_cause": "The assumption that a single, consistent reference process exists for all tasks is often invalid; multiple valid processes or no authoritative reference may exist, making the measurement arbitrary.",
+    "violated_principle": "First-principles reasoning must account for variability and uncertainty in foundational constructs; assuming a unique reference process violates this by ignoring the multiplicity of valid processes in real-world tasks.",
+    "new_or_updated_principle": "When evaluating agent process fidelity, acknowledge that multiple valid reference processes may exist; measurement should be robust to this multiplicity by either aggregating across references or selecting a context-dependent reference.",
+    "new_or_updated_skill": "Ability to construct, identify, and compare multiple reference processes for a given task, and to design fidelity metrics that are invariant under valid transformations among references (e.g., using equivalence classes or distance measures that are robust to permutation/equivalence).",
+    "regression_test": "For a new task, explicitly check whether multiple valid reference processes exist (e.g., by consulting domain experts or analyzing variance across expert traces). If multiple references exist, the system must compute fidelity scores against all references and report the range or variance; metrics that assume a single reference (e.g., exact match) should be flagged as potentially misleading."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is the relationship between process fidelity and downstream performance moderated by task complexity such that there exists a complexity threshold beyond which higher fidelity leads to lower performance?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical granularity threshold that marks a phase transition in the cross-task generalizability of process fidelity scores?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical observability threshold at which the sign of bias in agent process fidelity estimates flips, and does this threshold depend on the alignment metric used?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,1314 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Process Step",
+        "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+        "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+      },
+      {
+        "name": "Agent Action",
+        "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+        "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+      },
+      {
+        "name": "Alignment Relation",
+        "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+        "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+        "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+        "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+      },
+      {
+        "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+        "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+        "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Stringent step-by-step alignment vs. holistic outcome evaluation",
+        "variables": [
+          "process fidelity",
+          "task success",
+          "measurement granularity"
+        ]
+      },
+      {
+        "tradeoff": "High-fidelity measurement cost vs. measurement scalability",
+        "variables": [
+          "manual annotation effort",
+          "automated metrics",
+          "coverage"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Process Steps",
+        "role": "input",
+        "description": "The set of prescribed atomic steps that define the ideal process."
+      },
+      {
+        "name": "Agent Actions",
+        "role": "input",
+        "description": "The observed atomic actions performed by the agent during task execution."
+      },
+      {
+        "name": "Alignment Relation",
+        "role": "mediator",
+        "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+      },
+      {
+        "name": "Process Fidelity Score",
+        "role": "output",
+        "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Process Steps",
+        "relation": "defines reference",
+        "target": "Alignment Relation",
+        "explanation": "The prescribed steps provide the standard against which actions are compared."
+      },
+      {
+        "step": "2",
+        "source": "Agent Actions",
+        "relation": "are observed and matched to steps",
+        "target": "Alignment Relation",
+        "explanation": "Each agent action is classified as aligning (or not) with each step."
+      },
+      {
+        "step": "3",
+        "source": "Alignment Relation",
+        "relation": "aggregated into",
+        "target": "Process Fidelity Score",
+        "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ambiguity in process step definitions",
+        "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+      },
+      {
+        "bottleneck": "Noise in agent action observation",
+        "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+      }
+    ],
+    "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Ambiguity in process step definitions undermines the reliability of the alignment relation, as subjective interpretation of steps introduces inconsistency in fidelity measurement.",
+      "derived_from": [
+        "Alignment Relation",
+        "Ambiguity in process step definitions"
+      ],
+      "why_it_matters": "Fidelity scores become unreliable if steps are not clearly defined, making comparisons across agents or tasks invalid.",
+      "what_existing_methods_may_miss": "Methods that assume objective alignment without addressing step ambiguity may produce false precision.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Noise or incompleteness in agent action observations leads to misalignment and inaccurate process fidelity scores, especially in open-ended environments where actions are not easily disambiguated.",
+      "derived_from": [
+        "Agent Action",
+        "Noise in agent action observation"
+      ],
+      "why_it_matters": "Measurement fidelity is only as good as the observation; poor observation undermines the entire mechanism.",
+      "what_existing_methods_may_miss": "Methods relying on automated logging without noise handling may systematically overestimate or underestimate fidelity.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Focusing on strict step-by-step alignment may penalize agents that achieve the task goal through alternative valid steps, contradicting holistic outcome success.",
+      "derived_from": [
+        "core_tradeoffs",
+        "Stringent step-by-step alignment vs. holistic outcome evaluation"
+      ],
+      "why_it_matters": "Process fidelity may not correlate with task success, leading to misleading evaluations if used as a sole metric.",
+      "what_existing_methods_may_miss": "Methods that only measure process fidelity ignore the possibility of valid alternative strategies.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Achieving high-fidelity process measurement often requires manual annotation, which limits scalability to large-scale agent evaluations.",
+      "derived_from": [
+        "core_tradeoffs",
+        "High-fidelity measurement cost vs. measurement scalability"
+      ],
+      "why_it_matters": "Tradeoff between accuracy and coverage; automated methods may sacrifice fidelity, manual methods are slow and expensive.",
+      "what_existing_methods_may_miss": "Automated metrics may miss nuanced alignment; manual methods cannot scale to many agents.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The assumption that the prescribed process is well-defined and complete conflicts with real-world processes that are often underspecified or have multiple valid interpretations.",
+      "derived_from": [
+        "assumption: The prescribed process is well-defined and complete"
+      ],
+      "why_it_matters": "Fidelity measures based on an incomplete or ambiguous reference are misleading and may not reflect true agent capability.",
+      "what_existing_methods_may_miss": "Methods treating the process as perfectly defined ignore the need for interpretive flexibility.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the granularity of process step definitions (e.g., atomic vs. composite) quantitatively affect the inter-rater reliability of alignment judgments by expert annotators?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Provide empirical evidence on how step definition ambiguity impacts fidelity measurement reliability, guiding the design of less ambiguous step specifications."
+    },
+    {
+      "question": "Can a dual-encoder model trained on paired noisy and clean action sequences predict process fidelity scores with error bounds that outperform simple noise-unaware aggregation?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "Develop a robust fidelity estimation method that is resilient to observation noise, enabling accurate evaluation in open-ended environments."
+    },
+    {
+      "question": "Under what conditions of task complexity and agent autonomy is the correlation between step-by-step process fidelity and final outcome success significantly positive versus negative?",
+      "question_type": "descriptive",
+      "source_tension": "T3",
+      "expected_contribution": "Identify boundary conditions where process fidelity is a valid surrogate for task success, preventing over-reliance on step alignment metrics."
+    },
+    {
+      "question": "How does the trade-off between annotation cost and fidelity measurement accuracy vary as a function of the number of process steps and the diversity of agent strategies?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Quantify the cost-accuracy frontier to help practitioners choose appropriate fidelity measurement granularity given resource constraints."
+    },
+    {
+      "question": "To what extent does the incompleteness of the prescribed process (measured by the proportion of missing steps) distort process fidelity scores when evaluating agents that perform unseen but valid actions?",
+      "question_type": "causal",
+      "source_tension": "T5",
+      "expected_contribution": "Reveal the sensitivity of fidelity metrics to process definition gaps, motivating the need for flexible or dynamic process specifications."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process Step",
+          "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+          "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+        },
+        {
+          "name": "Agent Action",
+          "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+          "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+        },
+        {
+          "name": "Alignment Relation",
+          "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+          "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+          "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+          "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+        },
+        {
+          "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+          "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+          "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Steps",
+            "role": "input",
+            "description": "The set of prescribed atomic steps that define the ideal process."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "The observed atomic actions performed by the agent during task execution."
+          },
+          {
+            "name": "Alignment Relation",
+            "role": "mediator",
+            "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Process Steps",
+            "relation": "defines reference",
+            "target": "Alignment Relation",
+            "explanation": "The prescribed steps provide the standard against which actions are compared."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "are observed and matched to steps",
+            "target": "Alignment Relation",
+            "explanation": "Each agent action is classified as aligning (or not) with each step."
+          },
+          {
+            "step": "3",
+            "source": "Alignment Relation",
+            "relation": "aggregated into",
+            "target": "Process Fidelity Score",
+            "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in process step definitions",
+            "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+          },
+          {
+            "bottleneck": "Noise in agent action observation",
+            "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The assumption that the prescribed process is well-defined and complete conflicts with real-world processes that are often underspecified or have multiple valid interpretations.",
+        "derived_from": [
+          "assumption: The prescribed process is well-defined and complete"
+        ],
+        "why_it_matters": "Fidelity measures based on an incomplete or ambiguous reference are misleading and may not reflect true agent capability.",
+        "what_existing_methods_may_miss": "Methods treating the process as perfectly defined ignore the need for interpretive flexibility.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical proportion of missing steps does the process fidelity score transition from being a positively correlated but underestimated measure to becoming negatively correlated with true process fidelity?",
+        "question_type": "diagnostic",
+        "source_tension": "T5",
+        "expected_contribution": "Identifying a sharp threshold reveals a phase transition in measurement reliability, guiding the design of robust fidelity metrics that account for process incompleteness."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold T (e.g., 50% missing steps) such that when the proportion of missing steps is below T, the process fidelity score underestimates true fidelity but remains positively correlated, and when above T, the score becomes negatively correlated with true fidelity due to misalignment between unseen valid actions and prescribed steps.",
+        "predicted_effect": "Above the threshold, the measured fidelity score decreases as true fidelity increases, leading to a negative correlation."
+      },
+      "minimal_decisive_test": {
+        "experiment": "For a synthetic task with a known complete process (10 steps), generate incomplete processes by randomly removing steps at proportions from 0% to 100% in increments of 10%. For each incomplete process, have an agent execute the task, performing actions that include valid actions corresponding to the missing steps. Compute the process fidelity score using binary alignment (exact match) and compare it to the true fidelity (measured against the full process). Repeat with 100 random subsets per proportion and 5 different agents. Analyze the correlation between measured and true fidelity as a function of missing proportion, and determine the threshold (if any) where the correlation changes sign.",
+        "independent_variables": [
+          "Proportion of missing steps (0%, 10%, ..., 100%)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation between measured fidelity score and true fidelity"
+        ],
+        "controls": [
+          "Same task complexity",
+          "Same alignment method (exact match)",
+          "Same set of agent actions (including unseen valid actions)",
+          "Random selection of missing steps (multiple runs)",
+          "Multiple agents to average out individual differences"
+        ],
+        "falsifying_observation": "If the correlation between measured fidelity and true fidelity remains positive for all proportions of missing steps, or if there is no identifiable threshold where the correlation becomes negative or non-monotonic, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Correlation starts positive for low missing proportions and decreases as missing proportion increases.",
+          "Correlation crosses zero at a specific threshold (e.g., around 50% missing).",
+          "Above the threshold, correlation becomes negative and continues decreasing."
+        ],
+        "rejects_hypothesis": [
+          "Correlation remains positive across all proportions.",
+          "Correlation fluctuates without a clear trend.",
+          "No threshold exists where correlation changes sign."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (i.e., no threshold or correlation always positive), then the assumption that process incompleteness systematically distorts fidelity scores may be invalid, or the distortion may be monotonic rather than threshold-based.",
+        "assumption_to_revise": "The assumption that missing steps cause a sign reversal in fidelity correlation at a specific threshold.",
+        "next_question": "What alternative mechanisms (e.g., alignment method, action diversity) determine whether process incompleteness leads to linear underestimation or more complex distortions?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process Step",
+          "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+          "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+        },
+        {
+          "name": "Agent Action",
+          "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+          "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+        },
+        {
+          "name": "Alignment Relation",
+          "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+          "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+          "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+          "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+        },
+        {
+          "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+          "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+          "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Steps",
+            "role": "input",
+            "description": "The set of prescribed atomic steps that define the ideal process."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "The observed atomic actions performed by the agent during task execution."
+          },
+          {
+            "name": "Alignment Relation",
+            "role": "mediator",
+            "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Process Steps",
+            "relation": "defines reference",
+            "target": "Alignment Relation",
+            "explanation": "The prescribed steps provide the standard against which actions are compared."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "are observed and matched to steps",
+            "target": "Alignment Relation",
+            "explanation": "Each agent action is classified as aligning (or not) with each step."
+          },
+          {
+            "step": "3",
+            "source": "Alignment Relation",
+            "relation": "aggregated into",
+            "target": "Process Fidelity Score",
+            "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in process step definitions",
+            "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+          },
+          {
+            "bottleneck": "Noise in agent action observation",
+            "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Ambiguity in process step definitions undermines the reliability of the alignment relation, as subjective interpretation of steps introduces inconsistency in fidelity measurement.",
+        "derived_from": [
+          "Alignment Relation",
+          "Ambiguity in process step definitions"
+        ],
+        "why_it_matters": "Fidelity scores become unreliable if steps are not clearly defined, making comparisons across agents or tasks invalid.",
+        "what_existing_methods_may_miss": "Methods that assume objective alignment without addressing step ambiguity may produce false precision.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a threshold of process step granularity beyond which inter-rater reliability of alignment judgments reaches a plateau, and does this threshold vary with the degree of step ambiguity?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a nonlinear relationship between granularity and reliability, revealing a plateau threshold and its dependence on ambiguity, which can guide the design of step specifications to maximize reliability without unnecessary detail."
+      },
+      "hypothesis": {
+        "statement": "Inter-rater reliability (Krippendorff's alpha) increases with step granularity but plateaus beyond a threshold granularity level; moreover, the threshold is lower when step ambiguity is high (i.e., composite steps with vague descriptions) and higher when ambiguity is low (i.e., atomic steps with precise descriptions).",
+        "predicted_effect": "The granularity-reliability curve is nonlinear: an initial steep increase, then a plateau; the plateau onset occurs at finer granularities for low-ambiguity steps compared to high-ambiguity steps."
+      },
+      "minimal_decisive_test": {
+        "experiment": "We conduct a controlled experiment with three factors: step granularity (3 levels: composite, atomic simple, atomic detailed), step ambiguity (2 levels: high vs. low, manipulated by adding/removing contextual cues), and annotator expertise (2 levels: novice vs. expert). Expert annotators (N=30) judge alignment (5-point Likert) for 60 agent actions paired with 60 process steps (crossed design). Each annotator sees all conditions (within-subject). The dependent variable is Krippendorff's alpha for each condition. We fit a segmented regression to identify a breakpoint in granularity (treated as ordinal) and test for an interaction with ambiguity.",
+        "independent_variables": [
+          "Step granularity (composite, atomic simple, atomic detailed)",
+          "Step ambiguity (high, low)",
+          "Annotator expertise (novice, expert)"
+        ],
+        "dependent_variables": [
+          "Inter-rater reliability (Krippendorff's alpha)"
+        ],
+        "controls": [
+          "Same agent actions for all conditions",
+          "Counterbalanced order of conditions",
+          "Clear alignment guidelines provided",
+          "Each annotator rates all combinations"
+        ],
+        "falsifying_observation": "If segmented regression fails to detect a significant plateau (i.e., no breakpoint where slope becomes non-significant) and/or no significant interaction between granularity and ambiguity on reliability, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant breakpoint in the granularity-reliability curve with a plateau after atomic simple steps.",
+          "The breakpoint occurs at a coarser level for high-ambiguity steps than for low-ambiguity steps.",
+          "Expert annotators show a higher plateau than novices, but the threshold pattern remains."
+        ],
+        "rejects_hypothesis": [
+          "No significant breakpoint; reliability increases linearly with granularity across all levels.",
+          "No significant difference in plateau threshold between high- and low-ambiguity steps.",
+          "Annotator expertise eliminates the plateau effect entirely."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no plateau or no interaction), the proposed nonlinear tradeoff between granularity and reliability is not supported. The assumption that ambiguity modulates the granularity effect may be incorrect.",
+        "assumption_to_revise": "The assumption that granularity and ambiguity interact nonlinearly to affect reliability. Instead, reliability may depend primarily on step clarity or on annotator training, independent of granularity.",
+        "next_question": "How does the clarity of step descriptions (measured via instruction readability) directly affect inter-rater reliability, controlling for granularity and ambiguity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process Step",
+          "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+          "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+        },
+        {
+          "name": "Agent Action",
+          "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+          "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+        },
+        {
+          "name": "Alignment Relation",
+          "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+          "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+          "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+          "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+        },
+        {
+          "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+          "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+          "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Steps",
+            "role": "input",
+            "description": "The set of prescribed atomic steps that define the ideal process."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "The observed atomic actions performed by the agent during task execution."
+          },
+          {
+            "name": "Alignment Relation",
+            "role": "mediator",
+            "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Process Steps",
+            "relation": "defines reference",
+            "target": "Alignment Relation",
+            "explanation": "The prescribed steps provide the standard against which actions are compared."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "are observed and matched to steps",
+            "target": "Alignment Relation",
+            "explanation": "Each agent action is classified as aligning (or not) with each step."
+          },
+          {
+            "step": "3",
+            "source": "Alignment Relation",
+            "relation": "aggregated into",
+            "target": "Process Fidelity Score",
+            "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in process step definitions",
+            "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+          },
+          {
+            "bottleneck": "Noise in agent action observation",
+            "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Focusing on strict step-by-step alignment may penalize agents that achieve the task goal through alternative valid steps, contradicting holistic outcome success.",
+        "derived_from": [
+          "core_tradeoffs",
+          "Stringent step-by-step alignment vs. holistic outcome evaluation"
+        ],
+        "why_it_matters": "Process fidelity may not correlate with task success, leading to misleading evaluations if used as a sole metric.",
+        "what_existing_methods_may_miss": "Methods that only measure process fidelity ignore the possibility of valid alternative strategies.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what threshold of process step granularity does the correlation between step-by-step process fidelity and outcome success flip from positive to negative for high-autonomy LLM agents?",
+        "question_type": "descriptive",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a precise granularity boundary where process fidelity becomes a counterproductive metric, enabling more nuanced evaluation of agent behavior."
+      },
+      "hypothesis": {
+        "statement": "For high-autonomy LLM agents (free action choices), the correlation between step-by-step process fidelity and outcome success is positive when process steps are coarse (average primitive actions per step < 5) and negative when steps are fine-grained (average primitive actions per step > 10), with a phase transition between these thresholds.",
+        "predicted_effect": "The correlation reverses sign at a specific granularity threshold, exhibiting a phase transition."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select a complex planning domain (e.g., web navigation with 10+ steps). Create process descriptions with varying granularity: steps defined as coarse (3-6 primitive actions per step), medium (7-9), and fine-grained (10-15). For each granularity level, have multiple high-autonomy LLM agents (e.g., GPT-4, Claude 3) execute the task. Record each agent's actions and compute step-by-step process fidelity (alignment score) and final outcome success (goal completion). For each granularity level, compute the Pearson correlation between fidelity and success. Test whether the correlation is significantly positive for coarse, negative for fine, and identify the threshold using breakpoint analysis.",
+        "independent_variables": [
+          "Process step granularity (continuous: average primitive actions per step, varied across conditions)"
+        ],
+        "dependent_variables": [
+          "Process fidelity score (0 to 1, alignment of agent actions to prescribed steps)",
+          "Outcome success (binary: goal achieved or not)"
+        ],
+        "controls": [
+          "Same task and goal across conditions",
+          "Same set of agents for all granularity levels",
+          "Same observation/alignment measurement method",
+          "Random ordering of conditions"
+        ],
+        "falsifying_observation": "If the correlation between fidelity and success is not significantly positive for the coarsest granularity (or not significantly negative for the finest), or if no significant breakpoint is detected in the correlation as granularity increases, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For step granularity < 5, significant positive correlation (r > 0.4, p < 0.05).",
+          "For step granularity > 10, significant negative correlation (r < -0.3, p < 0.05).",
+          "A significant breakpoint in the correlation-granularity curve is detected via segmented regression."
+        ],
+        "rejects_hypothesis": [
+          "Correlation is not significantly positive for any granularity level.",
+          "Correlation is not significantly negative for any granularity level.",
+          "Correlation remains positive for all granularity levels.",
+          "No breakpoint is detected."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted phase transition is not observed, then the assumption that granularity of process steps is a key moderator of the fidelity-success correlation may be incorrect.",
+        "assumption_to_revise": "The assumption that step granularity is a sufficient moderator for the fidelity-success relationship.",
+        "next_question": "What other attributes of the process (e.g., step interdependence, action entropy) or agent (e.g., planning capability) determine the sign of the fidelity-success correlation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process Step",
+          "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+          "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+        },
+        {
+          "name": "Agent Action",
+          "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+          "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+        },
+        {
+          "name": "Alignment Relation",
+          "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+          "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+          "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+          "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+        },
+        {
+          "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+          "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+          "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Steps",
+            "role": "input",
+            "description": "The set of prescribed atomic steps that define the ideal process."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "The observed atomic actions performed by the agent during task execution."
+          },
+          {
+            "name": "Alignment Relation",
+            "role": "mediator",
+            "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Process Steps",
+            "relation": "defines reference",
+            "target": "Alignment Relation",
+            "explanation": "The prescribed steps provide the standard against which actions are compared."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "are observed and matched to steps",
+            "target": "Alignment Relation",
+            "explanation": "Each agent action is classified as aligning (or not) with each step."
+          },
+          {
+            "step": "3",
+            "source": "Alignment Relation",
+            "relation": "aggregated into",
+            "target": "Process Fidelity Score",
+            "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in process step definitions",
+            "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+          },
+          {
+            "bottleneck": "Noise in agent action observation",
+            "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Achieving high-fidelity process measurement often requires manual annotation, which limits scalability to large-scale agent evaluations.",
+        "derived_from": [
+          "core_tradeoffs",
+          "High-fidelity measurement cost vs. measurement scalability"
+        ],
+        "why_it_matters": "Tradeoff between accuracy and coverage; automated methods may sacrifice fidelity, manual methods are slow and expensive.",
+        "what_existing_methods_may_miss": "Automated metrics may miss nuanced alignment; manual methods cannot scale to many agents.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What is the threshold number of process steps at which automated fidelity metrics become unreliable compared to manual annotation, and how does this threshold depend on the diversity of agent strategies?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a critical process complexity boundary where the cost-accuracy trade-off sharply transitions, enabling practitioners to decide when manual annotation is necessary."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical number of process steps (C) such that for step counts ≤ C, automated fidelity metrics achieve accuracy within 90% of manual annotation, but for step counts > C, automated accuracy drops sharply (correlation < 0.7). Moreover, this critical C decreases linearly with increasing diversity of agent strategies.",
+        "predicted_effect": "The threshold C is inversely proportional to strategy diversity, with a slope of -2 steps per diversity level (low=1, medium=2, high=3)."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a controlled multi-step task (e.g., a multi-step data extraction and summarization pipeline) with a prescribed process. Vary the number of process steps: 3, 6, 9, 12, 15. Vary agent strategy diversity: low (one rule-based agent), medium (two agents with different heuristics), high (four agents with diverse strategies). For each condition, compute automated fidelity using a string overlap metric and manual fidelity via expert annotators (gold standard). Measure the correlation between automated and manual scores. Identify the step count where correlation falls below 0.7 (the 'unreliable threshold').",
+        "independent_variables": [
+          "Number of process steps (3, 6, 9, 12, 15)",
+          "Diversity of agent strategies (low: 1 strategy, medium: 2, high: 4)"
+        ],
+        "dependent_variables": [
+          "Correlation between automated and manual fidelity scores",
+          "Step count at which correlation drops below 0.7 (threshold C)"
+        ],
+        "controls": [
+          "Same task environment and step definitions",
+          "Same annotator training and guidelines",
+          "Same automated metric implementation",
+          "All agents complete the same number of trials (10 per condition)"
+        ],
+        "falsifying_observation": "If automated-manual correlation remains above 0.7 for all step counts and diversity levels, or if the threshold C does not decrease with diversity, or if no sharp drop is observed (i.e., correlation declines gradually without a clear threshold), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low diversity, threshold C ≈ 12 steps; for medium diversity, C ≈ 9 steps; for high diversity, C ≈ 6 steps.",
+          "Correlation sharply declines from >0.9 to <0.7 as steps exceed C.",
+          "The decline is more pronounced at higher diversity levels."
+        ],
+        "rejects_hypothesis": [
+          "Correlation remains >0.9 for all step counts and diversity levels.",
+          "Correlation declines linearly without a clear threshold.",
+          "Threshold C increases with diversity (opposite direction)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is found, or if diversity does not affect the threshold monotonically.",
+        "assumption_to_revise": "The assumption that automated fidelity accuracy undergoes a phase transition rather than a smooth decay.",
+        "next_question": "What continuous function (e.g., exponential decay) best describes the relationship between step count, strategy diversity, and automated fidelity accuracy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Process Step",
+          "definition": "An atomic, non-decomposable unit of the prescribed procedure that the agent is expected to execute.",
+          "why_primitive": "Any measurement of process fidelity ultimately compares individual steps; decomposing further loses the procedural context."
+        },
+        {
+          "name": "Agent Action",
+          "definition": "An observable atomic unit of behavior performed by the agent during task execution.",
+          "why_primitive": "Agent actions are the raw data from which fidelity is assessed; they cannot be reduced without losing the behavioral trace."
+        },
+        {
+          "name": "Alignment Relation",
+          "definition": "A binary or graded correspondence between a process step and an agent action, indicating that the action fulfills or matches the step.",
+          "why_primitive": "Fidelity measurement requires a fundamental linking mechanism between the prescribed and actual behavior; alignment is the building block of any such measure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is well-defined and complete, with no ambiguity or missing steps.",
+          "rationale": "Without a clear reference, any measure of fidelity is meaningless; the process must be fully specified in advance.",
+          "possible_failure": "Real-world processes are often underspecified or have multiple valid interpretations, making this assumption fragile."
+        },
+        {
+          "assumption": "Agent actions can be reliably observed and disambiguated into atomic units.",
+          "rationale": "Measurement requires accurate recording of what the agent did; errors in observation directly affect fidelity scores.",
+          "possible_failure": "Observations may be noisy, incomplete, or require subjective interpretation, especially in open-ended environments."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Process Steps",
+            "role": "input",
+            "description": "The set of prescribed atomic steps that define the ideal process."
+          },
+          {
+            "name": "Agent Actions",
+            "role": "input",
+            "description": "The observed atomic actions performed by the agent during task execution."
+          },
+          {
+            "name": "Alignment Relation",
+            "role": "mediator",
+            "description": "The correspondence between each process step and each agent action, indicating the degree to which the action fulfills the step."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "An aggregate measure (e.g., average alignment over all steps) quantifying how faithfully the agent followed the prescribed process."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Process Steps",
+            "relation": "defines reference",
+            "target": "Alignment Relation",
+            "explanation": "The prescribed steps provide the standard against which actions are compared."
+          },
+          {
+            "step": "2",
+            "source": "Agent Actions",
+            "relation": "are observed and matched to steps",
+            "target": "Alignment Relation",
+            "explanation": "Each agent action is classified as aligning (or not) with each step."
+          },
+          {
+            "step": "3",
+            "source": "Alignment Relation",
+            "relation": "aggregated into",
+            "target": "Process Fidelity Score",
+            "explanation": "The individual alignments are combined (e.g., via averaging or weighted sum) to produce a single fidelity metric."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in process step definitions",
+            "why_it_matters": "If steps are not clearly defined, alignment judgments become subjective and unreliable, undermining the fidelity measure."
+          },
+          {
+            "bottleneck": "Noise in agent action observation",
+            "why_it_matters": "Inaccurate or incomplete observation of actions leads to misalignment and inaccurate fidelity scores."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing each prescribed process step to the corresponding agent action via an alignment relation. The alignment is binary or graded, and the overall fidelity score aggregates these alignments across all steps. The process relies on clear step definitions and reliable action observations; any ambiguity or noise introduces measurement error."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Noise or incompleteness in agent action observations leads to misalignment and inaccurate process fidelity scores, especially in open-ended environments where actions are not easily disambiguated.",
+        "derived_from": [
+          "Agent Action",
+          "Noise in agent action observation"
+        ],
+        "why_it_matters": "Measurement fidelity is only as good as the observation; poor observation undermines the entire mechanism.",
+        "what_existing_methods_may_miss": "Methods relying on automated logging without noise handling may systematically overestimate or underestimate fidelity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what noise threshold does the alignment between agent actions and process steps become unreliable (alignment accuracy < 60%), and can a dependency-aware alignment model that exploits step sequence structure maintain fidelity below this threshold?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a critical noise threshold for process fidelity measurement and propose a dependency-aware alignment method that extends reliable measurement to higher noise levels."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical noise level (e.g., 15-25% action corruption) at which simple alignment methods (e.g., exact matching) experience a sharp increase in error (alignment accuracy drops below 60%). A dependency-aware alignment model that encodes sequential dependencies between steps will maintain alignment accuracy above 60% for noise levels up to 10 percentage points higher than the baseline threshold.",
+        "predicted_effect": "Dependency-aware model will shift the threshold where accuracy drops below 60% to higher noise levels, demonstrating a significant delay in the phase transition."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Synthesize a set of 10-step procedures with varying step dependencies (e.g., sequential, conditional). Generate clean agent actions. Inject controlled noise (substitution, deletion, insertion) at levels from 0% to 40% in 5% increments. Implement a baseline exact-matching alignment and a dependency-aware alignment that uses a hidden Markov model to leverage step order. For each noise level, compute alignment accuracy (proportion of steps correctly matched). Determine the noise level where accuracy drops below 60% for each method.",
+        "independent_variables": [
+          "Alignment method (baseline exact-match vs. dependency-aware HMM)",
+          "Noise level (0% to 40% in 5% steps)"
+        ],
+        "dependent_variables": [
+          "Alignment accuracy",
+          "Noise threshold where accuracy < 60%"
+        ],
+        "controls": [
+          "Same set of procedures",
+          "Same noise injection mechanism",
+          "Same step definitions",
+          "Same evaluation metric"
+        ],
+        "falsifying_observation": "If the dependency-aware model does not achieve a significantly higher noise threshold (p<0.05) than the baseline, or if no sharp threshold is observed for either method (i.e., accuracy declines linearly), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Dependency-aware model maintains accuracy above 60% at noise levels where baseline already drops below.",
+          "There is a clear noise level at which baseline accuracy sharply declines, while dependency-aware model shows more gradual decline.",
+          "The threshold for dependency-aware model is at least 10% higher than baseline."
+        ],
+        "rejects_hypothesis": [
+          "Both methods show linear decline with no clear threshold.",
+          "Baseline outperforms dependency-aware at all noise levels.",
+          "Thresholds are within 5% of each other, not significant."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed or dependency-aware model does not outperform baseline, we conclude that sequential dependencies are insufficient to counteract observation noise in alignment, or that the threshold depends on other factors like step complexity.",
+        "assumption_to_revise": "The assumption that step sequential structure provides robust denoising may be false; alternative structural priors (e.g., hierarchical task decomposition) need exploration.",
+        "next_question": "Can a hierarchical alignment model that exploits subgoal structure provide a higher noise threshold than sequential dependency-aware models?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Inter-rater reliability (Krippendorff's alpha) increases with step granularity but plateaus beyond a threshold granularity level; moreover, the threshold is lower when step ambiguity is high (i.e., composite steps with vague descriptions) and higher when ambiguity is low (i.e., atomic steps with precise descriptions).",
+      "independent_variables": [
+        "Step granularity (3 levels: composite, atomic simple, atomic detailed)",
+        "Step ambiguity (2 levels: high, low)"
+      ],
+      "dependent_variables": [
+        "Inter-rater reliability (Krippendorff's alpha) per condition"
+      ],
+      "controlled_variables": [
+        "Same set of step-action pairs (10 pairs) used across all conditions",
+        "Clear alignment guidelines provided to all annotators",
+        "Annotator expertise: all expert (e.g., trained researchers)",
+        "Counterbalanced presentation order of conditions",
+        "Equal number of step-action pairs per condition",
+        "Scoring scale: 5-point Likert from 'no alignment' to 'full alignment'"
+      ],
+      "baselines": [
+        {
+          "name": "Composite granularity with high ambiguity",
+          "description": "Steps described at the coarsest level with ambiguous wording, serving as the baseline for low granularity and high ambiguity."
+        },
+        {
+          "name": "Composite granularity with low ambiguity",
+          "description": "Steps described at the coarsest level with precise wording, serving as the baseline for low granularity and low ambiguity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Krippendorff's alpha",
+          "definition": "Inter-rater reliability coefficient computed from annotators' alignment ratings for each condition. Values range from 0 (no agreement) to 1 (perfect agreement)."
+        }
+      ],
+      "expected_result": "For high-ambiguity steps, Krippendorff's alpha will increase from composite to atomic simple granularity and then plateau, with no significant increase from atomic simple to atomic detailed. For low-ambiguity steps, alpha will increase across all three levels, with a plateau only at the atomic detailed level. The breakpoint (plateau onset) will be at atomic simple for high ambiguity and at atomic detailed for low ambiguity, confirmed by a significant interaction in a segmented regression.",
+      "falsifying_result": "If segmented regression fails to find a significant breakpoint (i.e., reliability increases linearly across all three granularity levels), or if the breakpoint does not differ between high- and low-ambiguity conditions (no interaction), the hypothesis is falsified. Additionally, if reliability decreases or does not show a clear plateau pattern, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use 5 expert annotators to rate 10 step-action pairs per condition (3 granularities × 2 ambiguities = 6 conditions). Each annotator rates all 60 pairs (6 conditions × 10 pairs) in a counterbalanced order. Krippendorff's alpha is computed for each condition across the 5 annotators. Segmented regression with an interaction term is used to test for a plateau and differential threshold.",
+      "risks_and_confounds": [
+        "Limited number of annotators (5) may yield unstable alpha estimates; bootstrap confidence intervals should be used.",
+        "The choice of step-action pairs may inadvertently introduce ceiling or floor effects; pilot test pairs to ensure variability.",
+        "Manipulation of ambiguity may confound with step length or complexity; control for description length.",
+        "Order effects: counterbalancing mitigates but does not eliminate; include condition position as a covariate if needed.",
+        "Learning effects: annotators may become more consistent over time; allow for practice trials and check for drift."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical noise level (e.g., 15-25% action corruption) at which simple alignment methods (e.g., exact matching) experience a sharp increase in error (alignment accuracy drops below 60%). A dependency-aware alignment model that encodes sequential dependencies between steps will maintain alignment accuracy above 60% for noise levels up to 10 percentage points higher than the baseline threshold.",
+      "independent_variables": [
+        "Alignment method (exact-match vs dependency-aware HMM)",
+        "Noise level (0%, 15%, 25%, 35% action corruption)"
+      ],
+      "dependent_variables": [
+        "Alignment accuracy (proportion of steps correctly matched)",
+        "Noise threshold where accuracy drops below 60%"
+      ],
+      "controlled_variables": [
+        "Same 10-step procedure with sequential dependencies",
+        "Same noise injection mechanism (substitution, deletion, insertion)",
+        "Same step definitions",
+        "Same evaluation metric"
+      ],
+      "baselines": [
+        {
+          "name": "Exact-match alignment",
+          "description": "Each agent action is matched to a process step if exactly matches the step's action template; no tolerance for noise."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Alignment accuracy",
+          "definition": "Number of steps correctly matched divided by total steps (10)."
+        }
+      ],
+      "expected_result": "At 0% noise, both methods achieve 100% accuracy. At 15% noise, baseline accuracy may still be above 60% (e.g., 80%). At 25% noise, baseline accuracy drops below 60% (e.g., 50%), while dependency-aware HMM remains above 60% (e.g., 75%). At 35% noise, dependency-aware HMM may still be above 60% (e.g., 65%) or drops below but remains higher than baseline. The threshold for baseline is between 15% and 25%, and for dependency-aware is at least 10 percentage points higher (≥25% or higher).",
+      "falsifying_result": "If at 25% noise, baseline accuracy is still ≥60% or dependency-aware accuracy is <60%, then hypothesis is falsified. Alternatively, if both methods show a linear decline without a sharp threshold, or if the difference in thresholds is less than 10 percentage points, the hypothesis is not supported.",
+      "minimum_viable_experiment": "Synthesize a single 10-step procedure with sequential dependencies (steps must be executed in order). Generate clean agent actions. Inject noise (substitution, deletion, insertion) at levels 0%, 15%, 25%, 35% of actions corrupted. Apply exact-match baseline alignment and a dependency-aware HMM alignment. For each noise level, compute alignment accuracy as proportion of steps correctly matched. Determine the noise level where accuracy drops below 60% for each method.",
+      "risks_and_confounds": [
+        "Single procedure may not generalize to other step dependencies",
+        "Noise injection may not fully represent real-world observation noise",
+        "Step definitions may be too simplistic or ambiguous",
+        "HMM implementation details may affect results"
+      ]
+    },
+    {
+      "hypothesis": "For high-autonomy LLM agents (free action choices), the correlation between step-by-step process fidelity and outcome success is positive when process steps are coarse (average primitive actions per step < 5) and negative when steps are fine-grained (average primitive actions per step > 10), with a phase transition between these thresholds.",
+      "independent_variables": [
+        "Process step granularity: three levels - coarse (average 4 primitive actions per step), medium (average 8), fine (average 12)"
+      ],
+      "dependent_variables": [
+        "Process fidelity score (0 to 1, alignment of agent actions to prescribed steps)",
+        "Outcome success (binary: goal achieved or not)"
+      ],
+      "controlled_variables": [
+        "Same complex planning domain (e.g., web navigation with 10+ steps)",
+        "Same set of high-autonomy LLM agents (e.g., GPT-4, Claude 3) across all granularity levels",
+        "Same observation/alignment measurement method (automated action trace parser)",
+        "Random ordering of conditions to mitigate order effects",
+        "Each agent runs multiple trials per condition to estimate correlation"
+      ],
+      "baselines": [
+        {
+          "name": "No process specification",
+          "description": "Agents are given only the goal without any prescribed steps; used to compare success rates without process constraints."
+        },
+        {
+          "name": "Random action agent",
+          "description": "An agent that selects actions uniformly at random; provides a baseline for chance-level fidelity and success."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Step alignment score",
+          "definition": "For each prescribed step, the proportion of agent actions that correctly fulfill that step (binary alignment per step then averaged)."
+        },
+        {
+          "name": "Goal completion",
+          "definition": "Binary indicator of whether the agent successfully achieved the final goal of the task."
+        }
+      ],
+      "expected_result": "For coarse granularity (4 primitives/step), significant positive Pearson correlation (r > 0.4, p < 0.05) between fidelity and success. For fine granularity (12 primitives/step), significant negative correlation (r < -0.3, p < 0.05). A breakpoint in the correlation-granularity curve is detected via segmented regression, with the breakpoint occurring between 5 and 10 primitives per step.",
+      "falsifying_result": "The hypothesis is falsified if: (a) the correlation is not significantly positive for coarse granularity, (b) the correlation is not significantly negative for fine granularity, (c) the correlation remains positive for all granularities, or (d) no significant breakpoint is detected in the correlation as granularity increases.",
+      "minimum_viable_experiment": "Select a single complex planning task with at least 10 atomic actions. Define three process descriptions at different granularities: coarse (each step covers 4 primitive actions), medium (8), fine (12). For each granularity, have 5 high-autonomy LLM agents each perform the task 10 times (50 runs per condition). Record action sequences, compute fidelity scores, and assess goal success. Calculate Pearson correlation between fidelity and success for each condition. Perform segmented regression on the three correlation values to detect a breakpoint. If the predicted sign reversal and breakpoint are not observed, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Task difficulty may interact with granularity; if the task is too easy or too hard, ceiling/floor effects may obscure correlations.",
+        "The alignment metric may be imperfect: actions may partially satisfy steps, but binary alignment may miss graded matches.",
+        "Individual agent differences (e.g., planning capability) could confound the correlation if not evenly distributed across conditions.",
+        "The choice of primitive actions decomposition may be subjective; different decompositions could change granularity levels."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical number of process steps (C) such that for step counts ≤ C, automated fidelity metrics achieve accuracy within 90% of manual annotation, but for step counts > C, automated accuracy drops sharply (correlation < 0.7). Moreover, this critical C decreases linearly with increasing diversity of agent strategies.",
+      "independent_variables": [
+        "Number of process steps (levels: 3, 6, 9, 12)",
+        "Diversity of agent strategies (levels: low=1 strategy, high=4 strategies)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation between automated and manual fidelity scores",
+        "Step count at which correlation first falls below 0.7 (threshold C)"
+      ],
+      "controlled_variables": [
+        "Same multi-step data extraction and summarization task",
+        "Same step definitions and annotation guidelines",
+        "Same automated metric (string overlap)",
+        "Same number of trials per condition (10)",
+        "Same annotator pool and training",
+        "All agents observe the same input data"
+      ],
+      "baselines": [
+        {
+          "name": "Manual Annotation (Gold Standard)",
+          "description": "Fidelity scores assigned by expert human annotators following a detailed rubric."
+        },
+        {
+          "name": "Random Agent",
+          "description": "Agent that selects actions uniformly at random from possible actions, serving as a low-fidelity reference."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Automated Fidelity Score",
+          "definition": "Proportion of process steps whose corresponding agent action matches the step description via string overlap (exact or partial match)."
+        },
+        {
+          "name": "Manual Fidelity Score",
+          "definition": "Average alignment rating (0-1) assigned by expert annotators for each step-action pair."
+        },
+        {
+          "name": "Automated-Manual Correlation",
+          "definition": "Pearson correlation coefficient between automated and manual fidelity scores across all trials in a condition."
+        }
+      ],
+      "expected_result": "For low diversity, correlation >0.9 at steps 3,6,9; drops to <0.7 at step 12. For high diversity, correlation >0.9 at steps 3,6; drops to <0.7 at step 9. Threshold C decreases from ~12 to ~9 as diversity increases.",
+      "falsifying_result": "If for any condition automated-manual correlation remains above 0.7 across all step counts, or if the threshold C does not decrease with diversity (e.g., stays same or increases), or if correlation declines gradually without a clear drop below 0.7, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Conduct a multi-step data extraction task with prescribed process steps. Vary step count (3,6,9,12) and strategy diversity (low: one rule-based agent; high: four agents with different heuristics). For each combination, run 10 trials and compute automated (string overlap) and manual (expert annotation) fidelity scores. Calculate the Pearson correlation between automated and manual scores. Identify the smallest step count where correlation falls below 0.7. Compare thresholds between diversity levels. The experiment is minimal because it uses the smallest set of step counts and diversity levels that can detect a threshold shift (expected: low diversity threshold at 12, high at 9).",
+      "risks_and_confounds": [
+        "String overlap may not capture semantic alignment; manual annotation may have inter-annotator variability.",
+        "The specific task (data extraction) may not generalize to other procedural tasks.",
+        "Number of trials (10) may be insufficient for stable correlation estimates.",
+        "Agent strategies may not be sufficiently diverse to represent high diversity condition.",
+        "Learning effects or fatigue in annotators over time."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold T (e.g., 50% missing steps) such that when the proportion of missing steps is below T, the process fidelity score underestimates true fidelity but remains positively correlated, and when above T, the score becomes negatively correlated with true fidelity due to misalignment between unseen valid actions and prescribed steps.",
+      "independent_variables": [
+        "Proportion of missing steps (0%, 25%, 50%, 75%, 100%)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation between measured fidelity score and true fidelity score"
+      ],
+      "controlled_variables": [
+        "Same synthetic task (4-step process)",
+        "Same alignment method (binary exact match)",
+        "Agent actions include valid actions for all steps",
+        "Random selection of missing steps (5 random subsets per proportion)",
+        "Two different agents to average out individual differences"
+      ],
+      "baselines": [
+        {
+          "name": "Full Process Baseline",
+          "description": "The process with 0% missing steps, serving as the reference for maximum fidelity measurement accuracy."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Pearson correlation",
+          "definition": "Pearson r between measured fidelity score (using incomplete process) and true fidelity score (using full process) across agents and subsets."
+        }
+      ],
+      "expected_result": "For low proportions of missing steps (0-25%), correlation is positive and high. At some intermediate proportion (e.g., around 50%), correlation crosses zero and becomes negative for high proportions (75-100%), indicating that measured fidelity is inversely related to true fidelity.",
+      "falsifying_result": "Correlation remains positive for all proportions, or no clear sign change is observed, or correlation fluctuates without a monotonic trend.",
+      "minimum_viable_experiment": "Use a synthetic 4-step task. Generate incomplete processes by randomly removing 0%, 25%, 50%, 75%, or 100% of steps. Have 2 different agents each perform the task 5 times per proportion (10 trials per proportion total), always executing actions for all 4 steps (including missing ones). Compute the measured fidelity score as the proportion of prescribed steps that match agent actions. Compute true fidelity using the full 4-step process. Calculate Pearson correlation across all trials for each proportion. Determine if there exists a proportion where correlation changes sign.",
+      "risks_and_confounds": [
+        "Small number of steps may not generalize to longer processes",
+        "Binary alignment may be too simplistic",
+        "Random subsets may inadvertently create biased step selections",
+        "Agents may not be diverse enough to average out individual differences"
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "Is there a threshold of process step granularity beyond which inter-rater reliability of alignment judgments reaches a plateau, and does this threshold vary with the degree of step ambiguity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what noise threshold does the alignment between agent actions and process steps become unreliable (alignment accuracy < 60%), and can a dependency-aware alignment model that exploits step sequence structure maintain fidelity below this threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of process step granularity does the correlation between step-by-step process fidelity and outcome success flip from positive to negative for high-autonomy LLM agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the threshold number of process steps at which automated fidelity metrics become unreliable compared to manual annotation, and how does this threshold depend on the diversity of agent strategies?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical proportion of missing steps does the process fidelity score transition from being a positively correlated but underestimated measure to becoming negatively correlated with true process fidelity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

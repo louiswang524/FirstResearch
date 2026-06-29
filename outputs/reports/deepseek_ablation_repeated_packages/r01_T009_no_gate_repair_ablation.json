@@ -1,0 +1,1474 @@
+{
+  "topic": {
+    "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+    "topic_id": "T009",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should coding-agent benchmarks isolate non-inferable requirements?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Requirement",
+        "definition": "A constraint that the agent's code must satisfy to be considered correct. Requirements can be functional (e.g., output format) or non-functional (e.g., performance).",
+        "why_primitive": "It is the fundamental unit of what the agent must achieve; all benchmarks are built around requirements."
+      },
+      {
+        "name": "Inference",
+        "definition": "The process by which an agent derives a requirement from the given specification, including examples, docstrings, tests, or prior knowledge.",
+        "why_primitive": "The distinction between inferable and non-inferable hinges on the agent's ability to infer; isolation targets preventing inference."
+      },
+      {
+        "name": "Non-inferable Requirement",
+        "definition": "A requirement that cannot be logically or reasonably deduced from the specification provided to the agent; it requires external information or arbitrary choice.",
+        "why_primitive": "The central concept the benchmark aims to isolate; benchmarks must ensure that such requirements are not guessable."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent's inference capability is limited to the information provided in the specification and general knowledge, but not specific to the benchmark's hidden details.",
+        "rationale": "If the agent could infer arbitrary requirements from the specification, then no requirement would be non-inferable. This assumption allows us to design benchmarks that test handling of truly unknown requirements.",
+        "possible_failure": "The agent may have extensive world knowledge or be able to generate plausible requirements from context, making some intended non-inferable requirements actually inferable."
+      },
+      {
+        "assumption": "The benchmark designer has full control over the specification and can deliberately omit or obscure information to make specific requirements non-inferable.",
+        "rationale": "This is necessary to isolate non-inferable requirements; otherwise, the agent might infer them from unintended cues in the specification.",
+        "possible_failure": "Subtle clues, such as the ordering of test cases or names of functions, may inadvertently allow inference, breaking isolation."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Naturalness vs. Isolation Level: Making requirements non-inferable often requires removing context or adding arbitrary choices, which reduces the ecological validity of the benchmark.",
+        "variables": [
+          "Naturalness",
+          "Isolation Level"
+        ]
+      },
+      {
+        "tradeoff": "Evaluation Clarity vs. Task Difficulty: Clearly isolating non-inferable requirements may require explicit external specifications, but too much clarity makes the task trivial; too little makes evaluation ambiguous.",
+        "variables": [
+          "Evaluation Clarity",
+          "Task Difficulty"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Specification Ambiguity",
+        "role": "input",
+        "description": "Degree to which the specification omits or obscures information about non-inferable requirements."
+      },
+      {
+        "name": "Inference Leakage",
+        "role": "mediator",
+        "description": "Amount of unintended information in the specification that allows the agent to infer non-inferable requirements."
+      },
+      {
+        "name": "Naturalness",
+        "role": "mediator",
+        "description": "Ecological validity of the benchmark task, how realistic it appears."
+      },
+      {
+        "name": "Evaluation Clarity",
+        "role": "mediator",
+        "description": "Clarity of the criteria and process for evaluating agent output."
+      },
+      {
+        "name": "Task Difficulty",
+        "role": "mediator",
+        "description": "Overall difficulty of the coding task for the agent."
+      },
+      {
+        "name": "Isolation Level",
+        "role": "output",
+        "description": "Degree to which non-inferable requirements are isolated from being inferred from the specification."
+      },
+      {
+        "name": "Benchmark Validity",
+        "role": "outcome",
+        "description": "Overall validity of the benchmark in measuring the agent's ability to handle non-inferable requirements."
+      },
+      {
+        "name": "Agent Prior Knowledge",
+        "role": "confounder",
+        "description": "Knowledge the agent possesses beyond the specification, which may affect inference."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Specification Ambiguity",
+        "relation": "negative",
+        "target": "Inference Leakage",
+        "explanation": "Higher specification ambiguity reduces the amount of explicit information, decreasing unintended clues that could allow inference."
+      },
+      {
+        "step": "2",
+        "source": "Inference Leakage",
+        "relation": "negative",
+        "target": "Isolation Level",
+        "explanation": "More inference leakage directly undermines the isolation of non-inferable requirements."
+      },
+      {
+        "step": "3",
+        "source": "Specification Ambiguity",
+        "relation": "negative",
+        "target": "Naturalness",
+        "explanation": "Ambiguous or incomplete specifications make the task less realistic, reducing naturalness."
+      },
+      {
+        "step": "4",
+        "source": "Specification Ambiguity",
+        "relation": "negative",
+        "target": "Evaluation Clarity",
+        "explanation": "Ambiguity in the specification can obscure what constitutes correct behavior, making evaluation criteria less clear."
+      },
+      {
+        "step": "5",
+        "source": "Specification Ambiguity",
+        "relation": "positive",
+        "target": "Task Difficulty",
+        "explanation": "Unclear requirements increase the cognitive load on the agent, raising task difficulty."
+      },
+      {
+        "step": "6",
+        "source": "Isolation Level",
+        "relation": "positive",
+        "target": "Benchmark Validity",
+        "explanation": "Higher isolation ensures the benchmark truly tests handling of non-inferable requirements, improving validity."
+      },
+      {
+        "step": "7",
+        "source": "Naturalness",
+        "relation": "positive",
+        "target": "Benchmark Validity",
+        "explanation": "More natural tasks yield results that generalize better to real-world scenarios, enhancing validity."
+      },
+      {
+        "step": "8",
+        "source": "Evaluation Clarity",
+        "relation": "positive",
+        "target": "Benchmark Validity",
+        "explanation": "Clear evaluation reduces measurement error and improves the trustworthiness of benchmark outcomes."
+      },
+      {
+        "step": "9",
+        "source": "Task Difficulty",
+        "relation": "positive",
+        "target": "Benchmark Validity",
+        "explanation": "Moderate to high difficulty can discriminate agent capabilities, but extreme difficulty may confound results; generally positive up to a point."
+      },
+      {
+        "step": "10",
+        "source": "Agent Prior Knowledge",
+        "relation": "positive",
+        "target": "Inference Leakage",
+        "explanation": "Agents with more prior knowledge may infer requirements from minimal cues, increasing effective leakage."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Inadvertent Clues",
+        "why_it_matters": "Even with deliberate omission, subtle cues (e.g., test case names, function signatures) can allow inference, compromising isolation."
+      },
+      {
+        "bottleneck": "Naturalness vs Isolation Tradeoff",
+        "why_it_matters": "High isolation often requires unnatural specifications, hurting ecological validity and limiting generalizability."
+      },
+      {
+        "bottleneck": "Evaluation Clarity Degradation",
+        "why_it_matters": "Ambiguous specifications may reduce clarity of evaluation criteria, making it hard to judge correctness and leading to subjective assessments."
+      },
+      {
+        "bottleneck": "Task Difficulty Confound",
+        "why_it_matters": "If the task is too difficult, agents may fail for reasons unrelated to handling non-inferable requirements, confounding results."
+      }
+    ],
+    "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks operates by adjusting specification ambiguity. High ambiguity reduces inference leakage, thereby increasing isolation level, but it also decreases naturalness and evaluation clarity, and increases task difficulty. These factors jointly impact benchmark validity. The key challenge is to balance these tradeoffs to achieve valid measurement without unintended cues or degraded realism."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Increasing isolation of non-inferable requirements by making specifications ambiguous reduces the naturalness of the benchmark, potentially limiting ecological validity and generalizability.",
+      "derived_from": [
+        "core_tradeoffs[0]",
+        "causal_chain step3",
+        "causal_chain step7"
+      ],
+      "why_it_matters": "If benchmarks are too unnatural, results may not transfer to real-world scenarios where requirements are often ambiguous but naturally inferred from context.",
+      "what_existing_methods_may_miss": "Existing benchmarks may prioritize isolation without considering naturalness, leading to artificial tasks that agents solve in ways not representative of actual use.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Clear evaluation criteria may require explicit specifications that reduce task difficulty, making the benchmark less discriminating; conversely, ambiguous specifications increase difficulty but degrade evaluation clarity, leading to subjective or inconsistent assessments.",
+      "derived_from": [
+        "core_tradeoffs[1]",
+        "causal_chain step4",
+        "causal_chain step5"
+      ],
+      "why_it_matters": "The tradeoff directly affects the reliability and interpretability of benchmark results; poor evaluation clarity can invalidate comparisons across agents.",
+      "what_existing_methods_may_miss": "Automated evaluation systems may rely on strict rubrics that cannot handle ambiguous outputs, forcing designers to choose between clarity and difficulty.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that the agent's inference capability is limited to the specification and general knowledge may fail if agents have extensive prior knowledge or can generate plausible requirements from context, causing intended non-inferable requirements to be inferable.",
+      "derived_from": [
+        "assumptions[0]",
+        "causal_chain step10"
+      ],
+      "why_it_matters": "If this assumption fails, the benchmark no longer isolates non-inferable requirements, undermining its validity for evaluating that specific capability.",
+      "what_existing_methods_may_miss": "Most benchmarks do not account for or measure the agent's prior knowledge; they assume uniform background, which is rarely true in practice.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Even with deliberate omission, subtle cues such as function names, test order, or example structure can inadvertently allow inference, creating a gap between intended isolation and actual leakage.",
+      "derived_from": [
+        "bottlenecks[0]",
+        "assumptions[1].possible_failure"
+      ],
+      "why_it_matters": "Inadvertent clues are hard to eliminate entirely and can systematically advantage agents that are sensitive to such patterns, skewing results.",
+      "what_existing_methods_may_miss": "Current methods may not systematically audit specifications for all possible unintended cues, especially those that are context-dependent or agent-specific.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing specification ambiguity to reduce inference leakage significantly decrease the naturalness of the benchmark, as measured by a decrease in the correlation between agent performance on the benchmark and on real-world coding tasks?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the tradeoff between isolation and ecological validity, informing benchmark design."
+    },
+    {
+      "question": "Is there an optimal level of specification ambiguity that maximizes benchmark discrimination by balancing evaluation clarity and task difficulty, such that the variance in agent scores is maximized while maintaining inter-rater reliability?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Identify a principled method to set benchmark difficulty and evaluation criteria for valid comparisons."
+    },
+    {
+      "question": "Does the extent of an agent's prior knowledge (e.g., from pre-training on code) significantly increase the inference leakage from minimal cues, thereby reducing the isolation level of non-inferable requirements?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Establish whether benchmark validity is confounded by agent background, and suggest controls."
+    },
+    {
+      "question": "Can inadvertent clues in specification elements (e.g., function names, test case structures) be systematically identified and removed to eliminate inference leakage without significantly reducing naturalness or increasing specification ambiguity?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Develop a methodology for auditing and sanitizing specifications to improve isolation validity."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A constraint that the agent's code must satisfy to be considered correct. Requirements can be functional (e.g., output format) or non-functional (e.g., performance).",
+          "why_primitive": "It is the fundamental unit of what the agent must achieve; all benchmarks are built around requirements."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from the given specification, including examples, docstrings, tests, or prior knowledge.",
+          "why_primitive": "The distinction between inferable and non-inferable hinges on the agent's ability to infer; isolation targets preventing inference."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically or reasonably deduced from the specification provided to the agent; it requires external information or arbitrary choice.",
+          "why_primitive": "The central concept the benchmark aims to isolate; benchmarks must ensure that such requirements are not guessable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's inference capability is limited to the information provided in the specification and general knowledge, but not specific to the benchmark's hidden details.",
+          "rationale": "If the agent could infer arbitrary requirements from the specification, then no requirement would be non-inferable. This assumption allows us to design benchmarks that test handling of truly unknown requirements.",
+          "possible_failure": "The agent may have extensive world knowledge or be able to generate plausible requirements from context, making some intended non-inferable requirements actually inferable."
+        },
+        {
+          "assumption": "The benchmark designer has full control over the specification and can deliberately omit or obscure information to make specific requirements non-inferable.",
+          "rationale": "This is necessary to isolate non-inferable requirements; otherwise, the agent might infer them from unintended cues in the specification.",
+          "possible_failure": "Subtle clues, such as the ordering of test cases or names of functions, may inadvertently allow inference, breaking isolation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Specification Ambiguity",
+            "role": "input",
+            "description": "Degree to which the specification omits or obscures information about non-inferable requirements."
+          },
+          {
+            "name": "Inference Leakage",
+            "role": "mediator",
+            "description": "Amount of unintended information in the specification that allows the agent to infer non-inferable requirements."
+          },
+          {
+            "name": "Naturalness",
+            "role": "mediator",
+            "description": "Ecological validity of the benchmark task, how realistic it appears."
+          },
+          {
+            "name": "Evaluation Clarity",
+            "role": "mediator",
+            "description": "Clarity of the criteria and process for evaluating agent output."
+          },
+          {
+            "name": "Task Difficulty",
+            "role": "mediator",
+            "description": "Overall difficulty of the coding task for the agent."
+          },
+          {
+            "name": "Isolation Level",
+            "role": "output",
+            "description": "Degree to which non-inferable requirements are isolated from being inferred from the specification."
+          },
+          {
+            "name": "Benchmark Validity",
+            "role": "outcome",
+            "description": "Overall validity of the benchmark in measuring the agent's ability to handle non-inferable requirements."
+          },
+          {
+            "name": "Agent Prior Knowledge",
+            "role": "confounder",
+            "description": "Knowledge the agent possesses beyond the specification, which may affect inference."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Inference Leakage",
+            "explanation": "Higher specification ambiguity reduces the amount of explicit information, decreasing unintended clues that could allow inference."
+          },
+          {
+            "step": "2",
+            "source": "Inference Leakage",
+            "relation": "negative",
+            "target": "Isolation Level",
+            "explanation": "More inference leakage directly undermines the isolation of non-inferable requirements."
+          },
+          {
+            "step": "3",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Naturalness",
+            "explanation": "Ambiguous or incomplete specifications make the task less realistic, reducing naturalness."
+          },
+          {
+            "step": "4",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Evaluation Clarity",
+            "explanation": "Ambiguity in the specification can obscure what constitutes correct behavior, making evaluation criteria less clear."
+          },
+          {
+            "step": "5",
+            "source": "Specification Ambiguity",
+            "relation": "positive",
+            "target": "Task Difficulty",
+            "explanation": "Unclear requirements increase the cognitive load on the agent, raising task difficulty."
+          },
+          {
+            "step": "6",
+            "source": "Isolation Level",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Higher isolation ensures the benchmark truly tests handling of non-inferable requirements, improving validity."
+          },
+          {
+            "step": "7",
+            "source": "Naturalness",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "More natural tasks yield results that generalize better to real-world scenarios, enhancing validity."
+          },
+          {
+            "step": "8",
+            "source": "Evaluation Clarity",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Clear evaluation reduces measurement error and improves the trustworthiness of benchmark outcomes."
+          },
+          {
+            "step": "9",
+            "source": "Task Difficulty",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Moderate to high difficulty can discriminate agent capabilities, but extreme difficulty may confound results; generally positive up to a point."
+          },
+          {
+            "step": "10",
+            "source": "Agent Prior Knowledge",
+            "relation": "positive",
+            "target": "Inference Leakage",
+            "explanation": "Agents with more prior knowledge may infer requirements from minimal cues, increasing effective leakage."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadvertent Clues",
+            "why_it_matters": "Even with deliberate omission, subtle cues (e.g., test case names, function signatures) can allow inference, compromising isolation."
+          },
+          {
+            "bottleneck": "Naturalness vs Isolation Tradeoff",
+            "why_it_matters": "High isolation often requires unnatural specifications, hurting ecological validity and limiting generalizability."
+          },
+          {
+            "bottleneck": "Evaluation Clarity Degradation",
+            "why_it_matters": "Ambiguous specifications may reduce clarity of evaluation criteria, making it hard to judge correctness and leading to subjective assessments."
+          },
+          {
+            "bottleneck": "Task Difficulty Confound",
+            "why_it_matters": "If the task is too difficult, agents may fail for reasons unrelated to handling non-inferable requirements, confounding results."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks operates by adjusting specification ambiguity. High ambiguity reduces inference leakage, thereby increasing isolation level, but it also decreases naturalness and evaluation clarity, and increases task difficulty. These factors jointly impact benchmark validity. The key challenge is to balance these tradeoffs to achieve valid measurement without unintended cues or degraded realism."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that the agent's inference capability is limited to the specification and general knowledge may fail if agents have extensive prior knowledge or can generate plausible requirements from context, causing intended non-inferable requirements to be inferable.",
+        "derived_from": [
+          "assumptions[0]",
+          "causal_chain step10"
+        ],
+        "why_it_matters": "If this assumption fails, the benchmark no longer isolates non-inferable requirements, undermining its validity for evaluating that specific capability.",
+        "what_existing_methods_may_miss": "Most benchmarks do not account for or measure the agent's prior knowledge; they assume uniform background, which is rarely true in practice.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Does the extent of an agent's prior knowledge (e.g., from pre-training on code) significantly increase the inference leakage from minimal cues, thereby reducing the isolation level of non-inferable requirements?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Establish whether benchmark validity is confounded by agent background, and suggest controls."
+      },
+      "hypothesis": {
+        "statement": "The extent of an agent's prior knowledge positively correlates with inference leakage from minimal cues, thus decreasing the isolation level of non-inferable requirements.",
+        "predicted_effect": "Agents with more prior knowledge will show higher inference leakage (i.e., they infer non-inferable requirements from minimal cues more often) compared to agents with less prior knowledge, leading to lower measured isolation level."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a benchmark with tasks that contain non-inferable requirements. Vary the prior knowledge of agents (e.g., by using models pre-trained on different amounts of code, or by fine-tuning on a relevant code corpus). Measure inference leakage (proportion of non-inferable requirements correctly inferred) and isolation level (inverse of leakage or a direct metric).",
+        "independent_variables": [
+          "Agent prior knowledge (low, medium, high) - operationalized as pre-training data size or model size"
+        ],
+        "dependent_variables": [
+          "Inference leakage (proportion of non-inferable requirements that are correctly inferred)",
+          "Isolation level (e.g., 1 - leakage)"
+        ],
+        "controls": [
+          "Same specification ambiguity level across all conditions",
+          "Same set of non-inferable requirements",
+          "Same evaluation criteria",
+          "Same task difficulty"
+        ],
+        "falsifying_observation": "Agents with more prior knowledge do not show higher inference leakage (i.e., leakage is similar or lower than agents with less prior knowledge)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Agents with greater prior knowledge correctly infer a higher proportion of non-inferable requirements.",
+          "Measured isolation level decreases with increasing prior knowledge."
+        ],
+        "rejects_hypothesis": [
+          "Agents with greater prior knowledge do not show higher inference leakage.",
+          "Isolation level remains unchanged or increases with prior knowledge."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported, then the assumption that prior knowledge increases inference leakage via minimal cues may be incorrect.",
+        "assumption_to_revise": "Assumption: Agent prior knowledge positively affects inference leakage. Revise to: Agent prior knowledge may have a nuanced effect; it could reduce inference leakage if agents are trained to recognize uncertainty or avoid guessing.",
+        "next_question": "How does the distribution of prior knowledge across different domains affect the ability of agents to handle non-inferable requirements?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A constraint that the agent's code must satisfy to be considered correct. Requirements can be functional (e.g., output format) or non-functional (e.g., performance).",
+          "why_primitive": "It is the fundamental unit of what the agent must achieve; all benchmarks are built around requirements."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from the given specification, including examples, docstrings, tests, or prior knowledge.",
+          "why_primitive": "The distinction between inferable and non-inferable hinges on the agent's ability to infer; isolation targets preventing inference."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically or reasonably deduced from the specification provided to the agent; it requires external information or arbitrary choice.",
+          "why_primitive": "The central concept the benchmark aims to isolate; benchmarks must ensure that such requirements are not guessable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's inference capability is limited to the information provided in the specification and general knowledge, but not specific to the benchmark's hidden details.",
+          "rationale": "If the agent could infer arbitrary requirements from the specification, then no requirement would be non-inferable. This assumption allows us to design benchmarks that test handling of truly unknown requirements.",
+          "possible_failure": "The agent may have extensive world knowledge or be able to generate plausible requirements from context, making some intended non-inferable requirements actually inferable."
+        },
+        {
+          "assumption": "The benchmark designer has full control over the specification and can deliberately omit or obscure information to make specific requirements non-inferable.",
+          "rationale": "This is necessary to isolate non-inferable requirements; otherwise, the agent might infer them from unintended cues in the specification.",
+          "possible_failure": "Subtle clues, such as the ordering of test cases or names of functions, may inadvertently allow inference, breaking isolation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Specification Ambiguity",
+            "role": "input",
+            "description": "Degree to which the specification omits or obscures information about non-inferable requirements."
+          },
+          {
+            "name": "Inference Leakage",
+            "role": "mediator",
+            "description": "Amount of unintended information in the specification that allows the agent to infer non-inferable requirements."
+          },
+          {
+            "name": "Naturalness",
+            "role": "mediator",
+            "description": "Ecological validity of the benchmark task, how realistic it appears."
+          },
+          {
+            "name": "Evaluation Clarity",
+            "role": "mediator",
+            "description": "Clarity of the criteria and process for evaluating agent output."
+          },
+          {
+            "name": "Task Difficulty",
+            "role": "mediator",
+            "description": "Overall difficulty of the coding task for the agent."
+          },
+          {
+            "name": "Isolation Level",
+            "role": "output",
+            "description": "Degree to which non-inferable requirements are isolated from being inferred from the specification."
+          },
+          {
+            "name": "Benchmark Validity",
+            "role": "outcome",
+            "description": "Overall validity of the benchmark in measuring the agent's ability to handle non-inferable requirements."
+          },
+          {
+            "name": "Agent Prior Knowledge",
+            "role": "confounder",
+            "description": "Knowledge the agent possesses beyond the specification, which may affect inference."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Inference Leakage",
+            "explanation": "Higher specification ambiguity reduces the amount of explicit information, decreasing unintended clues that could allow inference."
+          },
+          {
+            "step": "2",
+            "source": "Inference Leakage",
+            "relation": "negative",
+            "target": "Isolation Level",
+            "explanation": "More inference leakage directly undermines the isolation of non-inferable requirements."
+          },
+          {
+            "step": "3",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Naturalness",
+            "explanation": "Ambiguous or incomplete specifications make the task less realistic, reducing naturalness."
+          },
+          {
+            "step": "4",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Evaluation Clarity",
+            "explanation": "Ambiguity in the specification can obscure what constitutes correct behavior, making evaluation criteria less clear."
+          },
+          {
+            "step": "5",
+            "source": "Specification Ambiguity",
+            "relation": "positive",
+            "target": "Task Difficulty",
+            "explanation": "Unclear requirements increase the cognitive load on the agent, raising task difficulty."
+          },
+          {
+            "step": "6",
+            "source": "Isolation Level",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Higher isolation ensures the benchmark truly tests handling of non-inferable requirements, improving validity."
+          },
+          {
+            "step": "7",
+            "source": "Naturalness",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "More natural tasks yield results that generalize better to real-world scenarios, enhancing validity."
+          },
+          {
+            "step": "8",
+            "source": "Evaluation Clarity",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Clear evaluation reduces measurement error and improves the trustworthiness of benchmark outcomes."
+          },
+          {
+            "step": "9",
+            "source": "Task Difficulty",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Moderate to high difficulty can discriminate agent capabilities, but extreme difficulty may confound results; generally positive up to a point."
+          },
+          {
+            "step": "10",
+            "source": "Agent Prior Knowledge",
+            "relation": "positive",
+            "target": "Inference Leakage",
+            "explanation": "Agents with more prior knowledge may infer requirements from minimal cues, increasing effective leakage."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadvertent Clues",
+            "why_it_matters": "Even with deliberate omission, subtle cues (e.g., test case names, function signatures) can allow inference, compromising isolation."
+          },
+          {
+            "bottleneck": "Naturalness vs Isolation Tradeoff",
+            "why_it_matters": "High isolation often requires unnatural specifications, hurting ecological validity and limiting generalizability."
+          },
+          {
+            "bottleneck": "Evaluation Clarity Degradation",
+            "why_it_matters": "Ambiguous specifications may reduce clarity of evaluation criteria, making it hard to judge correctness and leading to subjective assessments."
+          },
+          {
+            "bottleneck": "Task Difficulty Confound",
+            "why_it_matters": "If the task is too difficult, agents may fail for reasons unrelated to handling non-inferable requirements, confounding results."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks operates by adjusting specification ambiguity. High ambiguity reduces inference leakage, thereby increasing isolation level, but it also decreases naturalness and evaluation clarity, and increases task difficulty. These factors jointly impact benchmark validity. The key challenge is to balance these tradeoffs to achieve valid measurement without unintended cues or degraded realism."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Increasing isolation of non-inferable requirements by making specifications ambiguous reduces the naturalness of the benchmark, potentially limiting ecological validity and generalizability.",
+        "derived_from": [
+          "core_tradeoffs[0]",
+          "causal_chain step3",
+          "causal_chain step7"
+        ],
+        "why_it_matters": "If benchmarks are too unnatural, results may not transfer to real-world scenarios where requirements are often ambiguous but naturally inferred from context.",
+        "what_existing_methods_may_miss": "Existing benchmarks may prioritize isolation without considering naturalness, leading to artificial tasks that agents solve in ways not representative of actual use.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does increasing specification ambiguity to reduce inference leakage significantly decrease the naturalness of the benchmark, as measured by a decrease in the correlation between agent performance on the benchmark and on real-world coding tasks?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantify the tradeoff between isolation and ecological validity, informing benchmark design."
+      },
+      "hypothesis": {
+        "statement": "Increasing specification ambiguity to isolate non-inferable requirements significantly decreases the naturalness of the benchmark, as measured by a decrease in the correlation between agent performance on the benchmark and on real-world coding tasks.",
+        "predicted_effect": "The correlation between agent performance on the benchmark and on real-world tasks will be lower for benchmarks with higher specification ambiguity compared to benchmarks with lower specification ambiguity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create two versions of a coding-agent benchmark on the same underlying task: one with low specification ambiguity (high naturalness) and one with high specification ambiguity (designed to isolate non-inferable requirements). Have a set of agents perform both versions and also perform a set of real-world coding tasks. Compute the Pearson correlation between benchmark performance and real-world performance for each version. Compare the correlations.",
+        "independent_variables": [
+          "Specification Ambiguity (low vs. high)"
+        ],
+        "dependent_variables": [
+          "Correlation coefficient between benchmark performance and real-world performance"
+        ],
+        "controls": [
+          "Same agents",
+          "Same real-world tasks",
+          "Same underlying task for both benchmark versions",
+          "Same evaluation criteria for benchmark performance (except for ambiguity manipulation)",
+          "Randomized order of benchmark versions"
+        ],
+        "falsifying_observation": "If the correlation for the high-ambiguity benchmark is not significantly lower (p < 0.05) than that for the low-ambiguity benchmark, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The correlation for the high-ambiguity benchmark is significantly lower than for the low-ambiguity benchmark.",
+          "Agents show more variance in performance on the high-ambiguity benchmark relative to real-world tasks."
+        ],
+        "rejects_hypothesis": [
+          "The correlations are not significantly different, or the high-ambiguity benchmark yields a higher correlation.",
+          "Agent performance on the high-ambiguity benchmark is not less predictive of real-world performance."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (i.e., higher ambiguity does not decrease correlation), then the assumption that naturalness is directly measurable by correlation with real-world tasks may be flawed.",
+        "assumption_to_revise": "The assumption that naturalness (ecological validity) can be operationalized as the correlation between benchmark and real-world performance.",
+        "next_question": "What alternative measures of naturalness better capture the tradeoff between isolation and ecological validity in coding-agent benchmarks?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A constraint that the agent's code must satisfy to be considered correct. Requirements can be functional (e.g., output format) or non-functional (e.g., performance).",
+          "why_primitive": "It is the fundamental unit of what the agent must achieve; all benchmarks are built around requirements."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from the given specification, including examples, docstrings, tests, or prior knowledge.",
+          "why_primitive": "The distinction between inferable and non-inferable hinges on the agent's ability to infer; isolation targets preventing inference."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically or reasonably deduced from the specification provided to the agent; it requires external information or arbitrary choice.",
+          "why_primitive": "The central concept the benchmark aims to isolate; benchmarks must ensure that such requirements are not guessable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's inference capability is limited to the information provided in the specification and general knowledge, but not specific to the benchmark's hidden details.",
+          "rationale": "If the agent could infer arbitrary requirements from the specification, then no requirement would be non-inferable. This assumption allows us to design benchmarks that test handling of truly unknown requirements.",
+          "possible_failure": "The agent may have extensive world knowledge or be able to generate plausible requirements from context, making some intended non-inferable requirements actually inferable."
+        },
+        {
+          "assumption": "The benchmark designer has full control over the specification and can deliberately omit or obscure information to make specific requirements non-inferable.",
+          "rationale": "This is necessary to isolate non-inferable requirements; otherwise, the agent might infer them from unintended cues in the specification.",
+          "possible_failure": "Subtle clues, such as the ordering of test cases or names of functions, may inadvertently allow inference, breaking isolation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Specification Ambiguity",
+            "role": "input",
+            "description": "Degree to which the specification omits or obscures information about non-inferable requirements."
+          },
+          {
+            "name": "Inference Leakage",
+            "role": "mediator",
+            "description": "Amount of unintended information in the specification that allows the agent to infer non-inferable requirements."
+          },
+          {
+            "name": "Naturalness",
+            "role": "mediator",
+            "description": "Ecological validity of the benchmark task, how realistic it appears."
+          },
+          {
+            "name": "Evaluation Clarity",
+            "role": "mediator",
+            "description": "Clarity of the criteria and process for evaluating agent output."
+          },
+          {
+            "name": "Task Difficulty",
+            "role": "mediator",
+            "description": "Overall difficulty of the coding task for the agent."
+          },
+          {
+            "name": "Isolation Level",
+            "role": "output",
+            "description": "Degree to which non-inferable requirements are isolated from being inferred from the specification."
+          },
+          {
+            "name": "Benchmark Validity",
+            "role": "outcome",
+            "description": "Overall validity of the benchmark in measuring the agent's ability to handle non-inferable requirements."
+          },
+          {
+            "name": "Agent Prior Knowledge",
+            "role": "confounder",
+            "description": "Knowledge the agent possesses beyond the specification, which may affect inference."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Inference Leakage",
+            "explanation": "Higher specification ambiguity reduces the amount of explicit information, decreasing unintended clues that could allow inference."
+          },
+          {
+            "step": "2",
+            "source": "Inference Leakage",
+            "relation": "negative",
+            "target": "Isolation Level",
+            "explanation": "More inference leakage directly undermines the isolation of non-inferable requirements."
+          },
+          {
+            "step": "3",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Naturalness",
+            "explanation": "Ambiguous or incomplete specifications make the task less realistic, reducing naturalness."
+          },
+          {
+            "step": "4",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Evaluation Clarity",
+            "explanation": "Ambiguity in the specification can obscure what constitutes correct behavior, making evaluation criteria less clear."
+          },
+          {
+            "step": "5",
+            "source": "Specification Ambiguity",
+            "relation": "positive",
+            "target": "Task Difficulty",
+            "explanation": "Unclear requirements increase the cognitive load on the agent, raising task difficulty."
+          },
+          {
+            "step": "6",
+            "source": "Isolation Level",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Higher isolation ensures the benchmark truly tests handling of non-inferable requirements, improving validity."
+          },
+          {
+            "step": "7",
+            "source": "Naturalness",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "More natural tasks yield results that generalize better to real-world scenarios, enhancing validity."
+          },
+          {
+            "step": "8",
+            "source": "Evaluation Clarity",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Clear evaluation reduces measurement error and improves the trustworthiness of benchmark outcomes."
+          },
+          {
+            "step": "9",
+            "source": "Task Difficulty",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Moderate to high difficulty can discriminate agent capabilities, but extreme difficulty may confound results; generally positive up to a point."
+          },
+          {
+            "step": "10",
+            "source": "Agent Prior Knowledge",
+            "relation": "positive",
+            "target": "Inference Leakage",
+            "explanation": "Agents with more prior knowledge may infer requirements from minimal cues, increasing effective leakage."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadvertent Clues",
+            "why_it_matters": "Even with deliberate omission, subtle cues (e.g., test case names, function signatures) can allow inference, compromising isolation."
+          },
+          {
+            "bottleneck": "Naturalness vs Isolation Tradeoff",
+            "why_it_matters": "High isolation often requires unnatural specifications, hurting ecological validity and limiting generalizability."
+          },
+          {
+            "bottleneck": "Evaluation Clarity Degradation",
+            "why_it_matters": "Ambiguous specifications may reduce clarity of evaluation criteria, making it hard to judge correctness and leading to subjective assessments."
+          },
+          {
+            "bottleneck": "Task Difficulty Confound",
+            "why_it_matters": "If the task is too difficult, agents may fail for reasons unrelated to handling non-inferable requirements, confounding results."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks operates by adjusting specification ambiguity. High ambiguity reduces inference leakage, thereby increasing isolation level, but it also decreases naturalness and evaluation clarity, and increases task difficulty. These factors jointly impact benchmark validity. The key challenge is to balance these tradeoffs to achieve valid measurement without unintended cues or degraded realism."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Clear evaluation criteria may require explicit specifications that reduce task difficulty, making the benchmark less discriminating; conversely, ambiguous specifications increase difficulty but degrade evaluation clarity, leading to subjective or inconsistent assessments.",
+        "derived_from": [
+          "core_tradeoffs[1]",
+          "causal_chain step4",
+          "causal_chain step5"
+        ],
+        "why_it_matters": "The tradeoff directly affects the reliability and interpretability of benchmark results; poor evaluation clarity can invalidate comparisons across agents.",
+        "what_existing_methods_may_miss": "Automated evaluation systems may rely on strict rubrics that cannot handle ambiguous outputs, forcing designers to choose between clarity and difficulty.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there an optimal level of specification ambiguity that maximizes benchmark discrimination by balancing evaluation clarity and task difficulty, such that the variance in agent scores is maximized while maintaining inter-rater reliability?",
+        "question_type": "benchmark",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a principled method to set benchmark difficulty and evaluation criteria for valid comparisons."
+      },
+      "hypothesis": {
+        "statement": "There exists a level of specification ambiguity that maximizes benchmark discrimination (variance in agent scores) while maintaining high inter-rater reliability, by balancing evaluation clarity and task difficulty.",
+        "predicted_effect": "As specification ambiguity increases from low to moderate, variance in agent scores increases due to increased task difficulty, while inter-rater reliability remains high because evaluation criteria are still clear enough. Beyond moderate ambiguity, evaluation clarity degrades, causing inter-rater reliability to drop and variance to plateau or decrease, resulting in a inverted-U relationship."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Design a set of coding tasks with three levels of specification ambiguity: low (explicit requirements with full detail), medium (partial omission of some non-inferable requirements), and high (very sparse specification with many hidden requirements). Use multiple state-of-the-art coding agents to complete each task. Evaluate outputs using a rubric that accounts for ambiguity (e.g., by having human evaluators score correctness and clarity). Measure the variance of agent scores across tasks at each ambiguity level and the inter-rater reliability (e.g., Cohen's kappa) among evaluators.",
+        "independent_variables": [
+          "specification ambiguity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "variance of agent scores across tasks",
+          "inter-rater reliability among evaluators"
+        ],
+        "controls": [
+          "same set of coding agents",
+          "same base tasks (varying only ambiguity)",
+          "same evaluators and rubric (with adaptation for ambiguity levels)",
+          "randomized order of tasks"
+        ],
+        "falsifying_observation": "If the variance of agent scores is highest at either low or high ambiguity, or if inter-rater reliability at medium ambiguity is significantly lower than at low ambiguity (e.g., kappa < 0.6), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Variance of agent scores is highest at the medium level of specification ambiguity.",
+          "Inter-rater reliability remains above 0.8 for all three ambiguity levels, with only a slight decrease at high ambiguity."
+        ],
+        "rejects_hypothesis": [
+          "Variance is monotonically increasing or decreasing with ambiguity.",
+          "Inter-rater reliability drops below 0.6 at medium or high ambiguity.",
+          "Variance at medium ambiguity is not significantly different from low or high ambiguity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, the core assumption that there is a universal optimal ambiguity level for all benchmarks is wrong.",
+        "assumption_to_revise": "The assumption that the tradeoff between naturalness and isolation is monotonic and that evaluation clarity degrades gradually with ambiguity may be too simplistic. The relationship may depend on agent architecture, prior knowledge, or task domain.",
+        "next_question": "Does the optimal level of specification ambiguity depend on agent prior knowledge or benchmark domain, and if so, how can benchmarks adapt ambiguity to individual agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A constraint that the agent's code must satisfy to be considered correct. Requirements can be functional (e.g., output format) or non-functional (e.g., performance).",
+          "why_primitive": "It is the fundamental unit of what the agent must achieve; all benchmarks are built around requirements."
+        },
+        {
+          "name": "Inference",
+          "definition": "The process by which an agent derives a requirement from the given specification, including examples, docstrings, tests, or prior knowledge.",
+          "why_primitive": "The distinction between inferable and non-inferable hinges on the agent's ability to infer; isolation targets preventing inference."
+        },
+        {
+          "name": "Non-inferable Requirement",
+          "definition": "A requirement that cannot be logically or reasonably deduced from the specification provided to the agent; it requires external information or arbitrary choice.",
+          "why_primitive": "The central concept the benchmark aims to isolate; benchmarks must ensure that such requirements are not guessable."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent's inference capability is limited to the information provided in the specification and general knowledge, but not specific to the benchmark's hidden details.",
+          "rationale": "If the agent could infer arbitrary requirements from the specification, then no requirement would be non-inferable. This assumption allows us to design benchmarks that test handling of truly unknown requirements.",
+          "possible_failure": "The agent may have extensive world knowledge or be able to generate plausible requirements from context, making some intended non-inferable requirements actually inferable."
+        },
+        {
+          "assumption": "The benchmark designer has full control over the specification and can deliberately omit or obscure information to make specific requirements non-inferable.",
+          "rationale": "This is necessary to isolate non-inferable requirements; otherwise, the agent might infer them from unintended cues in the specification.",
+          "possible_failure": "Subtle clues, such as the ordering of test cases or names of functions, may inadvertently allow inference, breaking isolation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Specification Ambiguity",
+            "role": "input",
+            "description": "Degree to which the specification omits or obscures information about non-inferable requirements."
+          },
+          {
+            "name": "Inference Leakage",
+            "role": "mediator",
+            "description": "Amount of unintended information in the specification that allows the agent to infer non-inferable requirements."
+          },
+          {
+            "name": "Naturalness",
+            "role": "mediator",
+            "description": "Ecological validity of the benchmark task, how realistic it appears."
+          },
+          {
+            "name": "Evaluation Clarity",
+            "role": "mediator",
+            "description": "Clarity of the criteria and process for evaluating agent output."
+          },
+          {
+            "name": "Task Difficulty",
+            "role": "mediator",
+            "description": "Overall difficulty of the coding task for the agent."
+          },
+          {
+            "name": "Isolation Level",
+            "role": "output",
+            "description": "Degree to which non-inferable requirements are isolated from being inferred from the specification."
+          },
+          {
+            "name": "Benchmark Validity",
+            "role": "outcome",
+            "description": "Overall validity of the benchmark in measuring the agent's ability to handle non-inferable requirements."
+          },
+          {
+            "name": "Agent Prior Knowledge",
+            "role": "confounder",
+            "description": "Knowledge the agent possesses beyond the specification, which may affect inference."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Inference Leakage",
+            "explanation": "Higher specification ambiguity reduces the amount of explicit information, decreasing unintended clues that could allow inference."
+          },
+          {
+            "step": "2",
+            "source": "Inference Leakage",
+            "relation": "negative",
+            "target": "Isolation Level",
+            "explanation": "More inference leakage directly undermines the isolation of non-inferable requirements."
+          },
+          {
+            "step": "3",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Naturalness",
+            "explanation": "Ambiguous or incomplete specifications make the task less realistic, reducing naturalness."
+          },
+          {
+            "step": "4",
+            "source": "Specification Ambiguity",
+            "relation": "negative",
+            "target": "Evaluation Clarity",
+            "explanation": "Ambiguity in the specification can obscure what constitutes correct behavior, making evaluation criteria less clear."
+          },
+          {
+            "step": "5",
+            "source": "Specification Ambiguity",
+            "relation": "positive",
+            "target": "Task Difficulty",
+            "explanation": "Unclear requirements increase the cognitive load on the agent, raising task difficulty."
+          },
+          {
+            "step": "6",
+            "source": "Isolation Level",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Higher isolation ensures the benchmark truly tests handling of non-inferable requirements, improving validity."
+          },
+          {
+            "step": "7",
+            "source": "Naturalness",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "More natural tasks yield results that generalize better to real-world scenarios, enhancing validity."
+          },
+          {
+            "step": "8",
+            "source": "Evaluation Clarity",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Clear evaluation reduces measurement error and improves the trustworthiness of benchmark outcomes."
+          },
+          {
+            "step": "9",
+            "source": "Task Difficulty",
+            "relation": "positive",
+            "target": "Benchmark Validity",
+            "explanation": "Moderate to high difficulty can discriminate agent capabilities, but extreme difficulty may confound results; generally positive up to a point."
+          },
+          {
+            "step": "10",
+            "source": "Agent Prior Knowledge",
+            "relation": "positive",
+            "target": "Inference Leakage",
+            "explanation": "Agents with more prior knowledge may infer requirements from minimal cues, increasing effective leakage."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Inadvertent Clues",
+            "why_it_matters": "Even with deliberate omission, subtle cues (e.g., test case names, function signatures) can allow inference, compromising isolation."
+          },
+          {
+            "bottleneck": "Naturalness vs Isolation Tradeoff",
+            "why_it_matters": "High isolation often requires unnatural specifications, hurting ecological validity and limiting generalizability."
+          },
+          {
+            "bottleneck": "Evaluation Clarity Degradation",
+            "why_it_matters": "Ambiguous specifications may reduce clarity of evaluation criteria, making it hard to judge correctness and leading to subjective assessments."
+          },
+          {
+            "bottleneck": "Task Difficulty Confound",
+            "why_it_matters": "If the task is too difficult, agents may fail for reasons unrelated to handling non-inferable requirements, confounding results."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks operates by adjusting specification ambiguity. High ambiguity reduces inference leakage, thereby increasing isolation level, but it also decreases naturalness and evaluation clarity, and increases task difficulty. These factors jointly impact benchmark validity. The key challenge is to balance these tradeoffs to achieve valid measurement without unintended cues or degraded realism."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Even with deliberate omission, subtle cues such as function names, test order, or example structure can inadvertently allow inference, creating a gap between intended isolation and actual leakage.",
+        "derived_from": [
+          "bottlenecks[0]",
+          "assumptions[1].possible_failure"
+        ],
+        "why_it_matters": "Inadvertent clues are hard to eliminate entirely and can systematically advantage agents that are sensitive to such patterns, skewing results.",
+        "what_existing_methods_may_miss": "Current methods may not systematically audit specifications for all possible unintended cues, especially those that are context-dependent or agent-specific.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Can inadvertent clues in specification elements (e.g., function names, test case structures) be systematically identified and removed to eliminate inference leakage without significantly reducing naturalness or increasing specification ambiguity?",
+        "question_type": "algorithmic",
+        "source_tension": "T4",
+        "expected_contribution": "Develop a methodology for auditing and sanitizing specifications to improve isolation validity."
+      },
+      "hypothesis": {
+        "statement": "A systematic methodology for identifying and removing inadvertent clues in specification elements can eliminate inference leakage while keeping naturalness and specification ambiguity at acceptable levels.",
+        "predicted_effect": "Benchmarks using this methodology will show significantly lower inference leakage (measured by agent ability to infer non-inferable requirements) compared to benchmarks without such sanitization, while naturalness and specification ambiguity ratings remain similar."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create two versions of a benchmark task: one without any sanitization (baseline) and one where specification elements are systematically audited and sanitized to remove potential inadvertent clues (e.g., using a checklist of common clue sources). Both versions have identical underlying requirements and specification content except for the removal of clues. Run the benchmark on multiple agents and measure inference leakage (e.g., proportion of non-inferable requirements that agents correctly fulfill), naturalness (rated by human judges on a Likert scale), and specification ambiguity (e.g., inverse of clarity rating).",
+        "independent_variables": [
+          "Sanitization of specification (sanitized vs. non-sanitized)"
+        ],
+        "dependent_variables": [
+          "Inference leakage rate",
+          "Naturalness score",
+          "Specification ambiguity score"
+        ],
+        "controls": [
+          "Same underlying task",
+          "Same specification content except for clues",
+          "Same set of agents across both versions",
+          "Randomized order of versions"
+        ],
+        "falsifying_observation": "No statistically significant reduction in inference leakage in the sanitized version, or a significant decrease in naturalness or increase in specification ambiguity"
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Inference leakage is significantly lower in the sanitized version (e.g., p<0.05).",
+          "Naturalness ratings are not significantly different between versions.",
+          "Specification ambiguity ratings are not significantly different or are lower in sanitized version."
+        ],
+        "rejects_hypothesis": [
+          "Inference leakage is not significantly different between versions.",
+          "Naturalness ratings are significantly lower in the sanitized version.",
+          "Specification ambiguity ratings are significantly higher in the sanitized version."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, it indicates that current methods for removing inadvertent clues either are ineffective or cause unacceptable side effects on naturalness or specification clarity.",
+        "assumption_to_revise": "Assumption that inadvertent clues can be removed without tradeoffs; instead, there may be an inherent tradeoff between isolation and naturalness/clarity.",
+        "next_question": "What is the optimal tradeoff between inference leakage reduction and maintenance of naturalness/specification clarity, and what alternative methods (e.g., using obfuscation or adversarial specifications) can achieve the best balance?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Increasing specification ambiguity to isolate non-inferable requirements significantly decreases the naturalness of the benchmark, as measured by a decrease in the correlation between agent performance on the benchmark and on real-world coding tasks.",
+      "independent_variables": [
+        "Specification Ambiguity (low vs. high)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation coefficient between benchmark performance and real-world performance"
+      ],
+      "controlled_variables": [
+        "Same set of agents",
+        "Same set of real-world coding tasks",
+        "Same underlying task for both benchmark versions",
+        "Same evaluation criteria for benchmark performance (except for ambiguity manipulation)",
+        "Randomized order of benchmark versions across agents"
+      ],
+      "baselines": [
+        {
+          "name": "Low Ambiguity Benchmark",
+          "description": "Benchmark with low specification ambiguity, serving as baseline for naturalness."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Pearson correlation coefficient",
+          "definition": "Measure of linear correlation between benchmark performance scores and real-world task performance scores, computed across agents."
+        }
+      ],
+      "expected_result": "The Pearson correlation for the high-ambiguity benchmark is significantly lower (p < 0.05) than for the low-ambiguity benchmark.",
+      "falsifying_result": "The correlations are not significantly different, or the high-ambiguity benchmark yields a higher correlation than the low-ambiguity benchmark.",
+      "minimum_viable_experiment": "Recruit N=10 agents. Create two versions of the same coding benchmark: one with low specification ambiguity (natural specification) and one with high specification ambiguity (designed to isolate non-inferable requirements). Also prepare a set of 5 real-world coding tasks. Each agent completes the low-ambiguity benchmark, the high-ambiguity benchmark (order counterbalanced), and the real-world tasks. For each benchmark version, compute the Pearson correlation between agents' benchmark scores and their real-world task scores. Compare the two correlations using a Fisher r-to-z transformation test. The hypothesis is supported if the correlation for the high-ambiguity benchmark is significantly lower.",
+      "risks_and_confounds": [
+        "Agent prior knowledge may differ across agents, affecting inference leakage.",
+        "Order effects from completing benchmarks and real-world tasks in sequence.",
+        "The real-world tasks may not be representative of actual real-world coding.",
+        "Small sample size may limit statistical power.",
+        "Evaluation criteria for real-world tasks may be subjective."
+      ]
+    },
+    {
+      "hypothesis": "There exists a level of specification ambiguity that maximizes benchmark discrimination (variance in agent scores) while maintaining high inter-rater reliability, by balancing evaluation clarity and task difficulty.",
+      "independent_variables": [
+        "specification ambiguity (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "variance of agent scores across tasks",
+        "inter-rater reliability among evaluators"
+      ],
+      "controlled_variables": [
+        "same set of coding agents (multiple state-of-the-art agents)",
+        "same base coding tasks (varying only ambiguity level)",
+        "same evaluators and rubric (adapted for ambiguity levels)",
+        "randomized order of tasks"
+      ],
+      "baselines": [
+        {
+          "name": "Low Ambiguity Baseline",
+          "description": "Explicit requirements with full detail; serves as control for normal performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Variance of Agent Scores",
+          "definition": "Statistical variance of correctness scores (e.g., proportion of requirements met) across all agents for a given ambiguity level."
+        },
+        {
+          "name": "Inter-rater Reliability",
+          "definition": "Cohen's kappa or intraclass correlation among human evaluators scoring agent outputs."
+        }
+      ],
+      "expected_result": "Variance of agent scores is highest at medium ambiguity, and inter-rater reliability remains above 0.8 for all levels, with only a slight decrease at high ambiguity.",
+      "falsifying_result": "If variance is highest at low or high ambiguity, or if inter-rater reliability at medium ambiguity drops below 0.6, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Design 3 coding tasks (e.g., implement a data structure) each with low, medium, and high ambiguity versions (9 total). Have 5 state-of-the-art agents complete them. Use 3 human evaluators to score outputs via rubric. Compute variance and inter-rater reliability per ambiguity level.",
+      "risks_and_confounds": [
+        "Agent prior knowledge may confound inference leakage.",
+        "Human evaluator subjectivity may affect inter-rater reliability.",
+        "Ambiguity levels may not be uniformly perceived across tasks.",
+        "Order effects if tasks are not properly randomized."
+      ]
+    },
+    {
+      "hypothesis": "The extent of an agent's prior knowledge positively correlates with inference leakage from minimal cues, thus decreasing the isolation level of non-inferable requirements.",
+      "independent_variables": [
+        "Agent prior knowledge level (low, medium, high) operationalized as pre-training data size or model size"
+      ],
+      "dependent_variables": [
+        "Inference leakage (proportion of non-inferable requirements correctly inferred)",
+        "Isolation level (1 - inference leakage)"
+      ],
+      "controlled_variables": [
+        "Same specification ambiguity level across all conditions",
+        "Same set of non-inferable requirements",
+        "Same evaluation criteria",
+        "Same task difficulty",
+        "Same benchmark tasks"
+      ],
+      "baselines": [
+        {
+          "name": "Low prior knowledge baseline",
+          "description": "An agent with minimal code pre-training, e.g., a small model trained only on natural language or a randomly initialized model."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inference leakage rate",
+          "definition": "The fraction of non-inferable requirements that the agent correctly satisfies, indicating it inferred them from minimal cues."
+        },
+        {
+          "name": "Isolation level",
+          "definition": "1 minus inference leakage rate, representing the degree to which non-inferable requirements remain isolated from inference."
+        },
+        {
+          "name": "Prior knowledge quantification",
+          "definition": "Measured by the agent's performance on a separate probe dataset of code understanding tasks (e.g., code completion accuracy) to verify the manipulation."
+        }
+      ],
+      "expected_result": "Agents with higher prior knowledge (larger models or trained on more code) will exhibit higher inference leakage and lower isolation level compared to agents with lower prior knowledge.",
+      "falsifying_result": "Agents with higher prior knowledge do not show higher inference leakage; leakage is similar or lower than agents with lower prior knowledge, or isolation level is unchanged or increases with prior knowledge.",
+      "minimum_viable_experiment": "Select a benchmark with at least 10 tasks each containing exactly one non-inferable requirement (e.g., a specific output format or naming convention not deducible from spec). Use three agents with clearly different prior knowledge levels (e.g., GPT-2 small vs GPT-3 vs a code-specific model). For each agent, run all tasks, measure inference leakage and isolation. Compare across groups using statistical tests.",
+      "risks_and_confounds": [
+        "Differences in model architecture or training data distribution besides size may affect inference ability.",
+        "The probe dataset for prior knowledge may not perfectly capture relevant knowledge for the specific non-inferable requirements.",
+        "Agents might guess requirements randomly; need to control for chance by including distractor requirements.",
+        "The specification ambiguity level might not be perfectly matched across tasks."
+      ]
+    },
+    {
+      "hypothesis": "A systematic methodology for identifying and removing inadvertent clues in specification elements can eliminate inference leakage while keeping naturalness and specification ambiguity at acceptable levels.",
+      "independent_variables": [
+        "Sanitization condition (sanitized vs. non-sanitized)"
+      ],
+      "dependent_variables": [
+        "Inference leakage rate (proportion of non-inferable requirements correctly fulfilled)",
+        "Naturalness score (human-rated on Likert scale)",
+        "Specification ambiguity score (inverse of clarity rating)"
+      ],
+      "controlled_variables": [
+        "Same underlying benchmark task",
+        "Same specification content except for clue removal",
+        "Same set of agents across both conditions",
+        "Randomized order of conditions across agents"
+      ],
+      "baselines": [
+        {
+          "name": "Non-sanitized specification",
+          "description": "Specification without any sanitization of inadvertent clues"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Inference leakage rate",
+          "definition": "Proportion of non-inferable requirements that agents fulfill correctly in the benchmark task"
+        },
+        {
+          "name": "Naturalness score",
+          "definition": "Average rating from human judges on a 7-point Likert scale (1=very unnatural, 7=very natural)"
+        },
+        {
+          "name": "Specification ambiguity score",
+          "definition": "Average rating from human judges on clarity (inverse: 1=very clear, 7=very ambiguous)"
+        }
+      ],
+      "expected_result": "In the sanitized condition, inference leakage rate is significantly lower (p<0.05) compared to baseline, while naturalness and specification ambiguity scores are not significantly different (p>0.05) between conditions.",
+      "falsifying_result": "No statistically significant reduction in inference leakage rate in the sanitized condition, or a significant decrease in naturalness (p<0.05) or increase in specification ambiguity (p<0.05) in the sanitized condition.",
+      "minimum_viable_experiment": "Create two versions of a single benchmark task with identical requirements: one version with a standard specification (baseline) and one version where the specification is systematically audited and sanitized to remove potential inadvertent clues (e.g., function names, test case structures). Recruit at least 30 coding agents (e.g., LLMs) to complete both versions in randomized order. Measure inference leakage by the proportion of hidden requirements agents correctly fulfill, and collect human ratings of naturalness and specification ambiguity from at least 3 independent judges. Compare metrics using paired t-tests or Wilcoxon signed-rank tests.",
+      "risks_and_confounds": [
+        "Agent prior knowledge may affect inference, potentially varying across agents; use within-subjects design to mitigate.",
+        "Human ratings of naturalness and ambiguity may be subjective; use multiple judges and measure inter-rater reliability.",
+        "Order effects are controlled by randomization, but learning effects could still occur; counterbalance or include washout tasks.",
+        "The single task may not generalize; but as a minimal test, it suffices to falsify the hypothesis."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of how coding-agent benchmarks should isolate non-inferable requirements. It deconstructs the problem into primitive definitions, assumptions, a causal mechanism model, tensions, and falsifiable hypotheses with experiment designs. The work is systematic and methodologically sound, but the novelty is limited as the core tradeoffs (naturalness vs. isolation, clarity vs. difficulty) are already recognized in the community. The paper lacks concrete implementation or comparison with existing benchmarks, which undermines its immediate impact. The hypotheses are falsifiable and well-designed, making the work a solid conceptual contribution that could guide future benchmark construction.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitive concepts.",
+      "Detailed causal mechanism model identifying key variables and tradeoffs.",
+      "Falsifiable hypotheses with minimal decisive experiments, enhancing scientific rigor.",
+      "Addresses a practically important problem in coding agent evaluation."
+    ],
+    "weaknesses": [
+      "Novelty is moderate; similar tradeoffs have been discussed in prior work on benchmark design (e.g., SWE-bench, HumanEval).",
+      "Lacks concrete implementation or empirical validation; remains a theoretical proposal.",
+      "Assumptions (e.g., full control over specification, limited inference capability) may be unrealistic in practice.",
+      "No comparison or incorporation of existing benchmark methodologies.",
+      "The tensions and questions are well-articulated but do not offer a new resolution or surprising insight."
+    ],
+    "questions": [
+      "How would the proposed framework handle cases where agents have access to external documentation or retrieval-augmented generation, which could blur the line between inferable and non-inferable requirements?",
+      "Could the tradeoff between naturalness and isolation be partially resolved by using adversarial specification generation rather than manual omission?",
+      "How would the optimal specification ambiguity level vary across different types of coding tasks (e.g., algorithmic vs. architectural)?"
+    ],
+    "missing_baselines": [
+      "The paper should explicitly compare with existing coding-agent benchmarks (e.g., SWE-bench, HumanEval, MBPP) and discuss how they handle (or fail to handle) non-inferable requirements.",
+      "No baseline of a naive benchmark that does not attempt to isolate non-inferable requirements is provided for contrast.",
+      "Missing a discussion of how the proposed methodology relates to existing work on curriculum learning or difficulty calibration in benchmarks."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient_novelty_boundary",
+    "root_cause": "The research identified tradeoffs but did not isolate a sharp, testable boundary condition or nonlinear threshold that would transform the known tradeoffs into a novel mechanism prediction.",
+    "violated_principle": "Novelty principle: Research must identify a specific, non-obvious boundary, phase transition, or interaction that refines understanding beyond existing tradeoff descriptions.",
+    "new_or_updated_principle": "Principle: For benchmark design tradeoffs, novelty arises from specifying a parametric condition (e.g., a critical ambiguity level, a knowledge cutoff, or a clue density) at which the tradeoff reverses or saturates, enabling falsifiable predictions of a regime shift.",
+    "new_or_updated_skill": "Skill: Threshold Identification – systematically explore a tradeoff space by varying a continuous parameter (e.g., ambiguity, prior knowledge, inference leakage) to locate the inflection point where benchmark validity exhibits a non-linear change (e.g., a drop in inter-rater reliability or a change in variance).",
+    "regression_test": "Regression Test: Before accepting a certificate, verify that at least one research question or hypothesis proposes a specific, quantitative boundary (e.g., 'when specification ambiguity exceeds X, the correlation with real-world performance drops below Y') and that the experiment design includes at least three levels or a continuous sweep of the parameter to test for non-linearity. If not, flag for revision."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T170131Z"
+  }
+}

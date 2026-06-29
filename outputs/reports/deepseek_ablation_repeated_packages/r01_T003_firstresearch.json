@@ -1,0 +1,1476 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Coding agent",
+        "definition": "An autonomous AI system that generates, modifies, or verifies code by selecting and invoking tools (e.g., code interpreters, compilers, search engines, APIs) to achieve a desired programming task.",
+        "why_primitive": "The entity that performs tool-use routing; without it, the concept of routing has no context."
+      },
+      {
+        "name": "Tool-use routing",
+        "definition": "The decision-making process that determines which tool to invoke at each step of the coding agent's workflow, based on the current state (e.g., code, goal, history).",
+        "why_primitive": "The core mechanism whose failure we investigate; it is the 'what' that fails."
+      },
+      {
+        "name": "Failure",
+        "definition": "A deviation from expected successful outcomes, such as producing incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations that do not advance progress.",
+        "why_primitive": "The phenomenon under study; defines what 'fail' means in the context of tool-use routing."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The coding agent has a finite, well-defined set of tools with known capabilities and interfaces.",
+        "rationale": "Routing decisions rely on knowledge of available tools; unbounded or unknown tools would change the nature of the problem.",
+        "possible_failure": "If tools have hidden dependencies or undefined behaviors, routing may fail unpredictably even with correct logic."
+      },
+      {
+        "assumption": "The agent's routing decisions are based on an internal representation of the task and environment (e.g., via an LLM, policy network, or rule system).",
+        "rationale": "Without some internal state, routing would be random or deterministic in a trivial sense; analyzing failure requires a decision model.",
+        "possible_failure": "Inaccurate or incomplete internal representation can lead to systematic routing errors."
+      },
+      {
+        "assumption": "Failures in tool-use routing are observable through the agent's output or final result (e.g., code correctness, execution errors, user feedback).",
+        "rationale": "To study when routing fails, we must be able to detect failure; unobservable failures are outside the scope.",
+        "possible_failure": "Silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. Exploitation in Tool Selection",
+        "variables": [
+          "exploration rate",
+          "task novelty",
+          "tool reliability"
+        ]
+      },
+      {
+        "tradeoff": "Precision vs. Recall in Routing Decisions",
+        "variables": [
+          "tool specificity",
+          "coverage of candidate tools",
+          "tolerance for error"
+        ]
+      },
+      {
+        "tradeoff": "Computational Cost vs. Routing Accuracy",
+        "variables": [
+          "inference budget",
+          "model complexity",
+          "time constraints"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "The difficulty of the coding task, including number of subtasks, ambiguity, and required domain knowledge."
+      },
+      {
+        "name": "tool_reliability",
+        "role": "input",
+        "description": "The consistency and correctness of each available tool's output when invoked under similar conditions."
+      },
+      {
+        "name": "internal_representation_accuracy",
+        "role": "mediator",
+        "description": "How accurately the agent models the current state, goal, and environment to decide which tool to use."
+      },
+      {
+        "name": "routing_decision_quality",
+        "role": "mediator",
+        "description": "The appropriateness of the tool chosen given the current context, influenced by exploration-exploitation balance and cost-accuracy tradeoffs."
+      },
+      {
+        "name": "tool_selection_outcome",
+        "role": "mediator",
+        "description": "The actual result of invoking the selected tool (e.g., code snippet, execution output, API response)."
+      },
+      {
+        "name": "task_success",
+        "role": "outcome",
+        "description": "Binary indicator of whether the final code meets all requirements without errors."
+      },
+      {
+        "name": "failure_mode",
+        "role": "output",
+        "description": "The specific type of failure observed: incorrect logic, runtime error, suboptimal performance, or unnecessary tool use."
+      },
+      {
+        "name": "exploration_rate",
+        "role": "confounder",
+        "description": "The probability with which the agent tries a less familiar tool instead of the seemingly optimal one, affecting routing decision quality."
+      },
+      {
+        "name": "inference_budget",
+        "role": "confounder",
+        "description": "Computational resources allocated to routing decisions (e.g., LLM calls, search depth), impacting routing quality."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_complexity",
+        "relation": "increases demand on",
+        "target": "internal_representation_accuracy",
+        "explanation": "More complex tasks require more precise internal state representations; inaccuracies lead to poor routing."
+      },
+      {
+        "step": "2",
+        "source": "internal_representation_accuracy",
+        "relation": "determines",
+        "target": "routing_decision_quality",
+        "explanation": "Accurate representations enable better tool choice; inaccuracies cause misrouting."
+      },
+      {
+        "step": "3",
+        "source": "routing_decision_quality",
+        "relation": "influenced by",
+        "target": "exploration_rate",
+        "explanation": "Higher exploration may degrade average quality initially but can discover better tools later."
+      },
+      {
+        "step": "4",
+        "source": "routing_decision_quality",
+        "relation": "influenced by",
+        "target": "inference_budget",
+        "explanation": "More inference resources (e.g., multiple LLM calls) can improve routing quality at a cost."
+      },
+      {
+        "step": "5",
+        "source": "routing_decision_quality",
+        "relation": "leads to",
+        "target": "tool_selection_outcome",
+        "explanation": "The chosen tool is invoked, producing an outcome (successful or failed tool execution)."
+      },
+      {
+        "step": "6",
+        "source": "tool_selection_outcome",
+        "relation": "combined with",
+        "target": "tool_reliability",
+        "explanation": "Even a correct routing can fail if the tool itself is unreliable; tool reliability moderates the link."
+      },
+      {
+        "step": "7",
+        "source": "tool_selection_outcome",
+        "relation": "determines",
+        "target": "task_success",
+        "explanation": "If the tool outcome is correct and sufficient, the task succeeds; otherwise, failure modes emerge."
+      },
+      {
+        "step": "8",
+        "source": "failure_mode",
+        "relation": "derived from",
+        "target": "task_success",
+        "explanation": "When task_success is false, specific failure modes are observed (incorrect code, runtime error, etc.)."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Accuracy of internal representation",
+        "why_it_matters": "Routing decisions are only as good as the agent's understanding of the current context; poor representation leads to systematic misrouting regardless of tool quality."
+      },
+      {
+        "bottleneck": "Exploration vs. exploitation balance",
+        "why_it_matters": "Too much exploration wastes resources and may cause early failures; too little exploitation may miss better tools, leading to suboptimal or failure-prone code."
+      },
+      {
+        "bottleneck": "Computational cost vs. routing accuracy",
+        "why_it_matters": "Limited inference budget forces tradeoffs; in time-critical tasks, cheaper but less accurate routing may cause failures that could have been avoided with more computation."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the internal representation of the task is inaccurate, compounded by mismanagement of exploration-exploitation tradeoffs and cost-accuracy constraints. The causal chain begins with task complexity straining representation accuracy, which degrades routing decision quality. This, moderated by exploration rate and inference budget, leads to tool selection outcomes that interact with tool reliability. Failures manifest as incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations. Key bottlenecks are representation accuracy, exploration-exploitation balance, and computational cost constraints."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Balancing exploration of novel tools versus exploitation of known reliable tools is critical; excessive exploration may cause failures in the short term, while insufficient exploration may miss better long-term solutions.",
+      "derived_from": [
+        "core_tradeoffs: Exploration vs. Exploitation in Tool Selection",
+        "bottlenecks: Exploration vs. exploitation balance"
+      ],
+      "why_it_matters": "Directly impacts routing quality and task success; improper balance leads to either wasted resources or suboptimal tool use.",
+      "what_existing_methods_may_miss": "Current evaluations often assume a fixed exploration rate or ignore its dynamic adjustment, missing the nuanced impact on failure modes.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "In time-critical or resource-constrained environments, limiting inference budget reduces routing accuracy, potentially causing failures that could be avoided with more computation.",
+      "derived_from": [
+        "core_tradeoffs: Computational Cost vs. Routing Accuracy",
+        "bottlenecks: Computational cost vs. routing accuracy"
+      ],
+      "why_it_matters": "Tradeoff affects real-world deployment where latency and cost are constraints; poor accuracy due to budget cuts can lead to errors.",
+      "what_existing_methods_may_miss": "Benchmarks often use ample compute, ignoring the fragility of routing under budget constraints.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Routing decisions face a tradeoff between precision (choosing the most specific tool) and recall (considering all possible tools); optimizing for one may hurt the other, leading to either over-specialization or irrelevant tool usage.",
+      "derived_from": [
+        "core_tradeoffs: Precision vs. Recall in Routing Decisions"
+      ],
+      "why_it_matters": "Affects robustness and adaptability; low precision causes unnecessary tool calls, low recall may miss optimal tools.",
+      "what_existing_methods_may_miss": "Most evaluations focus on average success rate, not distinguishing between precision and recall failures.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Failures in tool-use routing are assumed observable through outputs, but silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency.",
+      "derived_from": [
+        "assumptions: Failures in tool-use routing are observable through the agent's output",
+        "possible_failure: Silent failures may go undetected"
+      ],
+      "why_it_matters": "Inaccurate failure detection skews research and development; silent failures can accumulate and degrade system trustworthiness.",
+      "what_existing_methods_may_miss": "Standard binary success/failure metrics overlook suboptimal outcomes; user feedback may be absent or noisy.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does dynamically adjusting the exploration rate based on recent task success or failure impact the overall success rate and failure modes in tool routing for coding agents?",
+      "question_type": "algorithmic",
+      "source_tension": "T1",
+      "expected_contribution": "Provides evidence for whether adaptive exploration improves routing quality and reveals failure patterns associated with exploration-exploitation balance."
+    },
+    {
+      "question": "Under a fixed inference budget, does allocating more computation to the routing decision in early steps (when uncertainty is high) reduce failure rates compared to uniform allocation across steps?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Determines if budget allocation strategies significantly affect routing accuracy and failure modes, informing cost-accuracy tradeoff management."
+    },
+    {
+      "question": "Does optimizing routing for precision (choosing the most specific tool) reduce runtime errors but increase instances of suboptimal performance due to missing alternative tools?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Characterizes the precision-recall tradeoff by linking routing strategies to specific failure types (errors vs. suboptimality)."
+    },
+    {
+      "question": "To what extent do silent failures (suboptimal but non-error tool uses) occur in current coding agent benchmarks, and how does their prevalence vary with task complexity?",
+      "question_type": "descriptive",
+      "source_tension": "T4",
+      "expected_contribution": "Quantifies undetected failures and identifies task complexity as a moderator, highlighting gaps in current evaluation metrics."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding agent",
+          "definition": "An autonomous AI system that generates, modifies, or verifies code by selecting and invoking tools (e.g., code interpreters, compilers, search engines, APIs) to achieve a desired programming task.",
+          "why_primitive": "The entity that performs tool-use routing; without it, the concept of routing has no context."
+        },
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision-making process that determines which tool to invoke at each step of the coding agent's workflow, based on the current state (e.g., code, goal, history).",
+          "why_primitive": "The core mechanism whose failure we investigate; it is the 'what' that fails."
+        },
+        {
+          "name": "Failure",
+          "definition": "A deviation from expected successful outcomes, such as producing incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations that do not advance progress.",
+          "why_primitive": "The phenomenon under study; defines what 'fail' means in the context of tool-use routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite, well-defined set of tools with known capabilities and interfaces.",
+          "rationale": "Routing decisions rely on knowledge of available tools; unbounded or unknown tools would change the nature of the problem.",
+          "possible_failure": "If tools have hidden dependencies or undefined behaviors, routing may fail unpredictably even with correct logic."
+        },
+        {
+          "assumption": "The agent's routing decisions are based on an internal representation of the task and environment (e.g., via an LLM, policy network, or rule system).",
+          "rationale": "Without some internal state, routing would be random or deterministic in a trivial sense; analyzing failure requires a decision model.",
+          "possible_failure": "Inaccurate or incomplete internal representation can lead to systematic routing errors."
+        },
+        {
+          "assumption": "Failures in tool-use routing are observable through the agent's output or final result (e.g., code correctness, execution errors, user feedback).",
+          "rationale": "To study when routing fails, we must be able to detect failure; unobservable failures are outside the scope.",
+          "possible_failure": "Silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, including number of subtasks, ambiguity, and required domain knowledge."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The consistency and correctness of each available tool's output when invoked under similar conditions."
+          },
+          {
+            "name": "internal_representation_accuracy",
+            "role": "mediator",
+            "description": "How accurately the agent models the current state, goal, and environment to decide which tool to use."
+          },
+          {
+            "name": "routing_decision_quality",
+            "role": "mediator",
+            "description": "The appropriateness of the tool chosen given the current context, influenced by exploration-exploitation balance and cost-accuracy tradeoffs."
+          },
+          {
+            "name": "tool_selection_outcome",
+            "role": "mediator",
+            "description": "The actual result of invoking the selected tool (e.g., code snippet, execution output, API response)."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the final code meets all requirements without errors."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The specific type of failure observed: incorrect logic, runtime error, suboptimal performance, or unnecessary tool use."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "confounder",
+            "description": "The probability with which the agent tries a less familiar tool instead of the seemingly optimal one, affecting routing decision quality."
+          },
+          {
+            "name": "inference_budget",
+            "role": "confounder",
+            "description": "Computational resources allocated to routing decisions (e.g., LLM calls, search depth), impacting routing quality."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "increases demand on",
+            "target": "internal_representation_accuracy",
+            "explanation": "More complex tasks require more precise internal state representations; inaccuracies lead to poor routing."
+          },
+          {
+            "step": "2",
+            "source": "internal_representation_accuracy",
+            "relation": "determines",
+            "target": "routing_decision_quality",
+            "explanation": "Accurate representations enable better tool choice; inaccuracies cause misrouting."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "exploration_rate",
+            "explanation": "Higher exploration may degrade average quality initially but can discover better tools later."
+          },
+          {
+            "step": "4",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "inference_budget",
+            "explanation": "More inference resources (e.g., multiple LLM calls) can improve routing quality at a cost."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_quality",
+            "relation": "leads to",
+            "target": "tool_selection_outcome",
+            "explanation": "The chosen tool is invoked, producing an outcome (successful or failed tool execution)."
+          },
+          {
+            "step": "6",
+            "source": "tool_selection_outcome",
+            "relation": "combined with",
+            "target": "tool_reliability",
+            "explanation": "Even a correct routing can fail if the tool itself is unreliable; tool reliability moderates the link."
+          },
+          {
+            "step": "7",
+            "source": "tool_selection_outcome",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "If the tool outcome is correct and sufficient, the task succeeds; otherwise, failure modes emerge."
+          },
+          {
+            "step": "8",
+            "source": "failure_mode",
+            "relation": "derived from",
+            "target": "task_success",
+            "explanation": "When task_success is false, specific failure modes are observed (incorrect code, runtime error, etc.)."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accuracy of internal representation",
+            "why_it_matters": "Routing decisions are only as good as the agent's understanding of the current context; poor representation leads to systematic misrouting regardless of tool quality."
+          },
+          {
+            "bottleneck": "Exploration vs. exploitation balance",
+            "why_it_matters": "Too much exploration wastes resources and may cause early failures; too little exploitation may miss better tools, leading to suboptimal or failure-prone code."
+          },
+          {
+            "bottleneck": "Computational cost vs. routing accuracy",
+            "why_it_matters": "Limited inference budget forces tradeoffs; in time-critical tasks, cheaper but less accurate routing may cause failures that could have been avoided with more computation."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the internal representation of the task is inaccurate, compounded by mismanagement of exploration-exploitation tradeoffs and cost-accuracy constraints. The causal chain begins with task complexity straining representation accuracy, which degrades routing decision quality. This, moderated by exploration rate and inference budget, leads to tool selection outcomes that interact with tool reliability. Failures manifest as incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations. Key bottlenecks are representation accuracy, exploration-exploitation balance, and computational cost constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Balancing exploration of novel tools versus exploitation of known reliable tools is critical; excessive exploration may cause failures in the short term, while insufficient exploration may miss better long-term solutions.",
+        "derived_from": [
+          "core_tradeoffs: Exploration vs. Exploitation in Tool Selection",
+          "bottlenecks: Exploration vs. exploitation balance"
+        ],
+        "why_it_matters": "Directly impacts routing quality and task success; improper balance leads to either wasted resources or suboptimal tool use.",
+        "what_existing_methods_may_miss": "Current evaluations often assume a fixed exploration rate or ignore its dynamic adjustment, missing the nuanced impact on failure modes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the critical task complexity threshold above which dynamically adjusting the exploration rate based on recent outcomes transitions from beneficial to harmful in tool routing for coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a precise boundary condition where adaptive exploration fails, providing a design rule for when to employ fixed vs. adaptive exploration in coding agents."
+      },
+      "hypothesis": {
+        "statement": "There exists a task complexity threshold θ such that for tasks with complexity below θ, adaptive exploration yields higher success rates than fixed exploration; for tasks above θ, adaptive exploration yields lower success rates. Additionally, this threshold decreases as tool reliability decreases.",
+        "predicted_effect": "The crossover point can be estimated empirically; below θ adaptive is better, above θ fixed is better, and the threshold is lower when tools are less reliable."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with two exploration strategies: adaptive (decrease on success, increase on failure) and fixed (constant rate 0.1). Use a benchmark of coding tasks with varying complexity (e.g., measured by number of subtasks, ambiguity, required domain knowledge). For each task complexity level, run 100 trials per strategy. Record success rate and failure modes. Also vary tool reliability by injecting random errors into tool outputs at different rates (e.g., 0%, 10%, 20%). Analyze the success rate difference between adaptive and fixed as a function of task complexity and tool reliability to identify the threshold θ where the difference crosses zero.",
+        "independent_variables": [
+          "exploration strategy (adaptive vs. fixed)",
+          "task complexity (continuous or ordinal)",
+          "tool reliability (error rate: 0%, 10%, 20%)"
+        ],
+        "dependent_variables": [
+          "task success rate",
+          "difference in success rate (adaptive - fixed)",
+          "threshold θ (task complexity at which difference crosses zero)"
+        ],
+        "controls": [
+          "same base routing model (e.g., LLM with fixed inference budget)",
+          "same set of tools (except for injected unreliability)",
+          "same number of trials per condition",
+          "same exploration rate schedule for adaptive (specific rule)"
+        ],
+        "falsifying_observation": "If the success rate difference does not cross zero or does not show a clear monotonic trend with task complexity, or if tool reliability does not affect the crossover point, the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low task complexity, adaptive exploration yields higher success rate than fixed.",
+          "For high task complexity, adaptive exploration yields lower success rate than fixed.",
+          "The threshold θ exists and is estimable with reasonable confidence intervals.",
+          "θ decreases as tool reliability decreases (i.e., with higher error rates, adaptive becomes detrimental at lower complexity)."
+        ],
+        "rejects_hypothesis": [
+          "No crossover point: adaptive always better or always worse regardless of complexity.",
+          "Non-monotonic relationship where adaptive is better at both low and high complexity.",
+          "Tool reliability has no effect on the crossover point.",
+          "The threshold estimate is not statistically significant or varies inconsistently."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no clear threshold is found or the relationship is not as predicted, then the hypothesis that adaptive exploration has a simple benefit-harm tradeoff based on complexity is falsified.",
+        "assumption_to_revise": "The assumption that task complexity is the primary moderator of adaptive exploration's effectiveness may be incorrect; other factors like tool diversity or task type may dominate.",
+        "next_question": "What factors beyond task complexity (e.g., tool set size, task domain, agent memory) determine when adaptive exploration is beneficial?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding agent",
+          "definition": "An autonomous AI system that generates, modifies, or verifies code by selecting and invoking tools (e.g., code interpreters, compilers, search engines, APIs) to achieve a desired programming task.",
+          "why_primitive": "The entity that performs tool-use routing; without it, the concept of routing has no context."
+        },
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision-making process that determines which tool to invoke at each step of the coding agent's workflow, based on the current state (e.g., code, goal, history).",
+          "why_primitive": "The core mechanism whose failure we investigate; it is the 'what' that fails."
+        },
+        {
+          "name": "Failure",
+          "definition": "A deviation from expected successful outcomes, such as producing incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations that do not advance progress.",
+          "why_primitive": "The phenomenon under study; defines what 'fail' means in the context of tool-use routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite, well-defined set of tools with known capabilities and interfaces.",
+          "rationale": "Routing decisions rely on knowledge of available tools; unbounded or unknown tools would change the nature of the problem.",
+          "possible_failure": "If tools have hidden dependencies or undefined behaviors, routing may fail unpredictably even with correct logic."
+        },
+        {
+          "assumption": "The agent's routing decisions are based on an internal representation of the task and environment (e.g., via an LLM, policy network, or rule system).",
+          "rationale": "Without some internal state, routing would be random or deterministic in a trivial sense; analyzing failure requires a decision model.",
+          "possible_failure": "Inaccurate or incomplete internal representation can lead to systematic routing errors."
+        },
+        {
+          "assumption": "Failures in tool-use routing are observable through the agent's output or final result (e.g., code correctness, execution errors, user feedback).",
+          "rationale": "To study when routing fails, we must be able to detect failure; unobservable failures are outside the scope.",
+          "possible_failure": "Silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, including number of subtasks, ambiguity, and required domain knowledge."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The consistency and correctness of each available tool's output when invoked under similar conditions."
+          },
+          {
+            "name": "internal_representation_accuracy",
+            "role": "mediator",
+            "description": "How accurately the agent models the current state, goal, and environment to decide which tool to use."
+          },
+          {
+            "name": "routing_decision_quality",
+            "role": "mediator",
+            "description": "The appropriateness of the tool chosen given the current context, influenced by exploration-exploitation balance and cost-accuracy tradeoffs."
+          },
+          {
+            "name": "tool_selection_outcome",
+            "role": "mediator",
+            "description": "The actual result of invoking the selected tool (e.g., code snippet, execution output, API response)."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the final code meets all requirements without errors."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The specific type of failure observed: incorrect logic, runtime error, suboptimal performance, or unnecessary tool use."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "confounder",
+            "description": "The probability with which the agent tries a less familiar tool instead of the seemingly optimal one, affecting routing decision quality."
+          },
+          {
+            "name": "inference_budget",
+            "role": "confounder",
+            "description": "Computational resources allocated to routing decisions (e.g., LLM calls, search depth), impacting routing quality."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "increases demand on",
+            "target": "internal_representation_accuracy",
+            "explanation": "More complex tasks require more precise internal state representations; inaccuracies lead to poor routing."
+          },
+          {
+            "step": "2",
+            "source": "internal_representation_accuracy",
+            "relation": "determines",
+            "target": "routing_decision_quality",
+            "explanation": "Accurate representations enable better tool choice; inaccuracies cause misrouting."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "exploration_rate",
+            "explanation": "Higher exploration may degrade average quality initially but can discover better tools later."
+          },
+          {
+            "step": "4",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "inference_budget",
+            "explanation": "More inference resources (e.g., multiple LLM calls) can improve routing quality at a cost."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_quality",
+            "relation": "leads to",
+            "target": "tool_selection_outcome",
+            "explanation": "The chosen tool is invoked, producing an outcome (successful or failed tool execution)."
+          },
+          {
+            "step": "6",
+            "source": "tool_selection_outcome",
+            "relation": "combined with",
+            "target": "tool_reliability",
+            "explanation": "Even a correct routing can fail if the tool itself is unreliable; tool reliability moderates the link."
+          },
+          {
+            "step": "7",
+            "source": "tool_selection_outcome",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "If the tool outcome is correct and sufficient, the task succeeds; otherwise, failure modes emerge."
+          },
+          {
+            "step": "8",
+            "source": "failure_mode",
+            "relation": "derived from",
+            "target": "task_success",
+            "explanation": "When task_success is false, specific failure modes are observed (incorrect code, runtime error, etc.)."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accuracy of internal representation",
+            "why_it_matters": "Routing decisions are only as good as the agent's understanding of the current context; poor representation leads to systematic misrouting regardless of tool quality."
+          },
+          {
+            "bottleneck": "Exploration vs. exploitation balance",
+            "why_it_matters": "Too much exploration wastes resources and may cause early failures; too little exploitation may miss better tools, leading to suboptimal or failure-prone code."
+          },
+          {
+            "bottleneck": "Computational cost vs. routing accuracy",
+            "why_it_matters": "Limited inference budget forces tradeoffs; in time-critical tasks, cheaper but less accurate routing may cause failures that could have been avoided with more computation."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the internal representation of the task is inaccurate, compounded by mismanagement of exploration-exploitation tradeoffs and cost-accuracy constraints. The causal chain begins with task complexity straining representation accuracy, which degrades routing decision quality. This, moderated by exploration rate and inference budget, leads to tool selection outcomes that interact with tool reliability. Failures manifest as incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations. Key bottlenecks are representation accuracy, exploration-exploitation balance, and computational cost constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "In time-critical or resource-constrained environments, limiting inference budget reduces routing accuracy, potentially causing failures that could be avoided with more computation.",
+        "derived_from": [
+          "core_tradeoffs: Computational Cost vs. Routing Accuracy",
+          "bottlenecks: Computational cost vs. routing accuracy"
+        ],
+        "why_it_matters": "Tradeoff affects real-world deployment where latency and cost are constraints; poor accuracy due to budget cuts can lead to errors.",
+        "what_existing_methods_may_miss": "Benchmarks often use ample compute, ignoring the fragility of routing under budget constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Under a fixed inference budget, does the effectiveness of early-focused versus uniform budget allocation for tool-use routing in coding agents depend on initial task ambiguity, and is there a threshold of ambiguity where the optimal strategy switches?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a boundary condition (ambiguity threshold) governing the optimal inference budget allocation, providing a decisively sharper tradeoff than uniform vs. early-focused alone."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold τ of initial task ambiguity such that for tasks with ambiguity below τ, early-focused allocation yields significantly lower failure rates than uniform allocation; for tasks with ambiguity above τ, uniform allocation is not significantly different from or better than early-focused allocation.",
+        "predicted_effect": "An interaction between ambiguity level and allocation strategy, where the benefit of early-focused allocation diminishes or reverses beyond a critical ambiguity threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use 100 coding tasks, each with a measured initial ambiguity (entropy of tool-choice distribution from a zero-shot LLM). Group tasks into 5 ambiguity bins. For each bin, run early-focused (5/3/1/1 calls) and uniform (2.5 per step) allocation with total budget 10 LLM calls. Measure failure rate per bin. Use logistic regression to test for interaction between strategy and ambiguity. Identify threshold τ as the ambiguity level where the predicted failure rate difference crosses zero.",
+        "independent_variables": [
+          "Allocation strategy (early-focused vs uniform)",
+          "Initial task ambiguity (continuous or binned)"
+        ],
+        "dependent_variables": [
+          "Failure rate per ambiguity bin",
+          "Failure rate difference between strategies"
+        ],
+        "controls": [
+          "Same set of tasks",
+          "Same agent architecture and tools",
+          "Fixed total inference budget (10 LLM calls)",
+          "Exploration rate=0.1",
+          "Multiple random seeds"
+        ],
+        "falsifying_observation": "If no significant interaction (p>0.05) between strategy and ambiguity is found, or if the estimated threshold τ does not produce a significant difference (p>0.01) in failure rate when comparing strategies on either side of τ, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant interaction between strategy and ambiguity (p<0.05) with early-focused significantly reducing failure rate in low-ambiguity bins but not in high-ambiguity bins.",
+          "A clear threshold τ estimated from the data (e.g., ambiguity > 0.7 bits) beyond which uniform allocation performs no worse than early-focused."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction (p>0.05) or interaction in opposite direction (early-focused worse at low ambiguity).",
+          "Threshold cannot be estimated or is not statistically reliable.",
+          "Uniform allocation outperforms early-focused across all ambiguity levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold effect is found, then the assumption that early routing decisions are uniquely critical under high uncertainty is false; other factors (e.g., tool reliability or step-by-step dependencies) may dominate.",
+        "assumption_to_revise": "The assumption that early-step ambiguity is a primary driver of the benefit of early-focused allocation.",
+        "next_question": "Under a fixed inference budget, does the failure-rate impact of early-focused allocation depend on the number of critical dependencies between steps, rather than initial ambiguity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding agent",
+          "definition": "An autonomous AI system that generates, modifies, or verifies code by selecting and invoking tools (e.g., code interpreters, compilers, search engines, APIs) to achieve a desired programming task.",
+          "why_primitive": "The entity that performs tool-use routing; without it, the concept of routing has no context."
+        },
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision-making process that determines which tool to invoke at each step of the coding agent's workflow, based on the current state (e.g., code, goal, history).",
+          "why_primitive": "The core mechanism whose failure we investigate; it is the 'what' that fails."
+        },
+        {
+          "name": "Failure",
+          "definition": "A deviation from expected successful outcomes, such as producing incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations that do not advance progress.",
+          "why_primitive": "The phenomenon under study; defines what 'fail' means in the context of tool-use routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite, well-defined set of tools with known capabilities and interfaces.",
+          "rationale": "Routing decisions rely on knowledge of available tools; unbounded or unknown tools would change the nature of the problem.",
+          "possible_failure": "If tools have hidden dependencies or undefined behaviors, routing may fail unpredictably even with correct logic."
+        },
+        {
+          "assumption": "The agent's routing decisions are based on an internal representation of the task and environment (e.g., via an LLM, policy network, or rule system).",
+          "rationale": "Without some internal state, routing would be random or deterministic in a trivial sense; analyzing failure requires a decision model.",
+          "possible_failure": "Inaccurate or incomplete internal representation can lead to systematic routing errors."
+        },
+        {
+          "assumption": "Failures in tool-use routing are observable through the agent's output or final result (e.g., code correctness, execution errors, user feedback).",
+          "rationale": "To study when routing fails, we must be able to detect failure; unobservable failures are outside the scope.",
+          "possible_failure": "Silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, including number of subtasks, ambiguity, and required domain knowledge."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The consistency and correctness of each available tool's output when invoked under similar conditions."
+          },
+          {
+            "name": "internal_representation_accuracy",
+            "role": "mediator",
+            "description": "How accurately the agent models the current state, goal, and environment to decide which tool to use."
+          },
+          {
+            "name": "routing_decision_quality",
+            "role": "mediator",
+            "description": "The appropriateness of the tool chosen given the current context, influenced by exploration-exploitation balance and cost-accuracy tradeoffs."
+          },
+          {
+            "name": "tool_selection_outcome",
+            "role": "mediator",
+            "description": "The actual result of invoking the selected tool (e.g., code snippet, execution output, API response)."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the final code meets all requirements without errors."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The specific type of failure observed: incorrect logic, runtime error, suboptimal performance, or unnecessary tool use."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "confounder",
+            "description": "The probability with which the agent tries a less familiar tool instead of the seemingly optimal one, affecting routing decision quality."
+          },
+          {
+            "name": "inference_budget",
+            "role": "confounder",
+            "description": "Computational resources allocated to routing decisions (e.g., LLM calls, search depth), impacting routing quality."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "increases demand on",
+            "target": "internal_representation_accuracy",
+            "explanation": "More complex tasks require more precise internal state representations; inaccuracies lead to poor routing."
+          },
+          {
+            "step": "2",
+            "source": "internal_representation_accuracy",
+            "relation": "determines",
+            "target": "routing_decision_quality",
+            "explanation": "Accurate representations enable better tool choice; inaccuracies cause misrouting."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "exploration_rate",
+            "explanation": "Higher exploration may degrade average quality initially but can discover better tools later."
+          },
+          {
+            "step": "4",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "inference_budget",
+            "explanation": "More inference resources (e.g., multiple LLM calls) can improve routing quality at a cost."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_quality",
+            "relation": "leads to",
+            "target": "tool_selection_outcome",
+            "explanation": "The chosen tool is invoked, producing an outcome (successful or failed tool execution)."
+          },
+          {
+            "step": "6",
+            "source": "tool_selection_outcome",
+            "relation": "combined with",
+            "target": "tool_reliability",
+            "explanation": "Even a correct routing can fail if the tool itself is unreliable; tool reliability moderates the link."
+          },
+          {
+            "step": "7",
+            "source": "tool_selection_outcome",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "If the tool outcome is correct and sufficient, the task succeeds; otherwise, failure modes emerge."
+          },
+          {
+            "step": "8",
+            "source": "failure_mode",
+            "relation": "derived from",
+            "target": "task_success",
+            "explanation": "When task_success is false, specific failure modes are observed (incorrect code, runtime error, etc.)."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accuracy of internal representation",
+            "why_it_matters": "Routing decisions are only as good as the agent's understanding of the current context; poor representation leads to systematic misrouting regardless of tool quality."
+          },
+          {
+            "bottleneck": "Exploration vs. exploitation balance",
+            "why_it_matters": "Too much exploration wastes resources and may cause early failures; too little exploitation may miss better tools, leading to suboptimal or failure-prone code."
+          },
+          {
+            "bottleneck": "Computational cost vs. routing accuracy",
+            "why_it_matters": "Limited inference budget forces tradeoffs; in time-critical tasks, cheaper but less accurate routing may cause failures that could have been avoided with more computation."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the internal representation of the task is inaccurate, compounded by mismanagement of exploration-exploitation tradeoffs and cost-accuracy constraints. The causal chain begins with task complexity straining representation accuracy, which degrades routing decision quality. This, moderated by exploration rate and inference budget, leads to tool selection outcomes that interact with tool reliability. Failures manifest as incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations. Key bottlenecks are representation accuracy, exploration-exploitation balance, and computational cost constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Routing decisions face a tradeoff between precision (choosing the most specific tool) and recall (considering all possible tools); optimizing for one may hurt the other, leading to either over-specialization or irrelevant tool usage.",
+        "derived_from": [
+          "core_tradeoffs: Precision vs. Recall in Routing Decisions"
+        ],
+        "why_it_matters": "Affects robustness and adaptability; low precision causes unnecessary tool calls, low recall may miss optimal tools.",
+        "what_existing_methods_may_miss": "Most evaluations focus on average success rate, not distinguishing between precision and recall failures.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a threshold level of internal representation accuracy below which precision-optimized routing fails more severely than recall-optimized routing, reversing the typical tradeoff?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in the precision-recall tradeoff governed by representation accuracy, enabling adaptive routing strategies."
+      },
+      "hypothesis": {
+        "statement": "Below a critical threshold of internal representation accuracy, precision-optimized routing leads to a higher overall failure rate (runtime errors + suboptimal performance) compared to recall-optimized routing, reversing the typical tradeoff observed at higher accuracy levels.",
+        "predicted_effect": "As task complexity increases (reducing representation accuracy), the failure rate of precision-optimized routing increases faster than that of recall-optimized routing, crossing at a specific threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a benchmark of 100 coding tasks with varying complexity (e.g., from simple function completion to multi-file modifications). For each task, generate two versions of the internal representation by adding controlled noise to the task specification (e.g., paraphrasing, omitting details). Vary noise levels from 0 (high accuracy) to 1 (low accuracy). For each noise level, run both a precision-optimized routing agent (selects most specific tool based on inferred task) and a recall-optimized routing agent (samples from a broader tool set). Record overall failure rate (combining runtime errors and suboptimal performance) for each condition. Identify if there exists a noise threshold where the ranking of failure rates reverses.",
+        "independent_variables": [
+          "routing strategy (precision-optimized vs. recall-optimized)",
+          "internal representation accuracy (noise level from 0 to 1)"
+        ],
+        "dependent_variables": [
+          "overall failure rate (proportion of tasks with runtime errors or suboptimal performance)"
+        ],
+        "controls": [
+          "same set of coding tasks",
+          "same base agent (LLM, tool set)",
+          "same evaluation criteria for suboptimality",
+          "random seeds consistent across conditions"
+        ],
+        "falsifying_observation": "If the overall failure rate of precision-optimized routing is always lower (or always higher) than recall-optimized routing across all noise levels, or if the ranking does not change significantly, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low noise levels (high accuracy), precision-optimized routing has lower failure rate than recall-optimized routing.",
+          "At high noise levels (low accuracy), precision-optimized routing has higher failure rate than recall-optimized routing.",
+          "There is a statistically significant interaction between noise level and routing strategy, with a crossing point."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction: the ranking of failure rates remains the same across all noise levels.",
+          "The failure rate of precision-optimized routing is always lower than recall-optimized routing.",
+          "The failure rate of recall-optimized routing is always lower than precision-optimized routing."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment fails to detect a threshold reversal, then the precision-recall tradeoff hypothesis may be too simplistic; other factors like tool reliability or task type may dominate.",
+        "assumption_to_revise": "The assumption that internal representation accuracy monotonically affects routing decision quality may need to be replaced with a non-linear model where precision becomes harmful only below a certain accuracy level.",
+        "next_question": "Does tool reliability interact with representation accuracy to determine the optimal routing strategy, and if so, how?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding agent",
+          "definition": "An autonomous AI system that generates, modifies, or verifies code by selecting and invoking tools (e.g., code interpreters, compilers, search engines, APIs) to achieve a desired programming task.",
+          "why_primitive": "The entity that performs tool-use routing; without it, the concept of routing has no context."
+        },
+        {
+          "name": "Tool-use routing",
+          "definition": "The decision-making process that determines which tool to invoke at each step of the coding agent's workflow, based on the current state (e.g., code, goal, history).",
+          "why_primitive": "The core mechanism whose failure we investigate; it is the 'what' that fails."
+        },
+        {
+          "name": "Failure",
+          "definition": "A deviation from expected successful outcomes, such as producing incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations that do not advance progress.",
+          "why_primitive": "The phenomenon under study; defines what 'fail' means in the context of tool-use routing."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has a finite, well-defined set of tools with known capabilities and interfaces.",
+          "rationale": "Routing decisions rely on knowledge of available tools; unbounded or unknown tools would change the nature of the problem.",
+          "possible_failure": "If tools have hidden dependencies or undefined behaviors, routing may fail unpredictably even with correct logic."
+        },
+        {
+          "assumption": "The agent's routing decisions are based on an internal representation of the task and environment (e.g., via an LLM, policy network, or rule system).",
+          "rationale": "Without some internal state, routing would be random or deterministic in a trivial sense; analyzing failure requires a decision model.",
+          "possible_failure": "Inaccurate or incomplete internal representation can lead to systematic routing errors."
+        },
+        {
+          "assumption": "Failures in tool-use routing are observable through the agent's output or final result (e.g., code correctness, execution errors, user feedback).",
+          "rationale": "To study when routing fails, we must be able to detect failure; unobservable failures are outside the scope.",
+          "possible_failure": "Silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, including number of subtasks, ambiguity, and required domain knowledge."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The consistency and correctness of each available tool's output when invoked under similar conditions."
+          },
+          {
+            "name": "internal_representation_accuracy",
+            "role": "mediator",
+            "description": "How accurately the agent models the current state, goal, and environment to decide which tool to use."
+          },
+          {
+            "name": "routing_decision_quality",
+            "role": "mediator",
+            "description": "The appropriateness of the tool chosen given the current context, influenced by exploration-exploitation balance and cost-accuracy tradeoffs."
+          },
+          {
+            "name": "tool_selection_outcome",
+            "role": "mediator",
+            "description": "The actual result of invoking the selected tool (e.g., code snippet, execution output, API response)."
+          },
+          {
+            "name": "task_success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the final code meets all requirements without errors."
+          },
+          {
+            "name": "failure_mode",
+            "role": "output",
+            "description": "The specific type of failure observed: incorrect logic, runtime error, suboptimal performance, or unnecessary tool use."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "confounder",
+            "description": "The probability with which the agent tries a less familiar tool instead of the seemingly optimal one, affecting routing decision quality."
+          },
+          {
+            "name": "inference_budget",
+            "role": "confounder",
+            "description": "Computational resources allocated to routing decisions (e.g., LLM calls, search depth), impacting routing quality."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_complexity",
+            "relation": "increases demand on",
+            "target": "internal_representation_accuracy",
+            "explanation": "More complex tasks require more precise internal state representations; inaccuracies lead to poor routing."
+          },
+          {
+            "step": "2",
+            "source": "internal_representation_accuracy",
+            "relation": "determines",
+            "target": "routing_decision_quality",
+            "explanation": "Accurate representations enable better tool choice; inaccuracies cause misrouting."
+          },
+          {
+            "step": "3",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "exploration_rate",
+            "explanation": "Higher exploration may degrade average quality initially but can discover better tools later."
+          },
+          {
+            "step": "4",
+            "source": "routing_decision_quality",
+            "relation": "influenced by",
+            "target": "inference_budget",
+            "explanation": "More inference resources (e.g., multiple LLM calls) can improve routing quality at a cost."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_quality",
+            "relation": "leads to",
+            "target": "tool_selection_outcome",
+            "explanation": "The chosen tool is invoked, producing an outcome (successful or failed tool execution)."
+          },
+          {
+            "step": "6",
+            "source": "tool_selection_outcome",
+            "relation": "combined with",
+            "target": "tool_reliability",
+            "explanation": "Even a correct routing can fail if the tool itself is unreliable; tool reliability moderates the link."
+          },
+          {
+            "step": "7",
+            "source": "tool_selection_outcome",
+            "relation": "determines",
+            "target": "task_success",
+            "explanation": "If the tool outcome is correct and sufficient, the task succeeds; otherwise, failure modes emerge."
+          },
+          {
+            "step": "8",
+            "source": "failure_mode",
+            "relation": "derived from",
+            "target": "task_success",
+            "explanation": "When task_success is false, specific failure modes are observed (incorrect code, runtime error, etc.)."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accuracy of internal representation",
+            "why_it_matters": "Routing decisions are only as good as the agent's understanding of the current context; poor representation leads to systematic misrouting regardless of tool quality."
+          },
+          {
+            "bottleneck": "Exploration vs. exploitation balance",
+            "why_it_matters": "Too much exploration wastes resources and may cause early failures; too little exploitation may miss better tools, leading to suboptimal or failure-prone code."
+          },
+          {
+            "bottleneck": "Computational cost vs. routing accuracy",
+            "why_it_matters": "Limited inference budget forces tradeoffs; in time-critical tasks, cheaper but less accurate routing may cause failures that could have been avoided with more computation."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the internal representation of the task is inaccurate, compounded by mismanagement of exploration-exploitation tradeoffs and cost-accuracy constraints. The causal chain begins with task complexity straining representation accuracy, which degrades routing decision quality. This, moderated by exploration rate and inference budget, leads to tool selection outcomes that interact with tool reliability. Failures manifest as incorrect code, runtime errors, suboptimal performance, or unnecessary tool invocations. Key bottlenecks are representation accuracy, exploration-exploitation balance, and computational cost constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Failures in tool-use routing are assumed observable through outputs, but silent failures (e.g., suboptimal but correct code) may go undetected, leading to underestimation of failure frequency.",
+        "derived_from": [
+          "assumptions: Failures in tool-use routing are observable through the agent's output",
+          "possible_failure: Silent failures may go undetected"
+        ],
+        "why_it_matters": "Inaccurate failure detection skews research and development; silent failures can accumulate and degrade system trustworthiness.",
+        "what_existing_methods_may_miss": "Standard binary success/failure metrics overlook suboptimal outcomes; user feedback may be absent or noisy.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in task complexity beyond which tool-use routing failures in coding agents undergo a phase transition from predominantly overt failures to predominantly silent failures?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Demonstrates a nonlinear phase transition in failure modes, challenging the assumption of monotonic failure growth and providing a sharp, testable boundary condition for routing reliability."
+      },
+      "hypothesis": {
+        "statement": "As task complexity increases, the proportion of silent failures among all routing failures (overt + silent) exhibits a sharp, discontinuous increase at a critical complexity threshold, indicating a phase transition from overt-dominant to silent-dominant failure modes.",
+        "predicted_effect": "At low complexity, overt failures dominate; beyond the threshold, silent failures dominate, with a narrow transition region."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Run a single coding agent (e.g., LLM-based) on a benchmark of coding tasks with systematically varied complexity (e.g., parameterized by number of functions, ambiguity, required tool types). For each task, record whether the final output is correct (passing all tests) and categorize tool-use quality: overt failure (incorrect code or error) or silent failure (correct but suboptimal tool use compared to a human expert baseline). Increase complexity in fine increments. Plot the ratio of silent failures to total failures as a function of complexity. Fit a sigmoid or detect a discontinuity using change-point analysis.",
+        "independent_variables": [
+          "task complexity (continuous, e.g., measured by number of subtasks or required tool invocations)"
+        ],
+        "dependent_variables": [
+          "ratio of silent failures to total failures"
+        ],
+        "controls": [
+          "same base agent architecture",
+          "same tool set",
+          "same human expert baseline for suboptimality",
+          "fixed inference budget per task"
+        ],
+        "falsifying_observation": "If the ratio of silent to total failures changes gradually and linearly with complexity, or if no sharp transition is observed, the hypothesis of a phase transition is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The silent-to-total failure ratio stays low (<20%) for complexity values below a threshold C*.",
+          "Within ±10% of C*, the ratio rises steeply to >70%.",
+          "Above C*, the ratio remains high and stabilizes.",
+          "The transition is robust across multiple random seeds and agent parameter initializations."
+        ],
+        "rejects_hypothesis": [
+          "The ratio increases linearly or smoothly with complexity without a discontinuity.",
+          "No significant change in ratio is observed even at extreme complexity levels.",
+          "The transition is not replicable across different agent configurations."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis of a sharp phase transition is falsified, then the assumption that failure modes shift discretely is incorrect.",
+        "assumption_to_revise": "The assumption that silent failures dominate only beyond a critical complexity threshold.",
+        "next_question": "What continuous function best describes the relationship between task complexity and the silent failure proportion, and what underlying mechanisms (e.g., resource allocation, representation degradation) produce that function?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a task complexity threshold θ such that for tasks with complexity below θ, adaptive exploration yields higher success rates than fixed exploration; for tasks above θ, adaptive exploration yields lower success rates. Additionally, this threshold decreases as tool reliability decreases.",
+      "independent_variables": [
+        "Exploration strategy (adaptive vs fixed)",
+        "Task complexity (low, high)",
+        "Tool reliability (error rate 0%, 20%)"
+      ],
+      "dependent_variables": [
+        "Task success rate",
+        "Difference in success rate (adaptive - fixed)"
+      ],
+      "controlled_variables": [
+        "Same base routing model (LLM with fixed inference budget of 1 call per routing decision)",
+        "Same set of tools (code interpreter and search API) except for injected unreliability",
+        "Same number of trials per condition (50)",
+        "Same adaptive exploration rule (decrease rate by 0.05 on success, increase by 0.1 on failure, bounded [0.01, 0.5])",
+        "Same fixed exploration rate (0.1)",
+        "Same initial state for all trials"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed exploration strategy",
+          "description": "Exploration rate fixed at 0.1 regardless of outcomes."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of trials where the final code meets all requirements without errors."
+        },
+        {
+          "name": "Success rate difference",
+          "definition": "Adaptive success rate minus fixed success rate for each (complexity, reliability) condition."
+        }
+      ],
+      "expected_result": "For low complexity and high reliability, adaptive success rate > fixed; for high complexity and low reliability, adaptive success rate < fixed; pattern holds for other combinations. Specifically, adaptive is better at low complexity and worse at high complexity, and the crossover occurs at lower complexity when reliability is lower.",
+      "falsifying_result": "If adaptive success rate is always higher or always lower than fixed regardless of complexity and reliability, or if the pattern does not show a clear crossover (e.g., adaptive better at high complexity but not at low), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use two levels of task complexity (low: generate a function with 2 subtasks; high: generate a multi-step algorithm with 10 subtasks), two exploration strategies (adaptive as defined, fixed at 0.1), and two tool reliability conditions (0% error, 20% error per tool call). For each combination, run 50 trials. The base agent is an LLM with a fixed inference budget of 1 call per routing decision. Tools include a code interpreter and a search API. Success is determined by automated tests. Analyze the success rate difference. If the difference is positive for low complexity and negative for high complexity across reliability levels, the hypothesis is supported; otherwise, it is falsified.",
+      "risks_and_confounds": [
+        "Choice of task complexity levels may not span the threshold; if both levels are on one side, we may not observe crossover. To mitigate, use pilot tests to estimate threshold.",
+        "Sample size may be insufficient to detect small differences; use power analysis to ensure 50 per condition is adequate.",
+        "The adaptive rule parameters may influence results; use a common rule from literature.",
+        "Tool reliability injection must be random and not affect task validity."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold τ of initial task ambiguity such that for tasks with ambiguity below τ, early-focused allocation yields significantly lower failure rates than uniform allocation; for tasks with ambiguity above τ, uniform allocation is not significantly different from or better than early-focused allocation.",
+      "independent_variables": [
+        "Allocation strategy (early-focused vs uniform)",
+        "Initial task ambiguity (continuous or binned)"
+      ],
+      "dependent_variables": [
+        "Failure rate per ambiguity bin",
+        "Failure rate difference between strategies"
+      ],
+      "controlled_variables": [
+        "Same set of tasks",
+        "Same agent architecture and tools",
+        "Fixed total inference budget (10 LLM calls)",
+        "Exploration rate=0.1",
+        "Multiple random seeds"
+      ],
+      "baselines": [
+        {
+          "name": "Uniform allocation",
+          "description": "Distributes inference budget equally across steps (e.g., 2.5 calls per step for 4 steps)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure rate",
+          "definition": "Proportion of tasks in an ambiguity bin that result in any failure mode (incorrect code, runtime error, suboptimal performance, or unnecessary tool use)."
+        },
+        {
+          "name": "Interaction significance",
+          "definition": "p-value of the interaction term between strategy and ambiguity in logistic regression, indicating whether the effect of strategy depends on ambiguity."
+        }
+      ],
+      "expected_result": "Significant interaction (p<0.05) with early-focused allocation yielding lower failure rates than uniform for tasks with ambiguity below a threshold τ (e.g., ~0.7 bits), and no significant difference for tasks above τ.",
+      "falsifying_result": "No significant interaction (p>0.05) between strategy and ambiguity, or interaction in opposite direction (early-focused worse at low ambiguity), or inability to identify a reliable threshold.",
+      "minimum_viable_experiment": "Select 100 coding tasks with varying initial ambiguity, measured as the entropy of tool-choice distribution from a zero-shot LLM. Group tasks into 5 ambiguity bins (e.g., equal-width). For each bin, run each task twice: once with early-focused allocation (5/3/1/1 LLM calls across 4 steps) and once with uniform allocation (2.5 calls per step), both with total budget of 10 LLM calls. Record failure rate per bin. Use logistic regression to test for interaction between strategy and ambiguity (as continuous variable). Estimate threshold τ where predicted failure rate difference crosses zero. Replicate with multiple random seeds.",
+      "risks_and_confounds": [
+        "Ambiguity measurement may be noisy; use multiple zero-shot samples to stabilize entropy estimate.",
+        "Task selection may bias results; ensure tasks cover a wide range of complexity domains.",
+        "Failure rate definition may include subjective judgments; use automated checks where possible.",
+        "Exploration rate fixed at 0.1 may not be optimal; consider sensitivity analysis.",
+        "Inference budget of 10 calls may not be representative of all deployment contexts."
+      ]
+    },
+    {
+      "hypothesis": "Below a critical threshold of internal representation accuracy, precision-optimized routing leads to a higher overall failure rate (runtime errors + suboptimal performance) compared to recall-optimized routing, reversing the typical tradeoff observed at higher accuracy levels.",
+      "independent_variables": [
+        "routing strategy (precision-optimized vs. recall-optimized)",
+        "internal representation accuracy (noise level from 0 to 1)"
+      ],
+      "dependent_variables": [
+        "overall failure rate (proportion of tasks with runtime errors or suboptimal performance)"
+      ],
+      "controlled_variables": [
+        "same set of coding tasks",
+        "same base agent (LLM, tool set)",
+        "same evaluation criteria for suboptimality",
+        "random seeds consistent across conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Perfect representation baseline",
+          "description": "Both routing strategies at noise level 0 (high accuracy) to observe the typical tradeoff."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "overall failure rate",
+          "definition": "Proportion of tasks that result in runtime errors or suboptimal performance (as judged by a predefined rubric)."
+        },
+        {
+          "name": "failure mode breakdown",
+          "definition": "Proportion of failures categorized as runtime error vs. suboptimal performance."
+        }
+      ],
+      "expected_result": "At low noise levels (high accuracy), precision-optimized routing has lower failure rate than recall-optimized routing. At high noise levels (low accuracy), precision-optimized routing has higher failure rate than recall-optimized routing. There is a statistically significant interaction between noise level and routing strategy, with a crossing point.",
+      "falsifying_result": "If the overall failure rate of precision-optimized routing is always lower (or always higher) than recall-optimized routing across all noise levels, or if the ranking does not change significantly (no interaction), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use 20 coding tasks of varying complexity. For each task, generate 5 internal representation noise levels (0, 0.25, 0.5, 0.75, 1.0) by adding controlled noise to the task specification (e.g., paraphrasing, omitting details). For each combination, run both a precision-optimized routing agent and a recall-optimized routing agent. Record failure rate per condition. Total runs: 20 tasks * 5 noise levels * 2 strategies = 200 runs.",
+      "risks_and_confounds": [
+        "Noise manipulation may not accurately reflect natural variations in internal representation accuracy.",
+        "Exploration rate and inference budget may interact with noise level, confounding results.",
+        "Task selection may bias towards certain failure modes.",
+        "Subjective evaluation of suboptimal performance may introduce bias."
+      ]
+    },
+    {
+      "hypothesis": "As task complexity increases, the proportion of silent failures among all routing failures (overt + silent) exhibits a sharp, discontinuous increase at a critical complexity threshold, indicating a phase transition from overt-dominant to silent-dominant failure modes.",
+      "independent_variables": [
+        "task complexity (continuous, measured by number of subtasks or required tool invocations)"
+      ],
+      "dependent_variables": [
+        "ratio of silent failures to total failures"
+      ],
+      "controlled_variables": [
+        "same base agent architecture (e.g., LLM-based with fixed prompt strategy)",
+        "same tool set (finite, well-defined tools)",
+        "same human expert baseline for suboptimality (experts define optimal tool-use for each task)",
+        "fixed inference budget per task (e.g., number of LLM calls allowed for routing decisions)"
+      ],
+      "baselines": [
+        {
+          "name": "Human Expert Baseline",
+          "description": "Human programmers with expertise in the domain perform the same tasks using the same tool set; their tool choices define optimal routing, and silent failures are cases where the agent's output is correct but deviates from expert choice."
+        },
+        {
+          "name": "Random Tool Selection Baseline",
+          "description": "An agent that selects tools uniformly at random at each step; this provides a lower bound for routing quality and helps calibrate the failure rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Silent Failure Rate",
+          "definition": "Number of tasks where agent output is correct (passes all tests) but tool-use is suboptimal compared to expert baseline, divided by total tasks."
+        },
+        {
+          "name": "Overt Failure Rate",
+          "definition": "Number of tasks where agent output is incorrect or produces runtime errors, divided by total tasks."
+        },
+        {
+          "name": "Total Failure Rate",
+          "definition": "Sum of overt and silent failure rates."
+        },
+        {
+          "name": "Silent-to-Total Failure Ratio",
+          "definition": "Silent failure rate divided by total failure rate (only for tasks where total failure > 0)."
+        }
+      ],
+      "expected_result": "The silent-to-total failure ratio remains low (<20%) for complexity values below a threshold C*, then within a narrow transition region (±10% of C*) rises steeply to >70%, and stabilizes at high levels above C*. The transition is robust across random seeds and agent initializations, and is well-fit by a sigmoid function with a discontinuity (e.g., change-point detected).",
+      "falsifying_result": "The silent-to-total failure ratio increases linearly or smoothly with complexity without a discernible threshold; or no significant change in ratio is observed even at extreme complexity levels; or the transition is not replicable across different agent configurations or initializations.",
+      "minimum_viable_experiment": "Use a single LLM-based coding agent with a fixed set of tools (e.g., code interpreter, web search, file reader). Develop a benchmark of 50+ coding tasks with systematically varied complexity (e.g., from 1 to 10 required tool invocations in increments of 1 or finer). For each task, run the agent multiple times (e.g., 5) to account for stochasticity. Record correctness (test suite pass/fail) and tool-use sequences. Compare tool-use to an expert-defined optimal sequence; if correct but deviating, label as silent failure. Compute the silent-to-total failure ratio per complexity level. Apply change-point detection (e.g., using the 'changepoint' library) to identify a discontinuity. If the change-point is statistically significant and the ratio shift is >40% over a small complexity range (e.g., ±2 units), the hypothesis is supported; otherwise, falsified.",
+      "risks_and_confounds": [
+        "Subjectivity of expert baseline: different experts may have different optimal tool-use sequences; use multiple experts and average.",
+        "Silent failures may be misclassified if the expert baseline is imperfect; use inter-rater reliability checks.",
+        "Task complexity definition may be confounded with other factors (e.g., length of code); ensure tasks vary only in complexity dimensions.",
+        "Agent may exhibit learning across tasks; randomize task order to avoid order effects.",
+        "Inference budget fixed may limit generalization; consider sensitivity analysis with different budgets.",
+        "Tool reliability may vary; pre-test tools to ensure consistent performance."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This work presents a first-principles analysis of tool-use routing failures in coding agents, decomposing the problem into primitives, identifying core tensions, and proposing causal mechanisms. It then formulates several falsifiable hypotheses with minimal decisive tests. The derivation is meaningful and the proposed experiments are well-designed.",
+    "strengths": [
+      "Clear and rigorous first-principles decomposition.",
+      "Identifies key tensions and bottlenecks.",
+      "Proposes novel threshold hypotheses with clear falsifiability.",
+      "Experiment designs are well-controlled and include falsifying observations.",
+      "The package addresses a timely and important problem in AI agents."
+    ],
+    "weaknesses": [
+      "The assumption that failures are observable may overlook silent failures; though T4 addresses this, it could be more tightly integrated.",
+      "The tool set assumptions (finite, well-defined) may limit generality to real-world scenarios with dynamic tools.",
+      "Some thresholds (e.g., for representation accuracy) may be difficult to measure precisely.",
+      "The experiments rely on simulated noise for independent variables, which may not reflect natural variation."
+    ],
+    "questions": [
+      "How would the results generalize to agents with dynamically growing tool sets?",
+      "Can the threshold for representation accuracy be operationalized in a real system?"
+    ],
+    "missing_baselines": [
+      "The experiments could benefit from a no-routing baseline (e.g., always using the same tool) or human expert performance for comparison."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "over-reliance on artificial manipulations",
+    "root_cause": "The experiments propose thresholds based on injected noise and controlled task complexity that are not directly observable in real coding agent deployments, limiting the practical validity of the findings.",
+    "violated_principle": "Experimental designs must be grounded in naturally occurring variation or standard benchmarks to ensure real-world relevance and reproducibility.",
+    "new_or_updated_principle": "All hypotheses should be testable using existing, widely-used benchmarks (e.g., SWE-bench, HumanEval) or using naturally occurring variation in real-world coding tasks, without requiring artificial manipulation of independent variables that are not present in practice.",
+    "new_or_updated_skill": "Design experiments that leverage existing benchmarks and naturally occurring variability in task complexity, tool reliability, and representation accuracy, rather than injecting artificial noise or constructing synthetic tasks.",
+    "regression_test": "For every proposed experiment, verify that the independent variables can be measured or controlled using existing coding agent benchmarks (e.g., SWE-bench, HumanEval, or a curated dataset of real coding tasks) without requiring artificial manipulation. If the experiment requires injecting noise or constructing tasks that do not exist in standard benchmarks, the experiment must be redesigned."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "What is the critical task complexity threshold above which dynamically adjusting the exploration rate based on recent outcomes transitions from beneficial to harmful in tool routing for coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Under a fixed inference budget, does the effectiveness of early-focused versus uniform budget allocation for tool-use routing in coding agents depend on initial task ambiguity, and is there a threshold of ambiguity where the optimal strategy switches?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a threshold level of internal representation accuracy below which precision-optimized routing fails more severely than recall-optimized routing, reversing the typical tradeoff?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold in task complexity beyond which tool-use routing failures in coding agents undergo a phase transition from predominantly overt failures to predominantly silent failures?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

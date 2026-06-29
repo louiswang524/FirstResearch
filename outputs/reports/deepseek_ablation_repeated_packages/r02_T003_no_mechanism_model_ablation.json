@@ -1,0 +1,803 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An autonomous entity that perceives its environment (code, context, task) and selects actions (tool invocations) to accomplish a coding goal.",
+        "why_primitive": "The agent is the fundamental decision-making unit; all routing behavior originates from its internal state and policy."
+      },
+      {
+        "name": "Tool",
+        "definition": "A well-defined external capability with a specific interface (input/output), execution cost (time, tokens, side effects), and effect on the environment (e.g., running code, fetching data).",
+        "why_primitive": "Tools are the atomic actions available to the agent; their properties define the action space and directly determine possible outcomes."
+      },
+      {
+        "name": "Routing",
+        "definition": "The process of mapping current context (task, environment state, history) to a sequence of tool invocations, including when to invoke and which tool to use.",
+        "why_primitive": "Routing is the core mechanism linking the agent's decision to tool execution; failures in routing directly cause suboptimal or incorrect behavior."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Tools have known, stable interfaces and deterministic outcomes given valid inputs.",
+        "rationale": "Most routing systems assume tool behavior is predictable; otherwise, the agent cannot plan effectively.",
+        "possible_failure": "Tools like code execution can produce unexpected errors or non-deterministic outputs (e.g., network calls), leading to misrouting."
+      },
+      {
+        "assumption": "The agent has accurate knowledge of each tool's capabilities and current state.",
+        "rationale": "Routing decisions rely on matching tool capabilities to task needs; imperfect knowledge causes selection of unsuitable tools.",
+        "possible_failure": "New or updated tools, or ambiguous task descriptions, cause the agent to misjudge tool suitability, leading to failure."
+      },
+      {
+        "assumption": "The task is decomposable into linear steps that can be sequentially mapped to tool calls.",
+        "rationale": "Typical routing policies assume a clear progression; complex interdependent tasks break this assumption.",
+        "possible_failure": "When steps require parallel tool use or dynamic re-planning, sequential routing leads to dead ends or inefficient sequences."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. exploitation: trying new/risky tools vs. sticking with familiar reliable ones.",
+        "variables": [
+          "uncertainty about tool performance",
+          "novelty of task",
+          "time budget"
+        ]
+      },
+      {
+        "tradeoff": "Tool specificity vs. generality: using a precise tool for a narrow task vs. a general-purpose tool like a code interpreter.",
+        "variables": [
+          "task ambiguity",
+          "tool failure rate",
+          "execution cost"
+        ]
+      },
+      {
+        "tradeoff": "Greedy local optimization vs. global planning: choosing the best immediate tool vs. considering long-term consequences.",
+        "variables": [
+          "state space size",
+          "planning horizon",
+          "computational resources"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "topic condition",
+        "role": "input",
+        "description": "The observed condition in When does tool-use routing fail in coding agents?."
+      },
+      {
+        "name": "research outcome",
+        "role": "outcome",
+        "description": "The measured outcome or failure mode proposed by the research question."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+        "source": null,
+        "relation": null,
+        "target": null,
+        "explanation": null
+      }
+    ],
+    "bottlenecks": [],
+    "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+  },
+  "tensions": [
+    {
+      "tension_id": "t1",
+      "statement": "Assumption that tools have deterministic outcomes conflicts with the reality that tools like code execution or network calls can produce errors or non-deterministic outputs, leading to misrouting.",
+      "derived_from": [
+        "Tool",
+        "Assumption: Tools have known, stable interfaces and deterministic outcomes given valid inputs."
+      ],
+      "why_it_matters": "If tool behavior is not predictable, the agent cannot plan effectively, and routing decisions based on expected outcomes may fail, causing cascading errors in task completion.",
+      "what_existing_methods_may_miss": "Existing methods often assume tool determinism or treat failures as exogenous; they may not model the stochastic behavior of tools as an intrinsic part of the routing problem.",
+      "testability": 4
+    },
+    {
+      "tension_id": "t2",
+      "statement": "The tradeoff between exploration (trying new/risky tools) and exploitation (sticking with familiar reliable ones) is critical for routing failure, as agents must balance learning about tool performance against execution cost and task novelty.",
+      "derived_from": [
+        "Agent",
+        "Routing",
+        "Tradeoff: Exploration vs. exploitation"
+      ],
+      "why_it_matters": "Failure to explore sufficiently may lead to suboptimal tool choices when tasks require novel capabilities; over-exploration wastes resources and may cause failures due to untested tools.",
+      "what_existing_methods_may_miss": "Many routing systems use fixed policies or greedy selection, ignoring the need for adaptive exploration-exploitation strategies that depend on task uncertainty and time constraints.",
+      "testability": 5
+    },
+    {
+      "tension_id": "t3",
+      "statement": "The assumption that tasks are decomposable into linear sequential steps conflicts with complex tasks that require parallel tool invocations or dynamic re-planning, leading to dead ends or inefficient sequences.",
+      "derived_from": [
+        "Routing",
+        "Assumption: The task is decomposable into linear steps that can be sequentially mapped to tool calls."
+      ],
+      "why_it_matters": "When the task structure is non-linear, sequential routing models fail to capture dependencies and may select tools that block progress, requiring backtracking or manual correction.",
+      "what_existing_methods_may_miss": "Current routing methods largely assume linearity; they lack mechanisms for concurrent tool execution or online re-planning, which are essential for complex real-world coding tasks.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does the stochasticity of tool outputs causally increase the rate of routing failures in coding agents?",
+      "question_type": "causal",
+      "source_tension": "t1",
+      "expected_contribution": "Establishes whether non-deterministic tool behavior is a root cause of routing failures, motivating the need for probabilistic models in tool selection."
+    },
+    {
+      "question": "What exploration-exploitation strategy minimizes routing failures in coding agents when facing tasks with unknown tool reliability?",
+      "question_type": "algorithmic",
+      "source_tension": "t2",
+      "expected_contribution": "Provides an adaptive policy that balances learning about tool performance with execution cost, reducing failures from both insufficient exploration and over-exploration."
+    },
+    {
+      "question": "How does the assumption of linear task decomposition lead to routing failures in coding agents performing non-linear tasks?",
+      "question_type": "diagnostic",
+      "source_tension": "t3",
+      "expected_contribution": "Identifies specific failure modes (e.g., dead ends, inefficient sequences) caused by sequential routing on non-linear tasks, informing the design of parallel or re-planning mechanisms."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment (code, context, task) and selects actions (tool invocations) to accomplish a coding goal.",
+          "why_primitive": "The agent is the fundamental decision-making unit; all routing behavior originates from its internal state and policy."
+        },
+        {
+          "name": "Tool",
+          "definition": "A well-defined external capability with a specific interface (input/output), execution cost (time, tokens, side effects), and effect on the environment (e.g., running code, fetching data).",
+          "why_primitive": "Tools are the atomic actions available to the agent; their properties define the action space and directly determine possible outcomes."
+        },
+        {
+          "name": "Routing",
+          "definition": "The process of mapping current context (task, environment state, history) to a sequence of tool invocations, including when to invoke and which tool to use.",
+          "why_primitive": "Routing is the core mechanism linking the agent's decision to tool execution; failures in routing directly cause suboptimal or incorrect behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have known, stable interfaces and deterministic outcomes given valid inputs.",
+          "rationale": "Most routing systems assume tool behavior is predictable; otherwise, the agent cannot plan effectively.",
+          "possible_failure": "Tools like code execution can produce unexpected errors or non-deterministic outputs (e.g., network calls), leading to misrouting."
+        },
+        {
+          "assumption": "The agent has accurate knowledge of each tool's capabilities and current state.",
+          "rationale": "Routing decisions rely on matching tool capabilities to task needs; imperfect knowledge causes selection of unsuitable tools.",
+          "possible_failure": "New or updated tools, or ambiguous task descriptions, cause the agent to misjudge tool suitability, leading to failure."
+        },
+        {
+          "assumption": "The task is decomposable into linear steps that can be sequentially mapped to tool calls.",
+          "rationale": "Typical routing policies assume a clear progression; complex interdependent tasks break this assumption.",
+          "possible_failure": "When steps require parallel tool use or dynamic re-planning, sequential routing leads to dead ends or inefficient sequences."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "t2",
+        "statement": "The tradeoff between exploration (trying new/risky tools) and exploitation (sticking with familiar reliable ones) is critical for routing failure, as agents must balance learning about tool performance against execution cost and task novelty.",
+        "derived_from": [
+          "Agent",
+          "Routing",
+          "Tradeoff: Exploration vs. exploitation"
+        ],
+        "why_it_matters": "Failure to explore sufficiently may lead to suboptimal tool choices when tasks require novel capabilities; over-exploration wastes resources and may cause failures due to untested tools.",
+        "what_existing_methods_may_miss": "Many routing systems use fixed policies or greedy selection, ignoring the need for adaptive exploration-exploitation strategies that depend on task uncertainty and time constraints.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "At what level of uncertainty about tool reliability (measured as posterior variance) does exploration become harmful relative to exploitation in coding agents with limited step budgets?",
+        "question_type": "algorithmic",
+        "source_tension": "t2",
+        "expected_contribution": "Identifies a critical uncertainty threshold that determines when exploration-induced routing failures exceed the benefits of learning, enabling adaptive policies that dynamically halt exploration near budget limits."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical uncertainty threshold (e.g., posterior variance > 0.5) above which exploration increases routing failure rate because the cost of exploring unknown tools outweighs potential gains within the remaining step budget; below this threshold, exploration reduces failures.",
+        "predicted_effect": "The failure rate will exhibit a sharp increase when tool uncertainty exceeds the threshold, especially when step budgets are tight, leading to a phase transition in optimal exploration behavior."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with four tools (code execution, file search, web search, debugger) whose true reliability (0.2–0.9) is unknown. Agent uses a Bayesian update with a Beta prior to estimate reliability (posterior variance as uncertainty). Step budget per task is varied (5, 10, 20 steps). For each budget level, run 100 tasks with initial prior variance set to 0.1, 0.3, 0.5, 0.7, 0.9. Agent uses epsilon-greedy with epsilon=0.2 for exploration. Measure cumulative failure rate (tool calls resulting in error) per budget-uncertainty combination. Look for discontinuity in failure rate as a function of initial uncertainty.",
+        "independent_variables": [
+          "initial uncertainty (posterior variance of tool reliability)",
+          "step budget per task (5, 10, 20)",
+          "true tool reliability distribution"
+        ],
+        "dependent_variables": [
+          "cumulative routing failure rate",
+          "proportion of tool calls to explored vs. exploited tools",
+          "average task completion rate"
+        ],
+        "controls": [
+          "same set of tasks and tools across conditions",
+          "identical agent architecture, exploration policy, and learning rule",
+          "random seed reproduction for reliability initialization",
+          "same prior parameters (Beta distribution shape)"
+        ],
+        "falsifying_observation": "If the failure rate decreases monotonically with decreasing uncertainty (i.e., no sharp threshold or phase transition), or if the threshold does not vary with step budget, the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate exhibits a step increase when initial posterior variance exceeds ≈0.5, and this threshold shifts lower with smaller step budgets.",
+          "Below threshold, exploration reduces failure rate by discovering better tools; above threshold, exploration increases failure rate due to wasted steps.",
+          "The observed threshold aligns with a predicted phase transition where expected cost of exploration exceeds expected benefit within remaining budget."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate decreases monotonically as uncertainty decreases, with no discontinuity.",
+          "No systematic dependence of failure rate on uncertainty after controlling for task difficulty.",
+          "The threshold does not shift with step budget, indicating no interaction between uncertainty and budget."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp uncertainty threshold is observed, then the assumption that agents can reliably estimate and use posterior variance as a measure of exploration cost is invalid.",
+        "assumption_to_revise": "The assumption that tool reliability is learnable from binary feedback in a stationary environment such that posterior variance accurately captures decision-relevant uncertainty.",
+        "next_question": "Under what conditions (e.g., non-stationary tools, correlated failures) can agents reliably quantify exploration benefit to avoid harmful exploration?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment (code, context, task) and selects actions (tool invocations) to accomplish a coding goal.",
+          "why_primitive": "The agent is the fundamental decision-making unit; all routing behavior originates from its internal state and policy."
+        },
+        {
+          "name": "Tool",
+          "definition": "A well-defined external capability with a specific interface (input/output), execution cost (time, tokens, side effects), and effect on the environment (e.g., running code, fetching data).",
+          "why_primitive": "Tools are the atomic actions available to the agent; their properties define the action space and directly determine possible outcomes."
+        },
+        {
+          "name": "Routing",
+          "definition": "The process of mapping current context (task, environment state, history) to a sequence of tool invocations, including when to invoke and which tool to use.",
+          "why_primitive": "Routing is the core mechanism linking the agent's decision to tool execution; failures in routing directly cause suboptimal or incorrect behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have known, stable interfaces and deterministic outcomes given valid inputs.",
+          "rationale": "Most routing systems assume tool behavior is predictable; otherwise, the agent cannot plan effectively.",
+          "possible_failure": "Tools like code execution can produce unexpected errors or non-deterministic outputs (e.g., network calls), leading to misrouting."
+        },
+        {
+          "assumption": "The agent has accurate knowledge of each tool's capabilities and current state.",
+          "rationale": "Routing decisions rely on matching tool capabilities to task needs; imperfect knowledge causes selection of unsuitable tools.",
+          "possible_failure": "New or updated tools, or ambiguous task descriptions, cause the agent to misjudge tool suitability, leading to failure."
+        },
+        {
+          "assumption": "The task is decomposable into linear steps that can be sequentially mapped to tool calls.",
+          "rationale": "Typical routing policies assume a clear progression; complex interdependent tasks break this assumption.",
+          "possible_failure": "When steps require parallel tool use or dynamic re-planning, sequential routing leads to dead ends or inefficient sequences."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "t1",
+        "statement": "Assumption that tools have deterministic outcomes conflicts with the reality that tools like code execution or network calls can produce errors or non-deterministic outputs, leading to misrouting.",
+        "derived_from": [
+          "Tool",
+          "Assumption: Tools have known, stable interfaces and deterministic outcomes given valid inputs."
+        ],
+        "why_it_matters": "If tool behavior is not predictable, the agent cannot plan effectively, and routing decisions based on expected outcomes may fail, causing cascading errors in task completion.",
+        "what_existing_methods_may_miss": "Existing methods often assume tool determinism or treat failures as exogenous; they may not model the stochastic behavior of tools as an intrinsic part of the routing problem.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of tool-output stochasticity beyond which routing failure rates in coding agents increase nonlinearly, and does this threshold depend on the agent's uncertainty calibration?",
+        "question_type": "causal",
+        "source_tension": "t1",
+        "expected_contribution": "Identifies a nonlinear phase transition in routing reliability as a function of stochasticity and agent calibration, moving beyond linear assumptions to a boundary-condition-aware understanding."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of tool-output stochasticity (e.g., >20% error rate) beyond which routing failures increase at a disproportionately higher rate; moreover, this threshold is lower for agents with poor uncertainty calibration.",
+        "predicted_effect": "Routing failure rate will show a nonlinear jump at a critical stochasticity level, and the jump point will shift left (lower stochasticity) for poorly calibrated agents."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Run a controlled experiment with a coding agent on a set of tasks requiring tool use (code execution, file search, web API). Vary tool stochasticity at levels: 0%, 10%, 20%, 30%, 50% error rate (random outputs). Also vary agent uncertainty calibration: well-calibrated (e.g., using a calibration module) vs. poorly calibrated (no calibration). For each combination, measure routing failure rate (proportion of tasks with incorrect tool selection or incomplete task). Fit a piecewise linear regression to detect a breakpoint in stochasticity. Test for interaction with calibration.",
+        "independent_variables": [
+          "Stochasticity level (0%, 10%, 20%, 30%, 50% error rate)",
+          "Agent calibration (well-calibrated vs. poorly calibrated)"
+        ],
+        "dependent_variables": [
+          "Routing failure rate"
+        ],
+        "controls": [
+          "Same agent base policy",
+          "Same set of tasks and tools",
+          "Same environment and context",
+          "Random seed for agent's decisions",
+          "Number of trials per condition (≥100)"
+        ],
+        "falsifying_observation": "If the routing failure rate increases linearly with stochasticity (no significant breakpoint) and there is no significant interaction with calibration (i.e., the effect of stochasticity is the same for both calibration conditions), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A significant breakpoint is detected in the stochasticity-failure curve, with a steeper slope after the threshold.",
+          "The breakpoint occurs at a lower stochasticity level for poorly calibrated agents compared to well-calibrated ones.",
+          "Qualitative analysis shows that failures after the threshold are particularly due to agents misinterpreting unexpected tool outputs."
+        ],
+        "rejects_hypothesis": [
+          "No significant breakpoint; failure rate increases linearly with stochasticity.",
+          "No significant difference in breakpoint location between calibration conditions.",
+          "The effect of stochasticity on failure rate is the same regardless of calibration."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (no nonlinear threshold or no calibration interaction), then we revise the assumption that stochasticity alone drives routing failures in a nonlinear way.",
+        "assumption_to_revise": "The assumption that there is a universal threshold based on stochasticity and calibration should be updated; instead, consider that the agent's policy may adapt to stochasticity (e.g., through retry mechanisms) or that other factors like task complexity dominate.",
+        "next_question": "Under what combination of task complexity and tool stochasticity does routing failure exhibit a phase transition, if any?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment (code, context, task) and selects actions (tool invocations) to accomplish a coding goal.",
+          "why_primitive": "The agent is the fundamental decision-making unit; all routing behavior originates from its internal state and policy."
+        },
+        {
+          "name": "Tool",
+          "definition": "A well-defined external capability with a specific interface (input/output), execution cost (time, tokens, side effects), and effect on the environment (e.g., running code, fetching data).",
+          "why_primitive": "Tools are the atomic actions available to the agent; their properties define the action space and directly determine possible outcomes."
+        },
+        {
+          "name": "Routing",
+          "definition": "The process of mapping current context (task, environment state, history) to a sequence of tool invocations, including when to invoke and which tool to use.",
+          "why_primitive": "Routing is the core mechanism linking the agent's decision to tool execution; failures in routing directly cause suboptimal or incorrect behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Tools have known, stable interfaces and deterministic outcomes given valid inputs.",
+          "rationale": "Most routing systems assume tool behavior is predictable; otherwise, the agent cannot plan effectively.",
+          "possible_failure": "Tools like code execution can produce unexpected errors or non-deterministic outputs (e.g., network calls), leading to misrouting."
+        },
+        {
+          "assumption": "The agent has accurate knowledge of each tool's capabilities and current state.",
+          "rationale": "Routing decisions rely on matching tool capabilities to task needs; imperfect knowledge causes selection of unsuitable tools.",
+          "possible_failure": "New or updated tools, or ambiguous task descriptions, cause the agent to misjudge tool suitability, leading to failure."
+        },
+        {
+          "assumption": "The task is decomposable into linear steps that can be sequentially mapped to tool calls.",
+          "rationale": "Typical routing policies assume a clear progression; complex interdependent tasks break this assumption.",
+          "possible_failure": "When steps require parallel tool use or dynamic re-planning, sequential routing leads to dead ends or inefficient sequences."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "t3",
+        "statement": "The assumption that tasks are decomposable into linear sequential steps conflicts with complex tasks that require parallel tool invocations or dynamic re-planning, leading to dead ends or inefficient sequences.",
+        "derived_from": [
+          "Routing",
+          "Assumption: The task is decomposable into linear steps that can be sequentially mapped to tool calls."
+        ],
+        "why_it_matters": "When the task structure is non-linear, sequential routing models fail to capture dependencies and may select tools that block progress, requiring backtracking or manual correction.",
+        "what_existing_methods_may_miss": "Current routing methods largely assume linearity; they lack mechanisms for concurrent tool execution or online re-planning, which are essential for complex real-world coding tasks.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "At what level of task interdependency does sequential tool-use routing in coding agents transition from effective to failure-prone?",
+        "question_type": "diagnostic",
+        "source_tension": "t3",
+        "expected_contribution": "Identifies a critical threshold of task interdependency (e.g., dependency graph density > 0.5) where sequential routing incurs >50% dead-end rate, informing the design of adaptive routing policies that switch to parallel or re-planning mechanisms only when needed."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of task interdependency (measured as the ratio of task-step dependencies to total possible dependencies) above which sequential routing policies produce significantly more dead ends and inefficient sequences compared to policies with parallel or dynamic re-planning capabilities.",
+        "predicted_effect": "On tasks with high interdependency (e.g., >0.5), sequential agents will exhibit a >2x increase in dead-end rate and >1.5x increase in tool calls relative to parallel agents, while below the threshold performance is comparable."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a suite of coding tasks with varying levels of task interdependency (e.g., 0.0, 0.2, 0.4, 0.6, 0.8, 1.0) measured by the proportion of steps that depend on outputs of previous steps. For each level, compare a sequential router (ReAct-style) against a parallel router (allowing concurrent tool calls) on task success rate, number of tool calls, and dead-end incidence. Use the same base LLM (e.g., GPT-4) and tool set.",
+        "independent_variables": [
+          "task interdependency level (continuous from 0 to 1)",
+          "routing strategy (sequential vs. parallel/re-planning)"
+        ],
+        "dependent_variables": [
+          "task success rate",
+          "number of tool calls (efficiency)",
+          "incidence of dead ends (steps with no progress)"
+        ],
+        "controls": [
+          "same base LLM",
+          "same tool set",
+          "same time budget",
+          "same prompt format"
+        ],
+        "falsifying_observation": "If no clear threshold is observed (e.g., sequential and parallel agents show similar performance across all interdependency levels), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low interdependency (<0.3), both agents achieve >90% success rate with similar tool calls.",
+          "At high interdependency (>0.5), sequential agent success rate drops below 50% and dead-end rate exceeds 30%, while parallel agent maintains >80% success.",
+          "A sharp transition in success rate occurs around interdependency level 0.4-0.6."
+        ],
+        "rejects_hypothesis": [
+          "Both agents perform similarly at all interdependency levels.",
+          "Sequential agent maintains >80% success rate even at high interdependency.",
+          "No sharp transition observed; performance degrades gradually."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then the assumption that task interdependency alone drives the failure of sequential routing is incorrect.",
+        "assumption_to_revise": "The assumption that task interdependency (as defined) is the primary factor causing sequential routing failures.",
+        "next_question": "What specific properties of task structures (e.g., dynamic dependencies, re-planning frequency, tool interaction constraints) actually trigger routing failures in sequential agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold of tool-output stochasticity (e.g., >20% error rate) beyond which routing failures increase at a disproportionately higher rate; moreover, this threshold is lower for agents with poor uncertainty calibration.",
+      "independent_variables": [
+        "Stochasticity level (0%, 10%, 20%, 30%, 50% error rate)",
+        "Agent calibration (well-calibrated vs. poorly calibrated)"
+      ],
+      "dependent_variables": [
+        "Routing failure rate"
+      ],
+      "controlled_variables": [
+        "Same agent base policy",
+        "Same set of tasks and tools",
+        "Same environment and context",
+        "Random seed for agent's decisions",
+        "Number of trials per condition (≥100)"
+      ],
+      "baselines": [
+        {
+          "name": "Ideal baseline",
+          "description": "0% stochasticity with well-calibrated agent"
+        },
+        {
+          "name": "Calibration baseline",
+          "description": "0% stochasticity with poorly calibrated agent"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing failure rate",
+          "definition": "Proportion of tasks where incorrect tool selection or incomplete task occurs"
+        }
+      ],
+      "expected_result": "A significant breakpoint in the stochasticity-failure curve, with steeper slope after the threshold. The breakpoint occurs at a lower stochasticity level for poorly calibrated agents compared to well-calibrated ones.",
+      "falsifying_result": "No significant breakpoint; failure rate increases linearly with stochasticity. No significant interaction between calibration and stochasticity on failure rate.",
+      "minimum_viable_experiment": "Run a controlled experiment with a coding agent on a set of tasks requiring tool use (code execution, file search, web API). Vary tool stochasticity at levels: 0%, 10%, 20%, 30%, 50% error rate (random outputs). Also vary agent uncertainty calibration: well-calibrated (e.g., using a calibration module) vs. poorly calibrated (no calibration). For each combination, measure routing failure rate (proportion of tasks with incorrect tool selection or incomplete task). Fit a piecewise linear regression to detect a breakpoint in stochasticity. Test for interaction with calibration.",
+      "risks_and_confounds": [
+        "Agent policy may adapt over trials (e.g., retry), reducing apparent failure rate; use sufficient trials and consider blocking on time.",
+        "Task complexity variation may confound results; use same set of tasks across conditions.",
+        "Non-deterministic tool outputs may be correlated with task difficulty; randomize error patterns.",
+        "Sample size must be adequate to detect breakpoint; power analysis may be needed.",
+        "Agent's internal uncertainty calibration may be influenced by stochasticity itself; monitor calibration over time."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical uncertainty threshold (e.g., posterior variance > 0.5) above which exploration increases routing failure rate because the cost of exploring unknown tools outweighs potential gains within the remaining step budget; below this threshold, exploration reduces failures.",
+      "independent_variables": [
+        "initial uncertainty (posterior variance of tool reliability): low (0.3) vs. high (0.7)",
+        "step budget per task: tight (5) vs. loose (20)"
+      ],
+      "dependent_variables": [
+        "cumulative routing failure rate (proportion of tool calls that result in error)",
+        "average task completion rate",
+        "proportion of tool calls to explored vs. exploited tools"
+      ],
+      "controlled_variables": [
+        "same set of 100 coding tasks across all conditions",
+        "same four tools (code execution, file search, web search, debugger) with fixed but unknown true reliabilities (uniformly sampled from [0.2, 0.9])",
+        "identical agent architecture using Bayesian Beta prior with shape parameters α=1, β=1 for initial prior (adjusted for variance: low variance uses α=5, β=5; high variance uses α=1, β=1)",
+        "exploration policy: epsilon-greedy with epsilon=0.2",
+        "random seed for reproducibility of tool reliability initialization and task order",
+        "same random seed for each condition to control stochasticity"
+      ],
+      "baselines": [
+        {
+          "name": "pure exploitation",
+          "description": "Agent uses epsilon-greedy with epsilon=0 (no exploration), so it always selects the tool with highest estimated reliability based on prior and observed feedback."
+        },
+        {
+          "name": "oracle",
+          "description": "Agent knows true tool reliabilities and always selects the best tool, representing optimal performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure rate",
+          "definition": "Number of tool calls resulting in an error (e.g., runtime error, incorrect output) divided by total tool calls across all tasks."
+        },
+        {
+          "name": "task completion rate",
+          "definition": "Proportion of tasks successfully completed within the step budget."
+        },
+        {
+          "name": "exploration proportion",
+          "definition": "Number of tool calls where the selected tool is not the one with highest current estimated reliability, divided by total tool calls."
+        }
+      ],
+      "expected_result": "For low uncertainty (posterior variance 0.3), failure rate is lower than for high uncertainty (0.7), and this difference is larger under tight budget (5 steps) than loose budget (20 steps). The failure rate under high uncertainty with tight budget is significantly higher than under other conditions, indicating a threshold effect.",
+      "falsifying_result": "Failure rate decreases monotonically as uncertainty decreases (i.e., low uncertainty always gives lower failure rate than high uncertainty) with no sharp discontinuity, or the effect of uncertainty does not interact with step budget (i.e., the difference between low and high uncertainty is similar for both budgets). Alternatively, if high uncertainty with tight budget does not produce the highest failure rate, the hypothesis is rejected.",
+      "minimum_viable_experiment": "Simulate a coding agent with four tools. Set initial prior variance to low (0.3) or high (0.7) by choosing Beta prior parameters (α=5,β=5 for low variance; α=1,β=1 for high variance). Use two step budgets: 5 and 20 steps per task. Run 100 tasks per condition with the same set of tasks and true tool reliabilities. Agent uses epsilon-greedy (epsilon=0.2) to explore. Record cumulative failure rate. Compare failure rates across the four conditions (2 uncertainties × 2 budgets).",
+      "risks_and_confounds": [
+        "Task difficulty may vary across tasks, potentially masking uncertainty effects; counter by using same tasks across conditions.",
+        "The specific threshold (0.5) is arbitrary; the hypothesis only posits existence of some threshold, so a single high and low may not capture it; if the true threshold is between 0.3 and 0.7, the experiment may still show an effect but not a sharp transition; the experiment tests for a difference, not the exact threshold.",
+        "Tool reliability distribution may affect exploration benefit; fix reliability sampling to reduce variance.",
+        "Stochasticity in agent decisions may require multiple runs; use random seed control and average over seeds."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold of task interdependency (measured as the ratio of task-step dependencies to total possible dependencies) above which sequential routing policies produce significantly more dead ends and inefficient sequences compared to policies with parallel or dynamic re-planning capabilities.",
+      "independent_variables": [
+        "task interdependency level (continuous from 0 to 1)",
+        "routing strategy (sequential vs. parallel/re-planning)"
+      ],
+      "dependent_variables": [
+        "task success rate",
+        "number of tool calls (efficiency)",
+        "incidence of dead ends (steps with no progress)"
+      ],
+      "controlled_variables": [
+        "same base LLM (e.g., GPT-4)",
+        "same tool set",
+        "same time budget",
+        "same prompt format"
+      ],
+      "baselines": [
+        {
+          "name": "Sequential router (ReAct-style)",
+          "description": "Agent that selects tools sequentially based on current context, typical of many coding agents."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "task success rate",
+          "definition": "Fraction of tasks where the agent achieves the coding goal without external intervention."
+        },
+        {
+          "name": "number of tool calls",
+          "definition": "Total number of tool invocations recorded per task."
+        },
+        {
+          "name": "dead end incidence",
+          "definition": "Number of steps where the agent makes no progress (e.g., repeated tool calls, no output) leading to termination or reset."
+        }
+      ],
+      "expected_result": "At low interdependency (<0.3), both agents achieve >90% success rate with similar tool calls. At high interdependency (>0.5), sequential agent success rate drops below 50% and dead-end rate exceeds 30%, while parallel agent maintains >80% success. A sharp transition in success rate occurs around interdependency level 0.4-0.6.",
+      "falsifying_result": "If no clear threshold is observed (e.g., sequential and parallel agents show similar performance across all interdependency levels) or if sequential agent maintains >80% success rate even at high interdependency, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Create coding tasks at 6 interdependency levels (0.0, 0.2, 0.4, 0.6, 0.8, 1.0). For each level, run 5 tasks with a sequential router and 5 with a parallel router (total 60 tasks). Use GPT-4 with identical prompts and tool set. Measure success, tool calls, dead ends per task. Compare performance across levels to identify threshold.",
+      "risks_and_confounds": [
+        "Task difficulty may not be fully captured by interdependency metric alone; other factors like step complexity could vary.",
+        "LLM sampling randomness may cause variability; use low temperature or multiple seeds to mitigate.",
+        "Tool execution failures (e.g., timeout, exception) unrelated to routing could distort results.",
+        "Small sample size (5 per condition) may not reliably detect threshold; power analysis suggests but minimal viability prioritizes resource constraints.",
+        "Results may be specific to the chosen task suite; replication with diverse tasks needed for generalization."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles decomposition of tool-use routing failures in coding agents, identifies three key tensions (stochasticity, exploration-exploitation, task interdependency), and proposes experiments to detect critical thresholds. The work is well-structured and addresses an important problem, but the lack of an explicit mechanism model and limited baselines weaken the contribution.",
+    "strengths": [
+      "Clear first-principles derivation of primitives (agent, tool, routing) and assumptions.",
+      "Identifies three concrete, testable tensions with causal implications.",
+      "Experiments are well-designed with falsifiable hypotheses and controlled variables.",
+      "Addresses a timely and practical problem in AI agent reliability.",
+      "High clarity in definitions and tradeoffs."
+    ],
+    "weaknesses": [
+      "No explicit mechanism model is constructed; the causal chain is ablated, reducing theoretical depth.",
+      "Experiments rely on synthetic tasks with small sample sizes (e.g., 5 tasks per condition), limiting statistical power and generalizability.",
+      "Missing baselines such as random routing, Thompson sampling, UCB, or heuristic policies that could better contextualize the results.",
+      "Overclaiming: novelty scores of 5/5 are ambitious; the thresholds proposed are similar to known concepts in reinforcement learning (e.g., exploration-exploitation tradeoff).",
+      "The assumption of Beta priors for tool reliability may not hold in real-world scenarios with non-stationary tools.",
+      "Potential confounds: task difficulty, LLM stochasticity, and tool execution errors are not fully addressed."
+    ],
+    "questions": [
+      "How would the results change if tool reliability is non-stationary (e.g., temporal drift)?",
+      "Are the proposed thresholds robust across different coding tasks and tool sets?",
+      "Why was Thompson sampling, a standard exploration strategy, not included as a baseline?"
+    ],
+    "missing_baselines": [
+      "Random routing (chooses tool uniformly at random)",
+      "Thompson sampling for exploration-exploitation",
+      "Upper Confidence Bound (UCB) algorithm",
+      "Fixed heuristic (e.g., always use the most expensive tool first)",
+      "Ensemble or meta-learning approach"
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Mechanism Ablation",
+    "root_cause": "The mechanism_builder was disabled, so no explicit mechanism model was constructed before tension finding, leading to a lack of causal depth.",
+    "violated_principle": "All research packages must construct an explicit mechanism model from primitive definitions and assumptions before generating tensions.",
+    "new_or_updated_principle": "Mechanism model construction is mandatory: every research package must include a causal chain that logically links primitives and assumptions to the outcome variables, with identification of bottlenecks.",
+    "new_or_updated_skill": "Mechanism Model Builder: given primitive definitions and assumptions, produce a causal chain (steps, sources, targets, relations) and identify bottlenecks. This skill should be executed before the tension finder.",
+    "regression_test": "After running the mechanism_builder, verify that mechanism_model.causal_chain has at least one valid step, mechanism_model.bottlenecks is a list, and mechanism_model.mechanism_summary does not contain the word 'ablation' or 'omits'. If the sum of lengths of causal_chain and bottlenecks is zero, fail the test."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold of tool-output stochasticity beyond which routing failure rates in coding agents increase nonlinearly, and does this threshold depend on the agent's uncertainty calibration?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of uncertainty about tool reliability (measured as posterior variance) does exploration become harmful relative to exploitation in coding agents with limited step budgets?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of task interdependency does sequential tool-use routing in coding agents transition from effective to failure-prone?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": false,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_mechanism_model_ablation",
+    "ablation": "mechanism_builder_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

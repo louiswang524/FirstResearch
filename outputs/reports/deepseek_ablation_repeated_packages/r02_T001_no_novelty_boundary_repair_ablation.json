@@ -1,0 +1,1292 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable unit of behavior or capability that an agent can execute to achieve a subgoal or perform a specific action.",
+        "why_primitive": "Skills are the atomic building blocks of agent behavior; they cannot be decomposed into smaller meaningful units without losing functional significance."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining existing skills in a sequential or parallel manner to achieve a task that none of the skills alone can accomplish.",
+        "why_primitive": "Composition is a fundamental operation for reusing existing knowledge; it is irreducible because it relies solely on the agent's current skill set."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of creating or learning a new skill that was not previously part of the agent's repertoire, often via exploration, trial-and-error, or learning from data.",
+        "why_primitive": "Discovery is a distinct mechanism for expanding capabilities; it cannot be reduced to composition because it introduces novel behaviors not derivable from existing skills."
+      },
+      {
+        "name": "Task",
+        "definition": "A goal or objective that the agent must accomplish, typically specified by a utility function, reward signal, or user instruction.",
+        "why_primitive": "Tasks define the purpose of agent behavior; without a task, the notions of skill, composition, and discovery are meaningless."
+      },
+      {
+        "name": "Cost",
+        "definition": "The resources consumed by the agent in performing an action, including time, computation, data, memory, or energy.",
+        "why_primitive": "Cost is the primary constraint that drives the trade-off between composition and discovery; without cost, any decision could be arbitrary."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent has a fixed but non-empty set of existing skills that can be composed.",
+        "rationale": "If no skills exist, discovery is always necessary; if skills exist, composition becomes a viable alternative. This assumption sets up the decision problem.",
+        "possible_failure": "If the set of existing skills is empty or incomplete, composition may be impossible for many tasks, biasing the decision toward discovery."
+      },
+      {
+        "assumption": "Tasks are decomposable into subgoals that can be achieved by either a single skill or a composition of skills.",
+        "rationale": "This ensures that both composition and discovery are plausible solutions, making the trade-off meaningful.",
+        "possible_failure": "If tasks are not decomposable (e.g., require entirely novel behavior), discovery is the only option and the decision is trivial."
+      },
+      {
+        "assumption": "The costs of composition and discovery are measurable or estimable, and the agent has knowledge of these costs.",
+        "rationale": "Without cost information, the agent cannot make an informed decision; this assumption allows a principled trade-off analysis.",
+        "possible_failure": "If costs are unknown or highly uncertain, the decision becomes heuristic or risk-based, potentially leading to suboptimal choices."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Efficiency vs. Generality: Composing existing skills is typically faster and less resource-intensive but may be less adaptable to novel tasks, whereas discovering a new skill can yield a more general solution that applies to multiple future tasks.",
+        "variables": [
+          "composition_cost",
+          "discovery_cost",
+          "task_frequency",
+          "skill_reusability"
+        ]
+      },
+      {
+        "tradeoff": "Immediate vs. Long-term Utility: Composition provides immediate utility for the current task, but discovery may provide higher long-term utility if the new skill can be reused across many tasks.",
+        "variables": [
+          "current_task_value",
+          "future_task_value",
+          "discount_factor",
+          "learning_curve"
+        ]
+      },
+      {
+        "tradeoff": "Reliability vs. Innovation: Composed skills build on known, reliable behaviors, but discovered skills may introduce unknown failure modes or performance improvements.",
+        "variables": [
+          "skill_reliability",
+          "exploration_risk",
+          "failure_cost",
+          "robustness"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "existing_skill_set_coverage",
+        "role": "input",
+        "description": "Degree to which current skill set can achieve the task's subgoals, ranging from 0 (no coverage) to 1 (full coverage)."
+      },
+      {
+        "name": "composition_cost",
+        "role": "input",
+        "description": "Cost incurred to combine existing skills to complete the task, including time, compute, and coordination overhead."
+      },
+      {
+        "name": "discovery_cost",
+        "role": "input",
+        "description": "Cost to learn a new skill for the task, including exploration, training, and data acquisition."
+      },
+      {
+        "name": "expected_future_utility",
+        "role": "input",
+        "description": "Anticipated total benefit from the new skill over future tasks, discounted over time."
+      },
+      {
+        "name": "task_novelty",
+        "role": "input",
+        "description": "Degree to which the task differs from previously encountered tasks, affecting reusability of a new skill."
+      },
+      {
+        "name": "skill_reusability",
+        "role": "input",
+        "description": "Expected number and diversity of future tasks that could benefit from the new skill."
+      },
+      {
+        "name": "decision_threshold",
+        "role": "mediator",
+        "description": "Internal threshold that compares composition cost and discovery cost adjusted by expected future utility to decide between composition and discovery."
+      },
+      {
+        "name": "decision",
+        "role": "output",
+        "description": "Binary outcome: 'compose' or 'discover'."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Task arrives",
+        "source": null,
+        "relation": "triggers",
+        "target": "existing_skill_set_coverage",
+        "explanation": "The arrival of a new task initiates evaluation of how well existing skills cover its subgoals."
+      },
+      {
+        "step": "Assessment of existing skills",
+        "source": "existing_skill_set_coverage",
+        "relation": "determines",
+        "target": "composition_cost",
+        "explanation": "Higher coverage reduces the need for complex composition, lowering composition cost."
+      },
+      {
+        "step": "Assessment of existing skills",
+        "source": "existing_skill_set_coverage",
+        "relation": "determines",
+        "target": "discovery_cost",
+        "explanation": "Lower coverage may increase discovery cost as more new skills are needed, or decrease it if gaps are clear."
+      },
+      {
+        "step": "Cost estimation and utility projection",
+        "source": "composition_cost",
+        "relation": "compared with",
+        "target": "decision_threshold",
+        "explanation": "Composition cost is compared against discovery cost and expected future utility."
+      },
+      {
+        "step": "Cost estimation and utility projection",
+        "source": "discovery_cost",
+        "relation": "compared with",
+        "target": "decision_threshold",
+        "explanation": "Discovery cost is evaluated relative to composition cost and future benefits."
+      },
+      {
+        "step": "Utility projection",
+        "source": "task_novelty",
+        "relation": "influences",
+        "target": "expected_future_utility",
+        "explanation": "Novel tasks suggest higher potential reusability, increasing expected future utility."
+      },
+      {
+        "step": "Utility projection",
+        "source": "skill_reusability",
+        "relation": "influences",
+        "target": "expected_future_utility",
+        "explanation": "Higher reusability increases the discounted future benefit of a new skill."
+      },
+      {
+        "step": "Decision making",
+        "source": "expected_future_utility",
+        "relation": "modulates",
+        "target": "decision_threshold",
+        "explanation": "Expected future utility raises the threshold for discovery, making it more likely when benefits are high."
+      },
+      {
+        "step": "Decision output",
+        "source": "decision_threshold",
+        "relation": "determines",
+        "target": "decision",
+        "explanation": "If composition cost is lower than discounted discovery cost minus future utility, the agent composes; otherwise, it discovers."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Cost estimation accuracy",
+        "why_it_matters": "Accurate estimation of composition and discovery costs is essential for sound decision-making; errors lead to suboptimal choices, either overusing expensive composition or wasting resources on unnecessary discovery."
+      },
+      {
+        "bottleneck": "Task decomposition complexity",
+        "why_it_matters": "If tasks are not easily decomposable into subgoals, evaluating existing skill coverage becomes unreliable, biasing the decision toward discovery or composition without proper justification."
+      },
+      {
+        "bottleneck": "Reusability assessment",
+        "why_it_matters": "Predicting future tasks and the reusability of a new skill is inherently uncertain; overestimating leads to premature discovery, underestimating leads to missed opportunities for long-term efficiency."
+      }
+    ],
+    "mechanism_summary": "The decision to discover a new skill versus compose existing skills hinges on a cost-benefit analysis that compares immediate composition cost with discounted future utility. Key inputs include existing skill coverage (which lowers composition cost), task novelty (raising expected future utility), and skill reusability (increasing the long-term value of discovery). The agent computes a decision threshold: if composition cost is less than discovery cost adjusted by the expected future utility, it composes; otherwise, it discovers. Critical bottlenecks include accurate cost estimation, task decomposability, and reusability assessment, which introduce uncertainty and can bias the decision."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Composition assumes tasks are decomposable into subgoals achievable by existing skills, but non-decomposable tasks necessitate discovery, creating a binary choice that may ignore hybrid strategies.",
+      "derived_from": [
+        "Task",
+        "Skill",
+        "Composition",
+        "Discovery",
+        "Assumption: Tasks are decomposable"
+      ],
+      "why_it_matters": "Real-world tasks often have partial decomposability, so forcing a binary decision may lead to inefficient or incomplete solutions.",
+      "what_existing_methods_may_miss": "Hybrid approaches that compose some subgoals and discover others are overlooked.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The cost-benefit comparison relies on accurate estimates of future utility and reusability, yet these are inherently uncertain, creating a tension between optimality and robustness.",
+      "derived_from": [
+        "Cost",
+        "Discovery",
+        "expected_future_utility",
+        "skill_reusability",
+        "Assumption: Costs are measurable"
+      ],
+      "why_it_matters": "Uncertainty can lead to sunk costs in discovery or missed long-term gains from composition; robustness requires heuristics that may be suboptimal.",
+      "what_existing_methods_may_miss": "Adaptive decision-making that updates thresholds based on observed outcomes.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Efficiency of composition vs. generality of discovery is a tradeoff, but the decision threshold assumes a static comparison, ignoring that repeated discovery may create a more flexible skill set that reduces future composition costs.",
+      "derived_from": [
+        "Composition",
+        "Discovery",
+        "Cost",
+        "Efficiency vs. Generality tradeoff"
+      ],
+      "why_it_matters": "Agents that always compose may stagnate, while those that always discover may waste resources; the optimal balance depends on learning dynamics.",
+      "what_existing_methods_may_miss": "The long-term value of building a diverse skill set through strategic discovery.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Discovery is treated as a single action, but in reality it may involve multiple sub-skills and internal composition, blurring the line between composition and discovery and challenging the primitive distinction.",
+      "derived_from": [
+        "Skill",
+        "Discovery",
+        "Composition",
+        "Primitive definitions"
+      ],
+      "why_it_matters": "If discovery can be decomposed into smaller learning steps, the decision model may oversimplify the process and lead to misallocation of resources.",
+      "what_existing_methods_may_miss": "Hierarchical discovery where sub-skills are composed during learning.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The model assumes cost and utility are known or estimable, but in practice, they may be unknown a priori, requiring exploration that itself has cost, creating a meta-tension between exploration and exploitation.",
+      "derived_from": [
+        "Cost",
+        "Discovery",
+        "composition_cost",
+        "discovery_cost",
+        "expected_future_utility",
+        "Assumption: Costs are measurable"
+      ],
+      "why_it_matters": "If costs are unknown, the decision threshold cannot be computed exactly, leading to reliance on heuristics that may be suboptimal.",
+      "what_existing_methods_may_miss": "Active information gathering to estimate costs before deciding.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the degree of task decomposability modulate the optimal balance between composition and discovery in skill acquisition?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Reveals whether binary decision is suboptimal and how hybrid strategies emerge."
+    },
+    {
+      "question": "What is the long-term impact of a discovery-first versus composition-first strategy on skill set diversity and task completion efficiency across a distribution of tasks?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Quantifies the value of strategic discovery for future flexibility."
+    },
+    {
+      "question": "How does the accuracy of cost estimation influence the performance gap between composition and discovery decisions under uncertainty?",
+      "question_type": "causal",
+      "source_tension": "T5",
+      "expected_contribution": "Clarifies the role of exploration for cost estimation in decision-making."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior or capability that an agent can execute to achieve a subgoal or perform a specific action.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; they cannot be decomposed into smaller meaningful units without losing functional significance."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential or parallel manner to achieve a task that none of the skills alone can accomplish.",
+          "why_primitive": "Composition is a fundamental operation for reusing existing knowledge; it is irreducible because it relies solely on the agent's current skill set."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously part of the agent's repertoire, often via exploration, trial-and-error, or learning from data.",
+          "why_primitive": "Discovery is a distinct mechanism for expanding capabilities; it cannot be reduced to composition because it introduces novel behaviors not derivable from existing skills."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal or objective that the agent must accomplish, typically specified by a utility function, reward signal, or user instruction.",
+          "why_primitive": "Tasks define the purpose of agent behavior; without a task, the notions of skill, composition, and discovery are meaningless."
+        },
+        {
+          "name": "Cost",
+          "definition": "The resources consumed by the agent in performing an action, including time, computation, data, memory, or energy.",
+          "why_primitive": "Cost is the primary constraint that drives the trade-off between composition and discovery; without cost, any decision could be arbitrary."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a fixed but non-empty set of existing skills that can be composed.",
+          "rationale": "If no skills exist, discovery is always necessary; if skills exist, composition becomes a viable alternative. This assumption sets up the decision problem.",
+          "possible_failure": "If the set of existing skills is empty or incomplete, composition may be impossible for many tasks, biasing the decision toward discovery."
+        },
+        {
+          "assumption": "Tasks are decomposable into subgoals that can be achieved by either a single skill or a composition of skills.",
+          "rationale": "This ensures that both composition and discovery are plausible solutions, making the trade-off meaningful.",
+          "possible_failure": "If tasks are not decomposable (e.g., require entirely novel behavior), discovery is the only option and the decision is trivial."
+        },
+        {
+          "assumption": "The costs of composition and discovery are measurable or estimable, and the agent has knowledge of these costs.",
+          "rationale": "Without cost information, the agent cannot make an informed decision; this assumption allows a principled trade-off analysis.",
+          "possible_failure": "If costs are unknown or highly uncertain, the decision becomes heuristic or risk-based, potentially leading to suboptimal choices."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "existing_skill_set_coverage",
+            "role": "input",
+            "description": "Degree to which current skill set can achieve the task's subgoals, ranging from 0 (no coverage) to 1 (full coverage)."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "Cost incurred to combine existing skills to complete the task, including time, compute, and coordination overhead."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Cost to learn a new skill for the task, including exploration, training, and data acquisition."
+          },
+          {
+            "name": "expected_future_utility",
+            "role": "input",
+            "description": "Anticipated total benefit from the new skill over future tasks, discounted over time."
+          },
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task differs from previously encountered tasks, affecting reusability of a new skill."
+          },
+          {
+            "name": "skill_reusability",
+            "role": "input",
+            "description": "Expected number and diversity of future tasks that could benefit from the new skill."
+          },
+          {
+            "name": "decision_threshold",
+            "role": "mediator",
+            "description": "Internal threshold that compares composition cost and discovery cost adjusted by expected future utility to decide between composition and discovery."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary outcome: 'compose' or 'discover'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task arrives",
+            "source": null,
+            "relation": "triggers",
+            "target": "existing_skill_set_coverage",
+            "explanation": "The arrival of a new task initiates evaluation of how well existing skills cover its subgoals."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "composition_cost",
+            "explanation": "Higher coverage reduces the need for complex composition, lowering composition cost."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "discovery_cost",
+            "explanation": "Lower coverage may increase discovery cost as more new skills are needed, or decrease it if gaps are clear."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "composition_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Composition cost is compared against discovery cost and expected future utility."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "discovery_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Discovery cost is evaluated relative to composition cost and future benefits."
+          },
+          {
+            "step": "Utility projection",
+            "source": "task_novelty",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Novel tasks suggest higher potential reusability, increasing expected future utility."
+          },
+          {
+            "step": "Utility projection",
+            "source": "skill_reusability",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Higher reusability increases the discounted future benefit of a new skill."
+          },
+          {
+            "step": "Decision making",
+            "source": "expected_future_utility",
+            "relation": "modulates",
+            "target": "decision_threshold",
+            "explanation": "Expected future utility raises the threshold for discovery, making it more likely when benefits are high."
+          },
+          {
+            "step": "Decision output",
+            "source": "decision_threshold",
+            "relation": "determines",
+            "target": "decision",
+            "explanation": "If composition cost is lower than discounted discovery cost minus future utility, the agent composes; otherwise, it discovers."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Cost estimation accuracy",
+            "why_it_matters": "Accurate estimation of composition and discovery costs is essential for sound decision-making; errors lead to suboptimal choices, either overusing expensive composition or wasting resources on unnecessary discovery."
+          },
+          {
+            "bottleneck": "Task decomposition complexity",
+            "why_it_matters": "If tasks are not easily decomposable into subgoals, evaluating existing skill coverage becomes unreliable, biasing the decision toward discovery or composition without proper justification."
+          },
+          {
+            "bottleneck": "Reusability assessment",
+            "why_it_matters": "Predicting future tasks and the reusability of a new skill is inherently uncertain; overestimating leads to premature discovery, underestimating leads to missed opportunities for long-term efficiency."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing skills hinges on a cost-benefit analysis that compares immediate composition cost with discounted future utility. Key inputs include existing skill coverage (which lowers composition cost), task novelty (raising expected future utility), and skill reusability (increasing the long-term value of discovery). The agent computes a decision threshold: if composition cost is less than discovery cost adjusted by the expected future utility, it composes; otherwise, it discovers. Critical bottlenecks include accurate cost estimation, task decomposability, and reusability assessment, which introduce uncertainty and can bias the decision."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Efficiency of composition vs. generality of discovery is a tradeoff, but the decision threshold assumes a static comparison, ignoring that repeated discovery may create a more flexible skill set that reduces future composition costs.",
+        "derived_from": [
+          "Composition",
+          "Discovery",
+          "Cost",
+          "Efficiency vs. Generality tradeoff"
+        ],
+        "why_it_matters": "Agents that always compose may stagnate, while those that always discover may waste resources; the optimal balance depends on learning dynamics.",
+        "what_existing_methods_may_miss": "The long-term value of building a diverse skill set through strategic discovery.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "What is the minimal expected future reusability that, for a given ratio of discovery cost to composition cost, makes discovering a new skill more cost-efficient than composing existing skills over a sequence of tasks?",
+        "question_type": "algorithmic",
+        "source_tension": "T3",
+        "expected_contribution": "Defines a quantitative decision boundary that agents can use to optimally choose between discovery and composition based on cost and reusability estimates."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold function θ(r, n) of the cost ratio r = discovery_cost / composition_cost and task novelty n such that when the expected future reusability of a discovered skill exceeds θ, a discovery-first strategy yields lower cumulative cost than a composition-first strategy over a distribution of tasks.",
+        "predicted_effect": "As the cost ratio decreases or task novelty increases, the threshold θ decreases, making discovery more favorable; agents adopting a policy that compares reusability to this threshold will outperform both pure strategies."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent in a multi-task environment with varying cost ratios (r ∈ {0.5, 1.0, 2.0, 5.0}) and task novelty (low, medium, high). Each task has a known expected reusability drawn uniformly from [0,1]. The agent must choose between composing existing skills or discovering a new one. Compare three policies: (1) always compose, (2) always discover, (3) threshold-based: discover if expected reusability > threshold θ, with θ tuned via grid search. Measure cumulative cost over 100 tasks. Repeat 50 times with random seeds.",
+        "independent_variables": [
+          "Cost ratio r",
+          "Task novelty",
+          "Expected reusability"
+        ],
+        "dependent_variables": [
+          "Cumulative cost",
+          "Skill set diversity",
+          "Optimal threshold θ*"
+        ],
+        "controls": [
+          "Fixed initial skill set covering 20% of subgoals",
+          "Same set of 100 tasks (order randomized) for each run",
+          "Composition cost = base * (1 - coverage)^2; discovery cost = base * r",
+          "Task novelty influences discovery cost multiplier (e.g., +20% for high novelty)"
+        ],
+        "falsifying_observation": "If no consistent threshold θ* can be found that yields lower cumulative cost than both pure strategies across multiple cost ratios and novelty levels, or if the optimal threshold does not vary with r or novelty in a monotonic way, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each (r, novelty) setting, a threshold θ* exists such that the threshold policy outperforms always-compose and always-discover.",
+          "The threshold θ* decreases as cost ratio r decreases (discovery relatively cheaper) and as task novelty increases.",
+          "The threshold policy accumulates a more diverse skill set than always-compose after the initial tasks, leading to lower composition costs later."
+        ],
+        "rejects_hypothesis": [
+          "No threshold policy beats both pure strategies; one pure strategy dominates across all settings.",
+          "The optimal threshold is constant across different cost ratios and novelty levels, indicating no interaction.",
+          "The threshold policy performs worse than always-compose or always-discover due to estimation errors or non-monotonic effects."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the optimal threshold is constant or does not depend on cost ratio or novelty, then the assumption that expected reusability is a key driver of the decision may be incorrect; perhaps other factors like skill composition interference or diminishing returns dominate.",
+        "assumption_to_revise": "The assumption that expected future reusability is a sufficient statistic for the long-term benefit of discovery. In reality, the value may also depend on the complementarity of the new skill with existing skills and the cost of integrating it.",
+        "next_question": "How does the complementarity between a new skill and the existing skill set affect the decision to discover versus compose, beyond simple reusability estimates?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior or capability that an agent can execute to achieve a subgoal or perform a specific action.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; they cannot be decomposed into smaller meaningful units without losing functional significance."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential or parallel manner to achieve a task that none of the skills alone can accomplish.",
+          "why_primitive": "Composition is a fundamental operation for reusing existing knowledge; it is irreducible because it relies solely on the agent's current skill set."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously part of the agent's repertoire, often via exploration, trial-and-error, or learning from data.",
+          "why_primitive": "Discovery is a distinct mechanism for expanding capabilities; it cannot be reduced to composition because it introduces novel behaviors not derivable from existing skills."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal or objective that the agent must accomplish, typically specified by a utility function, reward signal, or user instruction.",
+          "why_primitive": "Tasks define the purpose of agent behavior; without a task, the notions of skill, composition, and discovery are meaningless."
+        },
+        {
+          "name": "Cost",
+          "definition": "The resources consumed by the agent in performing an action, including time, computation, data, memory, or energy.",
+          "why_primitive": "Cost is the primary constraint that drives the trade-off between composition and discovery; without cost, any decision could be arbitrary."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a fixed but non-empty set of existing skills that can be composed.",
+          "rationale": "If no skills exist, discovery is always necessary; if skills exist, composition becomes a viable alternative. This assumption sets up the decision problem.",
+          "possible_failure": "If the set of existing skills is empty or incomplete, composition may be impossible for many tasks, biasing the decision toward discovery."
+        },
+        {
+          "assumption": "Tasks are decomposable into subgoals that can be achieved by either a single skill or a composition of skills.",
+          "rationale": "This ensures that both composition and discovery are plausible solutions, making the trade-off meaningful.",
+          "possible_failure": "If tasks are not decomposable (e.g., require entirely novel behavior), discovery is the only option and the decision is trivial."
+        },
+        {
+          "assumption": "The costs of composition and discovery are measurable or estimable, and the agent has knowledge of these costs.",
+          "rationale": "Without cost information, the agent cannot make an informed decision; this assumption allows a principled trade-off analysis.",
+          "possible_failure": "If costs are unknown or highly uncertain, the decision becomes heuristic or risk-based, potentially leading to suboptimal choices."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "existing_skill_set_coverage",
+            "role": "input",
+            "description": "Degree to which current skill set can achieve the task's subgoals, ranging from 0 (no coverage) to 1 (full coverage)."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "Cost incurred to combine existing skills to complete the task, including time, compute, and coordination overhead."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Cost to learn a new skill for the task, including exploration, training, and data acquisition."
+          },
+          {
+            "name": "expected_future_utility",
+            "role": "input",
+            "description": "Anticipated total benefit from the new skill over future tasks, discounted over time."
+          },
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task differs from previously encountered tasks, affecting reusability of a new skill."
+          },
+          {
+            "name": "skill_reusability",
+            "role": "input",
+            "description": "Expected number and diversity of future tasks that could benefit from the new skill."
+          },
+          {
+            "name": "decision_threshold",
+            "role": "mediator",
+            "description": "Internal threshold that compares composition cost and discovery cost adjusted by expected future utility to decide between composition and discovery."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary outcome: 'compose' or 'discover'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task arrives",
+            "source": null,
+            "relation": "triggers",
+            "target": "existing_skill_set_coverage",
+            "explanation": "The arrival of a new task initiates evaluation of how well existing skills cover its subgoals."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "composition_cost",
+            "explanation": "Higher coverage reduces the need for complex composition, lowering composition cost."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "discovery_cost",
+            "explanation": "Lower coverage may increase discovery cost as more new skills are needed, or decrease it if gaps are clear."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "composition_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Composition cost is compared against discovery cost and expected future utility."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "discovery_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Discovery cost is evaluated relative to composition cost and future benefits."
+          },
+          {
+            "step": "Utility projection",
+            "source": "task_novelty",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Novel tasks suggest higher potential reusability, increasing expected future utility."
+          },
+          {
+            "step": "Utility projection",
+            "source": "skill_reusability",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Higher reusability increases the discounted future benefit of a new skill."
+          },
+          {
+            "step": "Decision making",
+            "source": "expected_future_utility",
+            "relation": "modulates",
+            "target": "decision_threshold",
+            "explanation": "Expected future utility raises the threshold for discovery, making it more likely when benefits are high."
+          },
+          {
+            "step": "Decision output",
+            "source": "decision_threshold",
+            "relation": "determines",
+            "target": "decision",
+            "explanation": "If composition cost is lower than discounted discovery cost minus future utility, the agent composes; otherwise, it discovers."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Cost estimation accuracy",
+            "why_it_matters": "Accurate estimation of composition and discovery costs is essential for sound decision-making; errors lead to suboptimal choices, either overusing expensive composition or wasting resources on unnecessary discovery."
+          },
+          {
+            "bottleneck": "Task decomposition complexity",
+            "why_it_matters": "If tasks are not easily decomposable into subgoals, evaluating existing skill coverage becomes unreliable, biasing the decision toward discovery or composition without proper justification."
+          },
+          {
+            "bottleneck": "Reusability assessment",
+            "why_it_matters": "Predicting future tasks and the reusability of a new skill is inherently uncertain; overestimating leads to premature discovery, underestimating leads to missed opportunities for long-term efficiency."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing skills hinges on a cost-benefit analysis that compares immediate composition cost with discounted future utility. Key inputs include existing skill coverage (which lowers composition cost), task novelty (raising expected future utility), and skill reusability (increasing the long-term value of discovery). The agent computes a decision threshold: if composition cost is less than discovery cost adjusted by the expected future utility, it composes; otherwise, it discovers. Critical bottlenecks include accurate cost estimation, task decomposability, and reusability assessment, which introduce uncertainty and can bias the decision."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Composition assumes tasks are decomposable into subgoals achievable by existing skills, but non-decomposable tasks necessitate discovery, creating a binary choice that may ignore hybrid strategies.",
+        "derived_from": [
+          "Task",
+          "Skill",
+          "Composition",
+          "Discovery",
+          "Assumption: Tasks are decomposable"
+        ],
+        "why_it_matters": "Real-world tasks often have partial decomposability, so forcing a binary decision may lead to inefficient or incomplete solutions.",
+        "what_existing_methods_may_miss": "Hybrid approaches that compose some subgoals and discover others are overlooked.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the ratio of discovery cost to composition cost interact with task decomposability to determine when an agent should discover a new skill rather than compose existing skills?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Reveals a phase transition in optimal strategy, where the critical decomposability threshold scales with cost ratio, providing a decision rule beyond binary classification."
+      },
+      "hypothesis": {
+        "statement": "The optimal decision exhibits a phase transition: for a given cost ratio r = discovery_cost / composition_cost, there exists a critical decomposability threshold δ*(r) such that for tasks with decomposability < δ*, pure discovery or hybrid (with more discovery) is optimal; for decomposability > δ*, pure composition or hybrid (with more composition) is optimal. The threshold δ*(r) decreases as r increases, meaning higher discovery cost shifts the optimal toward composition.",
+        "predicted_effect": "In a simulation with varying decomposability and cost ratio, the agent's chosen strategy will show a clear boundary in the (decomposability, cost ratio) space separating composition-dominated and discovery-dominated regions, with a narrow band of hybrid strategies at the boundary."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with a fixed set of base skills and a parameterized cost function. Vary task decomposability (0 to 1) and cost ratio (e.g., 0.5, 1, 2) independently. For each (decomposability, cost ratio) pair, let the agent choose among pure composition, pure discovery, or a hybrid that composes some subgoals and discovers others (with the ability to choose which subgoals to handle by which method). Record the decision and total cost over many trials.",
+        "independent_variables": [
+          "Task decomposability (fraction of subgoals coverable by existing skills: 0, 0.1, ..., 1)",
+          "Cost ratio r (discovery_cost / composition_cost): 0.5, 1, 2"
+        ],
+        "dependent_variables": [
+          "Decision type (compose, discover, hybrid, and the fraction of subgoals composed)",
+          "Total cost",
+          "Success rate"
+        ],
+        "controls": [
+          "Fixed skill set",
+          "Fixed absolute cost scale (composition cost fixed at 1, discovery cost varied accordingly)",
+          "Same set of task structures across conditions",
+          "No stochasticity in skill execution"
+        ],
+        "falsifying_observation": "If there is no clear phase boundary, e.g., the agent always chooses the same strategy regardless of decomposability and cost ratio, or if the relationship between decomposability and decision does not shift with cost ratio."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low r (e.g., 0.5), discovery is optimal even for fairly high decomposability.",
+          "For high r (e.g., 2), composition is optimal even for fairly low decomposability.",
+          "There exists a narrow band of decomposability values (e.g., 0.4-0.6 for r=1) where the agent selects a hybrid strategy."
+        ],
+        "rejects_hypothesis": [
+          "The agent always composes regardless of decomposability and cost ratio.",
+          "The agent always discovers regardless of decomposability and cost ratio.",
+          "The agent never selects a hybrid strategy.",
+          "The choice does not depend on cost ratio.",
+          "The choice does not depend on decomposability."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted phase transition is not observed (e.g., no clear boundary or no hybrid region),",
+        "assumption_to_revise": "the assumption that tasks are decomposable into independent subgoals may be violated; subgoals may interact, making composition non-additive in cost or discovery non-local.",
+        "next_question": "How do subgoal interdependencies (e.g., overlap, precondition requirements) affect the composition-discovery decision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable unit of behavior or capability that an agent can execute to achieve a subgoal or perform a specific action.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; they cannot be decomposed into smaller meaningful units without losing functional significance."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining existing skills in a sequential or parallel manner to achieve a task that none of the skills alone can accomplish.",
+          "why_primitive": "Composition is a fundamental operation for reusing existing knowledge; it is irreducible because it relies solely on the agent's current skill set."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of creating or learning a new skill that was not previously part of the agent's repertoire, often via exploration, trial-and-error, or learning from data.",
+          "why_primitive": "Discovery is a distinct mechanism for expanding capabilities; it cannot be reduced to composition because it introduces novel behaviors not derivable from existing skills."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal or objective that the agent must accomplish, typically specified by a utility function, reward signal, or user instruction.",
+          "why_primitive": "Tasks define the purpose of agent behavior; without a task, the notions of skill, composition, and discovery are meaningless."
+        },
+        {
+          "name": "Cost",
+          "definition": "The resources consumed by the agent in performing an action, including time, computation, data, memory, or energy.",
+          "why_primitive": "Cost is the primary constraint that drives the trade-off between composition and discovery; without cost, any decision could be arbitrary."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a fixed but non-empty set of existing skills that can be composed.",
+          "rationale": "If no skills exist, discovery is always necessary; if skills exist, composition becomes a viable alternative. This assumption sets up the decision problem.",
+          "possible_failure": "If the set of existing skills is empty or incomplete, composition may be impossible for many tasks, biasing the decision toward discovery."
+        },
+        {
+          "assumption": "Tasks are decomposable into subgoals that can be achieved by either a single skill or a composition of skills.",
+          "rationale": "This ensures that both composition and discovery are plausible solutions, making the trade-off meaningful.",
+          "possible_failure": "If tasks are not decomposable (e.g., require entirely novel behavior), discovery is the only option and the decision is trivial."
+        },
+        {
+          "assumption": "The costs of composition and discovery are measurable or estimable, and the agent has knowledge of these costs.",
+          "rationale": "Without cost information, the agent cannot make an informed decision; this assumption allows a principled trade-off analysis.",
+          "possible_failure": "If costs are unknown or highly uncertain, the decision becomes heuristic or risk-based, potentially leading to suboptimal choices."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "existing_skill_set_coverage",
+            "role": "input",
+            "description": "Degree to which current skill set can achieve the task's subgoals, ranging from 0 (no coverage) to 1 (full coverage)."
+          },
+          {
+            "name": "composition_cost",
+            "role": "input",
+            "description": "Cost incurred to combine existing skills to complete the task, including time, compute, and coordination overhead."
+          },
+          {
+            "name": "discovery_cost",
+            "role": "input",
+            "description": "Cost to learn a new skill for the task, including exploration, training, and data acquisition."
+          },
+          {
+            "name": "expected_future_utility",
+            "role": "input",
+            "description": "Anticipated total benefit from the new skill over future tasks, discounted over time."
+          },
+          {
+            "name": "task_novelty",
+            "role": "input",
+            "description": "Degree to which the task differs from previously encountered tasks, affecting reusability of a new skill."
+          },
+          {
+            "name": "skill_reusability",
+            "role": "input",
+            "description": "Expected number and diversity of future tasks that could benefit from the new skill."
+          },
+          {
+            "name": "decision_threshold",
+            "role": "mediator",
+            "description": "Internal threshold that compares composition cost and discovery cost adjusted by expected future utility to decide between composition and discovery."
+          },
+          {
+            "name": "decision",
+            "role": "output",
+            "description": "Binary outcome: 'compose' or 'discover'."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task arrives",
+            "source": null,
+            "relation": "triggers",
+            "target": "existing_skill_set_coverage",
+            "explanation": "The arrival of a new task initiates evaluation of how well existing skills cover its subgoals."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "composition_cost",
+            "explanation": "Higher coverage reduces the need for complex composition, lowering composition cost."
+          },
+          {
+            "step": "Assessment of existing skills",
+            "source": "existing_skill_set_coverage",
+            "relation": "determines",
+            "target": "discovery_cost",
+            "explanation": "Lower coverage may increase discovery cost as more new skills are needed, or decrease it if gaps are clear."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "composition_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Composition cost is compared against discovery cost and expected future utility."
+          },
+          {
+            "step": "Cost estimation and utility projection",
+            "source": "discovery_cost",
+            "relation": "compared with",
+            "target": "decision_threshold",
+            "explanation": "Discovery cost is evaluated relative to composition cost and future benefits."
+          },
+          {
+            "step": "Utility projection",
+            "source": "task_novelty",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Novel tasks suggest higher potential reusability, increasing expected future utility."
+          },
+          {
+            "step": "Utility projection",
+            "source": "skill_reusability",
+            "relation": "influences",
+            "target": "expected_future_utility",
+            "explanation": "Higher reusability increases the discounted future benefit of a new skill."
+          },
+          {
+            "step": "Decision making",
+            "source": "expected_future_utility",
+            "relation": "modulates",
+            "target": "decision_threshold",
+            "explanation": "Expected future utility raises the threshold for discovery, making it more likely when benefits are high."
+          },
+          {
+            "step": "Decision output",
+            "source": "decision_threshold",
+            "relation": "determines",
+            "target": "decision",
+            "explanation": "If composition cost is lower than discounted discovery cost minus future utility, the agent composes; otherwise, it discovers."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Cost estimation accuracy",
+            "why_it_matters": "Accurate estimation of composition and discovery costs is essential for sound decision-making; errors lead to suboptimal choices, either overusing expensive composition or wasting resources on unnecessary discovery."
+          },
+          {
+            "bottleneck": "Task decomposition complexity",
+            "why_it_matters": "If tasks are not easily decomposable into subgoals, evaluating existing skill coverage becomes unreliable, biasing the decision toward discovery or composition without proper justification."
+          },
+          {
+            "bottleneck": "Reusability assessment",
+            "why_it_matters": "Predicting future tasks and the reusability of a new skill is inherently uncertain; overestimating leads to premature discovery, underestimating leads to missed opportunities for long-term efficiency."
+          }
+        ],
+        "mechanism_summary": "The decision to discover a new skill versus compose existing skills hinges on a cost-benefit analysis that compares immediate composition cost with discounted future utility. Key inputs include existing skill coverage (which lowers composition cost), task novelty (raising expected future utility), and skill reusability (increasing the long-term value of discovery). The agent computes a decision threshold: if composition cost is less than discovery cost adjusted by the expected future utility, it composes; otherwise, it discovers. Critical bottlenecks include accurate cost estimation, task decomposability, and reusability assessment, which introduce uncertainty and can bias the decision."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The model assumes cost and utility are known or estimable, but in practice, they may be unknown a priori, requiring exploration that itself has cost, creating a meta-tension between exploration and exploitation.",
+        "derived_from": [
+          "Cost",
+          "Discovery",
+          "composition_cost",
+          "discovery_cost",
+          "expected_future_utility",
+          "Assumption: Costs are measurable"
+        ],
+        "why_it_matters": "If costs are unknown, the decision threshold cannot be computed exactly, leading to reliance on heuristics that may be suboptimal.",
+        "what_existing_methods_may_miss": "Active information gathering to estimate costs before deciding.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what level of task novelty does the benefit of discovering a new skill outweigh the cost of composing existing skills, given a fixed skill set coverage?",
+        "question_type": "causal",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies a critical novelty threshold that determines the optimal decision, providing a sharp, testable boundary condition for the composition-discovery trade-off."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold τ of task novelty such that for tasks with novelty < τ, composition is optimal (lower total expected cost), and for novelty > τ, discovery is optimal. The threshold τ decreases as the existing skill set coverage increases.",
+        "predicted_effect": "In an experiment varying task novelty and skill coverage, the observed decision (optimal vs suboptimal) will show a sharp transition around τ, with the transition point shifting to lower novelty when coverage is higher."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with a fixed set of skills (coverage = c, varied across runs) facing tasks of varying novelty (n, continuous from 0 to 1). For each task, compute the optimal decision (composition vs discovery) by full enumeration of costs (including future utility for discovery). Then, feed the agent with only the task novelty and coverage (not cost) and have it decide using a threshold policy. Vary the threshold θ and measure the average total cost over many tasks. Identify the threshold θ* that minimizes cost. Compare θ* to the theoretical τ predicted by the model. Test if the relationship τ = f(c) is monotonic decreasing.",
+        "independent_variables": [
+          "task novelty (n, 0-1)",
+          "existing skill coverage (c, 0-1)"
+        ],
+        "dependent_variables": [
+          "optimal decision threshold τ (the novelty value where optimal action switches)",
+          "cost regret relative to optimal policy"
+        ],
+        "controls": [
+          "composition cost function",
+          "discovery cost function",
+          "future utility discount factor",
+          "number of tasks per condition"
+        ],
+        "falsifying_observation": "If no clear threshold τ exists (i.e., the optimal decision does not consistently switch at some novelty level across coverage values), or if τ does not decrease monotonically with increasing coverage, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each coverage level, the cost-minimizing threshold θ* is close to the predicted τ.",
+          "τ decreases as coverage increases.",
+          "Regret is low when using the threshold policy compared to random or heuristic baselines."
+        ],
+        "rejects_hypothesis": [
+          "The optimal decision is not consistently related to novelty; composition and discovery are equally good across all novelty levels.",
+          "τ is not monotonic in coverage.",
+          "No threshold policy can achieve cost close to optimal."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If hypothesis is falsified, then the simple threshold model based on novelty and coverage is insufficient; other factors (e.g., cost estimation noise or task decomposability) dominate.",
+        "assumption_to_revise": "The assumption that tasks are decomposable into subgoals that are uniformly covered by existing skills (Assumption 2) may be too strong; non-decomposable tasks may require discovery regardless of novelty.",
+        "next_question": "How does task decomposability interact with novelty and coverage to determine the composition-discovery decision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The optimal decision exhibits a phase transition: for a given cost ratio r = discovery_cost / composition_cost, there exists a critical decomposability threshold δ*(r) such that for tasks with decomposability < δ*, pure discovery or hybrid (with more discovery) is optimal; for decomposability > δ*, pure composition or hybrid (with more composition) is optimal. The threshold δ*(r) decreases as r increases.",
+      "independent_variables": [
+        "Task decomposability (fraction of subgoals coverable by existing skills: 0, 0.1, ..., 1)",
+        "Cost ratio r = discovery_cost / composition_cost (values: 0.5, 1, 2)"
+      ],
+      "dependent_variables": [
+        "Decision type (compose, discover, hybrid; fraction of subgoals composed)",
+        "Total cost incurred by agent",
+        "Success rate (task completion)"
+      ],
+      "controlled_variables": [
+        "Fixed set of existing skills",
+        "Absolute cost scale (composition cost fixed at 1, discovery cost varied accordingly)",
+        "Same set of task structures across all conditions",
+        "No stochasticity in skill execution (deterministic outcomes)"
+      ],
+      "baselines": [
+        {
+          "name": "Pure composition baseline",
+          "description": "Agent always uses composition for all subgoals, regardless of feasibility or cost."
+        },
+        {
+          "name": "Pure discovery baseline",
+          "description": "Agent always discovers a new skill for each subgoal, ignoring existing skills."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Decision type distribution",
+          "definition": "The proportion of trials where the agent chooses pure composition, pure discovery, or hybrid, and the average fraction of subgoals composed in hybrid cases."
+        },
+        {
+          "name": "Total cost",
+          "definition": "Sum of composition costs and discovery costs incurred to complete the task."
+        },
+        {
+          "name": "Success rate",
+          "definition": "Fraction of trials where the agent successfully completes the task."
+        }
+      ],
+      "expected_result": "For each cost ratio, there is a clear phase transition: below a certain decomposability threshold, the agent predominantly chooses discovery or hybrid with high discovery fraction; above that threshold, the agent predominantly chooses composition or hybrid with high composition fraction. The threshold decreases as cost ratio increases. A narrow band of hybrid strategies exists at the boundary.",
+      "falsifying_result": "No clear phase transition is observed: the agent always chooses the same strategy (e.g., always compose or always discover) regardless of decomposability and cost ratio, or the choice does not depend on cost ratio, or no hybrid strategies are selected at any point.",
+      "minimum_viable_experiment": "Simulate an agent with a fixed set of base skills and a parameterized cost function. For each combination of decomposability (0, 0.1, ..., 1) and cost ratio (0.5, 1, 2), run 100 trials. In each trial, the agent is presented with a task consisting of 10 subgoals, each either coverable or not by existing skills (according to decomposability). The agent can choose for each subgoal to either compose existing skills or discover a new skill. Composition cost is 1 per composition; discovery cost is r. The agent selects the strategy that minimizes total cost. Record the decision and cost per trial. Analyze the average fraction of subgoals composed and the dominant strategy per condition.",
+      "risks_and_confounds": [
+        "Cost estimation accuracy: if the agent cannot accurately estimate costs, decisions may be noisy and obscure the phase transition.",
+        "Task decomposition complexity: if subgoals are not independent, composition costs may not be additive, violating model assumptions.",
+        "Reusability assessment: if expected future utility is considered, the decision may depend on projected future tasks, which is not controlled here."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold function θ(r, n) of the cost ratio r = discovery_cost / composition_cost and task novelty n such that when the expected future reusability of a discovered skill exceeds θ, a discovery-first strategy yields lower cumulative cost than a composition-first strategy over a distribution of tasks.",
+      "independent_variables": [
+        "Cost ratio r (0.5, 1.0, 2.0, 5.0)",
+        "Task novelty (low, medium, high)",
+        "Expected reusability (continuous in [0,1])"
+      ],
+      "dependent_variables": [
+        "Cumulative cost over 100 tasks",
+        "Skill set diversity (e.g., number of distinct skills)",
+        "Optimal threshold θ* (discovered via grid search)"
+      ],
+      "controlled_variables": [
+        "Fixed initial skill set covering 20% of subgoals",
+        "Same set of 100 tasks (order randomized per run)",
+        "Composition cost = base * (1 - coverage)^2",
+        "Discovery cost = base * r (with novelty multiplier: +20% for high novelty)",
+        "50 repeated runs per condition"
+      ],
+      "baselines": [
+        {
+          "name": "Always Compose",
+          "description": "Agent always composes existing skills to solve each task, never discovers new skills."
+        },
+        {
+          "name": "Always Discover",
+          "description": "Agent always discovers a new skill for each task, never composes existing skills."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cumulative Cost",
+          "definition": "Total cost incurred by the agent over the sequence of 100 tasks."
+        },
+        {
+          "name": "Skill Set Diversity",
+          "definition": "Number of distinct skills acquired by the agent by the end of the task sequence."
+        },
+        {
+          "name": "Optimal Threshold θ*",
+          "definition": "The threshold value (in terms of expected reusability) that minimizes cumulative cost for a given (r, novelty) condition, found via grid search."
+        }
+      ],
+      "expected_result": "For each (r, novelty) combination, there exists a threshold θ* such that the threshold policy (discover if expected reusability > θ*) achieves lower cumulative cost than both always-compose and always-discover baselines. Additionally, θ* decreases as r decreases or novelty increases.",
+      "falsifying_result": "If no threshold policy outperforms both baselines consistently across multiple (r, novelty) combinations, or if the optimal threshold θ* does not vary monotonically with r or novelty, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate an agent in a multi-task environment with discrete tasks. For each of 4 cost ratios (0.5, 1, 2, 5) and 3 novelty levels (low, medium, high), generate 100 tasks with known expected reusability drawn uniformly from [0,1]. The agent chooses either to compose or discover based on the policy. For threshold policy, scan θ from 0 to 1 in steps of 0.05. Record cumulative cost. Repeat 50 runs with different random seeds. Compare average cumulative costs across policies. If for any condition a threshold policy yields lower cost than both baselines, and the optimal θ varies as predicted, the hypothesis is supported.",
+      "risks_and_confounds": [
+        "Cost estimation inaccuracies may affect threshold performance if costs are not perfectly known; this is mitigated by using fixed formulas.",
+        "Task decomposition complexity: if tasks are not easily decomposable, coverage assessment may be flawed; we ensure tasks are decomposable.",
+        "Reusability assessment: agents may not know true expected reusability; but we assume known for simplicity; in real systems, estimation error could confound.",
+        "Order effects: randomizing task order per run mitigates this.",
+        "Limited task diversity: 100 tasks may not cover all scenarios; increasing number may improve reliability."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold τ of task novelty such that for tasks with novelty < τ, composition is optimal (lower total expected cost), and for novelty > τ, discovery is optimal. The threshold τ decreases as the existing skill set coverage increases.",
+      "independent_variables": [
+        "task novelty (n, continuous from 0 to 1)",
+        "existing skill coverage (c, continuous from 0 to 1)"
+      ],
+      "dependent_variables": [
+        "optimal decision threshold τ (the novelty value where optimal action switches)",
+        "cost regret relative to optimal policy (average additional cost over optimal)"
+      ],
+      "controlled_variables": [
+        "composition cost function (fixed form, e.g., linear in number of skills composed)",
+        "discovery cost function (fixed form, e.g., constant plus learning cost)",
+        "future utility discount factor (γ, e.g., 0.9)",
+        "number of tasks per condition (e.g., 1000 per combination of n and c)"
+      ],
+      "baselines": [
+        {
+          "name": "Random baseline",
+          "description": "Agent randomly chooses between composition and discovery with equal probability."
+        },
+        {
+          "name": "Always compose baseline",
+          "description": "Agent always uses composition regardless of task novelty."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Average total cost",
+          "definition": "Mean cost incurred by the agent over all tasks in a condition."
+        },
+        {
+          "name": "Cost regret",
+          "definition": "Difference between the average total cost of the threshold policy and the optimal policy (computed by full enumeration)."
+        },
+        {
+          "name": "Threshold accuracy",
+          "definition": "Absolute difference between the empirically optimal threshold θ* and the theoretical threshold τ predicted by the model."
+        }
+      ],
+      "expected_result": "For each coverage level c, the cost-minimizing threshold θ* closely matches the predicted τ; τ decreases monotonically as c increases; the threshold policy achieves significantly lower regret than baselines (p < 0.05).",
+      "falsifying_result": "No clear threshold τ exists (optimal decision does not switch at a specific novelty level across coverage values), or τ does not decrease monotonically with increasing coverage, or the threshold policy fails to outperform baselines (regret not significantly different).",
+      "minimum_viable_experiment": "Simulate an agent with a fixed set of skills (coverage c varied across runs) facing tasks of varying novelty n (sampled uniformly from [0,1]). For each (c, n) pair, compute the optimal decision by full enumeration of costs including future utility. Then, for each coverage level, vary a decision threshold θ (from 0 to 1) and compute the average cost across tasks where the agent decides by thresholding novelty: compose if n < θ, discover otherwise. Identify θ* that minimizes cost. Repeat for multiple coverage levels. Test if θ* decreases with c and if the relationship approximates the predicted function.",
+      "risks_and_confounds": [
+        "Cost estimation errors may blur the threshold; mitigate by using exact costs in simulation.",
+        "Task decomposability may vary with novelty; control by ensuring tasks are decomposable into subgoals with uniform coverage.",
+        "Limited number of tasks per condition may cause statistical noise; use at least 1000 tasks per condition.",
+        "The shape of cost functions may affect monotonicity; use multiple functional forms in sensitivity analysis."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The research package provides a formalized first-principles analysis of the composition-discovery trade-off in skill acquisition. The decomposition into primitive definitions, assumptions, mechanism model, tensions, and experiments is thorough and logically coherent. The proposed experiments are well-designed with clear hypotheses and falsification criteria.",
+    "strengths": [
+      "Clear and rigorous primitive definitions and assumptions that ground the trade-off.",
+      "Detailed mechanism model with causal chain and identified bottlenecks.",
+      "Well-articulated tensions that expose limitations and open questions.",
+      "Falsifiable hypotheses with concrete experiment designs including baselines and controls.",
+      "Novel formalization of an important problem in lifelong learning and agent intelligence."
+    ],
+    "weaknesses": [
+      "The assumption of task decomposability may not hold in many real-world scenarios, limiting generality.",
+      "The model assumes costs are measurable or estimable, but in practice they are often uncertain, which is acknowledged but not deeply addressed.",
+      "The experiments are entirely simulated; no real-world or human-subject validation is proposed.",
+      "The primitive definition of 'skill' could be seen as not truly primitive if lower-level actions exist, though it is pragmatically justified.",
+      "Some candidate questions and experiments have significant overlap, suggesting scope reduction could sharpen contributions."
+    ],
+    "questions": [
+      "How would the model change if skills can be partially composed or if composition has non-linear costs due to interference?",
+      "Can the threshold-based decision rule be learned online via meta-learning or bandit methods when costs are unknown?",
+      "How do subgoal dependencies (e.g., ordering constraints) affect the composition cost and the optimal decision?",
+      "What is the impact of incorrect cost estimates on the regret of the threshold policy?"
+    ],
+    "missing_baselines": [
+      "Meta-learning or 'learn to learn' approaches that adapt the decision policy over time.",
+      "Hierarchical reinforcement learning methods that treat subgoal selection as part of the decision.",
+      "Active learning or exploration policies that explicitly gather cost information before deciding."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "AssumptionWeakness",
+    "root_cause": "The research assumes that composition and discovery costs are measurable or estimable, which may not hold in real-world scenarios where costs are uncertain, leading to suboptimal decisions.",
+    "violated_principle": "First-principles decomposition should avoid assumptions that limit applicability; the assumption of cost measurability is too strong.",
+    "new_or_updated_principle": "The decision to discover vs compose must account for uncertainty in cost estimates; a robust approach should incorporate exploration to resolve cost uncertainty.",
+    "new_or_updated_skill": "Cost Estimation Skill: The agent should be able to actively gather information about costs of composition and discovery through exploration, updating estimates with Bayesian methods, and making decisions under uncertainty.",
+    "regression_test": "Given a scenario where cost estimates are initially uncertain (e.g., uniform prior over cost ratios), the agent's decision policy should converge to the optimal threshold after sufficient exploration, and its cumulative regret should be sublinear in the number of tasks."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "How does the ratio of discovery cost to composition cost interact with task decomposability to determine when an agent should discover a new skill rather than compose existing skills?",
+        "original_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the minimal expected future reusability that, for a given ratio of discovery cost to composition cost, makes discovering a new skill more cost-efficient than composing existing skills over a sequence of tasks?",
+        "original_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what level of task novelty does the benefit of discovering a new skill outweigh the cost of composing existing skills, given a fixed skill set coverage?",
+        "original_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

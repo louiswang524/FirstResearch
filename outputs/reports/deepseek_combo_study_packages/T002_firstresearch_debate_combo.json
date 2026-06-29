@@ -1,0 +1,1248 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An entity (e.g., an LLM-based system) that receives inputs and produces outputs in the form of actions or decisions within a given environment to achieve a goal.",
+        "why_primitive": "It is the subject of evaluation; without an agent, there is nothing to measure fidelity on."
+      },
+      {
+        "name": "Process",
+        "definition": "A prescribed sequence of steps, rules, or criteria that the agent is expected to follow when performing a task, often defined externally by a human or system.",
+        "why_primitive": "Process defines the standard against which the agent's actions are compared; fidelity is meaningless without a reference process."
+      },
+      {
+        "name": "Fidelity",
+        "definition": "The degree of correspondence between the agent's actual behavior and the prescribed process, typically measured as a distance or similarity score.",
+        "why_primitive": "The core concept of interest; all measurement methods aim to quantify this correspondence."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The prescribed process is fully specified and unambiguous.",
+        "rationale": "To measure fidelity, we need a clear ground truth; without a well-defined process, comparison is subjective or impossible.",
+        "possible_failure": "Real-world processes may be underspecified or contain ambiguities, leading to disagreements in fidelity assessment."
+      },
+      {
+        "assumption": "Agent actions are observable and recordable in a structured format that can be compared to the process.",
+        "rationale": "Measurement requires data; if the agent's internal reasoning or intermediate steps are hidden, fidelity cannot be directly assessed.",
+        "possible_failure": "LLM agents often generate free-form text or use internal tool calls that are not easily parsed into discrete steps, making comparison difficult."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of measurement vs. Cost of annotation",
+        "variables": [
+          "step-by-step trace comparison",
+          "holistic outcome assessment",
+          "human annotation effort",
+          "automated metrics"
+        ]
+      },
+      {
+        "tradeoff": "Specificity to a given process vs. Generalizability across different processes",
+        "variables": [
+          "process-specific metrics (e.g., exact match)",
+          "general similarity measures (e.g., semantic similarity)",
+          "transfer learning"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Agent_Actions",
+        "role": "input",
+        "description": "Observable trace of agent's steps or decisions."
+      },
+      {
+        "name": "Prescribed_Process",
+        "role": "input",
+        "description": "Defined sequence of steps the agent should follow."
+      },
+      {
+        "name": "Granularity",
+        "role": "mediator",
+        "description": "Level of detail at which actions are compared (e.g., step-by-step vs. outcome-level)."
+      },
+      {
+        "name": "Specificity_of_Metric",
+        "role": "mediator",
+        "description": "How closely tailored the metric is to the specific process."
+      },
+      {
+        "name": "Fidelity_Score",
+        "role": "output",
+        "description": "Quantified degree of alignment between agent actions and prescribed process."
+      },
+      {
+        "name": "Annotation_Effort",
+        "role": "outcome",
+        "description": "Human or computational resources required to perform measurement."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Agent_Actions",
+        "relation": "compared against",
+        "target": "Fidelity_Score",
+        "explanation": "The agent's actions are compared to the prescribed process to compute fidelity."
+      },
+      {
+        "step": "2",
+        "source": "Prescribed_Process",
+        "relation": "serves as standard",
+        "target": "Fidelity_Score",
+        "explanation": "The prescribed process provides the ground truth for comparison."
+      },
+      {
+        "step": "3",
+        "source": "Granularity",
+        "relation": "modulates",
+        "target": "Fidelity_Score",
+        "explanation": "The granularity of comparison affects how fidelity is quantified (e.g., exact match vs. semantic similarity)."
+      },
+      {
+        "step": "4",
+        "source": "Granularity",
+        "relation": "increases",
+        "target": "Annotation_Effort",
+        "explanation": "Higher granularity (more fine-grained comparison) typically requires more effort."
+      },
+      {
+        "step": "5",
+        "source": "Specificity_of_Metric",
+        "relation": "influences",
+        "target": "Fidelity_Score",
+        "explanation": "A metric specific to the process yields a more accurate fidelity measure but less generalizable."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ambiguous Process Specification",
+        "why_it_matters": "If the prescribed process is not fully specified or contains ambiguities, the comparison becomes subjective and fidelity measurement loses reliability."
+      },
+      {
+        "bottleneck": "Incomplete Agent Trace",
+        "why_it_matters": "Without full observability of agent actions (e.g., internal reasoning), the measured fidelity may not capture true alignment with the process."
+      }
+    ],
+    "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed actions against a prescribed process, modulated by the granularity and specificity of the metric. Higher granularity increases annotation effort but may yield more precise fidelity scores, while higher specificity improves accuracy for a given process but reduces generalizability. Bottlenecks include underspecified processes and incomplete agent traces."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Higher granularity in fidelity measurement improves precision but requires significantly more annotation effort, creating a tradeoff between accuracy and cost.",
+      "derived_from": [
+        "Granularity of measurement vs. Cost of annotation",
+        "Granularity modulates Fidelity_Score",
+        "Granularity increases Annotation_Effort"
+      ],
+      "why_it_matters": "Researchers and practitioners must choose between detailed step-by-step comparisons (costly) and holistic assessments (less accurate). This choice directly impacts the feasibility of large-scale evaluations.",
+      "what_existing_methods_may_miss": "Existing methods often default to one granularity level (e.g., exact match) without systematically evaluating the cost-accuracy tradeoff, leading to either over-engineering or insufficient scrutiny.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Metrics tailored to a specific process yield higher fidelity accuracy but sacrifice generalizability across different processes, impeding the development of universal fidelity benchmarks.",
+      "derived_from": [
+        "Specificity to a given process vs. Generalizability across different processes",
+        "Specificity_of_Metric influences Fidelity_Score"
+      ],
+      "why_it_matters": "A metric that works well for one task may fail for another, making it difficult to compare or aggregate results across studies. This tension limits the transferability of findings.",
+      "what_existing_methods_may_miss": "Existing methods often report performance on a single task without analyzing how metric specificity affects generalizability, leading to overclaims of universality.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that the prescribed process is fully specified and unambiguous conflicts with real-world processes that often contain ambiguity, making fidelity measurement subjective.",
+      "derived_from": [
+        "Assumption: The prescribed process is fully specified and unambiguous",
+        "Bottleneck: Ambiguous Process Specification"
+      ],
+      "why_it_matters": "If the ground truth is ambiguous, different evaluators may interpret it differently, leading to inconsistent fidelity scores. This undermines the reliability of any metric.",
+      "what_existing_methods_may_miss": "Existing methods typically treat the process as fixed and clear, ignoring the potential for multiple valid interpretations. They may not detect when ambiguity artificially inflates or deflates fidelity.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that agent actions are fully observable and recordable in a structured format contradicts the reality that LLM agents often produce free-form text or unrecorded internal reasoning, hiding potential deviations from the process.",
+      "derived_from": [
+        "Assumption: Agent actions are observable and recordable in a structured format",
+        "Bottleneck: Incomplete Agent Trace"
+      ],
+      "why_it_matters": "If key actions are unobservable, fidelity measurements may miss critical misalignments, giving a false sense of compliance. This is especially problematic for safety-critical applications.",
+      "what_existing_methods_may_miss": "Existing methods often rely on surface-level outputs (e.g., final answer) without probing internal steps, thus failing to detect process violations that occur in hidden steps.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "At what granularity level does the marginal improvement in fidelity accuracy fall below a cost threshold (e.g., 10% increase in accuracy per additional annotation hour), defining the optimal trade-off point in LLM agent evaluation?",
+      "question_type": "diagnostic",
+      "source_tension": "T1",
+      "expected_contribution": "Identifies the inflection point where finer granularity yields diminishing returns, enabling cost-effective evaluation design."
+    },
+    {
+      "question": "Does the tradeoff between metric specificity and cross-process generalizability follow a nonlinear pattern such that beyond a critical specificity level, generalizability drops sharply while fidelity accuracy saturates?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Reveals the functional form of the specificity-generalizability tradeoff, guiding metric selection for multi-task benchmarks."
+    },
+    {
+      "question": "Under what threshold of process ambiguity (e.g., number of equally valid step sequences) does inter-rater variability in fidelity scores exceed a reliability coefficient of 0.7, rendering the measurement unreliable?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Establishes a quantitative boundary for acceptable ambiguity, informing process specification guidelines."
+    },
+    {
+      "question": "Does the overestimation bias due to incomplete observability interact with action type such that hidden reasoning steps produce significantly larger bias than hidden tool calls, and is this interaction moderated by task complexity?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Identifies conditions where incomplete traces most distort fidelity, prompting targeted interpretability methods for high-bias scenarios."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity (e.g., an LLM-based system) that receives inputs and produces outputs in the form of actions or decisions within a given environment to achieve a goal.",
+          "why_primitive": "It is the subject of evaluation; without an agent, there is nothing to measure fidelity on."
+        },
+        {
+          "name": "Process",
+          "definition": "A prescribed sequence of steps, rules, or criteria that the agent is expected to follow when performing a task, often defined externally by a human or system.",
+          "why_primitive": "Process defines the standard against which the agent's actions are compared; fidelity is meaningless without a reference process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the agent's actual behavior and the prescribed process, typically measured as a distance or similarity score.",
+          "why_primitive": "The core concept of interest; all measurement methods aim to quantify this correspondence."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is fully specified and unambiguous.",
+          "rationale": "To measure fidelity, we need a clear ground truth; without a well-defined process, comparison is subjective or impossible.",
+          "possible_failure": "Real-world processes may be underspecified or contain ambiguities, leading to disagreements in fidelity assessment."
+        },
+        {
+          "assumption": "Agent actions are observable and recordable in a structured format that can be compared to the process.",
+          "rationale": "Measurement requires data; if the agent's internal reasoning or intermediate steps are hidden, fidelity cannot be directly assessed.",
+          "possible_failure": "LLM agents often generate free-form text or use internal tool calls that are not easily parsed into discrete steps, making comparison difficult."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent_Actions",
+            "role": "input",
+            "description": "Observable trace of agent's steps or decisions."
+          },
+          {
+            "name": "Prescribed_Process",
+            "role": "input",
+            "description": "Defined sequence of steps the agent should follow."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "Level of detail at which actions are compared (e.g., step-by-step vs. outcome-level)."
+          },
+          {
+            "name": "Specificity_of_Metric",
+            "role": "mediator",
+            "description": "How closely tailored the metric is to the specific process."
+          },
+          {
+            "name": "Fidelity_Score",
+            "role": "output",
+            "description": "Quantified degree of alignment between agent actions and prescribed process."
+          },
+          {
+            "name": "Annotation_Effort",
+            "role": "outcome",
+            "description": "Human or computational resources required to perform measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Agent_Actions",
+            "relation": "compared against",
+            "target": "Fidelity_Score",
+            "explanation": "The agent's actions are compared to the prescribed process to compute fidelity."
+          },
+          {
+            "step": "2",
+            "source": "Prescribed_Process",
+            "relation": "serves as standard",
+            "target": "Fidelity_Score",
+            "explanation": "The prescribed process provides the ground truth for comparison."
+          },
+          {
+            "step": "3",
+            "source": "Granularity",
+            "relation": "modulates",
+            "target": "Fidelity_Score",
+            "explanation": "The granularity of comparison affects how fidelity is quantified (e.g., exact match vs. semantic similarity)."
+          },
+          {
+            "step": "4",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Annotation_Effort",
+            "explanation": "Higher granularity (more fine-grained comparison) typically requires more effort."
+          },
+          {
+            "step": "5",
+            "source": "Specificity_of_Metric",
+            "relation": "influences",
+            "target": "Fidelity_Score",
+            "explanation": "A metric specific to the process yields a more accurate fidelity measure but less generalizable."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the prescribed process is not fully specified or contains ambiguities, the comparison becomes subjective and fidelity measurement loses reliability."
+          },
+          {
+            "bottleneck": "Incomplete Agent Trace",
+            "why_it_matters": "Without full observability of agent actions (e.g., internal reasoning), the measured fidelity may not capture true alignment with the process."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed actions against a prescribed process, modulated by the granularity and specificity of the metric. Higher granularity increases annotation effort but may yield more precise fidelity scores, while higher specificity improves accuracy for a given process but reduces generalizability. Bottlenecks include underspecified processes and incomplete agent traces."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that the prescribed process is fully specified and unambiguous conflicts with real-world processes that often contain ambiguity, making fidelity measurement subjective.",
+        "derived_from": [
+          "Assumption: The prescribed process is fully specified and unambiguous",
+          "Bottleneck: Ambiguous Process Specification"
+        ],
+        "why_it_matters": "If the ground truth is ambiguous, different evaluators may interpret it differently, leading to inconsistent fidelity scores. This undermines the reliability of any metric.",
+        "what_existing_methods_may_miss": "Existing methods typically treat the process as fixed and clear, ignoring the potential for multiple valid interpretations. They may not detect when ambiguity artificially inflates or deflates fidelity.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "How does the interaction between process ambiguity (number of equally valid step sequences) and metric specificity (exact match vs. semantic similarity) define a phase transition in inter-rater reliability, specifically a sharp drop below 0.7 at a critical ambiguity threshold that shifts depending on metric type?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a nonlinear interaction between ambiguity and metric choice, providing guidance on when to choose which metric to maintain reliability."
+      },
+      "hypothesis": {
+        "statement": "There is an interaction effect: for exact-match metrics, inter-rater reliability (Fleiss' kappa) drops below 0.7 when ambiguity reaches 3 equally valid sequences; for semantic similarity metrics, the drop occurs earlier at ambiguity level 2. Thus, metric specificity modulates the critical ambiguity threshold.",
+        "predicted_effect": "The critical ambiguity threshold for reliability <0.7 is 3 for exact match, 2 for semantic similarity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create process specifications with ambiguity levels 1,2,3,4 (equally valid step sequences). For each, generate a fixed agent trace satisfying all sequences. Recruit 12 raters; half use exact-match metric, half use semantic similarity metric. Compute Fleiss' kappa per ambiguity-metric combination. Test for interaction effect and threshold crossing.",
+        "independent_variables": [
+          "Ambiguity level (1,2,3,4)",
+          "Metric type (exact match vs. semantic similarity)"
+        ],
+        "dependent_variables": [
+          "Inter-rater reliability (Fleiss' kappa)"
+        ],
+        "controls": [
+          "Same agent trace for all processes",
+          "Same task domain",
+          "Rater training",
+          "Random order",
+          "Balanced assignment of raters to metrics"
+        ],
+        "falsifying_observation": "No interaction: either both metrics cross threshold at same ambiguity, or neither shows a sharp drop, or exact match cross earlier than semantic similarity, or threshold never reaches below 0.7 for any combination."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For exact match, Fleiss' kappa <0.7 at ambiguity 3 and above, >0.7 at 1-2.",
+          "For semantic similarity, Fleiss' kappa <0.7 at ambiguity 2 and above, >0.7 at 1."
+        ],
+        "rejects_hypothesis": [
+          "No difference between metrics; both cross at same ambiguity.",
+          "Semantic similarity shows higher reliability than exact match at all levels (opposite direction).",
+          "No sharp drop; reliability decreases gradually without clear threshold."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the predicted interaction pattern does not hold (e.g., both metrics behave similarly, or the threshold shift is opposite), then the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that metric specificity modulates ambiguity's effect on reliability may be wrong; instead, ambiguity type (e.g., ordering vs. semantic) might be the key moderator.",
+        "next_question": "What dimensions of process ambiguity (e.g., sequential vs. semantic) most strongly interact with metric specificity to affect reliability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity (e.g., an LLM-based system) that receives inputs and produces outputs in the form of actions or decisions within a given environment to achieve a goal.",
+          "why_primitive": "It is the subject of evaluation; without an agent, there is nothing to measure fidelity on."
+        },
+        {
+          "name": "Process",
+          "definition": "A prescribed sequence of steps, rules, or criteria that the agent is expected to follow when performing a task, often defined externally by a human or system.",
+          "why_primitive": "Process defines the standard against which the agent's actions are compared; fidelity is meaningless without a reference process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the agent's actual behavior and the prescribed process, typically measured as a distance or similarity score.",
+          "why_primitive": "The core concept of interest; all measurement methods aim to quantify this correspondence."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is fully specified and unambiguous.",
+          "rationale": "To measure fidelity, we need a clear ground truth; without a well-defined process, comparison is subjective or impossible.",
+          "possible_failure": "Real-world processes may be underspecified or contain ambiguities, leading to disagreements in fidelity assessment."
+        },
+        {
+          "assumption": "Agent actions are observable and recordable in a structured format that can be compared to the process.",
+          "rationale": "Measurement requires data; if the agent's internal reasoning or intermediate steps are hidden, fidelity cannot be directly assessed.",
+          "possible_failure": "LLM agents often generate free-form text or use internal tool calls that are not easily parsed into discrete steps, making comparison difficult."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent_Actions",
+            "role": "input",
+            "description": "Observable trace of agent's steps or decisions."
+          },
+          {
+            "name": "Prescribed_Process",
+            "role": "input",
+            "description": "Defined sequence of steps the agent should follow."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "Level of detail at which actions are compared (e.g., step-by-step vs. outcome-level)."
+          },
+          {
+            "name": "Specificity_of_Metric",
+            "role": "mediator",
+            "description": "How closely tailored the metric is to the specific process."
+          },
+          {
+            "name": "Fidelity_Score",
+            "role": "output",
+            "description": "Quantified degree of alignment between agent actions and prescribed process."
+          },
+          {
+            "name": "Annotation_Effort",
+            "role": "outcome",
+            "description": "Human or computational resources required to perform measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Agent_Actions",
+            "relation": "compared against",
+            "target": "Fidelity_Score",
+            "explanation": "The agent's actions are compared to the prescribed process to compute fidelity."
+          },
+          {
+            "step": "2",
+            "source": "Prescribed_Process",
+            "relation": "serves as standard",
+            "target": "Fidelity_Score",
+            "explanation": "The prescribed process provides the ground truth for comparison."
+          },
+          {
+            "step": "3",
+            "source": "Granularity",
+            "relation": "modulates",
+            "target": "Fidelity_Score",
+            "explanation": "The granularity of comparison affects how fidelity is quantified (e.g., exact match vs. semantic similarity)."
+          },
+          {
+            "step": "4",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Annotation_Effort",
+            "explanation": "Higher granularity (more fine-grained comparison) typically requires more effort."
+          },
+          {
+            "step": "5",
+            "source": "Specificity_of_Metric",
+            "relation": "influences",
+            "target": "Fidelity_Score",
+            "explanation": "A metric specific to the process yields a more accurate fidelity measure but less generalizable."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the prescribed process is not fully specified or contains ambiguities, the comparison becomes subjective and fidelity measurement loses reliability."
+          },
+          {
+            "bottleneck": "Incomplete Agent Trace",
+            "why_it_matters": "Without full observability of agent actions (e.g., internal reasoning), the measured fidelity may not capture true alignment with the process."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed actions against a prescribed process, modulated by the granularity and specificity of the metric. Higher granularity increases annotation effort but may yield more precise fidelity scores, while higher specificity improves accuracy for a given process but reduces generalizability. Bottlenecks include underspecified processes and incomplete agent traces."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that agent actions are fully observable and recordable in a structured format contradicts the reality that LLM agents often produce free-form text or unrecorded internal reasoning, hiding potential deviations from the process.",
+        "derived_from": [
+          "Assumption: Agent actions are observable and recordable in a structured format",
+          "Bottleneck: Incomplete Agent Trace"
+        ],
+        "why_it_matters": "If key actions are unobservable, fidelity measurements may miss critical misalignments, giving a false sense of compliance. This is especially problematic for safety-critical applications.",
+        "what_existing_methods_may_miss": "Existing methods often rely on surface-level outputs (e.g., final answer) without probing internal steps, thus failing to detect process violations that occur in hidden steps.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "As the proportion of hidden reasoning steps increases, does the overestimation bias in process fidelity reach a saturation threshold, unlike for hidden tool calls where bias scales linearly, and is this saturation moderated by task complexity?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a sharp boundary condition (saturation point) that distinguishes the effect of hidden reasoning steps from hidden tool calls, enabling targeted measurement strategies that focus on detecting the most critical hidden actions."
+      },
+      "hypothesis": {
+        "statement": "For hidden reasoning steps, the overestimation bias in process fidelity increases until a saturation threshold (e.g., 50% of steps hidden) beyond which it plateaus, whereas for hidden tool calls the bias increases linearly with the proportion of hidden steps. This saturation effect for reasoning steps is more pronounced under high task complexity.",
+        "predicted_effect": "The overestimation bias for hidden reasoning steps will show a diminishing return after a certain proportion, while for hidden tool calls it will remain linear, with the saturation point shifting to lower proportions under high complexity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use an LLM agent to perform multi-step tasks with prescribed processes. Vary the proportion of hidden steps (0%, 25%, 50%, 75%, 100%) for two types of hidden actions: reasoning steps and tool calls. Task complexity is binary (low: 4 steps, high: 8 steps with branching). For each combination, compute the overestimation bias as the difference between measured fidelity (using only visible steps) and true fidelity (full trace). Fit a segmented regression to detect a plateau in the bias vs. proportion curve for reasoning steps, and test if the plateau is absent for tool calls.",
+        "independent_variables": [
+          "Hidden action type: reasoning steps vs. tool calls",
+          "Proportion of hidden steps: 0%, 25%, 50%, 75%, 100%",
+          "Task complexity: low (4 steps) vs. high (8 steps with branching)"
+        ],
+        "dependent_variables": [
+          "Overestimation bias = measured fidelity - true fidelity"
+        ],
+        "controls": [
+          "Same agent model and configuration across conditions",
+          "Same prescribed processes per task",
+          "Counterbalance order of complexity and proportion",
+          "Use 5 seeds per condition"
+        ],
+        "falsifying_observation": "If the overestimation bias for hidden reasoning steps does not exhibit a statistically significant plateau (breakpoint in segmented regression) compared to hidden tool calls (which remain linear), or if the interaction with complexity does not shift the plateau, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For hidden reasoning steps, overestimation bias increases with proportion up to a breakpoint (e.g., ~50%) then plateaus; segmented regression shows a significant breakpoint.",
+          "For hidden tool calls, overestimation bias increases linearly with proportion (no significant breakpoint).",
+          "The breakpoint for reasoning steps occurs at a lower proportion for high-complexity tasks than for low-complexity tasks."
+        ],
+        "rejects_hypothesis": [
+          "Hidden reasoning steps show no significant plateau (linear fit not significantly worse than segmented).",
+          "Hidden tool calls also show a plateau (or vice versa).",
+          "The breakpoint does not shift with task complexity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported, we must revise the assumption that hidden reasoning steps produce a saturation effect distinct from hidden tool calls. Perhaps the saturation is a general property of hidden-step proportion, not specific to reasoning.",
+        "assumption_to_revise": "Assumption: Hidden internal reasoning steps cause a different functional form of bias growth compared to hidden external tool calls. This may be false; both may exhibit similar saturating behavior or both linear.",
+        "next_question": "Is the functional form of bias growth with hidden-step proportion universal across different hidden action types, or are there other factors (e.g., step interdependence) that determine whether bias saturates?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity (e.g., an LLM-based system) that receives inputs and produces outputs in the form of actions or decisions within a given environment to achieve a goal.",
+          "why_primitive": "It is the subject of evaluation; without an agent, there is nothing to measure fidelity on."
+        },
+        {
+          "name": "Process",
+          "definition": "A prescribed sequence of steps, rules, or criteria that the agent is expected to follow when performing a task, often defined externally by a human or system.",
+          "why_primitive": "Process defines the standard against which the agent's actions are compared; fidelity is meaningless without a reference process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the agent's actual behavior and the prescribed process, typically measured as a distance or similarity score.",
+          "why_primitive": "The core concept of interest; all measurement methods aim to quantify this correspondence."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is fully specified and unambiguous.",
+          "rationale": "To measure fidelity, we need a clear ground truth; without a well-defined process, comparison is subjective or impossible.",
+          "possible_failure": "Real-world processes may be underspecified or contain ambiguities, leading to disagreements in fidelity assessment."
+        },
+        {
+          "assumption": "Agent actions are observable and recordable in a structured format that can be compared to the process.",
+          "rationale": "Measurement requires data; if the agent's internal reasoning or intermediate steps are hidden, fidelity cannot be directly assessed.",
+          "possible_failure": "LLM agents often generate free-form text or use internal tool calls that are not easily parsed into discrete steps, making comparison difficult."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent_Actions",
+            "role": "input",
+            "description": "Observable trace of agent's steps or decisions."
+          },
+          {
+            "name": "Prescribed_Process",
+            "role": "input",
+            "description": "Defined sequence of steps the agent should follow."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "Level of detail at which actions are compared (e.g., step-by-step vs. outcome-level)."
+          },
+          {
+            "name": "Specificity_of_Metric",
+            "role": "mediator",
+            "description": "How closely tailored the metric is to the specific process."
+          },
+          {
+            "name": "Fidelity_Score",
+            "role": "output",
+            "description": "Quantified degree of alignment between agent actions and prescribed process."
+          },
+          {
+            "name": "Annotation_Effort",
+            "role": "outcome",
+            "description": "Human or computational resources required to perform measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Agent_Actions",
+            "relation": "compared against",
+            "target": "Fidelity_Score",
+            "explanation": "The agent's actions are compared to the prescribed process to compute fidelity."
+          },
+          {
+            "step": "2",
+            "source": "Prescribed_Process",
+            "relation": "serves as standard",
+            "target": "Fidelity_Score",
+            "explanation": "The prescribed process provides the ground truth for comparison."
+          },
+          {
+            "step": "3",
+            "source": "Granularity",
+            "relation": "modulates",
+            "target": "Fidelity_Score",
+            "explanation": "The granularity of comparison affects how fidelity is quantified (e.g., exact match vs. semantic similarity)."
+          },
+          {
+            "step": "4",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Annotation_Effort",
+            "explanation": "Higher granularity (more fine-grained comparison) typically requires more effort."
+          },
+          {
+            "step": "5",
+            "source": "Specificity_of_Metric",
+            "relation": "influences",
+            "target": "Fidelity_Score",
+            "explanation": "A metric specific to the process yields a more accurate fidelity measure but less generalizable."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the prescribed process is not fully specified or contains ambiguities, the comparison becomes subjective and fidelity measurement loses reliability."
+          },
+          {
+            "bottleneck": "Incomplete Agent Trace",
+            "why_it_matters": "Without full observability of agent actions (e.g., internal reasoning), the measured fidelity may not capture true alignment with the process."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed actions against a prescribed process, modulated by the granularity and specificity of the metric. Higher granularity increases annotation effort but may yield more precise fidelity scores, while higher specificity improves accuracy for a given process but reduces generalizability. Bottlenecks include underspecified processes and incomplete agent traces."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Metrics tailored to a specific process yield higher fidelity accuracy but sacrifice generalizability across different processes, impeding the development of universal fidelity benchmarks.",
+        "derived_from": [
+          "Specificity to a given process vs. Generalizability across different processes",
+          "Specificity_of_Metric influences Fidelity_Score"
+        ],
+        "why_it_matters": "A metric that works well for one task may fail for another, making it difficult to compare or aggregate results across studies. This tension limits the transferability of findings.",
+        "what_existing_methods_may_miss": "Existing methods often report performance on a single task without analyzing how metric specificity affects generalizability, leading to overclaims of universality.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of metric specificity beyond which fidelity accuracy saturates but generalizability collapses due to overfitting to process-specific patterns?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Reveals a phase transition in metric design, enabling principled selection of specificity levels that balance accuracy and generalizability across diverse processes."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical specificity threshold, determined by the entropy of process distributions, such that for specificity below threshold, generalizability remains high and fidelity accuracy increases; above threshold, generalizability sharply drops while fidelity accuracy plateaus.",
+        "predicted_effect": "A sharp drop in generalizability (measured as variance across processes) occurs at a critical specificity level, while fidelity accuracy (correlation with human scores) ceases to improve significantly beyond that point."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a suite of N=10 distinct processes (e.g., data analysis, web navigation, summarization) with varying intrinsic complexity (entropy). For each process, generate agent trajectories from the same LLM. Define a family of metrics on a specificity continuum from 0 (semantic embedding similarity) to 1 (exact step match). For each metric, compute fidelity accuracy as Pearson correlation with human judgments on 100 held-out trajectories per process, and generalizability as the negative variance of those correlations across all processes. Use piecewise regression to detect a breakpoint in the generalizability vs. specificity curve. Also measure fidelity accuracy at each specificity level.",
+        "independent_variables": [
+          "Metric specificity level (continuous, e.g., 0–1 defined by weighted combination of exact matches and semantic similarity)"
+        ],
+        "dependent_variables": [
+          "Fidelity accuracy (Pearson correlation with human scores aggregated across processes)",
+          "Generalizability (inverse variance of per-process fidelity accuracy, or average cross-process accuracy gap)"
+        ],
+        "controls": [
+          "Same set of 5 LLM agents (same base model and temperature) for all processes",
+          "Fixed random seed for agent behavior",
+          "Human annotators for ground truth fidelity (same set of 3 annotators, majority vote)",
+          "Process complexity measured via action entropy (pilot test)"
+        ],
+        "falsifying_observation": "If the generalizability vs. specificity plot shows a linear or monotonic decrease without a statistically significant breakpoint (e.g., no threshold in piecewise regression), or if fidelity accuracy continues to rise linearly beyond the apparent threshold, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low specificity, fidelity accuracy is moderate (around 0.4) and generalizability is high (variance <0.01).",
+          "As specificity increases, fidelity accuracy rises but at a decreasing rate (e.g., from 0.4 to 0.8, then plateauing at ~0.85).",
+          "Generalizability remains stable until a critical specificity (e.g., 0.6), then drops sharply (variance jumps to >0.05).",
+          "Piecewise regression identifies a significant breakpoint with a sharp slope change."
+        ],
+        "rejects_hypothesis": [
+          "Generalizability declines linearly across the entire specificity range without a breakpoint.",
+          "Fidelity accuracy continues to increase significantly beyond the point where generalizability drops.",
+          "No single critical threshold is identifiable; the relationship is smooth and monotonic."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or the tradeoff is linear, then the hypothesized phase transition does not occur under these conditions.",
+        "assumption_to_revise": "The assumption that metric specificity alone drives a nonlinear threshold; instead, other factors like process complexity or agent stochasticity may modulate the tradeoff.",
+        "next_question": "Does the shape of the specificity-generalizability tradeoff depend on process complexity (e.g., entropy) or agent behavior variability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity (e.g., an LLM-based system) that receives inputs and produces outputs in the form of actions or decisions within a given environment to achieve a goal.",
+          "why_primitive": "It is the subject of evaluation; without an agent, there is nothing to measure fidelity on."
+        },
+        {
+          "name": "Process",
+          "definition": "A prescribed sequence of steps, rules, or criteria that the agent is expected to follow when performing a task, often defined externally by a human or system.",
+          "why_primitive": "Process defines the standard against which the agent's actions are compared; fidelity is meaningless without a reference process."
+        },
+        {
+          "name": "Fidelity",
+          "definition": "The degree of correspondence between the agent's actual behavior and the prescribed process, typically measured as a distance or similarity score.",
+          "why_primitive": "The core concept of interest; all measurement methods aim to quantify this correspondence."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The prescribed process is fully specified and unambiguous.",
+          "rationale": "To measure fidelity, we need a clear ground truth; without a well-defined process, comparison is subjective or impossible.",
+          "possible_failure": "Real-world processes may be underspecified or contain ambiguities, leading to disagreements in fidelity assessment."
+        },
+        {
+          "assumption": "Agent actions are observable and recordable in a structured format that can be compared to the process.",
+          "rationale": "Measurement requires data; if the agent's internal reasoning or intermediate steps are hidden, fidelity cannot be directly assessed.",
+          "possible_failure": "LLM agents often generate free-form text or use internal tool calls that are not easily parsed into discrete steps, making comparison difficult."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent_Actions",
+            "role": "input",
+            "description": "Observable trace of agent's steps or decisions."
+          },
+          {
+            "name": "Prescribed_Process",
+            "role": "input",
+            "description": "Defined sequence of steps the agent should follow."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "Level of detail at which actions are compared (e.g., step-by-step vs. outcome-level)."
+          },
+          {
+            "name": "Specificity_of_Metric",
+            "role": "mediator",
+            "description": "How closely tailored the metric is to the specific process."
+          },
+          {
+            "name": "Fidelity_Score",
+            "role": "output",
+            "description": "Quantified degree of alignment between agent actions and prescribed process."
+          },
+          {
+            "name": "Annotation_Effort",
+            "role": "outcome",
+            "description": "Human or computational resources required to perform measurement."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Agent_Actions",
+            "relation": "compared against",
+            "target": "Fidelity_Score",
+            "explanation": "The agent's actions are compared to the prescribed process to compute fidelity."
+          },
+          {
+            "step": "2",
+            "source": "Prescribed_Process",
+            "relation": "serves as standard",
+            "target": "Fidelity_Score",
+            "explanation": "The prescribed process provides the ground truth for comparison."
+          },
+          {
+            "step": "3",
+            "source": "Granularity",
+            "relation": "modulates",
+            "target": "Fidelity_Score",
+            "explanation": "The granularity of comparison affects how fidelity is quantified (e.g., exact match vs. semantic similarity)."
+          },
+          {
+            "step": "4",
+            "source": "Granularity",
+            "relation": "increases",
+            "target": "Annotation_Effort",
+            "explanation": "Higher granularity (more fine-grained comparison) typically requires more effort."
+          },
+          {
+            "step": "5",
+            "source": "Specificity_of_Metric",
+            "relation": "influences",
+            "target": "Fidelity_Score",
+            "explanation": "A metric specific to the process yields a more accurate fidelity measure but less generalizable."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguous Process Specification",
+            "why_it_matters": "If the prescribed process is not fully specified or contains ambiguities, the comparison becomes subjective and fidelity measurement loses reliability."
+          },
+          {
+            "bottleneck": "Incomplete Agent Trace",
+            "why_it_matters": "Without full observability of agent actions (e.g., internal reasoning), the measured fidelity may not capture true alignment with the process."
+          }
+        ],
+        "mechanism_summary": "The measurement of agent process fidelity involves comparing the agent's observed actions against a prescribed process, modulated by the granularity and specificity of the metric. Higher granularity increases annotation effort but may yield more precise fidelity scores, while higher specificity improves accuracy for a given process but reduces generalizability. Bottlenecks include underspecified processes and incomplete agent traces."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Higher granularity in fidelity measurement improves precision but requires significantly more annotation effort, creating a tradeoff between accuracy and cost.",
+        "derived_from": [
+          "Granularity of measurement vs. Cost of annotation",
+          "Granularity modulates Fidelity_Score",
+          "Granularity increases Annotation_Effort"
+        ],
+        "why_it_matters": "Researchers and practitioners must choose between detailed step-by-step comparisons (costly) and holistic assessments (less accurate). This choice directly impacts the feasibility of large-scale evaluations.",
+        "what_existing_methods_may_miss": "Existing methods often default to one granularity level (e.g., exact match) without systematically evaluating the cost-accuracy tradeoff, leading to either over-engineering or insufficient scrutiny.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical level of prescribed process ambiguity does the relationship between fidelity measurement granularity and accuracy undergo a phase transition, such that beyond that level finer granularity ceases to improve fidelity accuracy?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition condition where ambiguity modulates the granularity-accuracy tradeoff, enabling adaptive evaluation protocols that prioritize granularity only for low-ambiguity processes."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ambiguity level A* such that for processes with ambiguity > A*, increasing fidelity granularity (e.g., from outcome-level to sub-step-level) yields no statistically significant improvement in accuracy, while for ambiguity < A*, finer granularity significantly improves accuracy.",
+        "predicted_effect": "A phase transition: the effect of granularity on accuracy is positive and decreasing below A*, but drops sharply to near zero above A*."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a set of 20 prescribed processes with varying ambiguity levels, measured as the proportion of steps that are underspecified (e.g., 0%, 25%, 50%, 75%, 100%). For each process, use the same LLM agent to perform the task and collect traces. Two granularity levels are applied: coarse (outcome-level: pass/fail) and fine (step-level: exact match of each step). For each process-ambiguity × granularity combination, compute fidelity accuracy (F1 score) averaged over 5 runs. For each ambiguity level, test whether fine granularity yields significantly higher accuracy than coarse (paired t-test, α=0.05). The critical ambiguity A* is the highest ambiguity at which the difference is significant across a continuous measure (via logistic regression of significance on ambiguity).",
+        "independent_variables": [
+          "Granularity level (coarse/fine)",
+          "Process ambiguity (proportion of underspecified steps: 0, 0.25, 0.5, 0.75, 1.0)"
+        ],
+        "dependent_variables": [
+          "Fidelity accuracy (F1 score)"
+        ],
+        "controls": [
+          "Same LLM agent and task across all conditions",
+          "Fixed set of 5 tasks per ambiguity level",
+          "Identical annotation guidelines",
+          "Randomized order of conditions"
+        ],
+        "falsifying_observation": "If for all ambiguity levels, fine granularity yields significantly higher accuracy than coarse (i.e., significant difference at all ambiguity levels), or if no ambiguity level shows a significant difference, then the hypothesis of a phase transition is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low ambiguity (0-25%), fine granularity yields significantly higher accuracy than coarse.",
+          "At high ambiguity (75-100%), there is no significant difference between granularity levels.",
+          "A clear transition point A* is identified between 25% and 75% ambiguity where significance drops."
+        ],
+        "rejects_hypothesis": [
+          "Fine granularity significantly outperforms coarse at all ambiguity levels, including high ambiguity.",
+          "No significant difference at any ambiguity level.",
+          "Fine granularity underperforms coarse at low ambiguity (i.e., negative effect)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed (e.g., granularity effect is uniform across ambiguity), then the initial assumption that ambiguity is the key modulator is incorrect.",
+        "assumption_to_revise": "The assumption that process ambiguity (proportion of underspecified steps) is the dominant factor modulating the granularity-accuracy relationship; other factors like metric specificity or agent capability may be more critical.",
+        "next_question": "How does the specificity of the fidelity metric (generic vs. process-specific) interact with granularity to affect accuracy, and does that interaction dominate over ambiguity effects?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical ambiguity level A* such that for processes with ambiguity > A*, increasing fidelity granularity (e.g., from outcome-level to sub-step-level) yields no statistically significant improvement in accuracy, while for ambiguity < A*, finer granularity significantly improves accuracy.",
+      "independent_variables": [
+        "Granularity level (coarse vs. fine)",
+        "Process ambiguity (low vs. high: e.g., 20% vs. 80% underspecified steps)"
+      ],
+      "dependent_variables": [
+        "Fidelity accuracy (F1 score between agent actions and prescribed process)"
+      ],
+      "controlled_variables": [
+        "Same LLM agent (e.g., GPT-4) across all conditions",
+        "Identical set of 5 tasks per ambiguity level",
+        "Fixed annotation guidelines for each granularity level",
+        "Randomized order of conditions",
+        "Same environment and task instructions"
+      ],
+      "baselines": [
+        {
+          "name": "Coarse granularity at low ambiguity",
+          "description": "Outcome-level pass/fail evaluation on processes with low ambiguity; serves as reference for comparing fine granularity effect."
+        },
+        {
+          "name": "Coarse granularity at high ambiguity",
+          "description": "Outcome-level pass/fail evaluation on processes with high ambiguity; serves as reference for high ambiguity condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "F1 score",
+          "definition": "Harmonic mean of precision and recall comparing agent's step-level (or outcome-level) alignment to prescribed process steps, averaged over tasks."
+        }
+      ],
+      "expected_result": "A significant interaction effect: at low ambiguity, fine granularity yields significantly higher F1 than coarse; at high ambiguity, no significant difference. Logistic regression of significance on ambiguity shows a threshold A* around 50%.",
+      "falsifying_result": "If fine granularity significantly outperforms coarse at both low and high ambiguity (uniform improvement), or if no significant difference at either level, then the hypothesis of a phase transition is falsified.",
+      "minimum_viable_experiment": "Use 2 process ambiguity levels (20% and 80% underspecified steps), 2 granularity levels (coarse: outcome pass/fail; fine: step-level exact match), 5 tasks per condition (total 20 runs). Same LLM agent (e.g., GPT-4) for all. Compute F1 for each run. Perform 2x2 ANOVA to check interaction. Count significant differences at each ambiguity level via post-hoc t-tests.",
+      "risks_and_confounds": [
+        "Task difficulty may confound ambiguity if low ambiguity tasks are easier; control by balancing base difficulty.",
+        "Order effects from sequential runs; mitigate by randomizing condition order.",
+        "Annotation subjectivity at fine granularity; use multiple annotators and measure inter-rater reliability.",
+        "Limited sample size (5 tasks per condition) may reduce statistical power; consider increasing to 10 if feasible."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical specificity threshold, determined by the entropy of process distributions, such that for specificity below threshold, generalizability remains high and fidelity accuracy increases; above threshold, generalizability sharply drops while fidelity accuracy plateaus.",
+      "independent_variables": [
+        "Metric specificity level (continuous, defined by weighted combination of exact step match and semantic embedding similarity, sampled at 5 levels: 0.0, 0.25, 0.5, 0.75, 1.0)"
+      ],
+      "dependent_variables": [
+        "Fidelity accuracy: Pearson correlation between metric scores and human fidelity judgments, averaged across processes",
+        "Generalizability: inverse variance of per-process fidelity accuracy correlations across processes"
+      ],
+      "controlled_variables": [
+        "Same base LLM agent (GPT-4 with temperature 0) for all processes",
+        "Fixed random seed for agent behavior",
+        "Same set of 3 human annotators for ground truth fidelity (majority vote)",
+        "Same set of 3 processes (data analysis, web navigation, summarization) with varying complexity"
+      ],
+      "baselines": [
+        {
+          "name": "Random baseline",
+          "description": "Random score of 0.5 for all metrics, no correlation with human judgments"
+        },
+        {
+          "name": "Exact step match baseline",
+          "description": "Metric that only considers exact step matches (specificity=1) as a high-specificity baseline"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Specificity level 0.0",
+          "definition": "Semantic embedding similarity (cosine similarity of step embeddings) between agent action and prescribed step, averaged across steps."
+        },
+        {
+          "name": "Specificity level 0.25",
+          "definition": "Weighted combination: 0.25 * exact match + 0.75 * semantic similarity."
+        },
+        {
+          "name": "Specificity level 0.5",
+          "definition": "Weighted combination: 0.5 * exact match + 0.5 * semantic similarity."
+        },
+        {
+          "name": "Specificity level 0.75",
+          "definition": "Weighted combination: 0.75 * exact match + 0.25 * semantic similarity."
+        },
+        {
+          "name": "Specificity level 1.0",
+          "definition": "Exact step match (binary indicator of whether each step matches the prescribed step exactly)."
+        }
+      ],
+      "expected_result": "We expect to observe a breakpoint in the generalizability vs. specificity curve around specificity=0.6, where generalizability drops sharply and fidelity accuracy plateaus. Piecewise regression will show a significant change in slope.",
+      "falsifying_result": "If the generalizability vs. specificity relationship is linear or monotonic without a statistically significant breakpoint (e.g., piecewise regression finds no threshold or the slope change is not significant), or if fidelity accuracy continues to increase significantly beyond the point where generalizability drops, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "We will use 3 distinct processes (data analysis, web navigation, summarization) with varying intrinsic complexity. For each process, we generate agent trajectories using GPT-4 (temperature 0) with a fixed seed, 30 trajectories per process. For each trajectory, we compute metric scores at 5 specificity levels (0.0, 0.25, 0.5, 0.75, 1.0). Three human annotators independently rate the fidelity of each trajectory on a 1-5 scale, majority vote used as ground truth. We then compute per-process fidelity accuracy (Pearson correlation between metric score and human rating) and generalizability (inverse variance across processes). We perform piecewise linear regression on the generalizability vs. specificity curve and test for a breakpoint using a standard segmented regression package.",
+      "risks_and_confounds": [
+        "Human annotation quality may vary; we use majority vote to mitigate.",
+        "Process selection may bias results; we choose processes with different action entropies.",
+        "Metric specificity levels may not be uniformly sampled; we use equally spaced levels.",
+        "The chosen LLM may not be representative; we use GPT-4 as a common baseline."
+      ]
+    },
+    {
+      "hypothesis": "For exact-match metrics, inter-rater reliability (Fleiss' kappa) drops below 0.7 when ambiguity reaches 3 equally valid sequences; for semantic similarity metrics, the drop occurs earlier at ambiguity level 2. Thus, metric specificity modulates the critical ambiguity threshold.",
+      "independent_variables": [
+        "Ambiguity level (1, 2, 3)",
+        "Metric type (exact match vs semantic similarity)"
+      ],
+      "dependent_variables": [
+        "Inter-rater reliability (Fleiss' kappa)"
+      ],
+      "controlled_variables": [
+        "Same agent trace for all processes",
+        "Same task domain (e.g., document processing)",
+        "Rater training on the prescribed process and metric use",
+        "Random order of process presentation",
+        "Balanced assignment of raters to metric groups (3 per metric)"
+      ],
+      "baselines": [
+        {
+          "name": "Unambiguous process",
+          "description": "Process specification with only 1 equally valid step sequence (ambiguity level 1). This provides a baseline where high reliability is expected for both metrics."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Exact match",
+          "definition": "Rater checks if the agent's actions exactly match one of the permitted step sequences; score is 1 if exact match, 0 otherwise."
+        },
+        {
+          "name": "Semantic similarity",
+          "definition": "Rater judges the degree of semantic correspondence between agent actions and the prescribed process on a Likert scale (1-5), which is then dichotomized at a threshold (e.g., >=4 as 'following process') for reliability computation."
+        }
+      ],
+      "expected_result": "For the exact-match metric, Fleiss' kappa will be >0.7 at ambiguity levels 1 and 2, and drop below 0.7 at ambiguity level 3. For the semantic similarity metric, Fleiss' kappa will be >0.7 at ambiguity level 1, and drop below 0.7 at ambiguity level 2 and remain below at level 3.",
+      "falsifying_result": "Any of the following: (1) No interaction: both metrics cross the 0.7 threshold at the same ambiguity level. (2) Exact-match metric crosses earlier than semantic similarity. (3) Neither metric shows a sharp drop below 0.7 at any ambiguity level (reliability remains >0.7). (4) Semantic similarity shows higher reliability than exact match at all ambiguity levels (opposite direction).",
+      "minimum_viable_experiment": "Construct three process specifications with ambiguity levels 1, 2, and 3 (1, 2, or 3 equally valid step sequences). For each, create a single agent trace that satisfies all valid sequences for that ambiguity. Recruit 6 raters: randomly assign 3 to use the exact-match metric and 3 to use the semantic similarity metric. Each rater evaluates the agent trace against each of the three process specifications (in random order) and assigns a fidelity score (binary for exact, ordinal for semantic). Compute Fleiss' kappa for each combination of ambiguity level and metric type (6 values). Determine if the predicted threshold pattern is observed.",
+      "risks_and_confounds": [
+        "Rater interpretation of semantic similarity may vary; training and calibration may reduce but not eliminate subjectivity.",
+        "The fixed agent trace might not be equally representative of all valid sequences; ensure it contains elements from each valid sequence.",
+        "Small number of raters (3 per condition) may lead to unstable kappa estimates; use bootstrap to assess confidence.",
+        "Order effects mitigated by randomization, but fatigue could affect later ratings."
+      ]
+    },
+    {
+      "hypothesis": "For hidden reasoning steps, the overestimation bias in process fidelity increases until a saturation threshold (e.g., 50% of steps hidden) beyond which it plateaus, whereas for hidden tool calls the bias increases linearly with the proportion of hidden steps. This saturation effect for reasoning steps is more pronounced under high task complexity.",
+      "independent_variables": [
+        "Hidden action type: reasoning steps vs. tool calls",
+        "Proportion of hidden steps: 0%, 25%, 50%, 75%, 100%",
+        "Task complexity: low (4 steps) vs. high (8 steps with branching)"
+      ],
+      "dependent_variables": [
+        "Overestimation bias = measured fidelity - true fidelity"
+      ],
+      "controlled_variables": [
+        "Same LLM agent model and configuration across all conditions",
+        "Same prescribed processes for each task type",
+        "Counterbalance order of complexity and proportion across runs",
+        "Use 5 random seeds per condition to ensure reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Full trace (0% hidden) condition for each action type and complexity level",
+          "description": "Baseline where all steps are visible, yielding true fidelity. Overestimation bias is zero by definition for this condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Overestimation bias",
+          "definition": "Difference between measured fidelity (computed using only visible steps) and true fidelity (computed using full trace). Measured fidelity is the proportion of visible steps that match the prescribed process steps exactly."
+        }
+      ],
+      "expected_result": "For hidden reasoning steps, overestimation bias increases with proportion of hidden steps up to a breakpoint (e.g., ~50%) and then plateaus; segmented regression reveals a significant breakpoint. For hidden tool calls, bias increases linearly with proportion (no significant breakpoint). The breakpoint for reasoning steps occurs at a lower proportion for high-complexity tasks than low-complexity tasks.",
+      "falsifying_result": "If hidden reasoning steps do not show a statistically significant plateau (i.e., linear fit is not significantly worse than segmented regression), or if hidden tool calls also exhibit a plateau, or if task complexity does not shift the breakpoint, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Design multi-step tasks with prescribed processes. Use an LLM agent (e.g., GPT-4) to perform tasks. Vary proportion of hidden steps (0%, 25%, 50%, 75%, 100%) for reasoning vs tool call steps, and task complexity (low: 4-step linear, high: 8-step with branching). For each of the 2×5×2=20 conditions, run 5 seeds, collect action traces, compute measured and true fidelity, calculate bias. Fit segmented regression to bias vs. proportion for each action type and complexity, and compare breakpoints. The experiment requires 100 runs total (20 conditions × 5 seeds).",
+      "risks_and_confounds": [
+        "Accuracy of fidelity measurement: exact step matching may be too strict; could use semantic similarity, but that introduces subjectivity.",
+        "Definition of hidden steps: ensuring that hidden reasoning steps are truly unobserved while tool calls are similarly hidden requires careful instrumentation.",
+        "Task complexity operationalization may not capture the intended moderator; branching steps may have different interdependence.",
+        "Agent model variability: different LLMs may exhibit different reasoning patterns; results may not generalize.",
+        "Order effects: despite counterbalancing, learning effects may occur; using different task instances per condition can mitigate.",
+        "Statistical power: 5 seeds per condition may be insufficient to detect subtle plateaus; consider increasing if warranted."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles research package for measuring agent process fidelity, including primitive definitions, assumptions, a mechanism model, tensions, and falsifiable hypotheses with proposed experiments. The work is well-structured and identifies key tradeoffs (granularity vs. cost, specificity vs. generalizability) and bottlenecks (ambiguous processes, incomplete traces). However, the derivation is more conceptual than truly first-principles, as it relies on conventional definitions rather than fundamental axioms. The proposed experiments lack comparison to existing fidelity metrics (e.g., exact match, BLEU, semantic similarity from prior work), and the self-assigned novelty scores (5/5) appear overclaimed. The practical feasibility of some experiments (e.g., controlling ambiguity levels) is questionable. Overall, the package offers a useful framing but falls short of the rigorous validation expected at a top ML conference.",
+    "strengths": [
+      "Clear primitive definitions and explicit assumptions ground the problem.",
+      "The mechanism model provides a structured causal view of fidelity measurement.",
+      "Tensions (T1-T4) are well-articulated and lead to falsifiable hypotheses.",
+      "The minimal decisive tests are carefully designed with controls and falsifying conditions.",
+      "Focus on process fidelity is timely for LLM agent evaluation."
+    ],
+    "weaknesses": [
+      "First-principles derivation is not deep; it merely defines terms rather than deriving from fundamental premises.",
+      "No baseline comparison to existing process fidelity metrics (e.g., step-level exact match, BLEU, or human evaluation scales).",
+      "Self-assigned scores (novelty 5/5) are not justified and likely overclaimed; the ideas build on known tradeoffs.",
+      "Some experiments rely on controllable ambiguity, which may be artificial and not representative of real-world processes.",
+      "The assumption that prescribed processes are fully specified is contradicted by the tensions, yet experiments still assume a clear ground truth.",
+      "The analysis lacks consideration of existing literature on process evaluation (e.g., program synthesis, workflow verification)."
+    ],
+    "questions": [
+      "How do the proposed metrics compare to established baselines like step-level exact match or BLEU for process adherence?",
+      "What real-world processes exhibit the ambiguity levels assumed in the experiments?",
+      "How would the results generalize to LLMs other than GPT-4 (e.g., open-source models)?",
+      "Could the observed tensions be subsumed by existing evaluation frameworks (e.g., reward models, process reward models)?"
+    ],
+    "missing_baselines": [
+      "Exact match (step-level) as a baseline metric.",
+      "Semantic similarity metrics used in prior process evaluation (e.g., BLEU, ROUGE, embedding cosine).",
+      "Human evaluation agreement (inter-rater reliability) without automated metrics.",
+      "Existing process fidelity measures from fields like workflow mining or plan recognition."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient empirical grounding",
+    "root_cause": "The research package proposed novel hypotheses and experiments but failed to compare against existing fidelity metrics (e.g., exact match, BLEU, semantic similarity) or validate assumptions (e.g., controllability of process ambiguity) in preliminary experiments. This led to overclaimed novelty (self-score 5/5) and weak practical feasibility.",
+    "violated_principle": "FirstResearch must ground every new metric or hypothesis in at least one existing baseline or prior work, and demonstrate that the new approach offers a measurable improvement over that baseline under controlled conditions.",
+    "new_or_updated_principle": "Before proposing a novel process fidelity metric or experimental design, researchers must conduct a small-scale pilot study comparing their candidate approach to at least three established baselines (e.g., exact step match, semantic embedding similarity, human agreement). The pilot must show clear advantages or identify nontrivial tradeoffs; otherwise, the novelty claim is considered unsubstantiated.",
+    "new_or_updated_skill": "Skill: Baseline Inclusion and Pilot Design. Researchers must learn to identify relevant existing metrics from adjacent fields (e.g., process mining, program synthesis, reward modeling), design a minimal pilot (e.g., 2 tasks × 2 metrics), and quantitatively compare performance (e.g., correlation, agreement, cost). Documentation of this comparison becomes part of the research package.",
+    "regression_test": "Regression test: For any new process fidelity metric or hypothesis, the system must generate a table comparing against at least 3 baselines (exact match, BLEU, human agreement) on 2 distinct processes. If the new metric does not outperform the best baseline on at least one of (accuracy, cost, interpretability) by a statistically significant margin, the package is flagged for insufficient novelty and must be revised."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "At what critical level of prescribed process ambiguity does the relationship between fidelity measurement granularity and accuracy undergo a phase transition, such that beyond that level finer granularity ceases to improve fidelity accuracy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of metric specificity beyond which fidelity accuracy saturates but generalizability collapses due to overfitting to process-specific patterns?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "How does the interaction between process ambiguity (number of equally valid step sequences) and metric specificity (exact match vs. semantic similarity) define a phase transition in inter-rater reliability, specifically a sharp drop below 0.7 at a critical ambiguity threshold that shifts depending on metric type?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "As the proportion of hidden reasoning steps increases, does the overestimation bias in process fidelity reach a saturation threshold, unlike for hidden tool calls where bias scales linearly, and is this saturation moderated by task complexity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true,
+      "enable_question_debate_refinement": true
+    },
+    "baseline": "firstresearch_debate_combo",
+    "ablation": "co_scientist_debate_refinement_added",
+    "replicate": 1,
+    "run_id": "run-20260628T212839Z"
+  }
+}

@@ -1,0 +1,1325 @@
+{
+  "topic": {
+    "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+    "topic_id": "T008",
+    "goal": null,
+    "domain": "self-improving agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: Can self-improvement loops reduce repeated reasoning failures?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Self-improvement loop",
+        "definition": "A process where an agent iteratively refines its reasoning or policy based on self-generated feedback or outcomes, aiming to reduce future errors.",
+        "why_primitive": "It is the central mechanism under investigation, and cannot be decomposed further without losing the core idea of iterative self-correction."
+      },
+      {
+        "name": "Reasoning failure",
+        "definition": "An instance where the agent's reasoning leads to an incorrect conclusion or suboptimal action relative to a given goal or objective.",
+        "why_primitive": "It is the fundamental problem to be reduced; defining it precisely is necessary to measure improvement."
+      },
+      {
+        "name": "Feedback signal",
+        "definition": "Information that indicates the quality or correctness of a reasoning step, which can be internal (e.g., confidence, contradictions) or external (e.g., outcome, environment reward).",
+        "why_primitive": "The feedback signal is the fuel for the loop; without it, no learning or correction can occur."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Accurate self-assessment",
+        "rationale": "The agent must reliably detect its own reasoning failures without external supervision, otherwise the loop may reinforce incorrect patterns.",
+        "possible_failure": "If the agent cannot correctly identify failures, it may 'improve' based on false signals, leading to worse performance."
+      },
+      {
+        "assumption": "Stable environment",
+        "rationale": "The causal structure of the task and the distribution of inputs must remain consistent across iterations for improvements to generalize.",
+        "possible_failure": "If the environment changes, learned corrections may become obsolete or harmful."
+      },
+      {
+        "assumption": "Bounded rationality",
+        "rationale": "The agent must have sufficient computational resources to run the loop without incurring prohibitive costs.",
+        "possible_failure": "If the loop consumes too much time or memory, the agent may be unable to improve in practice."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Depth vs. Breadth of improvement",
+        "variables": [
+          "Focus on a few error types vs. covering many types",
+          "Amount of feedback per error category"
+        ]
+      },
+      {
+        "tradeoff": "Overfitting vs. Generalization",
+        "variables": [
+          "Amount of repetition on the same tasks",
+          "Diversity of training signals",
+          "Regularization during self-training"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "feedback_signal",
+        "role": "input",
+        "description": "Information indicating reasoning quality from self-assessment."
+      },
+      {
+        "name": "self_improvement_loop",
+        "role": "mediator",
+        "description": "Iterative process of adjusting reasoning based on feedback."
+      },
+      {
+        "name": "reasoning_correctness",
+        "role": "output",
+        "description": "Correctness of reasoning after loop application."
+      },
+      {
+        "name": "repeated_reasoning_failures",
+        "role": "outcome",
+        "description": "Frequency of repeated failures over time."
+      },
+      {
+        "name": "self_assessment_accuracy",
+        "role": "confounder",
+        "description": "Accuracy of the agent's self-assessment of its reasoning."
+      },
+      {
+        "name": "environment_stability",
+        "role": "confounder",
+        "description": "Consistency of task distribution across iterations."
+      },
+      {
+        "name": "bounded_rationality",
+        "role": "confounder",
+        "description": "Computational constraints on loop execution."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "feedback_signal",
+        "relation": "provides input to",
+        "target": "self_improvement_loop",
+        "explanation": "The loop uses feedback to adjust reasoning."
+      },
+      {
+        "step": "2",
+        "source": "self_improvement_loop",
+        "relation": "improves",
+        "target": "reasoning_correctness",
+        "explanation": "Loop updates reasoning policy to avoid past errors."
+      },
+      {
+        "step": "3",
+        "source": "reasoning_correctness",
+        "relation": "reduces",
+        "target": "repeated_reasoning_failures",
+        "explanation": "Better reasoning leads to fewer repeated failures."
+      },
+      {
+        "step": "4",
+        "source": "self_assessment_accuracy",
+        "relation": "moderates",
+        "target": "feedback_signal",
+        "explanation": "Inaccurate feedback weakens the loop's effectiveness."
+      },
+      {
+        "step": "5",
+        "source": "environment_stability",
+        "relation": "moderates",
+        "target": "self_improvement_loop",
+        "explanation": "Changes in environment may render learned adjustments ineffective."
+      },
+      {
+        "step": "6",
+        "source": "bounded_rationality",
+        "relation": "constrains",
+        "target": "self_improvement_loop",
+        "explanation": "Limited compute may prevent sufficient iterations."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Accurate self-assessment",
+        "why_it_matters": "Without reliable failure detection, the loop may reinforce errors."
+      },
+      {
+        "bottleneck": "Stable environment",
+        "why_it_matters": "If the task changes, improvements may not generalize."
+      },
+      {
+        "bottleneck": "Bounded rationality",
+        "why_it_matters": "Insufficient compute can limit the depth of the loop."
+      }
+    ],
+    "mechanism_summary": "Self-improvement loops can reduce repeated reasoning failures by iteratively adjusting reasoning based on feedback, provided that self-assessment is accurate, the environment is stable, and computational resources suffice."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Accurate self-assessment requires significant computational resources, which conflicts with bounded rationality constraints.",
+      "derived_from": [
+        "Accurate self-assessment",
+        "Bounded rationality"
+      ],
+      "why_it_matters": "If the agent cannot afford the compute needed for reliable self-assessment, the loop may operate on inaccurate feedback, potentially worsening reasoning failures instead of reducing them.",
+      "what_existing_methods_may_miss": "Existing work often assumes self-assessment is cheap or ignores its computational cost, leading to unrealistic performance gains.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Stable environment assumption contradicts the need for diverse experiences to avoid overfitting and promote generalization.",
+      "derived_from": [
+        "Stable environment",
+        "Overfitting vs. Generalization"
+      ],
+      "why_it_matters": "If the environment is too stable, the agent may overfit to specific patterns; if it changes too much, improvements may not transfer. The optimal balance is unclear and often ignored.",
+      "what_existing_methods_may_miss": "Many self-improvement methods assume a static world, but real-world applications involve distribution shifts that render learned corrections obsolete.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The self-improvement loop may reduce repeated reasoning failures only if failures are consistently identifiable, but subtle or stochastic failures may be impossible to detect reliably.",
+      "derived_from": [
+        "Self-improvement loop",
+        "Reasoning failure",
+        "Feedback signal"
+      ],
+      "why_it_matters": "If the agent cannot distinguish true failures from noise, it may reinforce spurious patterns or fail to correct genuine errors, limiting long-term improvement.",
+      "what_existing_methods_may_miss": "Current work often uses deterministic benchmarks where failure is clear, but in open-ended tasks, failure signals are ambiguous, making self-improvement unreliable.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Depth vs. Breadth tradeoff: focusing on few error types improves them but leaves others unaddressed, while covering many types may dilute the effectiveness of each correction.",
+      "derived_from": [
+        "Depth vs. Breadth of improvement",
+        "Self-improvement loop"
+      ],
+      "why_it_matters": "The optimal allocation of feedback to error categories is unknown and may depend on problem structure, making it hard to design a universal self-improvement procedure.",
+      "what_existing_methods_may_miss": "Existing methods often implicitly choose depth (e.g., by repeating similar tasks) or breadth (e.g., by random sampling) without analyzing the tradeoff.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the computational cost of self-assessment affect the effectiveness of self-improvement loops under bounded rationality constraints?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the trade-off between self-assessment accuracy and computational budget, providing guidelines for optimal allocation."
+    },
+    {
+      "question": "What is the optimal degree of environment variability to maximize generalization in self-improvement loops while avoiding overfitting?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Characterize the stability-variability trade-off and its impact on long-term improvement."
+    },
+    {
+      "question": "Under what conditions does the self-improvement loop reduce repeated reasoning failures when failure signals are noisy?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Determine the robustness of self-improvement to ambiguous feedback and propose noise-tolerant methods."
+    },
+    {
+      "question": "How does the allocation of feedback across error categories (depth vs breadth) influence the overall reduction in repeated reasoning failures?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Develop a principled strategy for selecting which errors to correct, maximizing improvement per iteration."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Self-improvement loop",
+          "definition": "A process where an agent iteratively refines its reasoning or policy based on self-generated feedback or outcomes, aiming to reduce future errors.",
+          "why_primitive": "It is the central mechanism under investigation, and cannot be decomposed further without losing the core idea of iterative self-correction."
+        },
+        {
+          "name": "Reasoning failure",
+          "definition": "An instance where the agent's reasoning leads to an incorrect conclusion or suboptimal action relative to a given goal or objective.",
+          "why_primitive": "It is the fundamental problem to be reduced; defining it precisely is necessary to measure improvement."
+        },
+        {
+          "name": "Feedback signal",
+          "definition": "Information that indicates the quality or correctness of a reasoning step, which can be internal (e.g., confidence, contradictions) or external (e.g., outcome, environment reward).",
+          "why_primitive": "The feedback signal is the fuel for the loop; without it, no learning or correction can occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Accurate self-assessment",
+          "rationale": "The agent must reliably detect its own reasoning failures without external supervision, otherwise the loop may reinforce incorrect patterns.",
+          "possible_failure": "If the agent cannot correctly identify failures, it may 'improve' based on false signals, leading to worse performance."
+        },
+        {
+          "assumption": "Stable environment",
+          "rationale": "The causal structure of the task and the distribution of inputs must remain consistent across iterations for improvements to generalize.",
+          "possible_failure": "If the environment changes, learned corrections may become obsolete or harmful."
+        },
+        {
+          "assumption": "Bounded rationality",
+          "rationale": "The agent must have sufficient computational resources to run the loop without incurring prohibitive costs.",
+          "possible_failure": "If the loop consumes too much time or memory, the agent may be unable to improve in practice."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "feedback_signal",
+            "role": "input",
+            "description": "Information indicating reasoning quality from self-assessment."
+          },
+          {
+            "name": "self_improvement_loop",
+            "role": "mediator",
+            "description": "Iterative process of adjusting reasoning based on feedback."
+          },
+          {
+            "name": "reasoning_correctness",
+            "role": "output",
+            "description": "Correctness of reasoning after loop application."
+          },
+          {
+            "name": "repeated_reasoning_failures",
+            "role": "outcome",
+            "description": "Frequency of repeated failures over time."
+          },
+          {
+            "name": "self_assessment_accuracy",
+            "role": "confounder",
+            "description": "Accuracy of the agent's self-assessment of its reasoning."
+          },
+          {
+            "name": "environment_stability",
+            "role": "confounder",
+            "description": "Consistency of task distribution across iterations."
+          },
+          {
+            "name": "bounded_rationality",
+            "role": "confounder",
+            "description": "Computational constraints on loop execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "feedback_signal",
+            "relation": "provides input to",
+            "target": "self_improvement_loop",
+            "explanation": "The loop uses feedback to adjust reasoning."
+          },
+          {
+            "step": "2",
+            "source": "self_improvement_loop",
+            "relation": "improves",
+            "target": "reasoning_correctness",
+            "explanation": "Loop updates reasoning policy to avoid past errors."
+          },
+          {
+            "step": "3",
+            "source": "reasoning_correctness",
+            "relation": "reduces",
+            "target": "repeated_reasoning_failures",
+            "explanation": "Better reasoning leads to fewer repeated failures."
+          },
+          {
+            "step": "4",
+            "source": "self_assessment_accuracy",
+            "relation": "moderates",
+            "target": "feedback_signal",
+            "explanation": "Inaccurate feedback weakens the loop's effectiveness."
+          },
+          {
+            "step": "5",
+            "source": "environment_stability",
+            "relation": "moderates",
+            "target": "self_improvement_loop",
+            "explanation": "Changes in environment may render learned adjustments ineffective."
+          },
+          {
+            "step": "6",
+            "source": "bounded_rationality",
+            "relation": "constrains",
+            "target": "self_improvement_loop",
+            "explanation": "Limited compute may prevent sufficient iterations."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate self-assessment",
+            "why_it_matters": "Without reliable failure detection, the loop may reinforce errors."
+          },
+          {
+            "bottleneck": "Stable environment",
+            "why_it_matters": "If the task changes, improvements may not generalize."
+          },
+          {
+            "bottleneck": "Bounded rationality",
+            "why_it_matters": "Insufficient compute can limit the depth of the loop."
+          }
+        ],
+        "mechanism_summary": "Self-improvement loops can reduce repeated reasoning failures by iteratively adjusting reasoning based on feedback, provided that self-assessment is accurate, the environment is stable, and computational resources suffice."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Accurate self-assessment requires significant computational resources, which conflicts with bounded rationality constraints.",
+        "derived_from": [
+          "Accurate self-assessment",
+          "Bounded rationality"
+        ],
+        "why_it_matters": "If the agent cannot afford the compute needed for reliable self-assessment, the loop may operate on inaccurate feedback, potentially worsening reasoning failures instead of reducing them.",
+        "what_existing_methods_may_miss": "Existing work often assumes self-assessment is cheap or ignores its computational cost, leading to unrealistic performance gains.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the computational cost of self-assessment affect the effectiveness of self-improvement loops under bounded rationality constraints?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantify the trade-off between self-assessment accuracy and computational budget, providing guidelines for optimal allocation."
+      },
+      "hypothesis": {
+        "statement": "The effectiveness of self-improvement loops in reducing repeated reasoning failures is a concave function of the computational budget allocated to self-assessment, with an optimal budget beyond which further allocation yields diminishing returns due to opportunity cost.",
+        "predicted_effect": "For a given environment and task, increasing the computational budget for self-assessment initially decreases the rate of repeated errors until a plateau, after which additional budget does not reduce errors or may increase them due to reduced iterations."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a reasoning task (e.g., solving arithmetic word problems) with an agent that uses a self-improvement loop. Vary the computational budget allocated to self-assessment (e.g., number of self-checks or depth of verification) across conditions from low to high. Measure the frequency of repeated reasoning failures over a fixed number of interaction rounds. Also track the total computational cost per episode. Perform multiple runs with different random seeds.",
+        "independent_variables": [
+          "Computational budget allocated to self-assessment (e.g., floating point operations per episode)"
+        ],
+        "dependent_variables": [
+          "Reduction rate of repeated reasoning failures (difference in failure frequency before and after loop application)",
+          "Overall computational cost per episode"
+        ],
+        "controls": [
+          "Fixed total computational budget per episode (including both self-assessment and reasoning),",
+          "Same task distribution across conditions,",
+          "Constant reasoning algorithm (e.g., chain-of-thought) without self-improvement",
+          "Identical initial policy for all agents"
+        ],
+        "falsifying_observation": "If the reduction rate of repeated failures does not increase with higher self-assessment budget (e.g., stays constant or decreases) for any budget level above a minimal threshold, the hypothesis is rejected. Specifically, if the best performance is achieved at the lowest budget, or if there is no plateau, the hypothesis fails."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low budgets, failure reduction is poor because self-assessment is inaccurate and loop misdirects.",
+          "As budget increases, failure reduction improves significantly, reaching a maximum at some intermediate budget.",
+          "Beyond the optimal budget, failure reduction plateaus or slightly declines due to reduced number of loop iterations or wasted compute.",
+          "The optimal budget is consistent across runs with same task complexity, but shifts with task difficulty."
+        ],
+        "rejects_hypothesis": [
+          "Failure reduction continuously improves with budget without plateau, indicating no cost trade-off.",
+          "Failure reduction is independent of budget, suggesting self-assessment accuracy is not a bottleneck.",
+          "Higher budget leads to worse performance immediately, implying that self-assessment always harms due to noise."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment shows that the hypothesis is not supported (e.g., no concave relationship or no improvement with budget),",
+        "assumption_to_revise": "Revise the assumption that accurate self-assessment is a necessary bottleneck. Instead, consider that the bottleneck may be the feedback signal quality or the environment stability, or that self-assessment may be inherently inaccurate beyond a threshold.",
+        "next_question": "What is the role of feedback signal quality (e.g., internal vs. external) in determining the optimal computational allocation for self-improvement loops?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Self-improvement loop",
+          "definition": "A process where an agent iteratively refines its reasoning or policy based on self-generated feedback or outcomes, aiming to reduce future errors.",
+          "why_primitive": "It is the central mechanism under investigation, and cannot be decomposed further without losing the core idea of iterative self-correction."
+        },
+        {
+          "name": "Reasoning failure",
+          "definition": "An instance where the agent's reasoning leads to an incorrect conclusion or suboptimal action relative to a given goal or objective.",
+          "why_primitive": "It is the fundamental problem to be reduced; defining it precisely is necessary to measure improvement."
+        },
+        {
+          "name": "Feedback signal",
+          "definition": "Information that indicates the quality or correctness of a reasoning step, which can be internal (e.g., confidence, contradictions) or external (e.g., outcome, environment reward).",
+          "why_primitive": "The feedback signal is the fuel for the loop; without it, no learning or correction can occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Accurate self-assessment",
+          "rationale": "The agent must reliably detect its own reasoning failures without external supervision, otherwise the loop may reinforce incorrect patterns.",
+          "possible_failure": "If the agent cannot correctly identify failures, it may 'improve' based on false signals, leading to worse performance."
+        },
+        {
+          "assumption": "Stable environment",
+          "rationale": "The causal structure of the task and the distribution of inputs must remain consistent across iterations for improvements to generalize.",
+          "possible_failure": "If the environment changes, learned corrections may become obsolete or harmful."
+        },
+        {
+          "assumption": "Bounded rationality",
+          "rationale": "The agent must have sufficient computational resources to run the loop without incurring prohibitive costs.",
+          "possible_failure": "If the loop consumes too much time or memory, the agent may be unable to improve in practice."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "feedback_signal",
+            "role": "input",
+            "description": "Information indicating reasoning quality from self-assessment."
+          },
+          {
+            "name": "self_improvement_loop",
+            "role": "mediator",
+            "description": "Iterative process of adjusting reasoning based on feedback."
+          },
+          {
+            "name": "reasoning_correctness",
+            "role": "output",
+            "description": "Correctness of reasoning after loop application."
+          },
+          {
+            "name": "repeated_reasoning_failures",
+            "role": "outcome",
+            "description": "Frequency of repeated failures over time."
+          },
+          {
+            "name": "self_assessment_accuracy",
+            "role": "confounder",
+            "description": "Accuracy of the agent's self-assessment of its reasoning."
+          },
+          {
+            "name": "environment_stability",
+            "role": "confounder",
+            "description": "Consistency of task distribution across iterations."
+          },
+          {
+            "name": "bounded_rationality",
+            "role": "confounder",
+            "description": "Computational constraints on loop execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "feedback_signal",
+            "relation": "provides input to",
+            "target": "self_improvement_loop",
+            "explanation": "The loop uses feedback to adjust reasoning."
+          },
+          {
+            "step": "2",
+            "source": "self_improvement_loop",
+            "relation": "improves",
+            "target": "reasoning_correctness",
+            "explanation": "Loop updates reasoning policy to avoid past errors."
+          },
+          {
+            "step": "3",
+            "source": "reasoning_correctness",
+            "relation": "reduces",
+            "target": "repeated_reasoning_failures",
+            "explanation": "Better reasoning leads to fewer repeated failures."
+          },
+          {
+            "step": "4",
+            "source": "self_assessment_accuracy",
+            "relation": "moderates",
+            "target": "feedback_signal",
+            "explanation": "Inaccurate feedback weakens the loop's effectiveness."
+          },
+          {
+            "step": "5",
+            "source": "environment_stability",
+            "relation": "moderates",
+            "target": "self_improvement_loop",
+            "explanation": "Changes in environment may render learned adjustments ineffective."
+          },
+          {
+            "step": "6",
+            "source": "bounded_rationality",
+            "relation": "constrains",
+            "target": "self_improvement_loop",
+            "explanation": "Limited compute may prevent sufficient iterations."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate self-assessment",
+            "why_it_matters": "Without reliable failure detection, the loop may reinforce errors."
+          },
+          {
+            "bottleneck": "Stable environment",
+            "why_it_matters": "If the task changes, improvements may not generalize."
+          },
+          {
+            "bottleneck": "Bounded rationality",
+            "why_it_matters": "Insufficient compute can limit the depth of the loop."
+          }
+        ],
+        "mechanism_summary": "Self-improvement loops can reduce repeated reasoning failures by iteratively adjusting reasoning based on feedback, provided that self-assessment is accurate, the environment is stable, and computational resources suffice."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Stable environment assumption contradicts the need for diverse experiences to avoid overfitting and promote generalization.",
+        "derived_from": [
+          "Stable environment",
+          "Overfitting vs. Generalization"
+        ],
+        "why_it_matters": "If the environment is too stable, the agent may overfit to specific patterns; if it changes too much, improvements may not transfer. The optimal balance is unclear and often ignored.",
+        "what_existing_methods_may_miss": "Many self-improvement methods assume a static world, but real-world applications involve distribution shifts that render learned corrections obsolete.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the optimal degree of environment variability to maximize generalization in self-improvement loops while avoiding overfitting?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Characterize the stability-variability trade-off and its impact on long-term improvement."
+      },
+      "hypothesis": {
+        "statement": "There exists an optimal intermediate level of environment variability that maximizes generalization while minimizing overfitting in self-improvement loops.",
+        "predicted_effect": "Self-improvement loops with moderate environment variability will achieve lower repeated failure rates on held-out tasks compared to both low and high variability conditions."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated reasoning task (e.g., arithmetic or logical deduction), vary the degree of environment variability by changing the rate at which the task distribution shifts over time. Train a reinforcement learning agent with a self-improvement loop for a fixed number of iterations under three conditions: low variability (static distribution), medium variability (gradual, periodic shifts), and high variability (frequent random shifts). Then evaluate the agent's generalization error on a held-out set of tasks from the original distribution and measure the overfitting gap (training error minus held-out error).",
+        "independent_variables": [
+          "Environment variability level: low, medium, high"
+        ],
+        "dependent_variables": [
+          "Generalization error on held-out tasks",
+          "Overfitting gap (training error - held-out error)"
+        ],
+        "controls": [
+          "Fixed compute per iteration",
+          "Same initial agent architecture and weights",
+          "Fixed feedback mechanism (e.g., outcome-based)",
+          "Constant number of self-improvement iterations"
+        ],
+        "falsifying_observation": "If the medium variability condition does not yield significantly lower generalization error and overfitting gap than both low and high variability conditions, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Medium variability condition shows lower generalization error than low and high variability conditions.",
+          "Medium variability condition shows smaller overfitting gap than low and high variability conditions.",
+          "Repeated failure rate on held-out tasks decreases most rapidly under medium variability."
+        ],
+        "rejects_hypothesis": [
+          "Low variability condition achieves comparable or lower generalization error than medium variability.",
+          "High variability condition achieves comparable or lower generalization error than medium variability.",
+          "Overfitting gap does not differ significantly across conditions or shows a monotonic trend."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesis that an optimal intermediate variability level exists is not supported.",
+        "assumption_to_revise": "The assumption that environment variability alone determines the trade-off; instead, the optimal variability may depend on other factors such as self-assessment accuracy, task complexity, or the feedback signal quality.",
+        "next_question": "How does the optimal degree of environment variability interact with the accuracy of self-assessment in self-improvement loops?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Self-improvement loop",
+          "definition": "A process where an agent iteratively refines its reasoning or policy based on self-generated feedback or outcomes, aiming to reduce future errors.",
+          "why_primitive": "It is the central mechanism under investigation, and cannot be decomposed further without losing the core idea of iterative self-correction."
+        },
+        {
+          "name": "Reasoning failure",
+          "definition": "An instance where the agent's reasoning leads to an incorrect conclusion or suboptimal action relative to a given goal or objective.",
+          "why_primitive": "It is the fundamental problem to be reduced; defining it precisely is necessary to measure improvement."
+        },
+        {
+          "name": "Feedback signal",
+          "definition": "Information that indicates the quality or correctness of a reasoning step, which can be internal (e.g., confidence, contradictions) or external (e.g., outcome, environment reward).",
+          "why_primitive": "The feedback signal is the fuel for the loop; without it, no learning or correction can occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Accurate self-assessment",
+          "rationale": "The agent must reliably detect its own reasoning failures without external supervision, otherwise the loop may reinforce incorrect patterns.",
+          "possible_failure": "If the agent cannot correctly identify failures, it may 'improve' based on false signals, leading to worse performance."
+        },
+        {
+          "assumption": "Stable environment",
+          "rationale": "The causal structure of the task and the distribution of inputs must remain consistent across iterations for improvements to generalize.",
+          "possible_failure": "If the environment changes, learned corrections may become obsolete or harmful."
+        },
+        {
+          "assumption": "Bounded rationality",
+          "rationale": "The agent must have sufficient computational resources to run the loop without incurring prohibitive costs.",
+          "possible_failure": "If the loop consumes too much time or memory, the agent may be unable to improve in practice."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "feedback_signal",
+            "role": "input",
+            "description": "Information indicating reasoning quality from self-assessment."
+          },
+          {
+            "name": "self_improvement_loop",
+            "role": "mediator",
+            "description": "Iterative process of adjusting reasoning based on feedback."
+          },
+          {
+            "name": "reasoning_correctness",
+            "role": "output",
+            "description": "Correctness of reasoning after loop application."
+          },
+          {
+            "name": "repeated_reasoning_failures",
+            "role": "outcome",
+            "description": "Frequency of repeated failures over time."
+          },
+          {
+            "name": "self_assessment_accuracy",
+            "role": "confounder",
+            "description": "Accuracy of the agent's self-assessment of its reasoning."
+          },
+          {
+            "name": "environment_stability",
+            "role": "confounder",
+            "description": "Consistency of task distribution across iterations."
+          },
+          {
+            "name": "bounded_rationality",
+            "role": "confounder",
+            "description": "Computational constraints on loop execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "feedback_signal",
+            "relation": "provides input to",
+            "target": "self_improvement_loop",
+            "explanation": "The loop uses feedback to adjust reasoning."
+          },
+          {
+            "step": "2",
+            "source": "self_improvement_loop",
+            "relation": "improves",
+            "target": "reasoning_correctness",
+            "explanation": "Loop updates reasoning policy to avoid past errors."
+          },
+          {
+            "step": "3",
+            "source": "reasoning_correctness",
+            "relation": "reduces",
+            "target": "repeated_reasoning_failures",
+            "explanation": "Better reasoning leads to fewer repeated failures."
+          },
+          {
+            "step": "4",
+            "source": "self_assessment_accuracy",
+            "relation": "moderates",
+            "target": "feedback_signal",
+            "explanation": "Inaccurate feedback weakens the loop's effectiveness."
+          },
+          {
+            "step": "5",
+            "source": "environment_stability",
+            "relation": "moderates",
+            "target": "self_improvement_loop",
+            "explanation": "Changes in environment may render learned adjustments ineffective."
+          },
+          {
+            "step": "6",
+            "source": "bounded_rationality",
+            "relation": "constrains",
+            "target": "self_improvement_loop",
+            "explanation": "Limited compute may prevent sufficient iterations."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate self-assessment",
+            "why_it_matters": "Without reliable failure detection, the loop may reinforce errors."
+          },
+          {
+            "bottleneck": "Stable environment",
+            "why_it_matters": "If the task changes, improvements may not generalize."
+          },
+          {
+            "bottleneck": "Bounded rationality",
+            "why_it_matters": "Insufficient compute can limit the depth of the loop."
+          }
+        ],
+        "mechanism_summary": "Self-improvement loops can reduce repeated reasoning failures by iteratively adjusting reasoning based on feedback, provided that self-assessment is accurate, the environment is stable, and computational resources suffice."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Depth vs. Breadth tradeoff: focusing on few error types improves them but leaves others unaddressed, while covering many types may dilute the effectiveness of each correction.",
+        "derived_from": [
+          "Depth vs. Breadth of improvement",
+          "Self-improvement loop"
+        ],
+        "why_it_matters": "The optimal allocation of feedback to error categories is unknown and may depend on problem structure, making it hard to design a universal self-improvement procedure.",
+        "what_existing_methods_may_miss": "Existing methods often implicitly choose depth (e.g., by repeating similar tasks) or breadth (e.g., by random sampling) without analyzing the tradeoff.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "How does the allocation of feedback across error categories (depth vs breadth) influence the overall reduction in repeated reasoning failures?",
+        "question_type": "algorithmic",
+        "source_tension": "T4",
+        "expected_contribution": "Develop a principled strategy for selecting which errors to correct, maximizing improvement per iteration."
+      },
+      "hypothesis": {
+        "statement": "Allocating feedback to a small number of error categories (depth) yields a higher reduction in repeated reasoning failures overall compared to spreading feedback thinly across many categories (breadth), because deep correction leads to lasting elimination of root causes while shallow corrections are forgotten.",
+        "predicted_effect": "Depth-focused agents will exhibit a lower overall failure rate after a fixed number of iterations than breadth-focused agents, especially on the targeted error types, and this advantage persists over time."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a self-improvement loop on a reasoning task with known error categories (e.g., arithmetic, logic, common sense). Vary the allocation strategy: (a) depth: always select the top 1 most frequent error category for feedback; (b) breadth: select uniformly or proportionally across all categories; (c) optimal: a bandit-based allocation. Run each for 100 iterations, ensuring total feedback amount equal. Measure overall accuracy and per-category error rates after each iteration.",
+        "independent_variables": [
+          "feedback allocation strategy (depth, breadth, optimal)",
+          "number of iterations (fixed experimental length)"
+        ],
+        "dependent_variables": [
+          "overall accuracy on held-out test set",
+          "per-category error reduction rate",
+          "repetition rate of same error category"
+        ],
+        "controls": [
+          "same initial policy",
+          "same total number of feedback steps per iteration",
+          "same task distribution",
+          "same self-assessment accuracy (idealized oracle feedback)"
+        ],
+        "falsifying_observation": "If breadth strategy achieves equal or better overall accuracy than depth after 100 iterations, and especially if depth strategy shows no advantage on its targeted categories, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Depth strategy shows faster error reduction on targeted categories compared to breadth.",
+          "Overall accuracy of depth strategy surpasses breadth after a sufficient number of iterations.",
+          "Depth strategy yields lower repetition of the same errors over time."
+        ],
+        "rejects_hypothesis": [
+          "Breadth strategy achieves equal or better overall accuracy than depth.",
+          "Depth strategy's gains on targeted categories are not sustained or are offset by increases in other categories.",
+          "An intermediate allocation strategy consistently outperforms both pure depth and breadth."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., breadth outperforms depth), the underlying assumption that deep correction is more effective may be wrong.",
+        "assumption_to_revise": "The assumption that error categories are independent and that deep focus does not cause negative transfer (e.g., overfitting to specific patterns).",
+        "next_question": "How does the similarity between error categories affect the optimal allocation of feedback in self-improvement loops?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can self-improvement loops reduce repeated reasoning failures?",
+      "primitive_definitions": [
+        {
+          "name": "Self-improvement loop",
+          "definition": "A process where an agent iteratively refines its reasoning or policy based on self-generated feedback or outcomes, aiming to reduce future errors.",
+          "why_primitive": "It is the central mechanism under investigation, and cannot be decomposed further without losing the core idea of iterative self-correction."
+        },
+        {
+          "name": "Reasoning failure",
+          "definition": "An instance where the agent's reasoning leads to an incorrect conclusion or suboptimal action relative to a given goal or objective.",
+          "why_primitive": "It is the fundamental problem to be reduced; defining it precisely is necessary to measure improvement."
+        },
+        {
+          "name": "Feedback signal",
+          "definition": "Information that indicates the quality or correctness of a reasoning step, which can be internal (e.g., confidence, contradictions) or external (e.g., outcome, environment reward).",
+          "why_primitive": "The feedback signal is the fuel for the loop; without it, no learning or correction can occur."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Accurate self-assessment",
+          "rationale": "The agent must reliably detect its own reasoning failures without external supervision, otherwise the loop may reinforce incorrect patterns.",
+          "possible_failure": "If the agent cannot correctly identify failures, it may 'improve' based on false signals, leading to worse performance."
+        },
+        {
+          "assumption": "Stable environment",
+          "rationale": "The causal structure of the task and the distribution of inputs must remain consistent across iterations for improvements to generalize.",
+          "possible_failure": "If the environment changes, learned corrections may become obsolete or harmful."
+        },
+        {
+          "assumption": "Bounded rationality",
+          "rationale": "The agent must have sufficient computational resources to run the loop without incurring prohibitive costs.",
+          "possible_failure": "If the loop consumes too much time or memory, the agent may be unable to improve in practice."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "feedback_signal",
+            "role": "input",
+            "description": "Information indicating reasoning quality from self-assessment."
+          },
+          {
+            "name": "self_improvement_loop",
+            "role": "mediator",
+            "description": "Iterative process of adjusting reasoning based on feedback."
+          },
+          {
+            "name": "reasoning_correctness",
+            "role": "output",
+            "description": "Correctness of reasoning after loop application."
+          },
+          {
+            "name": "repeated_reasoning_failures",
+            "role": "outcome",
+            "description": "Frequency of repeated failures over time."
+          },
+          {
+            "name": "self_assessment_accuracy",
+            "role": "confounder",
+            "description": "Accuracy of the agent's self-assessment of its reasoning."
+          },
+          {
+            "name": "environment_stability",
+            "role": "confounder",
+            "description": "Consistency of task distribution across iterations."
+          },
+          {
+            "name": "bounded_rationality",
+            "role": "confounder",
+            "description": "Computational constraints on loop execution."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "feedback_signal",
+            "relation": "provides input to",
+            "target": "self_improvement_loop",
+            "explanation": "The loop uses feedback to adjust reasoning."
+          },
+          {
+            "step": "2",
+            "source": "self_improvement_loop",
+            "relation": "improves",
+            "target": "reasoning_correctness",
+            "explanation": "Loop updates reasoning policy to avoid past errors."
+          },
+          {
+            "step": "3",
+            "source": "reasoning_correctness",
+            "relation": "reduces",
+            "target": "repeated_reasoning_failures",
+            "explanation": "Better reasoning leads to fewer repeated failures."
+          },
+          {
+            "step": "4",
+            "source": "self_assessment_accuracy",
+            "relation": "moderates",
+            "target": "feedback_signal",
+            "explanation": "Inaccurate feedback weakens the loop's effectiveness."
+          },
+          {
+            "step": "5",
+            "source": "environment_stability",
+            "relation": "moderates",
+            "target": "self_improvement_loop",
+            "explanation": "Changes in environment may render learned adjustments ineffective."
+          },
+          {
+            "step": "6",
+            "source": "bounded_rationality",
+            "relation": "constrains",
+            "target": "self_improvement_loop",
+            "explanation": "Limited compute may prevent sufficient iterations."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate self-assessment",
+            "why_it_matters": "Without reliable failure detection, the loop may reinforce errors."
+          },
+          {
+            "bottleneck": "Stable environment",
+            "why_it_matters": "If the task changes, improvements may not generalize."
+          },
+          {
+            "bottleneck": "Bounded rationality",
+            "why_it_matters": "Insufficient compute can limit the depth of the loop."
+          }
+        ],
+        "mechanism_summary": "Self-improvement loops can reduce repeated reasoning failures by iteratively adjusting reasoning based on feedback, provided that self-assessment is accurate, the environment is stable, and computational resources suffice."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The self-improvement loop may reduce repeated reasoning failures only if failures are consistently identifiable, but subtle or stochastic failures may be impossible to detect reliably.",
+        "derived_from": [
+          "Self-improvement loop",
+          "Reasoning failure",
+          "Feedback signal"
+        ],
+        "why_it_matters": "If the agent cannot distinguish true failures from noise, it may reinforce spurious patterns or fail to correct genuine errors, limiting long-term improvement.",
+        "what_existing_methods_may_miss": "Current work often uses deterministic benchmarks where failure is clear, but in open-ended tasks, failure signals are ambiguous, making self-improvement unreliable.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Under what conditions does the self-improvement loop reduce repeated reasoning failures when failure signals are noisy?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Determine the robustness of self-improvement to ambiguous feedback and propose noise-tolerant methods."
+      },
+      "hypothesis": {
+        "statement": "Self-improvement loops reduce repeated reasoning failures only when the feedback signal noise is below a critical threshold. Above this threshold, the loop fails to reduce failures and may increase them.",
+        "predicted_effect": "Increasing noise in the feedback signal will decrease the effectiveness of the self-improvement loop, leading to a higher rate of repeated reasoning failures."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a controlled environment where an agent performs a series of reasoning tasks (e.g., arithmetic problems) with known ground truth. Implement a self-improvement loop that uses a noisy feedback signal: the agent self-assesses its reasoning, and the feedback signal is randomly flipped with probability p. Vary p from 0 to 1 across runs. Measure the number of repeated reasoning failures (same error on same type of problem) over time.",
+        "independent_variables": [
+          "Noise level p (probability of incorrect feedback)"
+        ],
+        "dependent_variables": [
+          "Frequency of repeated reasoning failures per task type",
+          "Overall accuracy improvement over baseline"
+        ],
+        "controls": [
+          "Stable task distribution",
+          "Fixed number of loop iterations per episode",
+          "Constant computational resources",
+          "Baseline without self-improvement loop"
+        ],
+        "falsifying_observation": "If the rate of repeated failures decreases or remains unchanged even at high noise levels (e.g., p=0.8), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "As noise level increases, the reduction in repeated failures diminishes, and at high noise the failure rate increases above baseline.",
+          "There exists a clear noise threshold beyond which the loop is harmful."
+        ],
+        "rejects_hypothesis": [
+          "Noise does not affect the improvement; the loop reduces failures equally across noise levels.",
+          "At high noise, the loop still reduces failures relative to no loop."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the loop still reduces failures at high noise, then the initial assumption that self-assessment is necessary for improvement may be wrong.",
+        "assumption_to_revise": "Assumption: Accurate self-assessment is required for the loop to function. (Maybe the loop can exploit noisy feedback in some way.)",
+        "next_question": "Can self-improvement loops benefit from noisy feedback if the noise is structured or if the agent learns to filter it?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The effectiveness of self-improvement loops in reducing repeated reasoning failures is a concave function of the computational budget allocated to self-assessment, with an optimal budget beyond which further allocation yields diminishing returns due to opportunity cost.",
+      "independent_variables": [
+        "Computational budget allocated to self-assessment (e.g., floating point operations per episode)"
+      ],
+      "dependent_variables": [
+        "Reduction rate of repeated reasoning failures (difference in failure frequency before and after loop application)",
+        "Overall computational cost per episode"
+      ],
+      "controlled_variables": [
+        "Fixed total computational budget per episode (including both self-assessment and reasoning)",
+        "Same task distribution across conditions",
+        "Constant reasoning algorithm (e.g., chain-of-thought) without self-improvement",
+        "Identical initial policy for all agents"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement",
+          "description": "Agent performs reasoning without any self-improvement loop; represents baseline frequency of repeated failures."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Reduction rate of repeated failures",
+          "definition": "Difference in the proportion of repeated reasoning failures between baseline condition and the condition with self-improvement loop, normalized by baseline."
+        },
+        {
+          "name": "Computational cost per episode",
+          "definition": "Total floating point operations (FLOPs) consumed per episode, including both reasoning and self-assessment steps."
+        }
+      ],
+      "expected_result": "The reduction rate of repeated failures will increase with higher self-assessment budget up to an optimal point, then plateau or slightly decline. The optimal budget will be consistent across runs for a given task complexity.",
+      "falsifying_result": "The reduction rate does not increase with higher self-assessment budget at any level above a minimal threshold, or the best performance is achieved at the lowest budget, or there is no plateau (i.e., continuous improvement or immediate decline).",
+      "minimum_viable_experiment": "Simulate a reasoning task (e.g., solving arithmetic word problems) with an agent that uses a self-improvement loop. Vary the computational budget allocated to self-assessment (e.g., number of self-checks or depth of verification) across at least 5 levels from low to high. Measure the frequency of repeated reasoning failures over a fixed number of interaction rounds (e.g., 100 rounds). Also track total FLOPs per episode. Perform 10 runs with different random seeds for each budget level. Use a fixed total computational budget per episode (including both self-assessment and reasoning) to ensure fairness.",
+      "risks_and_confounds": [
+        "The choice of reasoning task may not generalize to other domains.",
+        "The specific implementation of self-assessment (e.g., verification depth) may affect results.",
+        "Randomness in agent behavior may require many runs to detect trends.",
+        "The fixed total budget constraint may be violated if not carefully monitored."
+      ]
+    },
+    {
+      "hypothesis": "There exists an optimal intermediate level of environment variability that maximizes generalization while minimizing overfitting in self-improvement loops.",
+      "independent_variables": [
+        "environment variability level (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "generalization error on held-out tasks",
+        "overfitting gap (training error minus held-out error)"
+      ],
+      "controlled_variables": [
+        "fixed compute per iteration",
+        "same initial agent architecture and weights",
+        "fixed feedback mechanism (e.g., outcome-based)",
+        "constant number of self-improvement iterations"
+      ],
+      "baselines": [
+        {
+          "name": "Low variability (static distribution)",
+          "description": "Environment distribution remains constant across iterations."
+        },
+        {
+          "name": "High variability (frequent random shifts)",
+          "description": "Environment distribution changes frequently and randomly."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "generalization error",
+          "definition": "Error rate on a held-out set of tasks from the original distribution after training."
+        },
+        {
+          "name": "overfitting gap",
+          "definition": "Difference between training error (on the same distribution as training) and held-out error."
+        }
+      ],
+      "expected_result": "Medium variability condition shows lower generalization error and smaller overfitting gap than both low and high variability conditions.",
+      "falsifying_result": "If the medium variability condition does not yield significantly lower generalization error and overfitting gap than both low and high variability conditions, the hypothesis is falsified.",
+      "minimum_viable_experiment": "In a simulated reasoning task (e.g., arithmetic or logical deduction), vary the degree of environment variability by changing the rate at which the task distribution shifts over time. Train a reinforcement learning agent with a self-improvement loop for a fixed number of iterations under three conditions: low variability (static distribution), medium variability (gradual, periodic shifts), and high variability (frequent random shifts). Then evaluate the agent's generalization error on a held-out set of tasks from the original distribution and measure the overfitting gap (training error minus held-out error).",
+      "risks_and_confounds": [
+        "Self-assessment accuracy may differ across variability conditions, potentially confounding results.",
+        "The specific choice of task domain may not generalize to other reasoning tasks."
+      ]
+    },
+    {
+      "hypothesis": "Self-improvement loops reduce repeated reasoning failures only when the feedback signal noise is below a critical threshold. Above this threshold, the loop fails to reduce failures and may increase them.",
+      "independent_variables": [
+        "Noise level p (probability of incorrect feedback signal)"
+      ],
+      "dependent_variables": [
+        "Rate of repeated reasoning failures (same error on same problem type)",
+        "Overall accuracy improvement over baseline"
+      ],
+      "controlled_variables": [
+        "Stable task distribution (fixed set of problem types)",
+        "Fixed number of loop iterations per episode (e.g., 5)",
+        "Constant computational resources (same model size, same compute)",
+        "Baseline without self-improvement loop (no loop condition)"
+      ],
+      "baselines": [
+        {
+          "name": "No self-improvement loop",
+          "description": "Agent performs reasoning without any iterative refinement; feedback is ignored or not used."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Repeated failure rate",
+          "definition": "Proportion of trials where the agent makes the same error on the same problem type as in a previous trial, measured over a sliding window."
+        },
+        {
+          "name": "Accuracy improvement",
+          "definition": "Difference in accuracy between the loop condition and the baseline condition, normalized by baseline accuracy."
+        }
+      ],
+      "expected_result": "As noise level p increases, the reduction in repeated failures diminishes, and at high p (e.g., >0.5) the failure rate increases above the baseline level. A clear threshold p0 exists where the loop becomes detrimental.",
+      "falsifying_result": "If at high noise levels (e.g., p=0.8) the loop still reduces repeated failures compared to baseline, or if there is no effect of noise on improvement, the hypothesis is falsified.",
+      "minimum_viable_experiment": "One agent (e.g., a small transformer) trained to solve arithmetic problems (e.g., addition of two-digit numbers). The agent generates a reasoning step, self-assesses correctness, receives a noisy feedback signal (flip with probability p), and updates its policy via reinforcement learning. Over 10,000 episodes, we measure the rate of repeated errors for each problem type. We vary p from 0 to 1 in steps of 0.1. Each condition is run with 5 random seeds. The baseline condition is the same agent without the self-improvement loop.",
+      "risks_and_confounds": [
+        "The agent's self-assessment mechanism may itself be noisy; we must ensure the noise injected is exogenous.",
+        "Task difficulty may affect detectability of failures; using simple arithmetic ensures failures are clear.",
+        "The number of loop iterations per episode must be fixed to avoid confounding.",
+        "The agent may overfit to specific problems; using a large set of problem types mitigates this."
+      ]
+    },
+    {
+      "hypothesis": "Allocating feedback to a small number of error categories (depth) yields a higher reduction in repeated reasoning failures overall compared to spreading feedback thinly across many categories (breadth), because deep correction leads to lasting elimination of root causes while shallow corrections are forgotten.",
+      "independent_variables": [
+        "Feedback allocation strategy: depth (top-1 category), breadth (uniform across categories)"
+      ],
+      "dependent_variables": [
+        "Overall accuracy on held-out test set",
+        "Per-category error reduction rate",
+        "Repetition rate of same error category"
+      ],
+      "controlled_variables": [
+        "Same initial policy (e.g., random or pre-trained)",
+        "Same total number of feedback steps per iteration (e.g., 10 feedback steps per iteration)",
+        "Same number of iterations (e.g., 100)",
+        "Same task distribution (fixed set of reasoning problems with known error categories)",
+        "Same self-assessment accuracy (idealized oracle feedback instead of learned self-assessment)",
+        "Same set of error categories (e.g., three categories: arithmetic, logic, common sense)"
+      ],
+      "baselines": [
+        {
+          "name": "Breadth allocation",
+          "description": "Feedback is allocated uniformly across all error categories each iteration."
+        },
+        {
+          "name": "No self-improvement",
+          "description": "Agent does not update its reasoning policy; runs with initial policy throughout."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Overall accuracy",
+          "definition": "Proportion of correct answers on a held-out test set of reasoning problems, measured after each iteration."
+        },
+        {
+          "name": "Per-category error reduction rate",
+          "definition": "For each error category, the rate at which errors in that category decrease over iterations, computed as (initial error rate - current error rate)/initial error rate."
+        },
+        {
+          "name": "Repetition rate of same error category",
+          "definition": "The frequency with which the same error category appears consecutively in the agent's failures across iterations."
+        }
+      ],
+      "expected_result": "Depth strategy results in higher overall accuracy and lower per-category error rates on the targeted categories compared to breadth strategy, and the repetition rate of same errors is lower under depth. The breadth strategy may show more gradual improvement but fails to match depth's performance on targeted categories, and the no-improvement baseline remains steady or worsens.",
+      "falsifying_result": "The breadth strategy achieves equal or higher overall accuracy than the depth strategy after 100 iterations, or the depth strategy's gains on targeted categories are not sustained or are offset by increased errors in other categories. Additionally, if the no-improvement baseline outperforms either active strategy, the hypothesis is also falsified.",
+      "minimum_viable_experiment": "Implement a self-improvement loop on a reasoning task with at least 3 distinct error categories (e.g., arithmetic, logic, common sense). Use oracle feedback (perfect self-assessment) to isolate the effect of allocation. Depth condition: each iteration, select the error category with the highest frequency in the current batch and provide corrective feedback on that category (e.g., show correct reasoning). Breadth condition: select uniformly among categories. No-improvement condition: no updates. Run for 100 iterations with equal total feedback per iteration across conditions. Evaluate on a held-out test set after each iteration. Measure accuracy and per-category error rates.",
+      "risks_and_confounds": [
+        "Oracle feedback may not accurately reflect real self-assessment, limiting generalizability to practical self-improvement loops.",
+        "The choice of error categories may influence results; if categories are correlated, depth may inadvertently improve others.",
+        "The number of iterations (100) may be insufficient for depth to show advantage; a larger number might be needed.",
+        "The specific reasoning task and initial policy could bias results; using multiple seeds and tasks mitigates this."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles analysis of self-improvement loops to reduce repeated reasoning failures. It decomposes the problem into primitive concepts, identifies key assumptions, tensions, and proposes testable hypotheses with experiments. The analysis is systematic and well-structured, but the overall novelty is limited as the insights largely echo existing literature on iterative self-correction. The experiments are thoughtful but may miss important baselines and assume idealized conditions (e.g., oracle feedback). The claimed mechanism boundaries are not sharply defined.",
+    "strengths": [
+      "Clear first-principles decomposition with well-justified primitives and assumptions.",
+      "Detailed causal mechanism model linking feedback, loop, correctness, and failures.",
+      "Identification of several non-trivial tensions (e.g., depth vs. breadth, assessment cost vs. bounded rationality).",
+      "Proposed experiments are falsifiable and include controls and expected observations.",
+      "The approach to derive hypotheses from tensions is principled."
+    ],
+    "weaknesses": [
+      "Limited novelty: central insights (e.g., need for accurate self-assessment, risk of overfitting) are already known in the literature on self-improving AI.",
+      "Experiments rely heavily on specific tasks (e.g., arithmetic) and may not generalize to more complex reasoning domains.",
+      "Missing baselines: comparison with existing self-improvement methods (e.g., STaR, self-consistency, iterative refinement) is absent.",
+      "Some assumptions (e.g., stable environment, oracle feedback in one experiment) are unrealistic and may limit practical relevance.",
+      "The mechanism model is linear and does not account for interactions or feedback loops between confounders."
+    ],
+    "questions": [
+      "How does the proposed framework compare to existing self-improvement approaches like STaR, Expert Iteration, or self-play?",
+      "Can the first-principles derivation be extended to handle non-stationary environments more formally?",
+      "What is the empirical evidence for the concave relationship between self-assessment budget and improvement, beyond simple arithmetic tasks?",
+      "How sensitive are the conclusions to the specific definition of 'reasoning failure' (e.g., binary vs. continuous)?"
+    ],
+    "missing_baselines": [
+      "STaR (Self-Taught Reasoner) as a baseline for iterative self-improvement.",
+      "Self-consistency or majority voting as a non-learning baseline.",
+      "Behavioral cloning from oracle demonstrations as an upper bound.",
+      "Existing methods that explicitly trade off depth vs. breadth (e.g., prioritized experience replay)."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient novelty",
+    "root_cause": "First-principles decomposition failed to isolate a sharp boundary, threshold, or nonlinear mechanism interaction; the insights largely echo known literature.",
+    "violated_principle": "Novelty must derive from a clearly delineated condition, trade-off threshold, or phase transition not previously characterized.",
+    "new_or_updated_principle": "Self-improvement loop research must explicitly compare against at least two existing methods (e.g., STaR, self-consistency) and identify a parameter regime where the proposed mechanism yields qualitatively different behavior from baselines (e.g., a failure regime where existing methods degrade but the novel approach still improves).",
+    "new_or_updated_skill": "Comparative baseline construction: ability to select and implement meaningful baselines that test the claimed mechanism boundary, including both naive and state-of-the-art self-improvement methods.",
+    "regression_test": "For any certificate proposing a self-improvement mechanism, the experiment must include: (a) a baseline without self-improvement, (b) a baseline with a known method (e.g., self-consistency), (c) a condition where the mechanism is expected to fail (e.g., high noise, low compute). The report must specify the novelty claim and how the experiment distinguishes it from baselines."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T172150Z"
+  }
+}

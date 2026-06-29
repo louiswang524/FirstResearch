@@ -1,0 +1,1654 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Process",
+        "definition": "The sequence of internal reasoning and external actions performed by an LLM agent to accomplish a task, including observations, decisions, and tool usage.",
+        "why_primitive": "It is the fundamental object we aim to evaluate; without a definition of what constitutes the process, measurement cannot be anchored."
+      },
+      {
+        "name": "Process Fidelity",
+        "definition": "The degree to which an actual agent process matches a reference ideal process along specified dimensions (e.g., step order, reasoning coherence, constraint adherence).",
+        "why_primitive": "Fidelity is the core concept we seek to quantify; it provides the norm against which the agent's process is compared."
+      },
+      {
+        "name": "Measurement Instrument",
+        "definition": "A systematic method (e.g., rubric, automated trace analysis, human judgment) that produces a numeric or categorical score representing process fidelity.",
+        "why_primitive": "Measurement turns the abstract concept of fidelity into an empirical quantity; the design of this instrument directly determines what is counted and how."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution.",
+        "rationale": "To measure fidelity, we need a reference; this reference must be defined by task designers or inferred from best practices.",
+        "possible_failure": "For open-ended or creative tasks, no single ideal process exists; fidelity becomes subjective or multi-dimensional."
+      },
+      {
+        "assumption": "The agent's internal reasoning and decision points are either fully observable (e.g., via chain-of-thought traces) or inferable from actions and outputs.",
+        "rationale": "Process measurement requires access to the steps; otherwise, we can only guess what the process was.",
+        "possible_failure": "LLMs may have hidden reasoning (e.g., not verbalized) or produce plausible but unfaithful traces (e.g., post-hoc rationalization)."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of process decomposition vs. evaluation cost",
+        "variables": [
+          "step granularity",
+          "annotation effort",
+          "computation time",
+          "measurement resolution"
+        ]
+      },
+      {
+        "tradeoff": "Specificity of the ideal process vs. generality across tasks",
+        "variables": [
+          "task-specific process norms",
+          "universal process heuristics",
+          "transferability of fidelity metric"
+        ]
+      },
+      {
+        "tradeoff": "Weighting process fidelity vs. outcome quality",
+        "variables": [
+          "process score",
+          "outcome score",
+          "correlation",
+          "user preference"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Ideal Process Definition",
+        "role": "input",
+        "description": "A predefined reference process for a given task, specifying step order, reasoning expectations, and constraint adherence."
+      },
+      {
+        "name": "Observable Agent Trace",
+        "role": "input",
+        "description": "Recorded sequence of agent actions, outputs, and (if available) internal reasoning steps (e.g., chain-of-thought)."
+      },
+      {
+        "name": "Measurement Instrument Design",
+        "role": "input",
+        "description": "The systematic method (rubric, automated analysis, human judgment) used to compare agent trace to ideal process."
+      },
+      {
+        "name": "Step Alignment Score",
+        "role": "mediator",
+        "description": "Degree to which the agent's step order matches the ideal process sequence."
+      },
+      {
+        "name": "Reasoning Coherence Score",
+        "role": "mediator",
+        "description": "Degree to which the agent's reasoning (if observable) is logical and consistent with the task's expectations."
+      },
+      {
+        "name": "Constraint Adherence Score",
+        "role": "mediator",
+        "description": "Degree to which the agent respects constraints (e.g., tool usage, time limits, formatting)."
+      },
+      {
+        "name": "Process Fidelity Score",
+        "role": "output",
+        "description": "Aggregate numeric or categorical score representing overall process fidelity."
+      },
+      {
+        "name": "Utility of Measurement",
+        "role": "outcome",
+        "description": "The practical value of the fidelity score, e.g., its correlation with task outcome quality or its actionability for improvement."
+      },
+      {
+        "name": "Task Complexity",
+        "role": "confounder",
+        "description": "The inherent difficulty of the task, affecting both the ideal process specification and the agent's ability to adhere to it."
+      },
+      {
+        "name": "Agent Architecture",
+        "role": "confounder",
+        "description": "The underlying LLM and prompting strategy, which influence trace observability and fidelity achievable."
+      },
+      {
+        "name": "Observer Bias",
+        "role": "confounder",
+        "description": "Human or automated measurement biases that can distort fidelity scoring (e.g., leniency, subjectivity in rubric application)."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Input specification",
+        "source": "Ideal Process Definition",
+        "relation": "provides reference",
+        "target": "Measurement Instrument Design",
+        "explanation": "The ideal process defines what steps and constraints the measurement instrument will check."
+      },
+      {
+        "step": "Input data collection",
+        "source": "Observable Agent Trace",
+        "relation": "provides data",
+        "target": "Measurement Instrument Design",
+        "explanation": "The agent trace is the actual process data fed into the measurement instrument."
+      },
+      {
+        "step": "Alignment scoring",
+        "source": "Measurement Instrument Design",
+        "relation": "produces",
+        "target": "Step Alignment Score",
+        "explanation": "The instrument compares step order between trace and ideal process to compute alignment."
+      },
+      {
+        "step": "Coherence scoring",
+        "source": "Measurement Instrument Design",
+        "relation": "produces",
+        "target": "Reasoning Coherence Score",
+        "explanation": "The instrument evaluates reasoning trace (if present) for logical coherence relative to task."
+      },
+      {
+        "step": "Adherence scoring",
+        "source": "Measurement Instrument Design",
+        "relation": "produces",
+        "target": "Constraint Adherence Score",
+        "explanation": "The instrument checks whether the agent respected predefined constraints."
+      },
+      {
+        "step": "Aggregation",
+        "source": "Step Alignment Score",
+        "relation": "combined with",
+        "target": "Process Fidelity Score",
+        "explanation": "Alignment, coherence, and adherence scores are aggregated (e.g., weighted sum) into a single fidelity score."
+      },
+      {
+        "step": "Aggregation",
+        "source": "Reasoning Coherence Score",
+        "relation": "combined with",
+        "target": "Process Fidelity Score",
+        "explanation": "Coherence contributes to the overall fidelity score."
+      },
+      {
+        "step": "Aggregation",
+        "source": "Constraint Adherence Score",
+        "relation": "combined with",
+        "target": "Process Fidelity Score",
+        "explanation": "Adherence contributes to the overall fidelity score."
+      },
+      {
+        "step": "Utility assessment",
+        "source": "Process Fidelity Score",
+        "relation": "influences",
+        "target": "Utility of Measurement",
+        "explanation": "The measured fidelity score is used to inform decisions (e.g., model improvement, evaluation), determining its practical utility."
+      },
+      {
+        "step": "Confounding effect",
+        "source": "Task Complexity",
+        "relation": "moderates",
+        "target": "Process Fidelity Score",
+        "explanation": "Complex tasks may lead to lower fidelity scores even with good process, complicating interpretation."
+      },
+      {
+        "step": "Confounding effect",
+        "source": "Agent Architecture",
+        "relation": "moderates",
+        "target": "Observable Agent Trace",
+        "explanation": "Different architectures produce traces of varying completeness and veracity."
+      },
+      {
+        "step": "Confounding effect",
+        "source": "Observer Bias",
+        "relation": "moderates",
+        "target": "Process Fidelity Score",
+        "explanation": "Bias in measurement instrument or human raters can inflate or deflate fidelity scores."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Observability of internal reasoning",
+        "why_it_matters": "Without access to the agent's actual reasoning chain, fidelity assessment relies on external actions, which may miss important cognitive steps or be misaligned with true process."
+      },
+      {
+        "bottleneck": "Subjectivity of ideal process definition",
+        "why_it_matters": "For many tasks (especially creative ones), there is no single 'correct' process, making fidelity measurement arbitrary or contested."
+      },
+      {
+        "bottleneck": "Granularity versus cost tradeoff",
+        "why_it_matters": "Fine-grained step analysis yields richer fidelity information but requires more annotation effort and computational resources, potentially limiting scalability."
+      }
+    ],
+    "mechanism_summary": "The mechanism measures agent process fidelity by comparing an observable agent trace to a predefined ideal process using a measurement instrument. The instrument yields scores for step alignment, reasoning coherence, and constraint adherence, which are aggregated into a process fidelity score. This score is then used to assess the utility of the measurement (e.g., correlation with outcomes). Key bottlenecks include limited observability of internal reasoning, the lack of a unique ideal process for open-ended tasks, and the tension between granularity and evaluation cost."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The need for a well-defined ideal process to measure fidelity conflicts with the reality that many tasks lack a single 'correct' process, making fidelity assessment arbitrary or contested.",
+      "derived_from": [
+        "Agent Process",
+        "Process Fidelity",
+        "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution."
+      ],
+      "why_it_matters": "Without a unique ideal process, fidelity scores may lack validity and comparability, especially for creative or open-ended tasks.",
+      "what_existing_methods_may_miss": "Existing methods often assume a fixed process norm, ignoring task variability and multiple valid approaches.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Measuring process fidelity requires observability of the agent's internal reasoning, but LLMs may have hidden reasoning or produce unfaithful traces, leading to reliance on incomplete or misleading data.",
+      "derived_from": [
+        "Agent Process",
+        "Measurement Instrument",
+        "The agent's internal reasoning and decision points are either fully observable or inferable from actions and outputs."
+      ],
+      "why_it_matters": "Incomplete observability can cause fidelity scores to misrepresent the true process, undermining trust in the measurement.",
+      "what_existing_methods_may_miss": "Methods that only analyze external actions may miss reasoning errors not reflected in final outputs.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Fine-grained decomposition of the agent process yields high measurement resolution but increases annotation effort and computational cost, creating a tradeoff between granularity and scalability.",
+      "derived_from": [
+        "Agent Process",
+        "Measurement Instrument Design",
+        "Granularity of process decomposition vs. evaluation cost"
+      ],
+      "why_it_matters": "Choosing the right granularity is critical for practical deployment; too fine-grained may be infeasible, too coarse may miss important process details.",
+      "what_existing_methods_may_miss": "Many methods default to a fixed granularity without considering cost-benefit tradeoffs.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The process fidelity score is often assumed to correlate with outcome quality, but this relationship may be weak or task-dependent, leading to potential overemphasis on process at the expense of outcomes.",
+      "derived_from": [
+        "Process Fidelity Score",
+        "Utility of Measurement",
+        "Weighting process fidelity vs. outcome quality"
+      ],
+      "why_it_matters": "If process fidelity does not predict outcomes, its utility for agent improvement or evaluation is questionable.",
+      "what_existing_methods_may_miss": "Existing metrics may implicitly weight process fidelity without validating its predictive power.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does the choice of ideal process definition (e.g., step order vs. constraint-based) significantly alter the process fidelity score for creative tasks, controlling for task complexity and agent architecture?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Reveals how sensitive fidelity measurement is to the specification of the ideal process, informing whether a universal definition is feasible or task-specific definitions are needed."
+    },
+    {
+      "question": "Does withholding the agent's internal reasoning (chain-of-thought) from the observable trace lead to a systematic overestimation or underestimation of process fidelity scores compared to full observability?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the bias introduced by limited observability, guiding the design of measurement instruments that can compensate for missing reasoning data."
+    },
+    {
+      "question": "Does increasing the granularity of step decomposition (e.g., from 5 steps to 20 steps) improve the correlation between process fidelity score and outcome quality, and at what increase in annotation cost?",
+      "question_type": "benchmark",
+      "source_tension": "T3",
+      "expected_contribution": "Provides empirical tradeoff curves between measurement resolution and cost, enabling practitioners to choose granularity based on their resource constraints and utility requirements."
+    },
+    {
+      "question": "Is the process fidelity score a significant predictor of task outcome quality across tasks of varying complexity (e.g., simple retrieval vs. multi-step reasoning), controlling for agent architecture and observer bias?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Tests the assumption that process fidelity is indicative of outcome quality; if the relationship is weak or task-dependent, it calls into question the utility of process-oriented evaluation."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The sequence of internal reasoning and external actions performed by an LLM agent to accomplish a task, including observations, decisions, and tool usage.",
+          "why_primitive": "It is the fundamental object we aim to evaluate; without a definition of what constitutes the process, measurement cannot be anchored."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree to which an actual agent process matches a reference ideal process along specified dimensions (e.g., step order, reasoning coherence, constraint adherence).",
+          "why_primitive": "Fidelity is the core concept we seek to quantify; it provides the norm against which the agent's process is compared."
+        },
+        {
+          "name": "Measurement Instrument",
+          "definition": "A systematic method (e.g., rubric, automated trace analysis, human judgment) that produces a numeric or categorical score representing process fidelity.",
+          "why_primitive": "Measurement turns the abstract concept of fidelity into an empirical quantity; the design of this instrument directly determines what is counted and how."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution.",
+          "rationale": "To measure fidelity, we need a reference; this reference must be defined by task designers or inferred from best practices.",
+          "possible_failure": "For open-ended or creative tasks, no single ideal process exists; fidelity becomes subjective or multi-dimensional."
+        },
+        {
+          "assumption": "The agent's internal reasoning and decision points are either fully observable (e.g., via chain-of-thought traces) or inferable from actions and outputs.",
+          "rationale": "Process measurement requires access to the steps; otherwise, we can only guess what the process was.",
+          "possible_failure": "LLMs may have hidden reasoning (e.g., not verbalized) or produce plausible but unfaithful traces (e.g., post-hoc rationalization)."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Ideal Process Definition",
+            "role": "input",
+            "description": "A predefined reference process for a given task, specifying step order, reasoning expectations, and constraint adherence."
+          },
+          {
+            "name": "Observable Agent Trace",
+            "role": "input",
+            "description": "Recorded sequence of agent actions, outputs, and (if available) internal reasoning steps (e.g., chain-of-thought)."
+          },
+          {
+            "name": "Measurement Instrument Design",
+            "role": "input",
+            "description": "The systematic method (rubric, automated analysis, human judgment) used to compare agent trace to ideal process."
+          },
+          {
+            "name": "Step Alignment Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's step order matches the ideal process sequence."
+          },
+          {
+            "name": "Reasoning Coherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's reasoning (if observable) is logical and consistent with the task's expectations."
+          },
+          {
+            "name": "Constraint Adherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent respects constraints (e.g., tool usage, time limits, formatting)."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "Aggregate numeric or categorical score representing overall process fidelity."
+          },
+          {
+            "name": "Utility of Measurement",
+            "role": "outcome",
+            "description": "The practical value of the fidelity score, e.g., its correlation with task outcome quality or its actionability for improvement."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, affecting both the ideal process specification and the agent's ability to adhere to it."
+          },
+          {
+            "name": "Agent Architecture",
+            "role": "confounder",
+            "description": "The underlying LLM and prompting strategy, which influence trace observability and fidelity achievable."
+          },
+          {
+            "name": "Observer Bias",
+            "role": "confounder",
+            "description": "Human or automated measurement biases that can distort fidelity scoring (e.g., leniency, subjectivity in rubric application)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input specification",
+            "source": "Ideal Process Definition",
+            "relation": "provides reference",
+            "target": "Measurement Instrument Design",
+            "explanation": "The ideal process defines what steps and constraints the measurement instrument will check."
+          },
+          {
+            "step": "Input data collection",
+            "source": "Observable Agent Trace",
+            "relation": "provides data",
+            "target": "Measurement Instrument Design",
+            "explanation": "The agent trace is the actual process data fed into the measurement instrument."
+          },
+          {
+            "step": "Alignment scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Step Alignment Score",
+            "explanation": "The instrument compares step order between trace and ideal process to compute alignment."
+          },
+          {
+            "step": "Coherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Reasoning Coherence Score",
+            "explanation": "The instrument evaluates reasoning trace (if present) for logical coherence relative to task."
+          },
+          {
+            "step": "Adherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Constraint Adherence Score",
+            "explanation": "The instrument checks whether the agent respected predefined constraints."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Step Alignment Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Alignment, coherence, and adherence scores are aggregated (e.g., weighted sum) into a single fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Reasoning Coherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Coherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Constraint Adherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Adherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Utility assessment",
+            "source": "Process Fidelity Score",
+            "relation": "influences",
+            "target": "Utility of Measurement",
+            "explanation": "The measured fidelity score is used to inform decisions (e.g., model improvement, evaluation), determining its practical utility."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Task Complexity",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Complex tasks may lead to lower fidelity scores even with good process, complicating interpretation."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Agent Architecture",
+            "relation": "moderates",
+            "target": "Observable Agent Trace",
+            "explanation": "Different architectures produce traces of varying completeness and veracity."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Observer Bias",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Bias in measurement instrument or human raters can inflate or deflate fidelity scores."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of internal reasoning",
+            "why_it_matters": "Without access to the agent's actual reasoning chain, fidelity assessment relies on external actions, which may miss important cognitive steps or be misaligned with true process."
+          },
+          {
+            "bottleneck": "Subjectivity of ideal process definition",
+            "why_it_matters": "For many tasks (especially creative ones), there is no single 'correct' process, making fidelity measurement arbitrary or contested."
+          },
+          {
+            "bottleneck": "Granularity versus cost tradeoff",
+            "why_it_matters": "Fine-grained step analysis yields richer fidelity information but requires more annotation effort and computational resources, potentially limiting scalability."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing an observable agent trace to a predefined ideal process using a measurement instrument. The instrument yields scores for step alignment, reasoning coherence, and constraint adherence, which are aggregated into a process fidelity score. This score is then used to assess the utility of the measurement (e.g., correlation with outcomes). Key bottlenecks include limited observability of internal reasoning, the lack of a unique ideal process for open-ended tasks, and the tension between granularity and evaluation cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Measuring process fidelity requires observability of the agent's internal reasoning, but LLMs may have hidden reasoning or produce unfaithful traces, leading to reliance on incomplete or misleading data.",
+        "derived_from": [
+          "Agent Process",
+          "Measurement Instrument",
+          "The agent's internal reasoning and decision points are either fully observable or inferable from actions and outputs."
+        ],
+        "why_it_matters": "Incomplete observability can cause fidelity scores to misrepresent the true process, undermining trust in the measurement.",
+        "what_existing_methods_may_miss": "Methods that only analyze external actions may miss reasoning errors not reflected in final outputs.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the relative weight assigned to reasoning coherence in the aggregate fidelity score determine whether withholding the agent's internal reasoning causes overestimation or underestimation of overall process fidelity?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a specific parameter (coherence weight) that flips the direction of bias, enabling instrument designers to tune measurement to a desired bias profile."
+      },
+      "hypothesis": {
+        "statement": "When the coherence weight in the aggregate fidelity score is high (e.g., >0.5), withholding reasoning leads to underestimation of process fidelity; when the coherence weight is low (e.g., <0.3), withholding reasoning leads to overestimation.",
+        "predicted_effect": "The direction of bias reverses as the coherence weight crosses a threshold, due to the inability to score coherence without reasoning."
+      },
+      "minimal_decisive_test": {
+        "experiment": "For a fixed set of tasks and agents, create a measurement instrument with three different coherence weight settings: low (0.2), medium (0.5), and high (0.8). For each weight setting, compute process fidelity scores under full observability (actions + reasoning) and withheld reasoning (actions only). Compare the mean difference (withheld minus full) across weight levels. The same agents and tasks used in all conditions.",
+        "independent_variables": [
+          "Coherence weight in aggregate fidelity score (0.2, 0.5, 0.8)",
+          "Observability condition (full vs. withheld reasoning)"
+        ],
+        "dependent_variables": [
+          "Process fidelity score"
+        ],
+        "controls": [
+          "Same tasks with predefined ideal processes",
+          "Same agents (or same distribution)",
+          "Fixed alignment and constraint weights relative to coherence",
+          "Random assignment of observability condition per task-agent pair within each weight setting"
+        ],
+        "falsifying_observation": "If the mean difference (withheld minus full) does not decrease monotonically from positive to negative as coherence weight increases, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low coherence weight (0.2), mean difference is significantly positive (overestimation).",
+          "At medium coherence weight (0.5), mean difference is not significantly different from zero or has a small effect.",
+          "At high coherence weight (0.8), mean difference is significantly negative (underestimation).",
+          "The slope of the difference across weight levels is significantly negative (p < 0.05)."
+        ],
+        "rejects_hypothesis": [
+          "Mean difference is positive for all weight levels, or negative for all weight levels, or does not change direction.",
+          "No significant interaction between weight and observability condition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no reversal of bias direction), we conclude that coherence weight alone does not determine the direction of bias.",
+        "assumption_to_revise": "The assumption that the bias direction depends on the relative importance of coherence is not supported; bias may be consistently in one direction regardless of weight, or other factors (e.g., task complexity, agent ability) dominate.",
+        "next_question": "What other factors (e.g., task structure, agent reasoning quality) interact with coherence weight to determine bias direction?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The sequence of internal reasoning and external actions performed by an LLM agent to accomplish a task, including observations, decisions, and tool usage.",
+          "why_primitive": "It is the fundamental object we aim to evaluate; without a definition of what constitutes the process, measurement cannot be anchored."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree to which an actual agent process matches a reference ideal process along specified dimensions (e.g., step order, reasoning coherence, constraint adherence).",
+          "why_primitive": "Fidelity is the core concept we seek to quantify; it provides the norm against which the agent's process is compared."
+        },
+        {
+          "name": "Measurement Instrument",
+          "definition": "A systematic method (e.g., rubric, automated trace analysis, human judgment) that produces a numeric or categorical score representing process fidelity.",
+          "why_primitive": "Measurement turns the abstract concept of fidelity into an empirical quantity; the design of this instrument directly determines what is counted and how."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution.",
+          "rationale": "To measure fidelity, we need a reference; this reference must be defined by task designers or inferred from best practices.",
+          "possible_failure": "For open-ended or creative tasks, no single ideal process exists; fidelity becomes subjective or multi-dimensional."
+        },
+        {
+          "assumption": "The agent's internal reasoning and decision points are either fully observable (e.g., via chain-of-thought traces) or inferable from actions and outputs.",
+          "rationale": "Process measurement requires access to the steps; otherwise, we can only guess what the process was.",
+          "possible_failure": "LLMs may have hidden reasoning (e.g., not verbalized) or produce plausible but unfaithful traces (e.g., post-hoc rationalization)."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Ideal Process Definition",
+            "role": "input",
+            "description": "A predefined reference process for a given task, specifying step order, reasoning expectations, and constraint adherence."
+          },
+          {
+            "name": "Observable Agent Trace",
+            "role": "input",
+            "description": "Recorded sequence of agent actions, outputs, and (if available) internal reasoning steps (e.g., chain-of-thought)."
+          },
+          {
+            "name": "Measurement Instrument Design",
+            "role": "input",
+            "description": "The systematic method (rubric, automated analysis, human judgment) used to compare agent trace to ideal process."
+          },
+          {
+            "name": "Step Alignment Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's step order matches the ideal process sequence."
+          },
+          {
+            "name": "Reasoning Coherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's reasoning (if observable) is logical and consistent with the task's expectations."
+          },
+          {
+            "name": "Constraint Adherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent respects constraints (e.g., tool usage, time limits, formatting)."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "Aggregate numeric or categorical score representing overall process fidelity."
+          },
+          {
+            "name": "Utility of Measurement",
+            "role": "outcome",
+            "description": "The practical value of the fidelity score, e.g., its correlation with task outcome quality or its actionability for improvement."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, affecting both the ideal process specification and the agent's ability to adhere to it."
+          },
+          {
+            "name": "Agent Architecture",
+            "role": "confounder",
+            "description": "The underlying LLM and prompting strategy, which influence trace observability and fidelity achievable."
+          },
+          {
+            "name": "Observer Bias",
+            "role": "confounder",
+            "description": "Human or automated measurement biases that can distort fidelity scoring (e.g., leniency, subjectivity in rubric application)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input specification",
+            "source": "Ideal Process Definition",
+            "relation": "provides reference",
+            "target": "Measurement Instrument Design",
+            "explanation": "The ideal process defines what steps and constraints the measurement instrument will check."
+          },
+          {
+            "step": "Input data collection",
+            "source": "Observable Agent Trace",
+            "relation": "provides data",
+            "target": "Measurement Instrument Design",
+            "explanation": "The agent trace is the actual process data fed into the measurement instrument."
+          },
+          {
+            "step": "Alignment scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Step Alignment Score",
+            "explanation": "The instrument compares step order between trace and ideal process to compute alignment."
+          },
+          {
+            "step": "Coherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Reasoning Coherence Score",
+            "explanation": "The instrument evaluates reasoning trace (if present) for logical coherence relative to task."
+          },
+          {
+            "step": "Adherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Constraint Adherence Score",
+            "explanation": "The instrument checks whether the agent respected predefined constraints."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Step Alignment Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Alignment, coherence, and adherence scores are aggregated (e.g., weighted sum) into a single fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Reasoning Coherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Coherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Constraint Adherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Adherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Utility assessment",
+            "source": "Process Fidelity Score",
+            "relation": "influences",
+            "target": "Utility of Measurement",
+            "explanation": "The measured fidelity score is used to inform decisions (e.g., model improvement, evaluation), determining its practical utility."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Task Complexity",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Complex tasks may lead to lower fidelity scores even with good process, complicating interpretation."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Agent Architecture",
+            "relation": "moderates",
+            "target": "Observable Agent Trace",
+            "explanation": "Different architectures produce traces of varying completeness and veracity."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Observer Bias",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Bias in measurement instrument or human raters can inflate or deflate fidelity scores."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of internal reasoning",
+            "why_it_matters": "Without access to the agent's actual reasoning chain, fidelity assessment relies on external actions, which may miss important cognitive steps or be misaligned with true process."
+          },
+          {
+            "bottleneck": "Subjectivity of ideal process definition",
+            "why_it_matters": "For many tasks (especially creative ones), there is no single 'correct' process, making fidelity measurement arbitrary or contested."
+          },
+          {
+            "bottleneck": "Granularity versus cost tradeoff",
+            "why_it_matters": "Fine-grained step analysis yields richer fidelity information but requires more annotation effort and computational resources, potentially limiting scalability."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing an observable agent trace to a predefined ideal process using a measurement instrument. The instrument yields scores for step alignment, reasoning coherence, and constraint adherence, which are aggregated into a process fidelity score. This score is then used to assess the utility of the measurement (e.g., correlation with outcomes). Key bottlenecks include limited observability of internal reasoning, the lack of a unique ideal process for open-ended tasks, and the tension between granularity and evaluation cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Fine-grained decomposition of the agent process yields high measurement resolution but increases annotation effort and computational cost, creating a tradeoff between granularity and scalability.",
+        "derived_from": [
+          "Agent Process",
+          "Measurement Instrument Design",
+          "Granularity of process decomposition vs. evaluation cost"
+        ],
+        "why_it_matters": "Choosing the right granularity is critical for practical deployment; too fine-grained may be infeasible, too coarse may miss important process details.",
+        "what_existing_methods_may_miss": "Many methods default to a fixed granularity without considering cost-benefit tradeoffs.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical granularity threshold in process decomposition where increasing step count reduces the fidelity-outcome correlation due to noise, and how does this threshold depend on task complexity?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a non-monotonic effect of granularity on measurement validity, revealing a 'goldilocks zone' for process decomposition, and provides a principled way to select granularity based on task complexity."
+      },
+      "hypothesis": {
+        "statement": "For tasks of sufficient complexity, the relationship between step decomposition granularity and the fidelity-outcome correlation follows an inverted-U shape: as the number of steps increases, the correlation first increases, then decreases after a critical threshold. For simple tasks, the correlation may plateau or decrease at lower granularities. The granularity that maximizes correlation increases with task complexity.",
+        "predicted_effect": "For complex tasks, the Pearson correlation will peak at an intermediate number of steps (e.g., 15) and then significantly decrease at finer granularities (e.g., 25). For simple tasks, the correlation will peak at fewer steps and then plateau or slightly decrease. The optimal granularity will be positively correlated with a task complexity score."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select tasks spanning low, medium, and high complexity (e.g., simple extraction, multi-step reasoning, exploratory research). For each task, define a set of process decompositions with granularities: 5, 10, 15, 20, 25 steps. Have human annotators or an automated system assign process fidelity scores using a consistent instrument that only varies step count. Independently measure outcome quality via human judgment. Compute the Pearson correlation between fidelity score and outcome quality for each granularity-level x task pair. Analyze the shape of the correlation curve and the location of the peak. Repeat across multiple agents (e.g., 3 different LLMs) to check robustness.",
+        "independent_variables": [
+          "Number of steps in decomposition (5, 10, 15, 20, 25)",
+          "Task complexity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation between process fidelity score and outcome quality"
+        ],
+        "controls": [
+          "Same set of tasks across all conditions",
+          "Same measurement instrument design (except step count)",
+          "Same outcome quality metric (e.g., correctness on a rubric)",
+          "Same agents used across granularities",
+          "Equal number of evaluations per condition (e.g., 100 traces per task per granularity)"
+        ],
+        "falsifying_observation": "If the correlation increases monotonically with granularity for all task complexities, or if it plateaus without decreasing, or if the peak granularity does not vary with task complexity, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For high-complexity tasks, the correlation peaks at an intermediate granularity (e.g., 15 steps) and then significantly decreases at 20 or 25 steps.",
+          "For low-complexity tasks, the correlation increases up to 10 steps and then plateaus or slightly decreases, with a lower peak granularity than for complex tasks.",
+          "The optimal granularity (steps at peak correlation) is positively correlated with a task complexity rating."
+        ],
+        "rejects_hypothesis": [
+          "The correlation increases monotonically with granularity across all task complexities (no peak or decrease).",
+          "The correlation increases and then plateaus without a significant decrease at finer granularities.",
+          "The peak granularity does not vary across task complexities (e.g., always same)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no non-monotonic pattern is observed (i.e., correlation increases monotonically or plateaus), then the assumption that over-decomposition introduces substantial noise affecting fidelity-outcome correlation may be incorrect.",
+        "assumption_to_revise": "The assumption that finer step granularity eventually reduces the validity of fidelity measurement due to added noise or overfitting to surface details.",
+        "next_question": "What are the specific sources of noise in fine-grained process evaluation? Is it measurement error, spurious correlations, or task-irrelevant details that become salient at high granularity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The sequence of internal reasoning and external actions performed by an LLM agent to accomplish a task, including observations, decisions, and tool usage.",
+          "why_primitive": "It is the fundamental object we aim to evaluate; without a definition of what constitutes the process, measurement cannot be anchored."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree to which an actual agent process matches a reference ideal process along specified dimensions (e.g., step order, reasoning coherence, constraint adherence).",
+          "why_primitive": "Fidelity is the core concept we seek to quantify; it provides the norm against which the agent's process is compared."
+        },
+        {
+          "name": "Measurement Instrument",
+          "definition": "A systematic method (e.g., rubric, automated trace analysis, human judgment) that produces a numeric or categorical score representing process fidelity.",
+          "why_primitive": "Measurement turns the abstract concept of fidelity into an empirical quantity; the design of this instrument directly determines what is counted and how."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution.",
+          "rationale": "To measure fidelity, we need a reference; this reference must be defined by task designers or inferred from best practices.",
+          "possible_failure": "For open-ended or creative tasks, no single ideal process exists; fidelity becomes subjective or multi-dimensional."
+        },
+        {
+          "assumption": "The agent's internal reasoning and decision points are either fully observable (e.g., via chain-of-thought traces) or inferable from actions and outputs.",
+          "rationale": "Process measurement requires access to the steps; otherwise, we can only guess what the process was.",
+          "possible_failure": "LLMs may have hidden reasoning (e.g., not verbalized) or produce plausible but unfaithful traces (e.g., post-hoc rationalization)."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Ideal Process Definition",
+            "role": "input",
+            "description": "A predefined reference process for a given task, specifying step order, reasoning expectations, and constraint adherence."
+          },
+          {
+            "name": "Observable Agent Trace",
+            "role": "input",
+            "description": "Recorded sequence of agent actions, outputs, and (if available) internal reasoning steps (e.g., chain-of-thought)."
+          },
+          {
+            "name": "Measurement Instrument Design",
+            "role": "input",
+            "description": "The systematic method (rubric, automated analysis, human judgment) used to compare agent trace to ideal process."
+          },
+          {
+            "name": "Step Alignment Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's step order matches the ideal process sequence."
+          },
+          {
+            "name": "Reasoning Coherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's reasoning (if observable) is logical and consistent with the task's expectations."
+          },
+          {
+            "name": "Constraint Adherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent respects constraints (e.g., tool usage, time limits, formatting)."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "Aggregate numeric or categorical score representing overall process fidelity."
+          },
+          {
+            "name": "Utility of Measurement",
+            "role": "outcome",
+            "description": "The practical value of the fidelity score, e.g., its correlation with task outcome quality or its actionability for improvement."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, affecting both the ideal process specification and the agent's ability to adhere to it."
+          },
+          {
+            "name": "Agent Architecture",
+            "role": "confounder",
+            "description": "The underlying LLM and prompting strategy, which influence trace observability and fidelity achievable."
+          },
+          {
+            "name": "Observer Bias",
+            "role": "confounder",
+            "description": "Human or automated measurement biases that can distort fidelity scoring (e.g., leniency, subjectivity in rubric application)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input specification",
+            "source": "Ideal Process Definition",
+            "relation": "provides reference",
+            "target": "Measurement Instrument Design",
+            "explanation": "The ideal process defines what steps and constraints the measurement instrument will check."
+          },
+          {
+            "step": "Input data collection",
+            "source": "Observable Agent Trace",
+            "relation": "provides data",
+            "target": "Measurement Instrument Design",
+            "explanation": "The agent trace is the actual process data fed into the measurement instrument."
+          },
+          {
+            "step": "Alignment scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Step Alignment Score",
+            "explanation": "The instrument compares step order between trace and ideal process to compute alignment."
+          },
+          {
+            "step": "Coherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Reasoning Coherence Score",
+            "explanation": "The instrument evaluates reasoning trace (if present) for logical coherence relative to task."
+          },
+          {
+            "step": "Adherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Constraint Adherence Score",
+            "explanation": "The instrument checks whether the agent respected predefined constraints."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Step Alignment Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Alignment, coherence, and adherence scores are aggregated (e.g., weighted sum) into a single fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Reasoning Coherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Coherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Constraint Adherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Adherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Utility assessment",
+            "source": "Process Fidelity Score",
+            "relation": "influences",
+            "target": "Utility of Measurement",
+            "explanation": "The measured fidelity score is used to inform decisions (e.g., model improvement, evaluation), determining its practical utility."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Task Complexity",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Complex tasks may lead to lower fidelity scores even with good process, complicating interpretation."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Agent Architecture",
+            "relation": "moderates",
+            "target": "Observable Agent Trace",
+            "explanation": "Different architectures produce traces of varying completeness and veracity."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Observer Bias",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Bias in measurement instrument or human raters can inflate or deflate fidelity scores."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of internal reasoning",
+            "why_it_matters": "Without access to the agent's actual reasoning chain, fidelity assessment relies on external actions, which may miss important cognitive steps or be misaligned with true process."
+          },
+          {
+            "bottleneck": "Subjectivity of ideal process definition",
+            "why_it_matters": "For many tasks (especially creative ones), there is no single 'correct' process, making fidelity measurement arbitrary or contested."
+          },
+          {
+            "bottleneck": "Granularity versus cost tradeoff",
+            "why_it_matters": "Fine-grained step analysis yields richer fidelity information but requires more annotation effort and computational resources, potentially limiting scalability."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing an observable agent trace to a predefined ideal process using a measurement instrument. The instrument yields scores for step alignment, reasoning coherence, and constraint adherence, which are aggregated into a process fidelity score. This score is then used to assess the utility of the measurement (e.g., correlation with outcomes). Key bottlenecks include limited observability of internal reasoning, the lack of a unique ideal process for open-ended tasks, and the tension between granularity and evaluation cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The need for a well-defined ideal process to measure fidelity conflicts with the reality that many tasks lack a single 'correct' process, making fidelity assessment arbitrary or contested.",
+        "derived_from": [
+          "Agent Process",
+          "Process Fidelity",
+          "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution."
+        ],
+        "why_it_matters": "Without a unique ideal process, fidelity scores may lack validity and comparability, especially for creative or open-ended tasks.",
+        "what_existing_methods_may_miss": "Existing methods often assume a fixed process norm, ignoring task variability and multiple valid approaches.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does the completeness of the observable agent trace moderate the effect of ideal process definition type (step-order vs. constraint-based) on process fidelity scores for creative tasks, and is there a critical trace completeness threshold where the preferred definition type reverses?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Reveals a sharp boundary condition where the optimal measurement strategy flips, providing a principled guideline for choosing definition type based on trace quality, and increasing the practical validity of fidelity assessment."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of trace completeness (measured as the proportion of intended reasoning steps captured) such that when trace completeness is above the threshold, step-order ideal process definitions produce higher process fidelity scores than constraint-based definitions, and when below the threshold, constraint-based definitions produce higher scores. This threshold is expected to be around 0.6.",
+        "predicted_effect": "The interaction between definition type and trace completeness will be significant, with a reversal of relative performance at a specific trace completeness level."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select 3 creative tasks (e.g., short story writing, marketing slogan generation, product concept design) with predefined ideal processes of both types. Use 2 LLM agents (GPT-4, Claude 3) to generate traces at varying levels of completeness by controlling the verbosity of chain-of-thought (complete: full reasoning steps; partial: only final actions). For each task-agent combination, systematically vary trace completeness from 0.2 to 1.0 in 0.2 increments by selectively omitting intermediate reasoning steps from the full trace. Use human raters to score process fidelity using both definition types. Measure fidelity as a function of trace completeness. Fit a logistic function to identify the crossing point. Use bootstrapping to estimate confidence intervals for the threshold.",
+        "independent_variables": [
+          "Ideal process definition type (step-order vs. constraint-based)",
+          "Trace completeness (continuous: 0.2, 0.4, 0.6, 0.8, 1.0)"
+        ],
+        "dependent_variables": [
+          "Process fidelity score (0-1)"
+        ],
+        "controls": [
+          "Task identity (fixed effect)",
+          "Agent architecture (fixed effect)",
+          "Number of raters per condition (3)",
+          "Rater calibration (training before scoring)"
+        ],
+        "falsifying_observation": "If no significant interaction (p > 0.05) between definition type and trace completeness is found, or if one definition type consistently dominates across all completeness levels (i.e., no reversal), then the hypothesis is falsified. Additionally, if the estimated threshold is outside the range [0.3, 0.9] or the confidence interval includes the entire range, the hypothesis is not supported."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant interaction effect between definition type and trace completeness (p < 0.05).",
+          "Step-order definition yields higher fidelity than constraint-based for completeness >= 0.6, and lower for completeness < 0.6.",
+          "Threshold estimate falls between 0.5 and 0.7 with narrow confidence intervals.",
+          "The crossover is consistent across tasks and agents."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction between definition type and trace completeness.",
+          "One definition type (e.g., step-order) yields higher fidelity at all completeness levels.",
+          "Threshold estimate is below 0.3 or above 0.9, or confidence interval spans the entire range.",
+          "Different tasks show different crossing points (no universal threshold)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no crossing threshold is found (i.e., no interaction or no reversal), then the assumption that trace completeness determines optimal definition type is invalid.",
+        "assumption_to_revise": "Assumption: There exists a universal threshold of trace completeness where the optimal definition type switches.",
+        "next_question": "Does the optimal definition type depend on task characteristics (e.g., open-endedness, complexity) rather than trace completeness, and can a hybrid definition dynamically adapt to trace quality?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The sequence of internal reasoning and external actions performed by an LLM agent to accomplish a task, including observations, decisions, and tool usage.",
+          "why_primitive": "It is the fundamental object we aim to evaluate; without a definition of what constitutes the process, measurement cannot be anchored."
+        },
+        {
+          "name": "Process Fidelity",
+          "definition": "The degree to which an actual agent process matches a reference ideal process along specified dimensions (e.g., step order, reasoning coherence, constraint adherence).",
+          "why_primitive": "Fidelity is the core concept we seek to quantify; it provides the norm against which the agent's process is compared."
+        },
+        {
+          "name": "Measurement Instrument",
+          "definition": "A systematic method (e.g., rubric, automated trace analysis, human judgment) that produces a numeric or categorical score representing process fidelity.",
+          "why_primitive": "Measurement turns the abstract concept of fidelity into an empirical quantity; the design of this instrument directly determines what is counted and how."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "There exists a well-defined ideal process for a given task that can be established a priori, independent of any agent execution.",
+          "rationale": "To measure fidelity, we need a reference; this reference must be defined by task designers or inferred from best practices.",
+          "possible_failure": "For open-ended or creative tasks, no single ideal process exists; fidelity becomes subjective or multi-dimensional."
+        },
+        {
+          "assumption": "The agent's internal reasoning and decision points are either fully observable (e.g., via chain-of-thought traces) or inferable from actions and outputs.",
+          "rationale": "Process measurement requires access to the steps; otherwise, we can only guess what the process was.",
+          "possible_failure": "LLMs may have hidden reasoning (e.g., not verbalized) or produce plausible but unfaithful traces (e.g., post-hoc rationalization)."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Ideal Process Definition",
+            "role": "input",
+            "description": "A predefined reference process for a given task, specifying step order, reasoning expectations, and constraint adherence."
+          },
+          {
+            "name": "Observable Agent Trace",
+            "role": "input",
+            "description": "Recorded sequence of agent actions, outputs, and (if available) internal reasoning steps (e.g., chain-of-thought)."
+          },
+          {
+            "name": "Measurement Instrument Design",
+            "role": "input",
+            "description": "The systematic method (rubric, automated analysis, human judgment) used to compare agent trace to ideal process."
+          },
+          {
+            "name": "Step Alignment Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's step order matches the ideal process sequence."
+          },
+          {
+            "name": "Reasoning Coherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent's reasoning (if observable) is logical and consistent with the task's expectations."
+          },
+          {
+            "name": "Constraint Adherence Score",
+            "role": "mediator",
+            "description": "Degree to which the agent respects constraints (e.g., tool usage, time limits, formatting)."
+          },
+          {
+            "name": "Process Fidelity Score",
+            "role": "output",
+            "description": "Aggregate numeric or categorical score representing overall process fidelity."
+          },
+          {
+            "name": "Utility of Measurement",
+            "role": "outcome",
+            "description": "The practical value of the fidelity score, e.g., its correlation with task outcome quality or its actionability for improvement."
+          },
+          {
+            "name": "Task Complexity",
+            "role": "confounder",
+            "description": "The inherent difficulty of the task, affecting both the ideal process specification and the agent's ability to adhere to it."
+          },
+          {
+            "name": "Agent Architecture",
+            "role": "confounder",
+            "description": "The underlying LLM and prompting strategy, which influence trace observability and fidelity achievable."
+          },
+          {
+            "name": "Observer Bias",
+            "role": "confounder",
+            "description": "Human or automated measurement biases that can distort fidelity scoring (e.g., leniency, subjectivity in rubric application)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Input specification",
+            "source": "Ideal Process Definition",
+            "relation": "provides reference",
+            "target": "Measurement Instrument Design",
+            "explanation": "The ideal process defines what steps and constraints the measurement instrument will check."
+          },
+          {
+            "step": "Input data collection",
+            "source": "Observable Agent Trace",
+            "relation": "provides data",
+            "target": "Measurement Instrument Design",
+            "explanation": "The agent trace is the actual process data fed into the measurement instrument."
+          },
+          {
+            "step": "Alignment scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Step Alignment Score",
+            "explanation": "The instrument compares step order between trace and ideal process to compute alignment."
+          },
+          {
+            "step": "Coherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Reasoning Coherence Score",
+            "explanation": "The instrument evaluates reasoning trace (if present) for logical coherence relative to task."
+          },
+          {
+            "step": "Adherence scoring",
+            "source": "Measurement Instrument Design",
+            "relation": "produces",
+            "target": "Constraint Adherence Score",
+            "explanation": "The instrument checks whether the agent respected predefined constraints."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Step Alignment Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Alignment, coherence, and adherence scores are aggregated (e.g., weighted sum) into a single fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Reasoning Coherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Coherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Aggregation",
+            "source": "Constraint Adherence Score",
+            "relation": "combined with",
+            "target": "Process Fidelity Score",
+            "explanation": "Adherence contributes to the overall fidelity score."
+          },
+          {
+            "step": "Utility assessment",
+            "source": "Process Fidelity Score",
+            "relation": "influences",
+            "target": "Utility of Measurement",
+            "explanation": "The measured fidelity score is used to inform decisions (e.g., model improvement, evaluation), determining its practical utility."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Task Complexity",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Complex tasks may lead to lower fidelity scores even with good process, complicating interpretation."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Agent Architecture",
+            "relation": "moderates",
+            "target": "Observable Agent Trace",
+            "explanation": "Different architectures produce traces of varying completeness and veracity."
+          },
+          {
+            "step": "Confounding effect",
+            "source": "Observer Bias",
+            "relation": "moderates",
+            "target": "Process Fidelity Score",
+            "explanation": "Bias in measurement instrument or human raters can inflate or deflate fidelity scores."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Observability of internal reasoning",
+            "why_it_matters": "Without access to the agent's actual reasoning chain, fidelity assessment relies on external actions, which may miss important cognitive steps or be misaligned with true process."
+          },
+          {
+            "bottleneck": "Subjectivity of ideal process definition",
+            "why_it_matters": "For many tasks (especially creative ones), there is no single 'correct' process, making fidelity measurement arbitrary or contested."
+          },
+          {
+            "bottleneck": "Granularity versus cost tradeoff",
+            "why_it_matters": "Fine-grained step analysis yields richer fidelity information but requires more annotation effort and computational resources, potentially limiting scalability."
+          }
+        ],
+        "mechanism_summary": "The mechanism measures agent process fidelity by comparing an observable agent trace to a predefined ideal process using a measurement instrument. The instrument yields scores for step alignment, reasoning coherence, and constraint adherence, which are aggregated into a process fidelity score. This score is then used to assess the utility of the measurement (e.g., correlation with outcomes). Key bottlenecks include limited observability of internal reasoning, the lack of a unique ideal process for open-ended tasks, and the tension between granularity and evaluation cost."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The process fidelity score is often assumed to correlate with outcome quality, but this relationship may be weak or task-dependent, leading to potential overemphasis on process at the expense of outcomes.",
+        "derived_from": [
+          "Process Fidelity Score",
+          "Utility of Measurement",
+          "Weighting process fidelity vs. outcome quality"
+        ],
+        "why_it_matters": "If process fidelity does not predict outcomes, its utility for agent improvement or evaluation is questionable.",
+        "what_existing_methods_may_miss": "Existing metrics may implicitly weight process fidelity without validating its predictive power.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Does the sign of the relationship between process fidelity and outcome quality change depending on whether the task has a well-defined ideal process (high constraint) versus an open-ended ideal process (low constraint), controlling for agent architecture and observer bias?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Tests a sharp boundary: process fidelity predicts outcome quality only for constrained tasks; for open-ended tasks, high fidelity may degrade performance due to rigidity, challenging the assumption that fidelity is universally beneficial."
+      },
+      "hypothesis": {
+        "statement": "For tasks with a well-defined ideal process (high constraint), process fidelity positively predicts outcome quality; for tasks with an open-ended ideal process (low constraint), process fidelity negatively predicts outcome quality, controlling for agent architecture and observer bias.",
+        "predicted_effect": "A significant interaction between process fidelity and task constraint category: positive slope for constrained tasks, negative or non-significant slope for open-ended tasks."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select 5 constrained tasks (e.g., multi-step arithmetic, code debugging with fixed procedure) and 5 open-ended tasks (e.g., creative writing, product design brainstorming). For each task, define an ideal process (highly specific for constrained, a minimal skeleton for open-ended). Deploy 4 LLM agents (GPT-4, Claude, LLaMA-70B, Mistral) to perform each task 10 times. Record full traces (including chain-of-thought). Use two blinded human raters (inter-annotator agreement >0.8) to score process fidelity via a rubric covering step alignment, reasoning coherence, and constraint adherence. Measure outcome quality: for constrained tasks, accuracy/error rate; for open-ended tasks, average expert rating on creativity and appropriateness. Perform a mixed-effects regression with outcome quality as DV, fixed effects for process fidelity (centered), task category (constrained vs open-ended), their interaction, and agent architecture; random intercepts for tasks. Control for observer bias by averaging rater scores and blinding raters to hypothesis.",
+        "independent_variables": [
+          "Process fidelity score (continuous, centered)",
+          "Task category (categorical: constrained vs open-ended)",
+          "Agent architecture (categorical)",
+          "Interaction: Process fidelity × Task category"
+        ],
+        "dependent_variables": [
+          "Task outcome quality (continuous: accuracy for constrained, mean expert rating for open-ended, normalized to 0-1)"
+        ],
+        "controls": [
+          "Blinded human raters with inter-annotator agreement threshold >0.8",
+          "Agent architecture as fixed effect",
+          "Task-specific ideal process definitions held constant within each task",
+          "Random effects for task to account for task-level variance"
+        ],
+        "falsifying_observation": "The interaction coefficient is not statistically significant (p ≥ 0.05), or the slope for constrained tasks is not positive, or the slope for open-ended tasks is not negative/zero."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Statistically significant interaction (p < 0.05) in the mixed-effects model.",
+          "Positive slope for constrained tasks (β1 > 0, p < 0.05) and negative or non-significant slope for open-ended tasks (β2 ≤ 0).",
+          "Model with interaction explains more variance (ΔR² > 0.10) than model without interaction."
+        ],
+        "rejects_hypothesis": [
+          "Interaction term not significant (p ≥ 0.05).",
+          "Both slopes positive (open-ended tasks also show positive relationship).",
+          "Slope for constrained tasks not significant or negative."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the interaction is not significant or the predicted sign pattern does not hold, then the proposed boundary based on task constraint type is incorrect.",
+        "assumption_to_revise": "The assumption that process fidelity's utility depends on task constraint type should be revised. It may depend on another dimension (e.g., task novelty, agent capability, or measurement granularity).",
+        "next_question": "What task characteristic (e.g., degree of specification, required creativity) determines whether process fidelity helps or hinders outcome quality, and can we identify a quantitative threshold (e.g., number of constraints per step) where the effect flips?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical threshold of trace completeness (around 0.6) such that when trace completeness is above the threshold, step-order ideal process definitions yield higher process fidelity scores than constraint-based definitions, and when below, constraint-based definitions yield higher scores.",
+      "independent_variables": [
+        "Ideal process definition type (step-order vs. constraint-based)",
+        "Trace completeness (levels: 0.2, 0.4, 0.6, 0.8, 1.0)"
+      ],
+      "dependent_variables": [
+        "Process fidelity score (0-1)"
+      ],
+      "controlled_variables": [
+        "Task identity (3 creative tasks: short story, slogan, product concept)",
+        "Agent architecture (GPT-4, Claude 3)",
+        "Number of raters per condition (3)",
+        "Rater calibration (training before scoring)"
+      ],
+      "baselines": [
+        {
+          "name": "Full trace step-order baseline",
+          "description": "Trace completeness = 1.0 with step-order ideal process definition"
+        },
+        {
+          "name": "Full trace constraint-based baseline",
+          "description": "Trace completeness = 1.0 with constraint-based ideal process definition"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process fidelity score",
+          "definition": "Aggregate score (0-1) computed as weighted combination of step alignment, reasoning coherence, and constraint adherence, measured by human raters using a predefined rubric."
+        }
+      ],
+      "expected_result": "A significant interaction (p < 0.05) between definition type and trace completeness, with step-order fidelity higher than constraint-based for completeness >= 0.6 and lower for completeness < 0.6, and a threshold estimate between 0.5 and 0.7 with narrow confidence intervals, consistent across tasks and agents.",
+      "falsifying_result": "No significant interaction effect (p > 0.05), or one definition type consistently yields higher fidelity across all completeness levels, or the estimated threshold is below 0.3 or above 0.9, or confidence interval spans the entire range [0.2, 1.0].",
+      "minimum_viable_experiment": "Select 3 creative tasks with predefined ideal processes of both types. Use 2 LLM agents to generate traces at 5 levels of completeness (0.2 to 1.0 in 0.2 increments) by selectively omitting intermediate reasoning steps from full traces. Human raters score fidelity using both definition types. Analyze with mixed-effects ANOVA with definition type and completeness as fixed effects, and task and agent as random effects. Fit a logistic function to estimate the crossover point and bootstrap confidence intervals.",
+      "risks_and_confounds": [
+        "Rater subjectivity: despite training, raters may differ in interpretation of fidelity dimensions.",
+        "Trace realism: artificially truncated traces may not reflect natural agent behavior due to missing steps.",
+        "Carryover effects: raters scoring both definition types may be influenced by prior ratings; counterbalancing needed.",
+        "Task selection: creative tasks may not be representative; results may not generalize to other task types.",
+        "Observability: even full traces may miss internal reasoning if not verbalized, affecting completeness measurement."
+      ]
+    },
+    {
+      "hypothesis": "When the coherence weight in the aggregate fidelity score is high (e.g., >0.5), withholding reasoning leads to underestimation of process fidelity; when the coherence weight is low (e.g., <0.3), withholding reasoning leads to overestimation.",
+      "independent_variables": [
+        "Coherence weight (levels: 0.2, 0.5, 0.8)",
+        "Observability condition (full reasoning vs. withheld reasoning)"
+      ],
+      "dependent_variables": [
+        "Process fidelity score"
+      ],
+      "controlled_variables": [
+        "Same set of tasks with predefined ideal processes",
+        "Same set of agents (or same distribution across conditions)",
+        "Fixed alignment and constraint weights relative to coherence (e.g., alignment=constraint=0.25 when coherence=0.5, and adjusted proportionally for other weights)",
+        "Random assignment of observability condition per task-agent pair within each weight setting",
+        "Measurement instrument design (rubric) consistent across conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Full observability condition",
+          "description": "Process fidelity score computed with full reasoning trace available for each coherence weight level; used as reference to compute bias (withheld minus full)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process fidelity score",
+          "definition": "Aggregate score combining step alignment, reasoning coherence, and constraint adherence with specified coherence weight."
+        }
+      ],
+      "expected_result": "As coherence weight increases, the mean difference (withheld reasoning fidelity score minus full reasoning fidelity score) decreases monotonically from significantly positive to significantly negative. Specifically: at weight=0.2, mean difference > 0 (overestimation); at weight=0.5, mean difference ≈ 0; at weight=0.8, mean difference < 0 (underestimation). The slope of the mean difference across weight levels is significantly negative (p < 0.05).",
+      "falsifying_result": "If the mean difference does not show a monotonic trend from positive to negative across increasing coherence weights (e.g., remains positive or negative across all levels, or does not change direction), or if there is no significant interaction between coherence weight and observability condition, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use 3-5 tasks with well-defined ideal processes (e.g., solving a math problem, writing a short essay with constraints). Use 5-10 different LLM agents (different models or prompts). For each task-agent pair, collect full trace including chain-of-thought reasoning. Then create a version with reasoning steps removed (only actions kept). For each coherence weight setting (0.2, 0.5, 0.8), compute the fidelity score using the same measurement instrument but varying only the coherence weight, with alignment and constraint weights fixed proportionally. Randomly assign the order of observability condition within each weight to avoid order effects. For each weight, compute the mean difference across all task-agent pairs. Then test whether the mean difference decreases monotonically across weights (e.g., using linear regression or contrast analysis).",
+      "risks_and_confounds": [
+        "Task complexity may moderate the effect because complex tasks may have less coherent reasoning traces, affecting the impact of withholding.",
+        "Agent architecture (e.g., model size, prompting strategy) may affect reasoning quality and the observability condition effect.",
+        "Observer bias in human rating; use automated scoring to mitigate.",
+        "Subjectivity in predefined ideal processes may introduce noise; ensure tasks have clear, unambiguous reference processes.",
+        "Withholding reasoning may artificially lower coherence scores even for high-fidelity processes, creating a floor effect.",
+        "The fixed relative weights of alignment and constraint might interact with task type, requiring sensitivity analysis."
+      ]
+    },
+    {
+      "hypothesis": "For tasks of sufficient complexity, the relationship between step decomposition granularity and the fidelity-outcome correlation follows an inverted-U shape: as the number of steps increases, the correlation first increases, then decreases after a critical threshold. For simple tasks, the correlation may plateau or decrease at lower granularities. The granularity that maximizes correlation increases with task complexity.",
+      "independent_variables": [
+        "Number of steps in decomposition (levels: 5, 10, 15, 20, 25)",
+        "Task complexity (levels: low, medium, high)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation between process fidelity score and outcome quality"
+      ],
+      "controlled_variables": [
+        "Same set of tasks across all conditions",
+        "Same measurement instrument design (except step count)",
+        "Same outcome quality metric (e.g., correctness on a rubric)",
+        "Same agents used across granularities",
+        "Equal number of evaluations per condition (e.g., 100 traces per task per granularity)"
+      ],
+      "baselines": [
+        {
+          "name": "No step decomposition (global process score)",
+          "description": "A baseline where the process is evaluated as a whole without any step breakdown, using a single global fidelity score."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process Fidelity Score",
+          "definition": "Aggregate score from measurement instrument evaluating step alignment, reasoning coherence, and constraint adherence."
+        },
+        {
+          "name": "Outcome Quality Score",
+          "definition": "Human-judged correctness or quality of the agent's final output on a task-specific rubric."
+        },
+        {
+          "name": "Pearson Correlation Coefficient",
+          "definition": "Measure of linear correlation between process fidelity scores and outcome quality scores across agent traces."
+        }
+      ],
+      "expected_result": "For high-complexity tasks, the Pearson correlation between fidelity and outcome peaks at an intermediate granularity (e.g., 15 steps) and decreases at finer granularities (20, 25). For low-complexity tasks, the correlation peaks at a lower granularity (e.g., 10 steps) and then plateaus or slightly decreases. The optimal granularity (steps at peak correlation) is positively correlated with task complexity rating.",
+      "falsifying_result": "The correlation increases monotonically with granularity for all task complexities, or it plateaus without a significant decrease at finer granularities, or the peak granularity does not vary across task complexities (e.g., always the same).",
+      "minimum_viable_experiment": "Select two tasks: one low-complexity (e.g., simple fact extraction) and one high-complexity (e.g., multi-step research). Define three granularity levels: 5, 15, and 25 steps. Use one LLM agent type. Collect 50 agent traces per condition (2 tasks × 3 granularities = 300 traces). Human annotators assign process fidelity scores using rubrics that differ only in step count. Independently measure outcome quality via human judges. Compute Pearson correlation between fidelity and outcome for each condition. If the correlation for the high-complexity task shows a peak at 15 steps (higher than at 5 and 25) and for the low-complexity task shows a peak at 5 steps (or plateau), the hypothesis is supported.",
+      "risks_and_confounds": [
+        "Operationalization of task complexity may be subjective; use validated complexity metrics.",
+        "Definition of step boundaries in decompositions may introduce bias; use consistent rules.",
+        "Human annotation reliability for fidelity and outcome may vary; use multiple annotators and measure inter-rater reliability.",
+        "Limited number of agents (e.g., one LLM) may reduce generalizability; results may depend on agent architecture."
+      ]
+    },
+    {
+      "hypothesis": "For tasks with a well-defined ideal process (high constraint), process fidelity positively predicts outcome quality; for tasks with an open-ended ideal process (low constraint), process fidelity negatively predicts outcome quality, controlling for agent architecture and observer bias.",
+      "independent_variables": [
+        "Process fidelity score (continuous, centered)",
+        "Task category (constrained vs open-ended)",
+        "Agent architecture (categorical: GPT-4, LLaMA-70B)",
+        "Interaction: Process fidelity × Task category"
+      ],
+      "dependent_variables": [
+        "Task outcome quality (continuous: accuracy for constrained, mean expert rating for open-ended, normalized to 0-1)"
+      ],
+      "controlled_variables": [
+        "Blinded human raters with inter-annotator agreement threshold >0.8",
+        "Agent architecture as fixed effect",
+        "Task-specific ideal process definitions held constant within each task",
+        "Random intercepts for tasks",
+        "Rater scores averaged across two raters",
+        "Raters blinded to hypothesis"
+      ],
+      "baselines": [
+        {
+          "name": "Null Model (No Interaction)",
+          "description": "A mixed-effects model predicting outcome quality from process fidelity and task category without their interaction, to compare against the full model with interaction."
+        },
+        {
+          "name": "Random Baseline",
+          "description": "A model where process fidelity scores are randomly shuffled within each task to break any true relationship, serving as a negative control."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process Fidelity Score",
+          "definition": "Aggregate score (0-100) from human raters evaluating step alignment, reasoning coherence, and constraint adherence using a rubric."
+        },
+        {
+          "name": "Outcome Quality Score",
+          "definition": "For constrained tasks: accuracy (0-1); for open-ended tasks: average of two expert ratings on creativity and appropriateness (normalized to 0-1)."
+        }
+      ],
+      "expected_result": "Statistically significant interaction (p < 0.05) in mixed-effects model, with positive slope for constrained tasks (β > 0, p < 0.05) and negative or non-significant slope for open-ended tasks (β ≤ 0).",
+      "falsifying_result": "Interaction term not significant (p ≥ 0.05), or slope for constrained tasks is non-positive, or slope for open-ended tasks is significantly positive.",
+      "minimum_viable_experiment": "Select 3 constrained tasks (e.g., multi-step arithmetic, code debugging with fixed procedure, data transformation with specific steps) and 3 open-ended tasks (e.g., creative writing, brainstorming product features, designing a marketing campaign). For each task, define an ideal process (highly specific for constrained, minimal skeleton for open-ended). Deploy 2 LLM agents (GPT-4 and LLaMA-70B) to perform each task 10 times. Record full traces (including chain-of-thought). Use two blinded human raters (inter-annotator agreement >0.8) to score process fidelity via a rubric covering step alignment, reasoning coherence, and constraint adherence. Measure outcome quality: for constrained tasks, accuracy; for open-ended tasks, average expert rating on creativity and appropriateness. Perform a mixed-effects regression with outcome quality as DV, fixed effects for process fidelity (centered), task category, their interaction, and agent architecture; random intercepts for tasks. Control for observer bias by averaging rater scores and blinding raters to hypothesis.",
+      "risks_and_confounds": [
+        "Limited observability of internal reasoning (agents may not verbalize all steps)",
+        "Subjectivity of ideal process definition, especially for open-ended tasks",
+        "Potential low statistical power with only 6 tasks",
+        "Variability in inter-annotator agreement across tasks",
+        "Uncontrolled task complexity differences",
+        "Order effects if tasks are not randomized",
+        "Learning effects across multiple runs by same agent"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a comprehensive first-principles framework for measuring agent process fidelity. It defines primitive concepts, identifies key tensions, proposes a mechanism model, and generates falsifiable hypotheses with detailed experimental designs. The work is well-structured and thought-provoking.",
+    "strengths": [
+      "Clear first-principles derivation connecting definitions to testable hypotheses.",
+      "Identifies important tensions (e.g., observability, granularity tradeoff, process vs outcome) that are often overlooked.",
+      "Proposes novel boundaries (e.g., trace completeness threshold, coherence weight flip) with high falsifiability.",
+      "Experimental designs are detailed with controls, baselines, and falsifying criteria."
+    ],
+    "weaknesses": [
+      "The assumption of a well-defined ideal process is problematic for open-ended tasks, limiting generalizability.",
+      "Some experiments are resource-intensive (e.g., human raters, multiple LLMs) and may not be easily reproducible.",
+      "Missing baselines comparing to existing agent evaluation metrics (e.g., outcome-only, trajectory matching, human judgment).",
+      "Overclaiming: novelty scores of 5/5 are not fully justified; similar ideas exist in process evaluation literature."
+    ],
+    "questions": [
+      "How would the proposed measurement framework compare to simpler baselines like outcome-only evaluation or BLEU-style process matching?",
+      "Can the experiments be scaled to more complex tasks or real-world agent deployments?",
+      "What is the expected inter-rater reliability for the human fidelity scoring, and how would automation affect the thresholds?"
+    ],
+    "missing_baselines": [
+      "Comparison to outcome-only evaluation (task success).",
+      "Comparison to simple step-count or action-sequence similarity metrics.",
+      "Comparison to human judgment of process quality without defined ideal process.",
+      "Ablation: using only one dimension (e.g., step alignment) vs aggregate score."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "How does the completeness of the observable agent trace moderate the effect of ideal process definition type (step-order vs. constraint-based) on process fidelity scores for creative tasks, and is there a critical trace completeness threshold where the preferred definition type reverses?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Does the relative weight assigned to reasoning coherence in the aggregate fidelity score determine whether withholding the agent's internal reasoning causes overestimation or underestimation of overall process fidelity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "Is there a critical granularity threshold in process decomposition where increasing step count reduces the fidelity-outcome correlation due to noise, and how does this threshold depend on task complexity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Does the sign of the relationship between process fidelity and outcome quality change depending on whether the task has a well-defined ideal process (high constraint) versus an open-ended ideal process (low constraint), controlling for agent architecture and observer bias?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

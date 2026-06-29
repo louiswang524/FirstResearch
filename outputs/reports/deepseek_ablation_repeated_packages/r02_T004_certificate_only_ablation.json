@@ -1,0 +1,1222 @@
+{
+  "topic": {
+    "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+    "topic_id": "T004",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: Can agent memory improve generalization or does it create retrieval interference?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An autonomous entity that perceives its environment, processes information, and takes actions to achieve goals.",
+        "why_primitive": "It is the fundamental subject of the analysis; memory and generalization are properties of an agent."
+      },
+      {
+        "name": "Memory",
+        "definition": "A store of information derived from past experiences that can be accessed and used in future decisions.",
+        "why_primitive": "It is the core object being studied; its presence or absence defines the tradeoff."
+      },
+      {
+        "name": "Retrieval",
+        "definition": "The process of accessing and retrieving specific information from memory when needed.",
+        "why_primitive": "It is the mechanism that connects memory to action; interference arises from imperfect retrieval."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Memory capacity is bounded and retrieval is subject to interference.",
+        "rationale": "Agents have finite storage and computational resources; similar memories can interfere during retrieval.",
+        "possible_failure": "If memory is unbounded or retrieval is perfect, the tradeoff disappears."
+      },
+      {
+        "assumption": "Generalization relies on extracting patterns across experiences, which benefits from diverse memories.",
+        "rationale": "Generalization requires identifying commonalities; more memories provide richer statistical evidence.",
+        "possible_failure": "If noise in memories outweighs signal, generalization may degrade."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Memory breadth vs. retrieval precision: adding diverse memories improves generalization but increases interference, reducing precision.",
+        "variables": [
+          "Number of stored memories",
+          "Similarity between memories",
+          "Retrieval specificity"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Number of stored memories",
+        "role": "input",
+        "description": "The total count of distinct experiences or examples stored in the agent's memory."
+      },
+      {
+        "name": "Similarity between memories",
+        "role": "input",
+        "description": "The average pairwise similarity among stored memories, influencing how much they interfere."
+      },
+      {
+        "name": "Retrieval specificity",
+        "role": "mediator",
+        "description": "The precision with which a specific memory is retrieved; inversely related to interference."
+      },
+      {
+        "name": "Generalization performance",
+        "role": "output",
+        "description": "The agent's ability to apply learned patterns to novel situations."
+      },
+      {
+        "name": "Retrieval interference",
+        "role": "outcome",
+        "description": "The degree to which similar memories impair accurate recall."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Number of stored memories",
+        "relation": "decreases",
+        "target": "Retrieval specificity",
+        "explanation": "As more memories are stored, competition during retrieval lowers the specificity of recall."
+      },
+      {
+        "step": "2",
+        "source": "Similarity between memories",
+        "relation": "decreases",
+        "target": "Retrieval specificity",
+        "explanation": "Higher similarity among memories increases overlap in retrieval cues, reducing specificity."
+      },
+      {
+        "step": "3",
+        "source": "Retrieval specificity",
+        "relation": "decreases",
+        "target": "Retrieval interference",
+        "explanation": "Lower specificity leads to higher interference because multiple matching memories are activated."
+      },
+      {
+        "step": "4",
+        "source": "Number of stored memories",
+        "relation": "increases",
+        "target": "Generalization performance",
+        "explanation": "More memories provide a richer statistical base for extracting common patterns, improving generalization."
+      },
+      {
+        "step": "5",
+        "source": "Similarity between memories",
+        "relation": "decreases",
+        "target": "Generalization performance",
+        "explanation": "High similarity reduces diversity, limiting the range of patterns and harming generalization."
+      },
+      {
+        "step": "6",
+        "source": "Retrieval interference",
+        "relation": "decreases",
+        "target": "Generalization performance",
+        "explanation": "Interference impairs accurate retrieval of relevant memories, degrading the agent's ability to generalize."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Retrieval specificity",
+        "why_it_matters": "Retrieval specificity mediates the tradeoff between generalization and interference: improving it reduces interference but may require constraining memory breadth, which could limit generalization."
+      },
+      {
+        "bottleneck": "Similarity between memories",
+        "why_it_matters": "Similarity determines how much memories interfere; managing similarity is crucial to balance diversity (for generalization) and distinctiveness (to avoid interference)."
+      }
+    ],
+    "mechanism_summary": "The mechanism involves two input factors—number of stored memories and their similarity—that jointly affect retrieval specificity. Lower retrieval specificity increases retrieval interference, which hurts generalization. However, more memories directly boost generalization by providing more pattern evidence, while high similarity reduces both retrieval specificity and generalization. Thus, the net effect on generalization depends on the balance: adding diverse memories (low similarity) improves generalization if the increase in interference is offset by the gain in pattern diversity. The bottlenecks are retrieval specificity and memory similarity, which control the tension between broad memory (good for generalization) and precise retrieval (avoiding interference)."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Adding diverse memories improves generalization but increases retrieval interference, reducing precision.",
+      "derived_from": [
+        "Number of stored memories",
+        "Similarity between memories",
+        "Retrieval specificity",
+        "Generalization performance",
+        "Retrieval interference"
+      ],
+      "why_it_matters": "This tradeoff is central to memory systems: increasing memory breadth enhances pattern extraction but harms recall accuracy, leading to a fundamental balance.",
+      "what_existing_methods_may_miss": "Existing methods often optimize for either generalization or retrieval, missing the dynamic interplay where interference can negate gains from added memories.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "High similarity among memories reduces interference but also reduces generalization by limiting pattern diversity.",
+      "derived_from": [
+        "Similarity between memories",
+        "Retrieval interference",
+        "Generalization performance"
+      ],
+      "why_it_matters": "Similarity controls both the costs (interference) and benefits (diversity) of memory; managing similarity is key to balancing the tradeoff.",
+      "what_existing_methods_may_miss": "Many models treat similarity as fixed or ignore its dual role, failing to capture that increasing similarity may hurt generalization even as it helps retrieval.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that more memories always improve generalization may fail if noise dominates the signal in stored experiences.",
+      "derived_from": [
+        "Assumption: Generalization relies on extracting patterns across experiences, which benefits from diverse memories."
+      ],
+      "why_it_matters": "If memories are noisy or irrelevant, adding more can degrade generalization by introducing spurious patterns; the assumption may not hold under high noise.",
+      "what_existing_methods_may_miss": "Current methods often assume a positive monotonic relationship between memory size and generalization, ignoring the potential for noise to reverse this effect.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Improving retrieval specificity (to reduce interference) may require constraining memory breadth, which could limit generalization.",
+      "derived_from": [
+        "Retrieval specificity",
+        "Number of stored memories",
+        "Generalization performance"
+      ],
+      "why_it_matters": "This highlights a bottleneck: interventions to reduce interference (e.g., via attention or pruning) may inadvertently harm generalization if they reduce the diversity of memories.",
+      "what_existing_methods_may_miss": "Many retrieval-enhancement techniques focus on specificity without considering the downstream cost to generalization, leading to suboptimal overall performance.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing the number of stored memories with low similarity improve generalization more than increasing memories with high similarity, given the tradeoff with retrieval interference?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Clarify the interaction effect of memory count and similarity on generalization, informing memory management strategies."
+    },
+    {
+      "question": "How does the similarity between memories affect the rate at which retrieval interference grows as memory count increases?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Quantify the relationship between similarity and interference scaling, enabling better similarity tuning."
+    },
+    {
+      "question": "Under what noise levels does adding more memories degrade generalization performance, contradicting the assumption that more memories always improve generalization?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Identify threshold conditions where the positive monotonic relationship fails."
+    },
+    {
+      "question": "Can a retrieval-specificity intervention that constrains memory breadth achieve a net improvement in generalization by reducing interference, or does the loss of diversity outweigh the benefit?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Test the effectiveness of specificity-focused techniques and reveal the conditions for their success."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, processes information, and takes actions to achieve goals.",
+          "why_primitive": "It is the fundamental subject of the analysis; memory and generalization are properties of an agent."
+        },
+        {
+          "name": "Memory",
+          "definition": "A store of information derived from past experiences that can be accessed and used in future decisions.",
+          "why_primitive": "It is the core object being studied; its presence or absence defines the tradeoff."
+        },
+        {
+          "name": "Retrieval",
+          "definition": "The process of accessing and retrieving specific information from memory when needed.",
+          "why_primitive": "It is the mechanism that connects memory to action; interference arises from imperfect retrieval."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory capacity is bounded and retrieval is subject to interference.",
+          "rationale": "Agents have finite storage and computational resources; similar memories can interfere during retrieval.",
+          "possible_failure": "If memory is unbounded or retrieval is perfect, the tradeoff disappears."
+        },
+        {
+          "assumption": "Generalization relies on extracting patterns across experiences, which benefits from diverse memories.",
+          "rationale": "Generalization requires identifying commonalities; more memories provide richer statistical evidence.",
+          "possible_failure": "If noise in memories outweighs signal, generalization may degrade."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Number of stored memories",
+            "role": "input",
+            "description": "The total count of distinct experiences or examples stored in the agent's memory."
+          },
+          {
+            "name": "Similarity between memories",
+            "role": "input",
+            "description": "The average pairwise similarity among stored memories, influencing how much they interfere."
+          },
+          {
+            "name": "Retrieval specificity",
+            "role": "mediator",
+            "description": "The precision with which a specific memory is retrieved; inversely related to interference."
+          },
+          {
+            "name": "Generalization performance",
+            "role": "output",
+            "description": "The agent's ability to apply learned patterns to novel situations."
+          },
+          {
+            "name": "Retrieval interference",
+            "role": "outcome",
+            "description": "The degree to which similar memories impair accurate recall."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Number of stored memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "As more memories are stored, competition during retrieval lowers the specificity of recall."
+          },
+          {
+            "step": "2",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "Higher similarity among memories increases overlap in retrieval cues, reducing specificity."
+          },
+          {
+            "step": "3",
+            "source": "Retrieval specificity",
+            "relation": "decreases",
+            "target": "Retrieval interference",
+            "explanation": "Lower specificity leads to higher interference because multiple matching memories are activated."
+          },
+          {
+            "step": "4",
+            "source": "Number of stored memories",
+            "relation": "increases",
+            "target": "Generalization performance",
+            "explanation": "More memories provide a richer statistical base for extracting common patterns, improving generalization."
+          },
+          {
+            "step": "5",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "High similarity reduces diversity, limiting the range of patterns and harming generalization."
+          },
+          {
+            "step": "6",
+            "source": "Retrieval interference",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "Interference impairs accurate retrieval of relevant memories, degrading the agent's ability to generalize."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Retrieval specificity",
+            "why_it_matters": "Retrieval specificity mediates the tradeoff between generalization and interference: improving it reduces interference but may require constraining memory breadth, which could limit generalization."
+          },
+          {
+            "bottleneck": "Similarity between memories",
+            "why_it_matters": "Similarity determines how much memories interfere; managing similarity is crucial to balance diversity (for generalization) and distinctiveness (to avoid interference)."
+          }
+        ],
+        "mechanism_summary": "The mechanism involves two input factors—number of stored memories and their similarity—that jointly affect retrieval specificity. Lower retrieval specificity increases retrieval interference, which hurts generalization. However, more memories directly boost generalization by providing more pattern evidence, while high similarity reduces both retrieval specificity and generalization. Thus, the net effect on generalization depends on the balance: adding diverse memories (low similarity) improves generalization if the increase in interference is offset by the gain in pattern diversity. The bottlenecks are retrieval specificity and memory similarity, which control the tension between broad memory (good for generalization) and precise retrieval (avoiding interference)."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that more memories always improve generalization may fail if noise dominates the signal in stored experiences.",
+        "derived_from": [
+          "Assumption: Generalization relies on extracting patterns across experiences, which benefits from diverse memories."
+        ],
+        "why_it_matters": "If memories are noisy or irrelevant, adding more can degrade generalization by introducing spurious patterns; the assumption may not hold under high noise.",
+        "what_existing_methods_may_miss": "Current methods often assume a positive monotonic relationship between memory size and generalization, ignoring the potential for noise to reverse this effect.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "What is the critical similarity threshold beyond which adding similar memories degrades generalization performance due to retrieval interference overwhelming the pattern signal?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a phase transition in memory similarity that determines whether memory aids or harms generalization."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical similarity threshold such that adding more memories improves generalization below the threshold but degrades it above the threshold.",
+        "predicted_effect": "Generalization performance exhibits a sharp reversal at a critical similarity level: increasing with memory size when similarity is low, and decreasing when similarity is high."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train LLM-based agents on a classification task with synthetic data where memories are generated with controlled similarity (e.g., using a parameter that controls the overlap between feature vectors). Vary similarity level (low, medium, high) and memory size (10, 50, 100, 200). Measure generalization accuracy on a held-out test set and retrieval interference (e.g., retrieval precision for a specific memory).",
+        "independent_variables": [
+          "Memory size (10, 50, 100, 200)",
+          "Memory similarity (low, medium, high categorical, or a continuous metric like cosine similarity)"
+        ],
+        "dependent_variables": [
+          "Generalization accuracy on test set",
+          "Retrieval interference (precision of retrieving a specific memory)"
+        ],
+        "controls": [
+          "Agent architecture (same LLM and retrieval mechanism)",
+          "Task complexity (e.g., 10-class classification)",
+          "Memory storage policy (e.g., FIFO)",
+          "Distribution of test inputs"
+        ],
+        "falsifying_observation": "Generalization accuracy monotonically increases with memory size at all similarity levels, showing no reversal at any similarity."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low similarity, generalization accuracy increases with memory size.",
+          "For high similarity, generalization accuracy initially increases then decreases with memory size.",
+          "Retrieval interference increases with memory size only under high similarity."
+        ],
+        "rejects_hypothesis": [
+          "Generalization accuracy increases with memory size at all similarity levels.",
+          "Retrieval interference does not depend on similarity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no reversal is observed at any similarity level, the hypothesis of a critical similarity threshold is rejected.",
+        "assumption_to_revise": "The assumption that similarity causes interference may be too simplistic; perhaps other factors like memory organization or retrieval algorithm robustness mitigate interference.",
+        "next_question": "Under what conditions does the retrieval mechanism suppress similarity-based interference, allowing more memories to always benefit generalization?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, processes information, and takes actions to achieve goals.",
+          "why_primitive": "It is the fundamental subject of the analysis; memory and generalization are properties of an agent."
+        },
+        {
+          "name": "Memory",
+          "definition": "A store of information derived from past experiences that can be accessed and used in future decisions.",
+          "why_primitive": "It is the core object being studied; its presence or absence defines the tradeoff."
+        },
+        {
+          "name": "Retrieval",
+          "definition": "The process of accessing and retrieving specific information from memory when needed.",
+          "why_primitive": "It is the mechanism that connects memory to action; interference arises from imperfect retrieval."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory capacity is bounded and retrieval is subject to interference.",
+          "rationale": "Agents have finite storage and computational resources; similar memories can interfere during retrieval.",
+          "possible_failure": "If memory is unbounded or retrieval is perfect, the tradeoff disappears."
+        },
+        {
+          "assumption": "Generalization relies on extracting patterns across experiences, which benefits from diverse memories.",
+          "rationale": "Generalization requires identifying commonalities; more memories provide richer statistical evidence.",
+          "possible_failure": "If noise in memories outweighs signal, generalization may degrade."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Number of stored memories",
+            "role": "input",
+            "description": "The total count of distinct experiences or examples stored in the agent's memory."
+          },
+          {
+            "name": "Similarity between memories",
+            "role": "input",
+            "description": "The average pairwise similarity among stored memories, influencing how much they interfere."
+          },
+          {
+            "name": "Retrieval specificity",
+            "role": "mediator",
+            "description": "The precision with which a specific memory is retrieved; inversely related to interference."
+          },
+          {
+            "name": "Generalization performance",
+            "role": "output",
+            "description": "The agent's ability to apply learned patterns to novel situations."
+          },
+          {
+            "name": "Retrieval interference",
+            "role": "outcome",
+            "description": "The degree to which similar memories impair accurate recall."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Number of stored memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "As more memories are stored, competition during retrieval lowers the specificity of recall."
+          },
+          {
+            "step": "2",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "Higher similarity among memories increases overlap in retrieval cues, reducing specificity."
+          },
+          {
+            "step": "3",
+            "source": "Retrieval specificity",
+            "relation": "decreases",
+            "target": "Retrieval interference",
+            "explanation": "Lower specificity leads to higher interference because multiple matching memories are activated."
+          },
+          {
+            "step": "4",
+            "source": "Number of stored memories",
+            "relation": "increases",
+            "target": "Generalization performance",
+            "explanation": "More memories provide a richer statistical base for extracting common patterns, improving generalization."
+          },
+          {
+            "step": "5",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "High similarity reduces diversity, limiting the range of patterns and harming generalization."
+          },
+          {
+            "step": "6",
+            "source": "Retrieval interference",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "Interference impairs accurate retrieval of relevant memories, degrading the agent's ability to generalize."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Retrieval specificity",
+            "why_it_matters": "Retrieval specificity mediates the tradeoff between generalization and interference: improving it reduces interference but may require constraining memory breadth, which could limit generalization."
+          },
+          {
+            "bottleneck": "Similarity between memories",
+            "why_it_matters": "Similarity determines how much memories interfere; managing similarity is crucial to balance diversity (for generalization) and distinctiveness (to avoid interference)."
+          }
+        ],
+        "mechanism_summary": "The mechanism involves two input factors—number of stored memories and their similarity—that jointly affect retrieval specificity. Lower retrieval specificity increases retrieval interference, which hurts generalization. However, more memories directly boost generalization by providing more pattern evidence, while high similarity reduces both retrieval specificity and generalization. Thus, the net effect on generalization depends on the balance: adding diverse memories (low similarity) improves generalization if the increase in interference is offset by the gain in pattern diversity. The bottlenecks are retrieval specificity and memory similarity, which control the tension between broad memory (good for generalization) and precise retrieval (avoiding interference)."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Adding diverse memories improves generalization but increases retrieval interference, reducing precision.",
+        "derived_from": [
+          "Number of stored memories",
+          "Similarity between memories",
+          "Retrieval specificity",
+          "Generalization performance",
+          "Retrieval interference"
+        ],
+        "why_it_matters": "This tradeoff is central to memory systems: increasing memory breadth enhances pattern extraction but harms recall accuracy, leading to a fundamental balance.",
+        "what_existing_methods_may_miss": "Existing methods often optimize for either generalization or retrieval, missing the dynamic interplay where interference can negate gains from added memories.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical memory similarity threshold such that below it, increasing memory count improves generalization, but above it, increasing memory count degrades generalization due to retrieval interference?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a phase transition in memory similarity that separates beneficial from detrimental memory accumulation, enabling adaptive memory pruning strategies."
+      },
+      "hypothesis": {
+        "statement": "For a given task, there exists a threshold of average pairwise memory similarity (θ) such that when similarity < θ, adding memories improves generalization (positive net effect), and when similarity > θ, adding memories degrades generalization (negative net effect) due to interference overwhelming diversity gains.",
+        "predicted_effect": "The generalization vs. memory count curve flips slope at the similarity threshold: positive slope below, negative slope above."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent performing a classification task (e.g., CIFAR-10 with a memory-augmented neural network). Vary the average pairwise similarity of stored memories by controlling the fraction of memories from the same class vs. different classes. For each similarity level (e.g., 0.2, 0.4, 0.6, 0.8), measure generalization accuracy on test set as a function of memory count (e.g., 100, 500, 1000, 2000). Identify the similarity level where the slope of accuracy vs. memory count changes sign.",
+        "independent_variables": [
+          "Average memory similarity (controlled by fraction of same-class memories)",
+          "Number of stored memories"
+        ],
+        "dependent_variables": [
+          "Generalization accuracy on test set",
+          "Retrieval precision (proportion of retrieved memories that are relevant)"
+        ],
+        "controls": [
+          "Same agent architecture and retrieval mechanism",
+          "Same training procedure and hyperparameters",
+          "Same total memory capacity (unbounded but measured)",
+          "Same initial memory seeding",
+          "Fixed task (classification on CIFAR-10)"
+        ],
+        "falsifying_observation": "If the slope of generalization vs. memory count does not change sign at any similarity level, or if the slope is always positive or always negative across all tested similarities, then the hypothesis is false."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low similarity (e.g., 0.2), generalization accuracy increases monotonically with memory count.",
+          "For high similarity (e.g., 0.8), generalization accuracy initially increases then decreases after a certain count, or decreases monotonically.",
+          "There exists a intermediate similarity (e.g., 0.5) where accuracy plateaus or is independent of count."
+        ],
+        "rejects_hypothesis": [
+          "Generalization accuracy increases with memory count for all similarity levels.",
+          "Generalization accuracy decreases with memory count for all similarity levels.",
+          "No clear threshold; pattern is inconsistent across similarity levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (i.e., slope does not change sign), then the assumption that similarity modulates the count-generalization tradeoff may be wrong.",
+        "assumption_to_revise": "Assumption: Memory similarity is the primary moderator of the count effect on generalization.",
+        "next_question": "Is there another factor (e.g., retrieval algorithm, task complexity) that determines whether memory accumulation helps or hurts generalization? How does the threshold depend on task difficulty or retrieval noise?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, processes information, and takes actions to achieve goals.",
+          "why_primitive": "It is the fundamental subject of the analysis; memory and generalization are properties of an agent."
+        },
+        {
+          "name": "Memory",
+          "definition": "A store of information derived from past experiences that can be accessed and used in future decisions.",
+          "why_primitive": "It is the core object being studied; its presence or absence defines the tradeoff."
+        },
+        {
+          "name": "Retrieval",
+          "definition": "The process of accessing and retrieving specific information from memory when needed.",
+          "why_primitive": "It is the mechanism that connects memory to action; interference arises from imperfect retrieval."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory capacity is bounded and retrieval is subject to interference.",
+          "rationale": "Agents have finite storage and computational resources; similar memories can interfere during retrieval.",
+          "possible_failure": "If memory is unbounded or retrieval is perfect, the tradeoff disappears."
+        },
+        {
+          "assumption": "Generalization relies on extracting patterns across experiences, which benefits from diverse memories.",
+          "rationale": "Generalization requires identifying commonalities; more memories provide richer statistical evidence.",
+          "possible_failure": "If noise in memories outweighs signal, generalization may degrade."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Number of stored memories",
+            "role": "input",
+            "description": "The total count of distinct experiences or examples stored in the agent's memory."
+          },
+          {
+            "name": "Similarity between memories",
+            "role": "input",
+            "description": "The average pairwise similarity among stored memories, influencing how much they interfere."
+          },
+          {
+            "name": "Retrieval specificity",
+            "role": "mediator",
+            "description": "The precision with which a specific memory is retrieved; inversely related to interference."
+          },
+          {
+            "name": "Generalization performance",
+            "role": "output",
+            "description": "The agent's ability to apply learned patterns to novel situations."
+          },
+          {
+            "name": "Retrieval interference",
+            "role": "outcome",
+            "description": "The degree to which similar memories impair accurate recall."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Number of stored memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "As more memories are stored, competition during retrieval lowers the specificity of recall."
+          },
+          {
+            "step": "2",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "Higher similarity among memories increases overlap in retrieval cues, reducing specificity."
+          },
+          {
+            "step": "3",
+            "source": "Retrieval specificity",
+            "relation": "decreases",
+            "target": "Retrieval interference",
+            "explanation": "Lower specificity leads to higher interference because multiple matching memories are activated."
+          },
+          {
+            "step": "4",
+            "source": "Number of stored memories",
+            "relation": "increases",
+            "target": "Generalization performance",
+            "explanation": "More memories provide a richer statistical base for extracting common patterns, improving generalization."
+          },
+          {
+            "step": "5",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "High similarity reduces diversity, limiting the range of patterns and harming generalization."
+          },
+          {
+            "step": "6",
+            "source": "Retrieval interference",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "Interference impairs accurate retrieval of relevant memories, degrading the agent's ability to generalize."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Retrieval specificity",
+            "why_it_matters": "Retrieval specificity mediates the tradeoff between generalization and interference: improving it reduces interference but may require constraining memory breadth, which could limit generalization."
+          },
+          {
+            "bottleneck": "Similarity between memories",
+            "why_it_matters": "Similarity determines how much memories interfere; managing similarity is crucial to balance diversity (for generalization) and distinctiveness (to avoid interference)."
+          }
+        ],
+        "mechanism_summary": "The mechanism involves two input factors—number of stored memories and their similarity—that jointly affect retrieval specificity. Lower retrieval specificity increases retrieval interference, which hurts generalization. However, more memories directly boost generalization by providing more pattern evidence, while high similarity reduces both retrieval specificity and generalization. Thus, the net effect on generalization depends on the balance: adding diverse memories (low similarity) improves generalization if the increase in interference is offset by the gain in pattern diversity. The bottlenecks are retrieval specificity and memory similarity, which control the tension between broad memory (good for generalization) and precise retrieval (avoiding interference)."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "High similarity among memories reduces interference but also reduces generalization by limiting pattern diversity.",
+        "derived_from": [
+          "Similarity between memories",
+          "Retrieval interference",
+          "Generalization performance"
+        ],
+        "why_it_matters": "Similarity controls both the costs (interference) and benefits (diversity) of memory; managing similarity is key to balancing the tradeoff.",
+        "what_existing_methods_may_miss": "Many models treat similarity as fixed or ignore its dual role, failing to capture that increasing similarity may hurt generalization even as it helps retrieval.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what critical similarity level does the growth of retrieval interference transition from sublinear to superlinear as memory count increases?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a discrete phase transition in retrieval interference scaling, enabling precise similarity tuning to avoid explosive interference."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical similarity threshold θ such that for average pairwise similarity below θ, retrieval interference grows sublinearly with memory count (exponent < 1), and for similarity above θ, it grows superlinearly (exponent > 1).",
+        "predicted_effect": "The scaling exponent of interference versus memory count changes from <1 to >1 as similarity crosses θ."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with k-nearest neighbor retrieval (k=1). Vary memory count N = [10, 20, 50, 100, 200] and average pairwise similarity s = [0.1, 0.2, ..., 0.9]. For each (N,s), measure interference as retrieval error rate. Fit power law I ∝ N^β(s) for each s. Compute β(s) via linear regression on log-log plot. Identify s where β(s) crosses 1.",
+        "independent_variables": [
+          "Number of stored memories N",
+          "Average pairwise similarity s"
+        ],
+        "dependent_variables": [
+          "Retrieval interference (error rate)"
+        ],
+        "controls": [
+          "Memory capacity unbounded",
+          "Retrieval algorithm (kNN with k=1)",
+          "Input distribution (uniform on unit sphere)",
+          "Similarity metric (cosine similarity)"
+        ],
+        "falsifying_observation": "The exponent β(s) remains near 1 for all s, or β(s) is monotonic but always <1 or >1, with no transition across 1."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low s (<0.4), β(s) is significantly less than 1 (e.g., 0.6-0.8).",
+          "For high s (>0.6), β(s) is significantly greater than 1 (e.g., 1.2-1.5).",
+          "β(s) is a continuous increasing function of s that crosses 1 at a well-defined s* ≈ 0.5."
+        ],
+        "rejects_hypothesis": [
+          "β(s) does not cross 1 and remains below 1 for all s, even at high similarity.",
+          "β(s) is always above 1, even for low similarity.",
+          "β(s) shows no systematic trend with s."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (β(s) monotonic but never crosses 1, or no clear transition), then the phase transition hypothesis is invalid.",
+        "assumption_to_revise": "The assumption that similarity alone drives a discrete change in scaling. Instead, the transition might be continuous, or the retrieval algorithm (e.g., number of neighbors) could moderate the effect.",
+        "next_question": "Does the number of retrieved neighbors (k) modulate the existence or location of the critical similarity threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "Can agent memory improve generalization or does it create retrieval interference?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, processes information, and takes actions to achieve goals.",
+          "why_primitive": "It is the fundamental subject of the analysis; memory and generalization are properties of an agent."
+        },
+        {
+          "name": "Memory",
+          "definition": "A store of information derived from past experiences that can be accessed and used in future decisions.",
+          "why_primitive": "It is the core object being studied; its presence or absence defines the tradeoff."
+        },
+        {
+          "name": "Retrieval",
+          "definition": "The process of accessing and retrieving specific information from memory when needed.",
+          "why_primitive": "It is the mechanism that connects memory to action; interference arises from imperfect retrieval."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Memory capacity is bounded and retrieval is subject to interference.",
+          "rationale": "Agents have finite storage and computational resources; similar memories can interfere during retrieval.",
+          "possible_failure": "If memory is unbounded or retrieval is perfect, the tradeoff disappears."
+        },
+        {
+          "assumption": "Generalization relies on extracting patterns across experiences, which benefits from diverse memories.",
+          "rationale": "Generalization requires identifying commonalities; more memories provide richer statistical evidence.",
+          "possible_failure": "If noise in memories outweighs signal, generalization may degrade."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Number of stored memories",
+            "role": "input",
+            "description": "The total count of distinct experiences or examples stored in the agent's memory."
+          },
+          {
+            "name": "Similarity between memories",
+            "role": "input",
+            "description": "The average pairwise similarity among stored memories, influencing how much they interfere."
+          },
+          {
+            "name": "Retrieval specificity",
+            "role": "mediator",
+            "description": "The precision with which a specific memory is retrieved; inversely related to interference."
+          },
+          {
+            "name": "Generalization performance",
+            "role": "output",
+            "description": "The agent's ability to apply learned patterns to novel situations."
+          },
+          {
+            "name": "Retrieval interference",
+            "role": "outcome",
+            "description": "The degree to which similar memories impair accurate recall."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Number of stored memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "As more memories are stored, competition during retrieval lowers the specificity of recall."
+          },
+          {
+            "step": "2",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Retrieval specificity",
+            "explanation": "Higher similarity among memories increases overlap in retrieval cues, reducing specificity."
+          },
+          {
+            "step": "3",
+            "source": "Retrieval specificity",
+            "relation": "decreases",
+            "target": "Retrieval interference",
+            "explanation": "Lower specificity leads to higher interference because multiple matching memories are activated."
+          },
+          {
+            "step": "4",
+            "source": "Number of stored memories",
+            "relation": "increases",
+            "target": "Generalization performance",
+            "explanation": "More memories provide a richer statistical base for extracting common patterns, improving generalization."
+          },
+          {
+            "step": "5",
+            "source": "Similarity between memories",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "High similarity reduces diversity, limiting the range of patterns and harming generalization."
+          },
+          {
+            "step": "6",
+            "source": "Retrieval interference",
+            "relation": "decreases",
+            "target": "Generalization performance",
+            "explanation": "Interference impairs accurate retrieval of relevant memories, degrading the agent's ability to generalize."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Retrieval specificity",
+            "why_it_matters": "Retrieval specificity mediates the tradeoff between generalization and interference: improving it reduces interference but may require constraining memory breadth, which could limit generalization."
+          },
+          {
+            "bottleneck": "Similarity between memories",
+            "why_it_matters": "Similarity determines how much memories interfere; managing similarity is crucial to balance diversity (for generalization) and distinctiveness (to avoid interference)."
+          }
+        ],
+        "mechanism_summary": "The mechanism involves two input factors—number of stored memories and their similarity—that jointly affect retrieval specificity. Lower retrieval specificity increases retrieval interference, which hurts generalization. However, more memories directly boost generalization by providing more pattern evidence, while high similarity reduces both retrieval specificity and generalization. Thus, the net effect on generalization depends on the balance: adding diverse memories (low similarity) improves generalization if the increase in interference is offset by the gain in pattern diversity. The bottlenecks are retrieval specificity and memory similarity, which control the tension between broad memory (good for generalization) and precise retrieval (avoiding interference)."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Improving retrieval specificity (to reduce interference) may require constraining memory breadth, which could limit generalization.",
+        "derived_from": [
+          "Retrieval specificity",
+          "Number of stored memories",
+          "Generalization performance"
+        ],
+        "why_it_matters": "This highlights a bottleneck: interventions to reduce interference (e.g., via attention or pruning) may inadvertently harm generalization if they reduce the diversity of memories.",
+        "what_existing_methods_may_miss": "Many retrieval-enhancement techniques focus on specificity without considering the downstream cost to generalization, leading to suboptimal overall performance.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical memory similarity threshold does a retrieval-specificity intervention transition from harming to improving generalization in a memory-augmented LLM agent?",
+        "question_type": "algorithmic",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a phase transition boundary that determines when interference-reducing interventions are beneficial, moving beyond a binary tradeoff to a quantitative condition."
+      },
+      "hypothesis": {
+        "statement": "The intervention improves generalization when the average pairwise similarity between stored memories exceeds a threshold θ, but harms it when similarity is below θ, where θ depends on memory capacity and task complexity.",
+        "predicted_effect": "There exists a critical similarity value θ at which the slope of generalization accuracy with respect to intervention changes sign."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent with episodic memory on split MNIST. Vary task order to control similarity between memories across 10 levels (from low to high). At each similarity level, run with and without a retrieval-specificity intervention (attention-based pruning). Measure generalization accuracy on held-out tasks and retrieval precision. Identify the similarity threshold where the intervention's effect on generalization changes sign.",
+        "independent_variables": [
+          "Average pairwise similarity between memories (10 levels controlled by task overlap)",
+          "Application of retrieval-specificity intervention (binary)"
+        ],
+        "dependent_variables": [
+          "Generalization accuracy on novel tasks",
+          "Retrieval precision"
+        ],
+        "controls": [
+          "Same agent architecture (same LLM and memory module)",
+          "Same total number of stored memories (fixed at 200)",
+          "Same evaluation protocol",
+          "Same initial training data"
+        ],
+        "falsifying_observation": "If no threshold exists (intervention always harms, always helps, or effect is monotonic without sign change)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low similarity, intervention reduces generalization accuracy; at high similarity, intervention improves accuracy.",
+          "A clear threshold similarity θ is observed where intervention effect crosses zero."
+        ],
+        "rejects_hypothesis": [
+          "Intervention always improves generalization regardless of similarity.",
+          "Intervention always harms generalization regardless of similarity.",
+          "Effect of intervention changes sign but not at a consistent threshold across replications."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found (intervention effect is monotonic or absent), then the assumption that similarity is the key mediating variable is challenged.",
+        "assumption_to_revise": "Assumption: Retrieval specificity is the bottleneck that can be improved by pruning. Instead, maybe interference is dominated by other factors like memory consolidation or query attributes.",
+        "next_question": "What is the dominant factor determining whether memory pruning helps or hurts generalization: similarity, recency, or retrieval context?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "For a given task, there exists a threshold of average pairwise memory similarity (θ) such that when similarity < θ, adding memories improves generalization, and when similarity > θ, adding memories degrades generalization due to retrieval interference.",
+      "independent_variables": [
+        "Average memory similarity (controlled by fraction of same-class memories from 0.2 to 0.8 in steps of 0.2)",
+        "Number of stored memories (100, 500, 1000, 2000)"
+      ],
+      "dependent_variables": [
+        "Generalization accuracy on test set (percentage correct)",
+        "Retrieval precision (proportion of retrieved memories that are relevant to the query)"
+      ],
+      "controlled_variables": [
+        "Same agent architecture (e.g., a neural network with a memory module like a differentiable memory)",
+        "Same retrieval mechanism (e.g., content-based addressing with cosine similarity)",
+        "Same training procedure and hyperparameters (learning rate, optimizer, number of epochs)",
+        "Same total memory capacity (unbounded, but count is measured)",
+        "Same initial memory seeding (initial memories randomly sampled from training set)",
+        "Fixed task (classification on CIFAR-10, using a subset for training and test)"
+      ],
+      "baselines": [
+        {
+          "name": "No-memory baseline",
+          "description": "A standard neural network without any memory augmentation, trained on the same task, to compare the generalization improvement from memory."
+        },
+        {
+          "name": "Fixed similarity baseline",
+          "description": "An agent with memory but with a fixed similarity level (e.g., 0.5) and varying memory counts, to observe the effect of count alone."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Test accuracy",
+          "definition": "Proportion of correct predictions on the held-out test set, computed after each memory count configuration."
+        },
+        {
+          "name": "Retrieval precision",
+          "definition": "For each query, the proportion of retrieved memories that are from the same class as the query, averaged over all queries."
+        }
+      ],
+      "expected_result": "For low similarity (e.g., 0.2), test accuracy increases monotonically with memory count. For high similarity (e.g., 0.8), test accuracy initially increases then decreases after a certain count, or decreases monotonically. There exists an intermediate similarity (e.g., 0.5) where accuracy plateaus or is independent of count. This pattern indicates a threshold where the slope of accuracy vs. memory count changes sign.",
+      "falsifying_result": "If across all tested similarity levels (0.2 to 0.8) the slope of test accuracy vs. memory count does not change sign (i.e., always positive or always negative), or if there is no consistent pattern (e.g., random fluctuations), then the hypothesis is falsified. Specifically, if for all similarities, accuracy increases with count, or for all similarities, accuracy decreases with count, or if the threshold is not consistently identifiable, the hypothesis is rejected.",
+      "minimum_viable_experiment": "Use a simple agent: a feedforward neural network with 2 hidden layers (size 256) and a single-layer memory module using content-based retrieval with cosine similarity. Task: binary classification on a subset of CIFAR-10 (e.g., classes 'cat' and 'dog' with 1000 images each). Manipulate memory similarity by storing memories from only one class (high similarity) vs. equal mix (low similarity). Train the agent for 50 epochs, then measure test accuracy for memory counts: 100, 500, 1000, 2000. Repeat each condition 5 times with different random seeds. The smallest experiment would be to test just two extreme similarity levels (e.g., 0.2 and 0.8) and observe if the slope changes; if it does, the hypothesis is supported; if not, it's falsified.",
+      "risks_and_confounds": [
+        "The retrieval algorithm may not sufficiently model interference; alternative retrieval mechanisms (e.g., attention-based) might behave differently.",
+        "The task (CIFAR-10 binary subset) may be too simple; interference may not manifest strongly. A more complex task with high overlap may be needed.",
+        "Memory similarity manipulation by class fraction may not equate to pairwise similarity; direct control of embedding similarity may be more precise.",
+        "The number of memory counts may not be sufficient to see the effect; more granular counts could be needed.",
+        "Training dynamics (e.g., overfitting) could confound results; we control by early stopping or regularization."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical similarity threshold θ such that for average pairwise similarity below θ, retrieval interference grows sublinearly with memory count (exponent < 1), and for similarity above θ, it grows superlinearly (exponent > 1).",
+      "independent_variables": [
+        "Number of stored memories N",
+        "Average pairwise similarity s"
+      ],
+      "dependent_variables": [
+        "Retrieval interference (error rate)"
+      ],
+      "controlled_variables": [
+        "Memory capacity unbounded",
+        "Retrieval algorithm (k-nearest neighbors with k=1)",
+        "Input distribution (uniform on unit sphere)",
+        "Similarity metric (cosine similarity)"
+      ],
+      "baselines": [
+        {
+          "name": "No memory (random retrieval)",
+          "description": "Baseline where agent makes random guesses independent of memories, providing a reference error rate."
+        },
+        {
+          "name": "Perfect memory (no interference)",
+          "description": "Baseline with infinite memory capacity and zero interference, yielding optimal retrieval error."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Retrieval interference",
+          "definition": "For each memory count N and similarity s, the error rate in retrieving the exact correct memory when queried with a noisy version of that memory."
+        },
+        {
+          "name": "Scaling exponent β(s)",
+          "definition": "The exponent in the power law I ∝ N^β(s) obtained by linear regression on log-log plot of interference I vs N for a given similarity s."
+        }
+      ],
+      "expected_result": "For low similarity (e.g., s=0.1), β(s) < 1; for high similarity (e.g., s=0.9), β(s) > 1; β(s) is a continuous increasing function of s that crosses 1 at a well-defined threshold s* (e.g., around 0.5).",
+      "falsifying_result": "β(s) remains below 1 for all s (even high similarity), or β(s) remains above 1 for all s (even low similarity), or β(s) shows no systematic monotonic trend with s, or the transition across 1 is not observed within the range of s tested.",
+      "minimum_viable_experiment": "Simulate an agent with k-nearest neighbor retrieval (k=1) on uniformly distributed points on a unit sphere. Vary memory count N = [10, 20, 50, 100, 200] and average pairwise similarity s = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] (controlling similarity by scaling the points). For each (N, s) combination, measure retrieval interference as the error rate when retrieving the exact stored memory from a noisy query (add Gaussian noise with small variance). Repeat 100 trials per condition. For each s, fit a power law I = a N^β using linear regression on log(I) vs log(N). Report β(s) and identify the s at which β(s) = 1.",
+      "risks_and_confounds": [
+        "Choice of k may alter interference scaling; using k=1 is a specific assumption.",
+        "Uniform distribution on sphere may not represent realistic memory patterns, affecting generality.",
+        "Power law fit may be inaccurate with few N points (only 5 values); more N levels could improve but increase experiment size.",
+        "Noise level in query may affect interference measurement; fixed small variance may be suboptimal.",
+        "Similarity controlled by scaling may not correspond to natural similarity variations."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical similarity threshold such that adding more memories improves generalization below the threshold but degrades it above the threshold.",
+      "independent_variables": [
+        "Memory size (number of stored examples)",
+        "Similarity level among stored memories (e.g., low, medium, high)"
+      ],
+      "dependent_variables": [
+        "Generalization accuracy on held-out test set",
+        "Retrieval interference (e.g., retrieval precision)"
+      ],
+      "controlled_variables": [
+        "Agent architecture (same LLM and retrieval mechanism)",
+        "Task complexity (e.g., 10-class classification)",
+        "Memory storage policy (e.g., FIFO)",
+        "Distribution of test inputs",
+        "Number of training epochs",
+        "Learning rate"
+      ],
+      "baselines": [
+        {
+          "name": "No memory agent",
+          "description": "Agent without any memory, only uses its pre-trained knowledge"
+        },
+        {
+          "name": "Random memory agent",
+          "description": "Agent with random memories not related to task"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Generalization accuracy",
+          "definition": "Proportion of correct predictions on a held-out test set"
+        },
+        {
+          "name": "Retrieval precision",
+          "definition": "For a given memory, the proportion of times it is correctly retrieved when needed"
+        }
+      ],
+      "expected_result": "For low similarity, generalization accuracy increases with memory size. For high similarity, generalization accuracy initially increases then decreases with memory size, indicating a critical threshold.",
+      "falsifying_result": "Generalization accuracy monotonically increases with memory size at all similarity levels, showing no reversal.",
+      "minimum_viable_experiment": "Train an LLM-based agent on a 10-class synthetic classification task. Generate training examples as feature vectors with controlled pairwise cosine similarity (e.g., similarity levels: 0.2, 0.5, 0.8). For each similarity level, vary the number of stored memories (e.g., 10, 50, 100, 200). Use the same LLM backbone (e.g., GPT-2 small) and a simple retrieval-augmented generation mechanism (e.g., k-NN with k=5). Evaluate generalization accuracy on a test set of 500 samples. Measure retrieval precision on a subset of queries. Compare across conditions.",
+      "risks_and_confounds": [
+        "Effect of memorization vs. generalization in LLMs",
+        "Choice of similarity metric",
+        "Interaction with task difficulty",
+        "Random seed variability"
+      ]
+    },
+    {
+      "hypothesis": "The intervention improves generalization when the average pairwise similarity between stored memories exceeds a threshold θ, but harms it when similarity is below θ, where θ depends on memory capacity and task complexity.",
+      "independent_variables": [
+        "Average pairwise similarity between memories (10 levels controlled by task overlap)",
+        "Application of retrieval-specificity intervention (binary: with or without)"
+      ],
+      "dependent_variables": [
+        "Generalization accuracy on held-out tasks",
+        "Retrieval precision"
+      ],
+      "controlled_variables": [
+        "Same agent architecture (same LLM and memory module)",
+        "Same total number of stored memories (fixed at 200)",
+        "Same evaluation protocol",
+        "Same initial training data"
+      ],
+      "baselines": [
+        {
+          "name": "No intervention",
+          "description": "Standard memory retrieval without attention-based pruning"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Generalization accuracy",
+          "definition": "Accuracy on held-out split MNIST tasks, averaged over multiple runs"
+        },
+        {
+          "name": "Retrieval precision",
+          "definition": "Fraction of retrieved memories that are relevant to the query, averaged over trials"
+        },
+        {
+          "name": "Threshold existence",
+          "definition": "Detection of a similarity level at which the intervention's effect on generalization accuracy changes sign from negative to positive"
+        }
+      ],
+      "expected_result": "At low similarity (< θ), the intervention decreases generalization accuracy; at high similarity (> θ), it increases accuracy. A clear threshold θ is observable where the effect crosses zero.",
+      "falsifying_result": "The intervention always improves or always harms generalization regardless of similarity, or the effect changes sign but not at a consistent threshold across replications.",
+      "minimum_viable_experiment": "Run a memory-augmented LLM agent on split MNIST with 5 tasks sequentially. Vary task repetition order to create 10 similarity levels (from low to high). For each level, train the agent with and without attention-based pruning. Measure generalization on a held-out task. Repeat 5 times with different seeds. Determine if there exists a similarity level where the intervention benefit flips sign.",
+      "risks_and_confounds": [
+        "Task order may introduce recency effects that confound similarity",
+        "Random seed variability might obscure threshold",
+        "Limited number of similarity levels may miss the exact threshold",
+        "Intervention may interact with memory capacity; fixed 200 memories may not be representative"
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical memory similarity threshold such that below it, increasing memory count improves generalization, but above it, increasing memory count degrades generalization due to retrieval interference?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical similarity level does the growth of retrieval interference transition from sublinear to superlinear as memory count increases?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the critical similarity threshold beyond which adding similar memories degrades generalization performance due to retrieval interference overwhelming the pattern signal?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical memory similarity threshold does a retrieval-specificity intervention transition from harming to improving generalization in a memory-augmented LLM agent?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

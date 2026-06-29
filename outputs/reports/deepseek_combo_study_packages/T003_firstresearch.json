@@ -1,0 +1,1533 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Coding Task",
+        "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+        "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+      },
+      {
+        "name": "Tool",
+        "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+        "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+      },
+      {
+        "name": "Routing Decision",
+        "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+        "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+        "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+        "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+      },
+      {
+        "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+        "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+        "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Specialization vs. Generalization in Tool Design",
+        "variables": [
+          "number of tools",
+          "tool granularity",
+          "scope of each tool"
+        ]
+      },
+      {
+        "tradeoff": "Responsiveness vs. Deliberation in Routing",
+        "variables": [
+          "decision speed",
+          "computational cost",
+          "quality of decision"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Task Complexity",
+        "role": "input",
+        "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+      },
+      {
+        "name": "Tool Granularity",
+        "role": "input",
+        "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+      },
+      {
+        "name": "Number of Tools",
+        "role": "input",
+        "description": "The total number of tools available to the agent for routing."
+      },
+      {
+        "name": "Decision Speed",
+        "role": "mediator",
+        "description": "The time or computational cost allocated to each routing decision by the agent."
+      },
+      {
+        "name": "Routing Decision Quality",
+        "role": "mediator",
+        "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+      },
+      {
+        "name": "Task Success",
+        "role": "outcome",
+        "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Task Complexity",
+        "relation": "increases",
+        "target": "Number of Tools Required",
+        "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+      },
+      {
+        "step": "2",
+        "source": "Number of Tools",
+        "relation": "moderates",
+        "target": "Decision Speed",
+        "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+      },
+      {
+        "step": "3",
+        "source": "Decision Speed",
+        "relation": "affects",
+        "target": "Routing Decision Quality",
+        "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+      },
+      {
+        "step": "4",
+        "source": "Tool Granularity",
+        "relation": "moderates",
+        "target": "Routing Decision Quality",
+        "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+      },
+      {
+        "step": "5",
+        "source": "Routing Decision Quality",
+        "relation": "determines",
+        "target": "Task Success",
+        "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Combinatorial explosion of tool choices",
+        "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+      },
+      {
+        "bottleneck": "Feedback ambiguity during task execution",
+        "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+      },
+      {
+        "bottleneck": "Context window limits",
+        "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+      }
+    ],
+    "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Increasing tool granularity reduces per-tool complexity but increases the number of routing decisions, while decreasing granularity reduces routing decisions but increases tool complexity. This creates a fundamental tradeoff in designing tool sets for coding agents.",
+      "derived_from": [
+        "Coding Task",
+        "Tool",
+        "Routing Decision"
+      ],
+      "why_it_matters": "The choice of tool granularity directly impacts routing decision complexity and quality; suboptimal granularity leads to either excessive overhead or loss of precision, both causing task failures.",
+      "what_existing_methods_may_miss": "Existing work often ignores the interaction between tool set design and routing algorithms, assuming a fixed set of tools without considering this tradeoff.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a tension between making fast routing decisions (to reduce latency) and making high-quality decisions (to select the best tool). This tradeoff is exacerbated by increasing task complexity and number of tools.",
+      "derived_from": [
+        "Routing Decision",
+        "Decision Speed",
+        "Routing Decision Quality"
+      ],
+      "why_it_matters": "In resource-constrained environments, agents must balance speed and accuracy; poor balance leads to either timeouts or suboptimal tool use.",
+      "what_existing_methods_may_miss": "Most agents use fixed heuristics without dynamically adjusting the speed-quality tradeoff based on task demands.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that the agent has an accurate and complete model of each tool's behavior is often violated in practice, yet it is foundational for correct routing. When tools have undocumented behaviors or non-deterministic outputs, routing decisions become unreliable.",
+      "derived_from": [
+        "Tool",
+        "Routing Decision"
+      ],
+      "why_it_matters": "If agents make routing decisions based on flawed tool models, they may select tools that fail or produce unexpected results, leading to task failure.",
+      "what_existing_methods_may_miss": "Existing benchmarks assume perfect tool knowledge; they do not test the impact of tool model inaccuracies on routing.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Coding tasks are often underspecified or ambiguous, but the routing mechanism assumes a clear task description. This mismatch between task clarity and routing logic leads to misinterpretations and suboptimal tool choices.",
+      "derived_from": [
+        "Coding Task",
+        "Routing Decision"
+      ],
+      "why_it_matters": "Ambiguous tasks cause agents to pursue wrong objectives, making correct routing impossible.",
+      "what_existing_methods_may_miss": "Most evaluations use well-defined benchmarks, ignoring how ambiguity degrades routing.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying tool granularity affect the number of routing decisions and overall task success in coding agents?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the tradeoff between per-tool complexity and routing overhead, providing design guidelines for optimal granularity."
+    },
+    {
+      "question": "What is the optimal decision speed for routing that maximizes task success given a fixed tool set complexity?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "Develops an adaptive speed-quality scheduling algorithm that adjusts to task demands."
+    },
+    {
+      "question": "To what extent do inaccuracies in the agent's internal tool model degrade routing decision quality and task completion?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Identifies critical error thresholds beyond which routing fails, guiding robust tool modeling."
+    },
+    {
+      "question": "How does the level of task specification ambiguity interact with tool routing decision quality in coding agents?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Reveals the sensitivity of routing to task clarity, informing pre-processing or dialogue mechanisms."
+    },
+    {
+      "question": "Can a routing algorithm that dynamically adapts its decision speed based on task complexity outperform fixed-speed baselines in terms of task success rate?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Provides empirical evidence for the benefit of adaptive routing in real coding tasks."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Task",
+          "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+          "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+        },
+        {
+          "name": "Tool",
+          "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+          "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+        },
+        {
+          "name": "Routing Decision",
+          "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+          "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+          "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+          "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+        },
+        {
+          "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+          "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+          "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+          },
+          {
+            "name": "Tool Granularity",
+            "role": "input",
+            "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+          },
+          {
+            "name": "Number of Tools",
+            "role": "input",
+            "description": "The total number of tools available to the agent for routing."
+          },
+          {
+            "name": "Decision Speed",
+            "role": "mediator",
+            "description": "The time or computational cost allocated to each routing decision by the agent."
+          },
+          {
+            "name": "Routing Decision Quality",
+            "role": "mediator",
+            "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Number of Tools Required",
+            "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+          },
+          {
+            "step": "2",
+            "source": "Number of Tools",
+            "relation": "moderates",
+            "target": "Decision Speed",
+            "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+          },
+          {
+            "step": "3",
+            "source": "Decision Speed",
+            "relation": "affects",
+            "target": "Routing Decision Quality",
+            "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+          },
+          {
+            "step": "4",
+            "source": "Tool Granularity",
+            "relation": "moderates",
+            "target": "Routing Decision Quality",
+            "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+          },
+          {
+            "step": "5",
+            "source": "Routing Decision Quality",
+            "relation": "determines",
+            "target": "Task Success",
+            "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Combinatorial explosion of tool choices",
+            "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+          },
+          {
+            "bottleneck": "Feedback ambiguity during task execution",
+            "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+          },
+          {
+            "bottleneck": "Context window limits",
+            "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Increasing tool granularity reduces per-tool complexity but increases the number of routing decisions, while decreasing granularity reduces routing decisions but increases tool complexity. This creates a fundamental tradeoff in designing tool sets for coding agents.",
+        "derived_from": [
+          "Coding Task",
+          "Tool",
+          "Routing Decision"
+        ],
+        "why_it_matters": "The choice of tool granularity directly impacts routing decision complexity and quality; suboptimal granularity leads to either excessive overhead or loss of precision, both causing task failures.",
+        "what_existing_methods_may_miss": "Existing work often ignores the interaction between tool set design and routing algorithms, assuming a fixed set of tools without considering this tradeoff.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold in the number of tools beyond which routing failures in coding agents become catastrophic due to combinatorial explosion?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition boundary (critical tool count) where routing decision quality collapses, providing a concrete design constraint for tool set size in coding agents."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical tool count N* such that when the number of tools exceeds N*, the task success rate drops sharply (phase transition) due to the agent's inability to adequately explore all routing options within fixed deliberation time, while below N* success is high and relatively stable.",
+        "predicted_effect": "Task success rate as a function of tool count exhibits a sigmoidal decline with a steep drop near N*, and the number of routing decisions per step increases superlinearly with tool count, accelerating beyond N*."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a coding agent with a fixed deliberation time per routing step and a set of primitive tools of equal granularity. Vary the number of tools (2, 4, 8, 16, 32) by adding tools with distinct but non-overlapping functionality. Test on a set of coding tasks of moderate complexity (e.g., implementing a small algorithm). Measure task success rate (binary) and average number of routing decisions per task.",
+        "independent_variables": [
+          "number of tools (2, 4, 8, 16, 32)"
+        ],
+        "dependent_variables": [
+          "task success rate",
+          "number of routing decisions per task"
+        ],
+        "controls": [
+          "task complexity (same set of tasks across conditions)",
+          "tool granularity (all tools equally specific)",
+          "agent architecture and deliberation time (fixed number of forward passes per decision)",
+          "context window size (fixed)"
+        ],
+        "falsifying_observation": "Task success rate declines monotonically or linearly with tool count, without a sharp drop at any point, or the decline is entirely due to deliberation time limits rather than combinatorial explosion."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Task success rate remains high (e.g., >80%) for tool counts up to some N*, then drops sharply (e.g., to <30%) at higher counts.",
+          "The number of routing decisions per task increases superlinearly with tool count, with an inflection point near N*.",
+          "The sharp drop in success is not explainable by fixed deliberation time alone; combinatorial factors dominate."
+        ],
+        "rejects_hypothesis": [
+          "Task success rate decreases smoothly and gradually with tool count.",
+          "The superlinear increase in routing decisions is absent or linear.",
+          "The drop can be fully attributed to insufficient deliberation time (i.e., increasing deliberation time removes the threshold effect)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed (i.e., success declines monotonically or not at all), then the hypothesis of a combinatorial explosion phase transition is not supported.",
+        "assumption_to_revise": "The assumption that combinatorial explosion is the primary mechanism behind tool count's effect on routing failures should be revised to consider that other factors (e.g., tool diversity, task decomposition) may be more dominant.",
+        "next_question": "How does the diversity of tools (not just count) moderate the relationship between tool set size and routing decision failure in coding agents?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Task",
+          "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+          "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+        },
+        {
+          "name": "Tool",
+          "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+          "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+        },
+        {
+          "name": "Routing Decision",
+          "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+          "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+          "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+          "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+        },
+        {
+          "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+          "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+          "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+          },
+          {
+            "name": "Tool Granularity",
+            "role": "input",
+            "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+          },
+          {
+            "name": "Number of Tools",
+            "role": "input",
+            "description": "The total number of tools available to the agent for routing."
+          },
+          {
+            "name": "Decision Speed",
+            "role": "mediator",
+            "description": "The time or computational cost allocated to each routing decision by the agent."
+          },
+          {
+            "name": "Routing Decision Quality",
+            "role": "mediator",
+            "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Number of Tools Required",
+            "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+          },
+          {
+            "step": "2",
+            "source": "Number of Tools",
+            "relation": "moderates",
+            "target": "Decision Speed",
+            "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+          },
+          {
+            "step": "3",
+            "source": "Decision Speed",
+            "relation": "affects",
+            "target": "Routing Decision Quality",
+            "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+          },
+          {
+            "step": "4",
+            "source": "Tool Granularity",
+            "relation": "moderates",
+            "target": "Routing Decision Quality",
+            "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+          },
+          {
+            "step": "5",
+            "source": "Routing Decision Quality",
+            "relation": "determines",
+            "target": "Task Success",
+            "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Combinatorial explosion of tool choices",
+            "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+          },
+          {
+            "bottleneck": "Feedback ambiguity during task execution",
+            "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+          },
+          {
+            "bottleneck": "Context window limits",
+            "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Coding tasks are often underspecified or ambiguous, but the routing mechanism assumes a clear task description. This mismatch between task clarity and routing logic leads to misinterpretations and suboptimal tool choices.",
+        "derived_from": [
+          "Coding Task",
+          "Routing Decision"
+        ],
+        "why_it_matters": "Ambiguous tasks cause agents to pursue wrong objectives, making correct routing impossible.",
+        "what_existing_methods_may_miss": "Most evaluations use well-defined benchmarks, ignoring how ambiguity degrades routing.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the interaction between task specification ambiguity and tool granularity determine the threshold for tool-use routing failure in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a critical interaction boundary: when both ambiguity is high and tools are coarse, routing failure crosses a nonlinear threshold, revealing a phase transition that existing studies miss."
+      },
+      "hypothesis": {
+        "statement": "There is a nonlinear interaction such that when task specification ambiguity is high and tool granularity is coarse, the probability of routing failure increases sharply beyond a threshold, whereas fine-grained tools buffer against ambiguity and prevent catastrophic failure.",
+        "predicted_effect": "A statistically significant interaction effect: the impact of ambiguity on routing quality is amplified when tools are coarse, leading to a disproportionate increase in failures at high ambiguity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a 2x2 factorial experiment with a baseline coding agent on a set of coding tasks. Factor 1: task specification ambiguity (low vs. high). Factor 2: tool granularity (fine vs. coarse). Fine-grained tools are atomic operations (e.g., call_function, read_line), coarse-grained tools are composite (e.g., execute_all, search_web). Measure routing decision quality (expected contribution to progress) and task success rate. The agent uses a fixed routing policy (e.g., LLM-based). Each condition has 50 trials.",
+        "independent_variables": [
+          "Task specification ambiguity level (low, high)",
+          "Tool granularity (fine, coarse)"
+        ],
+        "dependent_variables": [
+          "Routing decision quality (average expected contribution score)",
+          "Task success rate (binary completion)"
+        ],
+        "controls": [
+          "Same set of tools (size fixed to 10)",
+          "Same agent architecture (LLM with identical prompts)",
+          "Same task complexity and domain (e.g., file manipulation tasks)",
+          "Same context window size"
+        ],
+        "falsifying_observation": "If the interaction effect is not significant (i.e., the difference in routing quality between low and high ambiguity does not depend on tool granularity), or if coarse tools reduce the negative impact of ambiguity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A significant two-way interaction (p < 0.05) in ANOVA for routing quality scores.",
+          "Post-hoc tests show that the effect of ambiguity is larger in the coarse tool condition (e.g., Cohen's d > 0.8) than in the fine tool condition (d < 0.3).",
+          "Task success rate drops below 50% only in the high ambiguity + coarse tool condition, indicating a failure threshold."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction effect; main effects of ambiguity and granularity are independent.",
+          "The effect of ambiguity is similar across both tool granularity levels.",
+          "Coarse tools actually mitigate ambiguity effects, improving routing quality under high ambiguity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no interaction is observed, the hypothesized buffering role of tool granularity is unsupported. This would suggest that ambiguity alone is the dominant driver, and tool granularity does not moderate its effect notably.",
+        "assumption_to_revise": "Assumption: Tool granularity moderates the effect of ambiguity on routing quality. Revised assumption: The routing mechanism's sensitivity to ambiguity is independent of tool granularity, possibly because the agent adapts its use of tools regardless of granularity.",
+        "next_question": "What features of the task specification (e.g., syntactic vs. semantic ambiguity) are most detrimental to routing, and how can agents detect and compensate for them?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Task",
+          "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+          "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+        },
+        {
+          "name": "Tool",
+          "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+          "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+        },
+        {
+          "name": "Routing Decision",
+          "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+          "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+          "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+          "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+        },
+        {
+          "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+          "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+          "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+          },
+          {
+            "name": "Tool Granularity",
+            "role": "input",
+            "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+          },
+          {
+            "name": "Number of Tools",
+            "role": "input",
+            "description": "The total number of tools available to the agent for routing."
+          },
+          {
+            "name": "Decision Speed",
+            "role": "mediator",
+            "description": "The time or computational cost allocated to each routing decision by the agent."
+          },
+          {
+            "name": "Routing Decision Quality",
+            "role": "mediator",
+            "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Number of Tools Required",
+            "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+          },
+          {
+            "step": "2",
+            "source": "Number of Tools",
+            "relation": "moderates",
+            "target": "Decision Speed",
+            "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+          },
+          {
+            "step": "3",
+            "source": "Decision Speed",
+            "relation": "affects",
+            "target": "Routing Decision Quality",
+            "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+          },
+          {
+            "step": "4",
+            "source": "Tool Granularity",
+            "relation": "moderates",
+            "target": "Routing Decision Quality",
+            "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+          },
+          {
+            "step": "5",
+            "source": "Routing Decision Quality",
+            "relation": "determines",
+            "target": "Task Success",
+            "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Combinatorial explosion of tool choices",
+            "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+          },
+          {
+            "bottleneck": "Feedback ambiguity during task execution",
+            "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+          },
+          {
+            "bottleneck": "Context window limits",
+            "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a tension between making fast routing decisions (to reduce latency) and making high-quality decisions (to select the best tool). This tradeoff is exacerbated by increasing task complexity and number of tools.",
+        "derived_from": [
+          "Routing Decision",
+          "Decision Speed",
+          "Routing Decision Quality"
+        ],
+        "why_it_matters": "In resource-constrained environments, agents must balance speed and accuracy; poor balance leads to either timeouts or suboptimal tool use.",
+        "what_existing_methods_may_miss": "Most agents use fixed heuristics without dynamically adjusting the speed-quality tradeoff based on task demands.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what tool set size does tool-use routing in coding agents exhibit a phase transition from reliable (>85% success) to unreliable (<50% success), and can adaptive decision speed restore reliability beyond that transition?",
+        "question_type": "benchmark",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a quantitative boundary for routing failure and demonstrates a mechanism to overcome it."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical tool set size N_c such that for N > N_c, fixed-speed routing (both fast and slow) yields <50% success rate, while adaptive routing that dynamically adjusts decision speed based on tool set size restores >80% success rate.",
+        "predicted_effect": "The phase transition occurs around N_c = 10 tools (plus/minus 2) in our benchmark of high-complexity coding tasks."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a benchmark of 20 high-complexity coding tasks (each requiring at least 5 steps). Vary tool set size: 4, 8, 12, 16, 20 tools. Implement three routing strategies: fixed fast (constant 0.1s deliberation per decision), fixed slow (1s per decision), and adaptive (decision speed = 0.1 * (1 + N/10) seconds). Run each strategy on all tasks with 10 trials per task-task-size combination. Measure task success rate (binary completion within correctness and 5-minute time limit).",
+        "independent_variables": [
+          "Tool set size (4,8,12,16,20)",
+          "Routing strategy (fixed fast, fixed slow, adaptive)"
+        ],
+        "dependent_variables": [
+          "Task success rate"
+        ],
+        "controls": [
+          "Same agent model (e.g., GPT-4o)",
+          "Same environment (e.g., SWE-bench-lite)",
+          "Same task instructions",
+          "Same tools (only number varies, excluding any tool that could trivialize tasks)",
+          "Maximum 5 minutes per task"
+        ],
+        "falsifying_observation": "No statistically significant drop in success rate for fixed baselines as tool set size increases, or adaptive routing does not significantly improve success rate beyond the transition (p > 0.05 after Bonferroni correction)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For tool set size N > 10, fixed fast and fixed slow success rates are both below 50%, while adaptive is above 80%.",
+          "For N <= 8, all strategies achieve >85% success rate.",
+          "The success rate of fixed baselines drops sharply between N=8 and N=12."
+        ],
+        "rejects_hypothesis": [
+          "No sharp drop in success rate for fixed baselines as N increases.",
+          "Adaptive routing does not outperform fixed baselines for any N.",
+          "Adaptive routing performs worse than fixed slow for all N."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The adaptive routing algorithm does not restore success rate above 80% for large tool sets, or the phase transition is not observed.",
+        "assumption_to_revise": "The speed-quality tradeoff is the primary bottleneck; instead, the main issue may be tool granularity mismatch or feedback ambiguity.",
+        "next_question": "How does the effectiveness of adaptive routing depend on the granularity of available tools relative to task decomposition, especially when tool set size is large?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Task",
+          "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+          "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+        },
+        {
+          "name": "Tool",
+          "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+          "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+        },
+        {
+          "name": "Routing Decision",
+          "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+          "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+          "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+          "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+        },
+        {
+          "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+          "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+          "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+          },
+          {
+            "name": "Tool Granularity",
+            "role": "input",
+            "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+          },
+          {
+            "name": "Number of Tools",
+            "role": "input",
+            "description": "The total number of tools available to the agent for routing."
+          },
+          {
+            "name": "Decision Speed",
+            "role": "mediator",
+            "description": "The time or computational cost allocated to each routing decision by the agent."
+          },
+          {
+            "name": "Routing Decision Quality",
+            "role": "mediator",
+            "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Number of Tools Required",
+            "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+          },
+          {
+            "step": "2",
+            "source": "Number of Tools",
+            "relation": "moderates",
+            "target": "Decision Speed",
+            "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+          },
+          {
+            "step": "3",
+            "source": "Decision Speed",
+            "relation": "affects",
+            "target": "Routing Decision Quality",
+            "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+          },
+          {
+            "step": "4",
+            "source": "Tool Granularity",
+            "relation": "moderates",
+            "target": "Routing Decision Quality",
+            "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+          },
+          {
+            "step": "5",
+            "source": "Routing Decision Quality",
+            "relation": "determines",
+            "target": "Task Success",
+            "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Combinatorial explosion of tool choices",
+            "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+          },
+          {
+            "bottleneck": "Feedback ambiguity during task execution",
+            "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+          },
+          {
+            "bottleneck": "Context window limits",
+            "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a tension between making fast routing decisions (to reduce latency) and making high-quality decisions (to select the best tool). This tradeoff is exacerbated by increasing task complexity and number of tools.",
+        "derived_from": [
+          "Routing Decision",
+          "Decision Speed",
+          "Routing Decision Quality"
+        ],
+        "why_it_matters": "In resource-constrained environments, agents must balance speed and accuracy; poor balance leads to either timeouts or suboptimal tool use.",
+        "what_existing_methods_may_miss": "Most agents use fixed heuristics without dynamically adjusting the speed-quality tradeoff based on task demands.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical task complexity threshold at which the optimal routing strategy in coding agents undergoes a sharp phase transition from speed-prioritizing (greedy heuristics) to accuracy-prioritizing (deliberative planning), and does this threshold depend on the ratio of available tools to allowable deliberation steps?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a phase transition boundary in the speed-quality tradeoff, enabling the design of adaptive routing policies that switch strategies at the critical complexity threshold."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical task complexity threshold (in terms of number of subtasks or dependencies) such that below this threshold, faster routing decisions (e.g., 50ms per step) yield higher task success, and above it, slower decisions (e.g., 1s per step) yield higher success. The threshold is modulated by the tool-to-step ratio (number of tools divided by the number of allowable deliberation steps), with higher ratios lowering the threshold.",
+        "predicted_effect": "A non-monotonic interaction: at low complexity, success increases with speed; at high complexity, success increases with deliberation. The crossover point shifts with the tool-to-step ratio."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a coding agent (GPT-4) on a controlled set of coding tasks from HumanEval+ with varying complexity (number of required steps: low=2, medium=5, high=10). Manipulate decision speed by time budget per routing step (50ms, 200ms, 1s). Vary number of available tools (5, 10, 20) while keeping granularity fixed. For each combination of complexity, speed, and tool count, run 50 trials. Measure task success rate and the proportion of greedy vs. deliberative routing choices (by analyzing tool selection patterns: immediately selecting the most likely tool vs. evaluating multiple candidates).",
+        "independent_variables": [
+          "task complexity (low/medium/high)",
+          "decision speed (50ms/200ms/1s)",
+          "number of tools (5/10/20)"
+        ],
+        "dependent_variables": [
+          "task success rate",
+          "proportion of greedy routing choices"
+        ],
+        "controls": [
+          "same agent architecture (GPT-4-turbo, temperature=0)",
+          "fixed tool granularity",
+          "same set of tools across trials (except count)",
+          "random seed for reproducibility",
+          "fixed context window size (8k tokens)"
+        ],
+        "falsifying_observation": "No sharp transition: e.g., the optimal speed is the same across all complexity levels, or the effect of speed is linear without a crossover. Alternatively, the transition is gradual and not modulated by tool count."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low complexity, success rate decreases significantly when going from 50ms to 200ms and from 200ms to 1s (faster is better).",
+          "For high complexity, success rate increases significantly when going from 50ms to 200ms and from 200ms to 1s (slower is better).",
+          "For medium complexity, the impact of speed is minimal (U-shaped or flat).",
+          "The crossover point (where the best speed flips) shifts to lower complexity as tool count increases from 5 to 20."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in success across speeds for any complexity level (all flat).",
+          "The same speed is optimal for all complexity levels (e.g., 200ms always best).",
+          "The interaction is monotonic: faster always better or slower always better.",
+          "The effect of tool count does not change the crossover systematically."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp phase transition is observed, or if the crossover does not depend on tool count, then the assumption that deliberation steps are a key limited resource may be incorrect. Instead, the failure may be due to other factors like tool granularity mismatch or feedback ambiguity.",
+        "assumption_to_revise": "The assumption that decision speed is the primary resource that can be directly traded off. Revise to consider that the bottleneck is not time but the context window or the agent's ability to maintain state across steps.",
+        "next_question": "Does the phase transition emerge when we manipulate the context window size instead of decision speed? Specifically, is there a critical context size below which greedy routing is optimal and above which deliberative routing is optimal?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Coding Task",
+          "definition": "The objective or goal that the coding agent is required to accomplish, typically expressed as a natural language instruction or a formal specification.",
+          "why_primitive": "The task defines the purpose of tool-use routing; without a task, routing decisions have no objective criterion for success or failure."
+        },
+        {
+          "name": "Tool",
+          "definition": "An atomic operation or function that the agent can invoke, such as code execution, file reading, or web search, with well-defined inputs and outputs.",
+          "why_primitive": "Tools are the building blocks of agent actions; routing is the selection among them, and each tool's capabilities and limitations directly influence routing outcomes."
+        },
+        {
+          "name": "Routing Decision",
+          "definition": "The choice made by the agent at a given step to select a particular tool from the available set, based on the current state and task.",
+          "why_primitive": "The central phenomenon under study; failure of routing decisions is the event we aim to characterize."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has an accurate and complete model of each tool's behavior and its preconditions and effects.",
+          "rationale": "This isolates the routing logic from issues of tool misunderstanding; we assume the agent knows exactly what each tool does.",
+          "possible_failure": "If this assumption is violated (e.g., tool documentation is incomplete or behavior is non-deterministic), routing failures may occur due to incorrect expectations rather than poor decision making."
+        },
+        {
+          "assumption": "The task is well-specified and unambiguous, with a clear success criterion.",
+          "rationale": "We assume the agent knows exactly what is required, so routing failures are not due to task ambiguity.",
+          "possible_failure": "In practice, tasks are often underspecified, leading to misinterpretation and thus routing decisions that fail to satisfy the user's intent."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Complexity",
+            "role": "input",
+            "description": "The difficulty and scope of the coding task, including the number of steps, dependencies, and required operations."
+          },
+          {
+            "name": "Tool Granularity",
+            "role": "input",
+            "description": "The specificity and scope of each available tool; coarse tools cover many operations, fine tools are very specific."
+          },
+          {
+            "name": "Number of Tools",
+            "role": "input",
+            "description": "The total number of tools available to the agent for routing."
+          },
+          {
+            "name": "Decision Speed",
+            "role": "mediator",
+            "description": "The time or computational cost allocated to each routing decision by the agent."
+          },
+          {
+            "name": "Routing Decision Quality",
+            "role": "mediator",
+            "description": "The appropriateness of the selected tool given the current state and task, measured by its expected contribution to progress."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Binary indicator of whether the agent successfully completes the coding task within constraints (time, correctness)."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Complexity",
+            "relation": "increases",
+            "target": "Number of Tools Required",
+            "explanation": "More complex tasks typically require a wider variety of tools, increasing the number of tools that must be considered."
+          },
+          {
+            "step": "2",
+            "source": "Number of Tools",
+            "relation": "moderates",
+            "target": "Decision Speed",
+            "explanation": "A larger tool set increases the search space, potentially slowing down decision making unless the agent uses heuristics."
+          },
+          {
+            "step": "3",
+            "source": "Decision Speed",
+            "relation": "affects",
+            "target": "Routing Decision Quality",
+            "explanation": "Too fast decisions may overlook the best tool; too slow may cause timeouts. There is an optimal speed-quality tradeoff."
+          },
+          {
+            "step": "4",
+            "source": "Tool Granularity",
+            "relation": "moderates",
+            "target": "Routing Decision Quality",
+            "explanation": "Mismatch between tool granularity and task granularity leads to either overly coarse or overly detailed selections, degrading quality."
+          },
+          {
+            "step": "5",
+            "source": "Routing Decision Quality",
+            "relation": "determines",
+            "target": "Task Success",
+            "explanation": "High-quality routing decisions increase the likelihood of task success; low-quality decisions lead to failures."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Combinatorial explosion of tool choices",
+            "why_it_matters": "As the number of tools grows, the routing decision space expands exponentially, making it hard to evaluate all options effectively within resource limits."
+          },
+          {
+            "bottleneck": "Feedback ambiguity during task execution",
+            "why_it_matters": "When task progress is unclear or tool outputs are noisy, the agent cannot accurately assess the quality of previous routing decisions, compounding errors."
+          },
+          {
+            "bottleneck": "Context window limits",
+            "why_it_matters": "Agents often have limited memory; as the task proceeds, relevant context may be forgotten, leading to routing decisions that ignore important state information."
+          }
+        ],
+        "mechanism_summary": "Tool-use routing in coding agents fails when the decision-making process cannot adequately balance speed and quality given the task complexity and tool set. Failures occur specifically when (1) the number of tools is large, leading to combinatorial overload and suboptimal decisions due to limited deliberation; (2) tool granularity mismatches the task's natural decomposition, causing either excessive specialization (too many tiny steps) or oversimplified actions; and (3) feedback loops are insufficient to correct poor routing choices early. The underlying mechanism is a multi-criteria optimization problem where resource constraints (time/compute) and architectural limitations (context size, heuristic biases) prevent the agent from consistently selecting the best tool, resulting in cascading errors and eventual task failure."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that the agent has an accurate and complete model of each tool's behavior is often violated in practice, yet it is foundational for correct routing. When tools have undocumented behaviors or non-deterministic outputs, routing decisions become unreliable.",
+        "derived_from": [
+          "Tool",
+          "Routing Decision"
+        ],
+        "why_it_matters": "If agents make routing decisions based on flawed tool models, they may select tools that fail or produce unexpected results, leading to task failure.",
+        "what_existing_methods_may_miss": "Existing benchmarks assume perfect tool knowledge; they do not test the impact of tool model inaccuracies on routing.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of tool model inaccuracy beyond which routing decision quality sharply degrades, and does this threshold depend on the number of tools relative to context window size?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in routing failure as a function of tool model inaccuracy, and reveals how context window constraints interact with inaccuracy to determine the failure threshold."
+      },
+      "hypothesis": {
+        "statement": "There exists a phase transition: when the proportion of tools with inaccurate models exceeds a critical ratio (e.g., 20%), routing decision quality drops nonlinearly, and this critical ratio is smaller when the number of tools exceeds the agent's context window capacity.",
+        "predicted_effect": "Agents operating below the inaccuracy threshold will maintain high routing quality, while those above will exhibit catastrophic failure; the threshold shifts downwards as the tool set exceeds context window limits."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create coding tasks requiring specific tool usage. Use a fixed set of tools (e.g., 10, 20, 50) with known accurate models. Introduce systematic inaccuracies by randomly selecting a proportion p of tools and altering their preconditions or outputs. Vary p from 0 to 1 in steps of 0.05. For each condition, run an agent with a fixed decision algorithm and measure routing decision quality (fraction of steps where chosen tool is optimal) and task success rate. Repeat for different context window sizes (e.g., 1024 vs 2048 tokens).",
+        "independent_variables": [
+          "Proportion of tools with inaccurate models (p)",
+          "Number of tools (N)",
+          "Context window size (C)"
+        ],
+        "dependent_variables": [
+          "Routing decision quality (fraction optimal choices)",
+          "Task success rate",
+          "Number of steps/tool invocations"
+        ],
+        "controls": [
+          "Task complexity (fixed)",
+          "Decision algorithm (fixed, no learning)",
+          "Inaccuracy type (random but consistent across conditions)",
+          "Agent's knowledge of tool models (only inaccurate as specified)"
+        ],
+        "falsifying_observation": "Routing decision quality decreases linearly with p without any sharp drop, or the threshold does not change with context window size."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Routing decision quality remains high for p below a critical value, then drops sharply.",
+          "The critical p is smaller for larger N and smaller C.",
+          "Task success rate mirrors the sharp drop in routing quality."
+        ],
+        "rejects_hypothesis": [
+          "No sharp transition; quality degrades monotonically with p.",
+          "Critical p is independent of N or C.",
+          "Agents compensate despite high inaccuracy, maintaining quality."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesized phase transition is not observed; instead, quality degrades gradually or is unaffected by context.",
+        "assumption_to_revise": "The assumption that tool model inaccuracy alone can cause a routing failure phase transition; perhaps interaction with other factors (e.g., decision algorithm) is necessary.",
+        "next_question": "What combination of factors (e.g., inaccuracy type, decision heuristic) leads to a sharp failure threshold in tool-use routing?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical tool count N* such that when the number of tools exceeds N*, the task success rate drops sharply (phase transition) due to the agent's inability to adequately explore all routing options within fixed deliberation time, while below N* success is high and relatively stable.",
+      "independent_variables": [
+        "Number of tools (2, 4, 8, 16, 32)"
+      ],
+      "dependent_variables": [
+        "Task success rate (fraction of tasks completed successfully)",
+        "Number of routing decisions per task"
+      ],
+      "controlled_variables": [
+        "Task complexity: same set of coding tasks (moderate complexity, e.g., implementing a small algorithm)",
+        "Tool granularity: all tools equally specific and non-overlapping",
+        "Agent architecture and deliberation time: fixed number of forward passes per routing decision",
+        "Context window size: fixed",
+        "Tool functionality: each tool has distinct, non-overlapping functionality"
+      ],
+      "baselines": [
+        {
+          "name": "Low tool count baseline",
+          "description": "Condition with 2 tools, representing a minimal tool set where routing is trivial; expected high success rate and low number of routing decisions."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Binary outcome per task (success/failure) aggregated across tasks; a task is successful if the agent produces a correct solution within time and resource limits."
+        },
+        {
+          "name": "Number of routing decisions per task",
+          "definition": "Total count of tool selection decisions made by the agent during the execution of a single task, averaged over tasks."
+        }
+      ],
+      "expected_result": "Task success rate remains high (e.g., >80%) for tool counts up to some N* (e.g., around 8), then drops sharply (e.g., to <30%) for larger tool counts (16, 32). The number of routing decisions per task increases superlinearly with tool count, with an inflection point near N*.",
+      "falsifying_result": "Task success rate declines monotonically or linearly with tool count, without a sharp drop at any point. Alternatively, the number of routing decisions per task increases linearly or sublinearly with tool count, indicating no combinatorial explosion.",
+      "minimum_viable_experiment": "Implement a coding agent with a fixed deliberation time per routing step (e.g., 5 reasoning steps) and a set of primitive tools of equal granularity and non-overlapping functionality. Vary the number of tools across 5 levels (2, 4, 8, 16, 32). Test on a set of 100 coding tasks of moderate complexity (e.g., implementing simple algorithms like sorting or searching). For each condition, measure the fraction of tasks successfully completed and the average number of routing decisions per task. Use the same agent architecture, task set, and deliberation time across all conditions. Compare the success rate across tool counts; if a sharp drop is observed, compute N* as the point where success falls below 50%. If no sharp drop occurs, the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Task difficulty may interact with tool count; tasks may be too easy or too hard, masking the effect.",
+        "Tool overlap or redundancy could reduce the effective number of distinct tools, biasing results.",
+        "Fixed deliberation time may be insufficient for small tool sets as well, but the hypothesis specifically predicts a threshold effect.",
+        "Order effects if the same agent is tested on multiple tool counts; counterbalancing or independent agents per condition may be needed.",
+        "The granularity of tools might not be perfectly equal; differences in tool complexity could confound results.",
+        "Context window limits could interact with tool count; ensure context window is adequately sized for all conditions."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical task complexity threshold (in terms of number of subtasks or dependencies) such that below this threshold, faster routing decisions (e.g., 50ms per step) yield higher task success, and above it, slower decisions (e.g., 1s per step) yield higher success. The threshold is modulated by the tool-to-step ratio (number of tools divided by the number of allowable deliberation steps), with higher ratios lowering the threshold.",
+      "independent_variables": [
+        "task complexity (low, medium, high)",
+        "decision speed (50ms, 200ms, 1s)",
+        "number of tools (5, 10, 20)"
+      ],
+      "dependent_variables": [
+        "task success rate",
+        "proportion of greedy routing choices"
+      ],
+      "controlled_variables": [
+        "same agent architecture (GPT-4-turbo, temperature=0)",
+        "fixed tool granularity",
+        "same set of tools across trials (except count)",
+        "random seed for reproducibility",
+        "fixed context window size (8k tokens)"
+      ],
+      "baselines": [
+        {
+          "name": "Greedy heuristic baseline",
+          "description": "Always selects the tool with highest immediate utility without deliberation (no time constraint)."
+        },
+        {
+          "name": "Random routing baseline",
+          "description": "Selects a tool uniformly at random at each step."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "task success rate",
+          "definition": "Proportion of trials where the agent completes the coding task correctly within a maximum number of steps."
+        },
+        {
+          "name": "proportion of greedy routing choices",
+          "definition": "Fraction of routing steps where the agent selects the tool with highest immediate heuristic score without considering alternatives."
+        }
+      ],
+      "expected_result": "For low complexity, success rate decreases with slower speeds; for high complexity, success rate increases with slower speeds; middle complexity shows no clear trend. The crossover point where slower becomes better shifts to lower complexity as tool count increases.",
+      "falsifying_result": "No significant difference in success across speeds for any complexity level, or the same speed is optimal for all complexities (e.g., monotonic trend), or the effect of tool count does not systematically change the crossover.",
+      "minimum_viable_experiment": "Use a coding agent (GPT-4) on tasks from HumanEval+ with three complexity levels (low=2 steps, medium=5, high=10). Manipulate decision speed with three time budgets (50ms, 200ms, 1s) and tool counts (5,10,20). For each of 3x3x3=27 conditions, run 50 trials (total 1350 trials). Measure task success and greedy choice proportion.",
+      "risks_and_confounds": [
+        "Tool granularity may not be fully fixed across conditions.",
+        "Agent may adapt its strategy over trials, confounding results.",
+        "Task complexity operationalization (number of steps) may not capture true difficulty.",
+        "Time budget manipulation may not perfectly control deliberation (agent might ignore timeout)."
+      ]
+    },
+    {
+      "hypothesis": "There exists a phase transition: when the proportion of tools with inaccurate models exceeds a critical ratio (e.g., 20%), routing decision quality drops nonlinearly, and this critical ratio is smaller when the number of tools exceeds the agent's context window capacity.",
+      "independent_variables": [
+        "Proportion of tools with inaccurate models (p, from 0 to 1 in steps of 0.1)",
+        "Number of tools (N): two levels relative to context window capacity: N_low = 10 (below capacity) and N_high = 30 (above capacity)"
+      ],
+      "dependent_variables": [
+        "Routing decision quality (fraction of steps where chosen tool is optimal)",
+        "Task success rate (binary per task, averaged over tasks)",
+        "Number of tool invocations per task"
+      ],
+      "controlled_variables": [
+        "Task complexity (fixed, e.g., implement a sorting algorithm)",
+        "Decision algorithm (fixed heuristic: e.g., greedy selection based on expected utility)",
+        "Inaccuracy type (randomly swap tool preconditions or outputs, consistent across conditions)",
+        "Agent's knowledge of tool models (only inaccurate as specified)",
+        "Context window size (fixed at 1024 tokens)"
+      ],
+      "baselines": [
+        {
+          "name": "Perfect tool models",
+          "description": "p = 0, all tools have accurate models."
+        },
+        {
+          "name": "Random routing",
+          "description": "Agent selects tool uniformly at random, independent of state."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing decision quality",
+          "definition": "Fraction of decision steps where the selected tool is the optimal tool (the one that maximizes expected progress given the current state)."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks completed successfully (output matches expected result) within a step limit."
+        },
+        {
+          "name": "Step count",
+          "definition": "Number of tool invocations used to complete the task (or until failure)."
+        }
+      ],
+      "expected_result": "For N_low, routing quality remains high (above 90%) for p up to about 0.4, then drops gradually. For N_high, quality stays high only up to p ≈ 0.2, then drops sharply. The critical p (where quality falls below 50%) is significantly lower for N_high than for N_low.",
+      "falsifying_result": "Either (1) no sharp drop in quality for either N level (quality degrades linearly with p), or (2) the critical p is approximately the same for N_low and N_high, or (3) quality remains high for all p values even for N_high.",
+      "minimum_viable_experiment": "Define a set of 30 distinct coding tasks, each requiring a sequence of tool invocations to complete. Use a fixed set of tools (10 for low N, 30 for high N) with known accurate models. Introduce systematic inaccuracies by randomly selecting a proportion p of tools and altering their documented preconditions (e.g., changing required input format) or outputs (e.g., returning unexpected errors). For each combination of N (two levels) and p (11 levels from 0 to 1 in steps of 0.1), run the agent on all 30 tasks, measuring routing decision quality, task success rate, and step count. Use a fixed greedy decision algorithm that selects the tool with highest expected utility based on the agent's models. Repeat each condition 5 times with different random seeds for inaccuracy assignment and task order. The total number of trials = 2 (N) × 11 (p) × 30 (tasks) × 5 (repetitions) = 3300 runs, which is feasible with automated testing.",
+      "risks_and_confounds": [
+        "The specific type of inaccuracy (e.g., precondition vs. output) may differentially affect routing; random mixing might average out but could mask interactions.",
+        "The decision algorithm's sensitivity to inaccuracy may vary; a different algorithm might show different thresholds.",
+        "Task complexity fixed to one type may limit generalizability; results might differ for more complex tasks requiring tool chaining.",
+        "The definition of 'optimal tool' requires ground truth; we must ensure tasks are designed such that optimal tool is computable programmatically."
+      ]
+    },
+    {
+      "hypothesis": "There is a nonlinear interaction such that when task specification ambiguity is high and tool granularity is coarse, the probability of routing failure increases sharply beyond a threshold, whereas fine-grained tools buffer against ambiguity and prevent catastrophic failure.",
+      "independent_variables": [
+        "Task specification ambiguity level (low, high)",
+        "Tool granularity (fine, coarse)"
+      ],
+      "dependent_variables": [
+        "Routing decision quality (average expected contribution score)",
+        "Task success rate (binary completion)"
+      ],
+      "controlled_variables": [
+        "Same set of tools (size fixed to 10)",
+        "Same agent architecture (LLM with identical prompts)",
+        "Same task complexity and domain (file manipulation tasks)",
+        "Same context window size"
+      ],
+      "baselines": [
+        {
+          "name": "Low ambiguity - fine granularity",
+          "description": "The condition with low task specification ambiguity and fine-grained tools, expected to yield the highest routing quality and success rate."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing decision quality",
+          "definition": "The average expected contribution score assigned to each routing decision by an expert evaluator, measuring how appropriate the tool choice is for the current state."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "The proportion of tasks completed successfully within a predefined time and correctness threshold."
+        }
+      ],
+      "expected_result": "A significant two-way interaction (p<0.05) in ANOVA for routing quality scores, with post-hoc tests showing a larger effect of ambiguity in the coarse tool condition (Cohen's d>0.8) compared to fine (d<0.3), and task success rate dropping below 50% only in the high ambiguity + coarse tool condition.",
+      "falsifying_result": "No significant interaction effect; the impact of ambiguity on routing quality is similar across tool granularity levels, or coarse tools actually mitigate ambiguity effects.",
+      "minimum_viable_experiment": "Conduct a 2x2 factorial experiment with a baseline coding agent on file manipulation tasks. Factor 1: task specification ambiguity (low vs. high). Factor 2: tool granularity (fine vs. coarse). Fine-grained tools are atomic operations (e.g., call_function, read_line); coarse-grained tools are composite (e.g., execute_all, search_web). The agent uses a fixed LLM-based routing policy. Each condition has 50 trials, total 200 trials. Measure routing decision quality and task success rate. Analyze with two-way ANOVA.",
+      "risks_and_confounds": [
+        "Task complexity may vary across conditions if not carefully controlled.",
+        "Order effects if the same agent performs multiple tasks sequentially.",
+        "Learning effects or fatigue across trials.",
+        "Subjectivity in defining 'low' and 'high' ambiguity levels.",
+        "Potential confounding from tool set size if not exactly equal in both granularity conditions."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical tool set size N_c such that for N > N_c, fixed-speed routing (both fast and slow) yields <50% success rate, while adaptive routing that dynamically adjusts decision speed based on tool set size restores >80% success rate.",
+      "independent_variables": [
+        "Tool set size (4, 20)",
+        "Routing strategy (fixed fast, fixed slow, adaptive)"
+      ],
+      "dependent_variables": [
+        "Task success rate (binary completion within correctness and 5-minute time limit)"
+      ],
+      "controlled_variables": [
+        "Same agent model (e.g., GPT-4o)",
+        "Same environment (e.g., SWE-bench-lite)",
+        "Same task instructions",
+        "Same tools (only number varies, excluding any tool that could trivialize tasks)",
+        "Maximum 5 minutes per task",
+        "10 high-complexity coding tasks (each requiring at least 5 steps)",
+        "10 trials per task-size-strategy combination"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed fast routing",
+          "description": "Constant 0.1 seconds deliberation per routing decision."
+        },
+        {
+          "name": "Fixed slow routing",
+          "description": "Constant 1 second deliberation per routing decision."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of trials where the agent completes the task correctly within the 5-minute limit."
+        }
+      ],
+      "expected_result": "For tool set size 4, all strategies achieve >85% success rate. For tool set size 20, fixed fast and fixed slow achieve <50% success rate, while adaptive achieves >80% success rate. The difference between size 4 and size 20 for fixed strategies is statistically significant (p<0.05), and adaptive significantly outperforms both fixed strategies at size 20.",
+      "falsifying_result": "No statistically significant drop in success rate for fixed strategies when increasing tool set size from 4 to 20 (p>0.05), or adaptive routing does not significantly outperform fixed strategies at size 20 (p>0.05 after Bonferroni correction).",
+      "minimum_viable_experiment": "Select 10 high-complexity coding tasks (each requiring at least 5 steps). Implement three routing strategies: fixed fast (0.1s/decision), fixed slow (1s/decision), and adaptive (decision speed = 0.1*(1+N/10) seconds). For each task, run each strategy with tool set sizes 4 and 20, each for 10 trials (total 10 tasks × 2 sizes × 3 strategies × 10 trials = 600 runs). Measure binary task success rate.",
+      "risks_and_confounds": [
+        "Tool composition may interact with size; ensure tools are representative and no single tool dominates.",
+        "Task difficulty variation; use tasks of similar complexity.",
+        "Order effects; randomize trial order.",
+        "Agent model variability; use same model version across all conditions."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a principled first-principles decomposition of tool-use routing failures in coding agents, identifying key primitives (task, tool, routing decision), assumptions, and tradeoffs. It develops a causal mechanism model and derives several testable hypotheses centered on phase transitions under varying tool counts, granularity, decision speed, and task ambiguity. The package includes multiple certificate-level proposals with falsifiable hypotheses and detailed experiment plans. Overall, the work is novel, well-structured, and addresses an important problem in AI agent design.",
+    "strengths": [
+      "Sound first-principles derivation that clearly defines primitives and assumptions.",
+      "Mechanism model with explicit variables and causal chains, enabling falsifiable predictions.",
+      "Hypotheses focus on phase transitions and nonlinear effects, which are under-explored in current literature.",
+      "Detailed, reproducible experiment plans with controlled variables and baseline conditions.",
+      "High practical significance for improving coding agent reliability."
+    ],
+    "weaknesses": [
+      "Some redundancy across certificates (e.g., multiple hypotheses about tool count thresholds).",
+      "Assumptions (e.g., perfect tool model) are strong and may limit real-world applicability.",
+      "Experiment plans are resource-intensive and may be challenging to execute fully.",
+      "First-principles derivation could be more formal (e.g., axiomatic or mathematical).",
+      "Missing comparison to existing adaptive routing methods (e.g., RL-based or Bayesian optimization) in baselines."
+    ],
+    "questions": [
+      "How do the proposed phase transition thresholds generalize across different agent architectures (e.g., LLMs vs. planning-based agents)?",
+      "In the ambiguity-granularity interaction experiment, how is 'task specification ambiguity' operationalized and validated?",
+      "What techniques can be used to automatically determine the critical threshold N* or p* in practice?"
+    ],
+    "missing_baselines": [
+      "Adaptive decision speed algorithms beyond the proposed simple formula (e.g., based on uncertainty estimation).",
+      "Comparison to existing reinforcement learning-based tool selection methods.",
+      "Baselines with varying context window sizes (for inaccuracy experiments) are mentioned but not fully elaborated."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "over-specification of assumptions",
+    "root_cause": "The research package assumes perfect tool models and unambiguous tasks, which are rarely true in practice. This limits the applicability of the findings to real-world coding agents where tool behavior is often unpredictable and task specifications are vague.",
+    "violated_principle": "First-principles research must derive mechanisms from primitives that hold across realistic conditions; assumptions should be relaxed or their impact quantified.",
+    "new_or_updated_principle": "Robust routing research should include realistic tool inaccuracies and task ambiguity as core variables, not assumptions to be idealized away.",
+    "new_or_updated_skill": "Skill: Constructing experiments that systematically introduce controlled inaccuracies in tool models and varying degrees of task ambiguity to isolate failure thresholds.",
+    "regression_test": "When testing a coding agent with a fixed tool set and task set, vary the proportion of tools with inaccurate models (e.g., 0%, 20%, 50%) and measure routing decision quality and task success rate. Ensure that the agent's performance degrades gracefully and predictably, and that the research conclusions are robust to these realistic perturbations."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical threshold in the number of tools beyond which routing failures in coding agents become catastrophic due to combinatorial explosion?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical task complexity threshold at which the optimal routing strategy in coding agents undergoes a sharp phase transition from speed-prioritizing (greedy heuristics) to accuracy-prioritizing (deliberative planning), and does this threshold depend on the ratio of available tools to allowable deliberation steps?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of tool model inaccuracy beyond which routing decision quality sharply degrades, and does this threshold depend on the number of tools relative to context window size?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "How does the interaction between task specification ambiguity and tool granularity determine the threshold for tool-use routing failure in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what tool set size does tool-use routing in coding agents exhibit a phase transition from reliable (>85% success) to unreliable (<50% success), and can adaptive decision speed restore reliability beyond that transition?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true,
+      "enable_question_debate_refinement": false
+    },
+    "replicate": 1,
+    "run_id": "run-20260628T212839Z"
+  }
+}

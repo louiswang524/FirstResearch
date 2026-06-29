@@ -1,0 +1,944 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Action",
+        "definition": "A discrete unit of behavior performed by an agent, such as a function call, text output, or environment interaction.",
+        "why_primitive": "Cannot be decomposed further without losing the unit of process adherence; all process fidelity metrics ultimately compare sequences of actions."
+      },
+      {
+        "name": "Process Specification",
+        "definition": "A formal description of the intended sequence or rules that an agent should follow, including order, conditions, and allowed variations.",
+        "why_primitive": "It defines the reference against which fidelity is measured; without a specification, fidelity is meaningless."
+      },
+      {
+        "name": "Correspondence Measure",
+        "definition": "A function that quantifies the degree of similarity between an observed sequence of actions and a process specification.",
+        "why_primitive": "It is the core operation of any fidelity metric, mapping from two sequences to a scalar value."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The process specification is unambiguous and complete for the intended task.",
+        "rationale": "Without a clear specification, there is no objective reference for fidelity; any measurement would be subjective.",
+        "possible_failure": "Specifications may have ambiguities or missing steps, leading to inconsistent measurements."
+      },
+      {
+        "assumption": "All agent actions are observable and recordable without error or omission.",
+        "rationale": "To compare with the process, we need a complete record of what the agent did; missing or noisy data will corrupt fidelity estimates.",
+        "possible_failure": "Agents may have internal state or actions that are not externally visible, or logging may be imperfect."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of action decomposition versus measurement tractability.",
+        "variables": [
+          "Action granularity",
+          "Measurement effort",
+          "Fidelity precision"
+        ]
+      },
+      {
+        "tradeoff": "Strict adherence to process vs. agent flexibility and adaptability.",
+        "variables": [
+          "Fidelity score",
+          "Task performance",
+          "Robustness to novelty"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "ProcessSpecification",
+        "role": "input",
+        "description": "The formal description of the intended process sequence or rules."
+      },
+      {
+        "name": "AgentActions",
+        "role": "input",
+        "description": "The sequence of actions actually performed by the agent."
+      },
+      {
+        "name": "CorrespondenceMeasure",
+        "role": "mediator",
+        "description": "A function that compares observed actions to the specification and outputs a similarity score."
+      },
+      {
+        "name": "ActionGranularity",
+        "role": "confounder",
+        "description": "The level of detail at which actions are defined; influences the precision of the correspondence measure."
+      },
+      {
+        "name": "ObservabilityNoise",
+        "role": "confounder",
+        "description": "Errors or omissions in recording agent actions that corrupt the observed action sequence."
+      },
+      {
+        "name": "ProcessFidelityScore",
+        "role": "output",
+        "description": "The computed degree of adherence of the agent's actions to the process specification."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "ProcessSpecification",
+        "relation": "and",
+        "target": "AgentActions",
+        "explanation": "Both are inputs to the correspondence measure."
+      },
+      {
+        "step": "2",
+        "source": "ProcessSpecification and AgentActions",
+        "relation": "are compared by",
+        "target": "CorrespondenceMeasure",
+        "explanation": "The correspondence measure takes specification and observed actions as inputs."
+      },
+      {
+        "step": "3",
+        "source": "ActionGranularity",
+        "relation": "influences",
+        "target": "CorrespondenceMeasure",
+        "explanation": "Granularity affects how the measure calculates similarity."
+      },
+      {
+        "step": "4",
+        "source": "ObservabilityNoise",
+        "relation": "corrupts",
+        "target": "AgentActions",
+        "explanation": "Noise degrades the fidelity of the recorded action sequence."
+      },
+      {
+        "step": "5",
+        "source": "CorrespondenceMeasure",
+        "relation": "produces",
+        "target": "ProcessFidelityScore",
+        "explanation": "The measure outputs a scalar fidelity score."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Ambiguity in Process Specification",
+        "why_it_matters": "If the specification is ambiguous, the correspondence measure lacks a clear reference, making fidelity scores unreliable."
+      },
+      {
+        "bottleneck": "Incomplete Observability",
+        "why_it_matters": "Missing or noisy action data prevents accurate comparison, leading to underestimation or overestimation of fidelity."
+      },
+      {
+        "bottleneck": "Tradeoff between Granularity and Tractability",
+        "why_it_matters": "Coarse actions may miss deviations, while fine-grained actions increase measurement cost and complexity."
+      }
+    ],
+    "mechanism_summary": "Agent process fidelity is measured by defining a process specification, recording agent actions, and applying a correspondence measure to compute a fidelity score. The measurement is sensitive to specification clarity, action observability, and granularity choices."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Strict adherence to a process specification may conflict with an agent's ability to adapt to novel or unexpected situations, creating a tradeoff between high process fidelity and task robustness.",
+      "derived_from": [
+        "Core Tradeoff: Strict adherence to process vs. agent flexibility and adaptability",
+        "Assumption: The process specification is unambiguous and complete for the intended task"
+      ],
+      "why_it_matters": "This tension implies that optimizing for process fidelity alone may reduce an agent's effectiveness in dynamic environments, where deviations from the specification could be beneficial.",
+      "what_existing_methods_may_miss": "Current fidelity metrics often penalize any deviation from the specification, without considering whether those deviations improve overall task performance or adaptability.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Finer granularity of action decomposition increases precision of fidelity measurement but also raises measurement effort and complexity, creating a tradeoff between detailed assessment and practical tractability.",
+      "derived_from": [
+        "Core Tradeoff: Granularity of action decomposition versus measurement tractability"
+      ],
+      "why_it_matters": "The choice of granularity directly affects the reliability and cost of fidelity evaluation; coarse actions may miss subtle deviations, while fine actions may be infeasible to record or analyze at scale.",
+      "what_existing_methods_may_miss": "Many existing fidelity metrics assume a fixed granularity without justifying its adequacy, potentially leading to misestimates of true process adherence.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that all agent actions are perfectly observable and recordable may be violated in practice, leading to incomplete or noisy action sequences that corrupt fidelity measurements.",
+      "derived_from": [
+        "Assumption: All agent actions are observable and recordable without error or omission",
+        "Variable: ObservabilityNoise"
+      ],
+      "why_it_matters": "If observability is incomplete, the correspondence measure cannot accurately compare observed actions to the specification, making fidelity scores unreliable.",
+      "what_existing_methods_may_miss": "Current methods often assume perfect logging; they do not account for internal actions (e.g., reasoning steps) or sensor/logger failures that can introduce systematic bias.",
+      "testability": 5
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the frequency of deviations from a process specification affect an agent's task completion rate in environments with unforeseen events, and is there a tradeoff point where moderate deviations maximize both fidelity and adaptability?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the optimal deviation rate for robust performance."
+    },
+    {
+      "question": "What is the relationship between action granularity and the precision of process fidelity measurement, and at what granularity does the measurement become insensitive to meaningful deviations?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Provides guidelines for choosing granularity in fidelity assessment."
+    },
+    {
+      "question": "How does the proportion of missing or corrupted action observations affect the accuracy of a correspondence-based fidelity score, and can we correct for it using imputation or error models?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Methods to detect and mitigate observability noise in fidelity measurement."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "A discrete unit of behavior performed by an agent, such as a function call, text output, or environment interaction.",
+          "why_primitive": "Cannot be decomposed further without losing the unit of process adherence; all process fidelity metrics ultimately compare sequences of actions."
+        },
+        {
+          "name": "Process Specification",
+          "definition": "A formal description of the intended sequence or rules that an agent should follow, including order, conditions, and allowed variations.",
+          "why_primitive": "It defines the reference against which fidelity is measured; without a specification, fidelity is meaningless."
+        },
+        {
+          "name": "Correspondence Measure",
+          "definition": "A function that quantifies the degree of similarity between an observed sequence of actions and a process specification.",
+          "why_primitive": "It is the core operation of any fidelity metric, mapping from two sequences to a scalar value."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The process specification is unambiguous and complete for the intended task.",
+          "rationale": "Without a clear specification, there is no objective reference for fidelity; any measurement would be subjective.",
+          "possible_failure": "Specifications may have ambiguities or missing steps, leading to inconsistent measurements."
+        },
+        {
+          "assumption": "All agent actions are observable and recordable without error or omission.",
+          "rationale": "To compare with the process, we need a complete record of what the agent did; missing or noisy data will corrupt fidelity estimates.",
+          "possible_failure": "Agents may have internal state or actions that are not externally visible, or logging may be imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ProcessSpecification",
+            "role": "input",
+            "description": "The formal description of the intended process sequence or rules."
+          },
+          {
+            "name": "AgentActions",
+            "role": "input",
+            "description": "The sequence of actions actually performed by the agent."
+          },
+          {
+            "name": "CorrespondenceMeasure",
+            "role": "mediator",
+            "description": "A function that compares observed actions to the specification and outputs a similarity score."
+          },
+          {
+            "name": "ActionGranularity",
+            "role": "confounder",
+            "description": "The level of detail at which actions are defined; influences the precision of the correspondence measure."
+          },
+          {
+            "name": "ObservabilityNoise",
+            "role": "confounder",
+            "description": "Errors or omissions in recording agent actions that corrupt the observed action sequence."
+          },
+          {
+            "name": "ProcessFidelityScore",
+            "role": "output",
+            "description": "The computed degree of adherence of the agent's actions to the process specification."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ProcessSpecification",
+            "relation": "and",
+            "target": "AgentActions",
+            "explanation": "Both are inputs to the correspondence measure."
+          },
+          {
+            "step": "2",
+            "source": "ProcessSpecification and AgentActions",
+            "relation": "are compared by",
+            "target": "CorrespondenceMeasure",
+            "explanation": "The correspondence measure takes specification and observed actions as inputs."
+          },
+          {
+            "step": "3",
+            "source": "ActionGranularity",
+            "relation": "influences",
+            "target": "CorrespondenceMeasure",
+            "explanation": "Granularity affects how the measure calculates similarity."
+          },
+          {
+            "step": "4",
+            "source": "ObservabilityNoise",
+            "relation": "corrupts",
+            "target": "AgentActions",
+            "explanation": "Noise degrades the fidelity of the recorded action sequence."
+          },
+          {
+            "step": "5",
+            "source": "CorrespondenceMeasure",
+            "relation": "produces",
+            "target": "ProcessFidelityScore",
+            "explanation": "The measure outputs a scalar fidelity score."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in Process Specification",
+            "why_it_matters": "If the specification is ambiguous, the correspondence measure lacks a clear reference, making fidelity scores unreliable."
+          },
+          {
+            "bottleneck": "Incomplete Observability",
+            "why_it_matters": "Missing or noisy action data prevents accurate comparison, leading to underestimation or overestimation of fidelity."
+          },
+          {
+            "bottleneck": "Tradeoff between Granularity and Tractability",
+            "why_it_matters": "Coarse actions may miss deviations, while fine-grained actions increase measurement cost and complexity."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by defining a process specification, recording agent actions, and applying a correspondence measure to compute a fidelity score. The measurement is sensitive to specification clarity, action observability, and granularity choices."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Strict adherence to a process specification may conflict with an agent's ability to adapt to novel or unexpected situations, creating a tradeoff between high process fidelity and task robustness.",
+        "derived_from": [
+          "Core Tradeoff: Strict adherence to process vs. agent flexibility and adaptability",
+          "Assumption: The process specification is unambiguous and complete for the intended task"
+        ],
+        "why_it_matters": "This tension implies that optimizing for process fidelity alone may reduce an agent's effectiveness in dynamic environments, where deviations from the specification could be beneficial.",
+        "what_existing_methods_may_miss": "Current fidelity metrics often penalize any deviation from the specification, without considering whether those deviations improve overall task performance or adaptability.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what critical deviation rate does an agent's process fidelity collapse when encountering novel states outside the process specification, and how does this threshold depend on the specification's strictness (extensiveness of allowed variations)?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a phase transition in process fidelity and quantifies how specification strictness shifts the critical point."
+      },
+      "hypothesis": {
+        "statement": "There exists a specific threshold deviation rate (d*) such that when the agent's deviation rate exceeds d*, process fidelity sharply declines (phase transition) in tasks with novel states. Moreover, d* is higher when the specification includes more allowed variations (i.e., less strict).",
+        "predicted_effect": "Agents with deviation rate below d* maintain high process fidelity (>90%), while those above d* show a sudden drop in fidelity (<50%). The threshold d* is at least 20 percentage points higher for lenient specifications than for strict specifications."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a simulated grid-world navigation task with a strict process specification (no allowed variations) and a lenient specification (allows 20% variation in step sequence), introduce novel states (unforeseen obstacles) in 30% of trials. Vary the agent's deviation rate by adjusting a threshold in its decision policy: the probability of deviating when a novel state is encountered. Measure process fidelity (percentage of actions adhering to specification) across trials for each deviation rate condition, using 100 trials per condition.",
+        "independent_variables": [
+          "Deviation rate (continuous, from 0% to 100% in steps of 5%)",
+          "Specification strictness (strict vs. lenient)"
+        ],
+        "dependent_variables": [
+          "Process fidelity (percentage of actions that follow the specification)",
+          "Task completion rate"
+        ],
+        "controls": [
+          "Task complexity (fixed number of waypoints and obstacles)",
+          "Environment randomness (same random seed across conditions)",
+          "Agent architecture (same base model with adjustable deviation threshold)",
+          "Frequency of novel states (30% of trials)"
+        ],
+        "falsifying_observation": "If process fidelity decreases linearly with deviation rate (no sharp drop) or if the threshold does not shift with specification strictness, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each specification strictness, process fidelity remains above 90% for deviation rates below a threshold d* and drops sharply below 50% for rates above d*.",
+          "The threshold d* for lenient specifications is at least 20 percentage points higher than for strict specifications.",
+          "Task completion rate mirrors fidelity, with a plateau near 100% below d* and a sharp decline above d*."
+        ],
+        "rejects_hypothesis": [
+          "Process fidelity decreases linearly with deviation rate, with no sharp threshold.",
+          "The threshold d* does not differ significantly between strict and lenient specifications.",
+          "Process fidelity remains high even at very high deviation rates (>80%), indicating no collapse.",
+          "Process fidelity drops sharply at a deviation rate that does not depend on specification strictness."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed, then the assumption that fidelity collapses catastrophically above a threshold is incorrect.",
+        "assumption_to_revise": "The assumption that process fidelity has a critical point; perhaps it degrades more gradually.",
+        "next_question": "How does the rate of fidelity degradation depend on the type of deviation (e.g., ordering vs. substitution) and the agent's ability to recover from deviations?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "A discrete unit of behavior performed by an agent, such as a function call, text output, or environment interaction.",
+          "why_primitive": "Cannot be decomposed further without losing the unit of process adherence; all process fidelity metrics ultimately compare sequences of actions."
+        },
+        {
+          "name": "Process Specification",
+          "definition": "A formal description of the intended sequence or rules that an agent should follow, including order, conditions, and allowed variations.",
+          "why_primitive": "It defines the reference against which fidelity is measured; without a specification, fidelity is meaningless."
+        },
+        {
+          "name": "Correspondence Measure",
+          "definition": "A function that quantifies the degree of similarity between an observed sequence of actions and a process specification.",
+          "why_primitive": "It is the core operation of any fidelity metric, mapping from two sequences to a scalar value."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The process specification is unambiguous and complete for the intended task.",
+          "rationale": "Without a clear specification, there is no objective reference for fidelity; any measurement would be subjective.",
+          "possible_failure": "Specifications may have ambiguities or missing steps, leading to inconsistent measurements."
+        },
+        {
+          "assumption": "All agent actions are observable and recordable without error or omission.",
+          "rationale": "To compare with the process, we need a complete record of what the agent did; missing or noisy data will corrupt fidelity estimates.",
+          "possible_failure": "Agents may have internal state or actions that are not externally visible, or logging may be imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ProcessSpecification",
+            "role": "input",
+            "description": "The formal description of the intended process sequence or rules."
+          },
+          {
+            "name": "AgentActions",
+            "role": "input",
+            "description": "The sequence of actions actually performed by the agent."
+          },
+          {
+            "name": "CorrespondenceMeasure",
+            "role": "mediator",
+            "description": "A function that compares observed actions to the specification and outputs a similarity score."
+          },
+          {
+            "name": "ActionGranularity",
+            "role": "confounder",
+            "description": "The level of detail at which actions are defined; influences the precision of the correspondence measure."
+          },
+          {
+            "name": "ObservabilityNoise",
+            "role": "confounder",
+            "description": "Errors or omissions in recording agent actions that corrupt the observed action sequence."
+          },
+          {
+            "name": "ProcessFidelityScore",
+            "role": "output",
+            "description": "The computed degree of adherence of the agent's actions to the process specification."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ProcessSpecification",
+            "relation": "and",
+            "target": "AgentActions",
+            "explanation": "Both are inputs to the correspondence measure."
+          },
+          {
+            "step": "2",
+            "source": "ProcessSpecification and AgentActions",
+            "relation": "are compared by",
+            "target": "CorrespondenceMeasure",
+            "explanation": "The correspondence measure takes specification and observed actions as inputs."
+          },
+          {
+            "step": "3",
+            "source": "ActionGranularity",
+            "relation": "influences",
+            "target": "CorrespondenceMeasure",
+            "explanation": "Granularity affects how the measure calculates similarity."
+          },
+          {
+            "step": "4",
+            "source": "ObservabilityNoise",
+            "relation": "corrupts",
+            "target": "AgentActions",
+            "explanation": "Noise degrades the fidelity of the recorded action sequence."
+          },
+          {
+            "step": "5",
+            "source": "CorrespondenceMeasure",
+            "relation": "produces",
+            "target": "ProcessFidelityScore",
+            "explanation": "The measure outputs a scalar fidelity score."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in Process Specification",
+            "why_it_matters": "If the specification is ambiguous, the correspondence measure lacks a clear reference, making fidelity scores unreliable."
+          },
+          {
+            "bottleneck": "Incomplete Observability",
+            "why_it_matters": "Missing or noisy action data prevents accurate comparison, leading to underestimation or overestimation of fidelity."
+          },
+          {
+            "bottleneck": "Tradeoff between Granularity and Tractability",
+            "why_it_matters": "Coarse actions may miss deviations, while fine-grained actions increase measurement cost and complexity."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by defining a process specification, recording agent actions, and applying a correspondence measure to compute a fidelity score. The measurement is sensitive to specification clarity, action observability, and granularity choices."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Finer granularity of action decomposition increases precision of fidelity measurement but also raises measurement effort and complexity, creating a tradeoff between detailed assessment and practical tractability.",
+        "derived_from": [
+          "Core Tradeoff: Granularity of action decomposition versus measurement tractability"
+        ],
+        "why_it_matters": "The choice of granularity directly affects the reliability and cost of fidelity evaluation; coarse actions may miss subtle deviations, while fine actions may be infeasible to record or analyze at scale.",
+        "what_existing_methods_may_miss": "Many existing fidelity metrics assume a fixed granularity without justifying its adequacy, potentially leading to misestimates of true process adherence.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "At what action granularity level does process fidelity measurement precision saturate, and how does this threshold depend on process specification ambiguity?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a critical granularity threshold for fidelity measurement and its dependence on specification ambiguity, enabling efficient evaluation design."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical granularity threshold beyond which process fidelity measurement precision does not significantly improve, forming a phase transition. This threshold increases with the ambiguity of the process specification.",
+        "predicted_effect": "Fidelity precision improves with finer granularity only up to a threshold that shifts upward with specification ambiguity; beyond the threshold, further refinement yields negligible gains."
+      },
+      "minimal_decisive_test": {
+        "experiment": "For five process specifications varying in ambiguity (e.g., unambiguous, moderately ambiguous, highly ambiguous) and five action granularity levels (from very coarse to very fine), compute fidelity score variance across 100 agent executions using a fixed correspondence measure (e.g., normalized edit distance). Apply piecewise linear regression to detect the breakpoint where precision plateaus, and test whether the breakpoint increases with ambiguity.",
+        "independent_variables": [
+          "Action granularity level (5 levels, e.g., 2,4,8,16,32 action types)",
+          "Process specification ambiguity (3 levels: low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Precision (1/variance of fidelity scores across runs)",
+          "Breakpoint granularity (estimated threshold)"
+        ],
+        "controls": [
+          "Task domain (e.g., a simple sequential task)",
+          "Correspondence measure",
+          "Agent type (fixed LLM, seed, temperature)",
+          "Number of runs per condition (100)"
+        ],
+        "falsifying_observation": "No significant breakpoint is detected (variance continues decreasing linearly across all granularities), or the breakpoint does not systematically vary with ambiguity (e.g., same for all ambiguity levels or decreases with ambiguity)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Precision increases with granularity up to a breakpoint, then plateaus",
+          "The breakpoint granularity is higher for more ambiguous specifications"
+        ],
+        "rejects_hypothesis": [
+          "Precision increases linearly without plateau across all granularities",
+          "Breakpoint is invariant or inversely related to ambiguity"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold exists or the threshold does not depend on ambiguity, the assumption that the relationship is universal may be false.",
+        "assumption_to_revise": "The assumption that a single critical granularity exists for a given task; the effect may be continuous or depend on other factors like task complexity.",
+        "next_question": "How does the shape of the precision–granularity curve depend on task structure and the choice of correspondence measure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "A discrete unit of behavior performed by an agent, such as a function call, text output, or environment interaction.",
+          "why_primitive": "Cannot be decomposed further without losing the unit of process adherence; all process fidelity metrics ultimately compare sequences of actions."
+        },
+        {
+          "name": "Process Specification",
+          "definition": "A formal description of the intended sequence or rules that an agent should follow, including order, conditions, and allowed variations.",
+          "why_primitive": "It defines the reference against which fidelity is measured; without a specification, fidelity is meaningless."
+        },
+        {
+          "name": "Correspondence Measure",
+          "definition": "A function that quantifies the degree of similarity between an observed sequence of actions and a process specification.",
+          "why_primitive": "It is the core operation of any fidelity metric, mapping from two sequences to a scalar value."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The process specification is unambiguous and complete for the intended task.",
+          "rationale": "Without a clear specification, there is no objective reference for fidelity; any measurement would be subjective.",
+          "possible_failure": "Specifications may have ambiguities or missing steps, leading to inconsistent measurements."
+        },
+        {
+          "assumption": "All agent actions are observable and recordable without error or omission.",
+          "rationale": "To compare with the process, we need a complete record of what the agent did; missing or noisy data will corrupt fidelity estimates.",
+          "possible_failure": "Agents may have internal state or actions that are not externally visible, or logging may be imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "ProcessSpecification",
+            "role": "input",
+            "description": "The formal description of the intended process sequence or rules."
+          },
+          {
+            "name": "AgentActions",
+            "role": "input",
+            "description": "The sequence of actions actually performed by the agent."
+          },
+          {
+            "name": "CorrespondenceMeasure",
+            "role": "mediator",
+            "description": "A function that compares observed actions to the specification and outputs a similarity score."
+          },
+          {
+            "name": "ActionGranularity",
+            "role": "confounder",
+            "description": "The level of detail at which actions are defined; influences the precision of the correspondence measure."
+          },
+          {
+            "name": "ObservabilityNoise",
+            "role": "confounder",
+            "description": "Errors or omissions in recording agent actions that corrupt the observed action sequence."
+          },
+          {
+            "name": "ProcessFidelityScore",
+            "role": "output",
+            "description": "The computed degree of adherence of the agent's actions to the process specification."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "ProcessSpecification",
+            "relation": "and",
+            "target": "AgentActions",
+            "explanation": "Both are inputs to the correspondence measure."
+          },
+          {
+            "step": "2",
+            "source": "ProcessSpecification and AgentActions",
+            "relation": "are compared by",
+            "target": "CorrespondenceMeasure",
+            "explanation": "The correspondence measure takes specification and observed actions as inputs."
+          },
+          {
+            "step": "3",
+            "source": "ActionGranularity",
+            "relation": "influences",
+            "target": "CorrespondenceMeasure",
+            "explanation": "Granularity affects how the measure calculates similarity."
+          },
+          {
+            "step": "4",
+            "source": "ObservabilityNoise",
+            "relation": "corrupts",
+            "target": "AgentActions",
+            "explanation": "Noise degrades the fidelity of the recorded action sequence."
+          },
+          {
+            "step": "5",
+            "source": "CorrespondenceMeasure",
+            "relation": "produces",
+            "target": "ProcessFidelityScore",
+            "explanation": "The measure outputs a scalar fidelity score."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Ambiguity in Process Specification",
+            "why_it_matters": "If the specification is ambiguous, the correspondence measure lacks a clear reference, making fidelity scores unreliable."
+          },
+          {
+            "bottleneck": "Incomplete Observability",
+            "why_it_matters": "Missing or noisy action data prevents accurate comparison, leading to underestimation or overestimation of fidelity."
+          },
+          {
+            "bottleneck": "Tradeoff between Granularity and Tractability",
+            "why_it_matters": "Coarse actions may miss deviations, while fine-grained actions increase measurement cost and complexity."
+          }
+        ],
+        "mechanism_summary": "Agent process fidelity is measured by defining a process specification, recording agent actions, and applying a correspondence measure to compute a fidelity score. The measurement is sensitive to specification clarity, action observability, and granularity choices."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that all agent actions are perfectly observable and recordable may be violated in practice, leading to incomplete or noisy action sequences that corrupt fidelity measurements.",
+        "derived_from": [
+          "Assumption: All agent actions are observable and recordable without error or omission",
+          "Variable: ObservabilityNoise"
+        ],
+        "why_it_matters": "If observability is incomplete, the correspondence measure cannot accurately compare observed actions to the specification, making fidelity scores unreliable.",
+        "what_existing_methods_may_miss": "Current methods often assume perfect logging; they do not account for internal actions (e.g., reasoning steps) or sensor/logger failures that can introduce systematic bias.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "At what missingness proportion and action granularity does imputation of incomplete action sequences cease to recover process fidelity scores, revealing a phase transition in the reliability of correspondence-based measurement?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a critical missingness threshold and its dependence on action granularity for the viability of imputation in process fidelity measurement."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of missingness proportion (θ) such that for missingness < θ, imputation reduces fidelity score error, but for missingness ≥ θ, imputation fails and error increases sharply. This threshold decreases as action granularity increases (i.e., finer-grained actions are more vulnerable).",
+        "predicted_effect": "Threshold θ exists and is lower for fine-grained actions; imputation is beneficial below θ, harmful above θ."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate agents performing a known process with varying action granularity (coarse: 5 actions/task, fine: 20 actions/task) and missingness proportions (0%, 10%, 20%, 40%, 60%, 80%). For each condition, compute accuracy (mean absolute error) of fidelity scores from raw incomplete sequences vs. imputed sequences (using specification-constrained Markov model) against true fidelity from full sequences. Identify the missingness threshold θ where imputed error exceeds or equals raw error. Repeat for each granularity level.",
+        "independent_variables": [
+          "Missingness proportion (0%-80%)",
+          "Action granularity (coarse vs. fine)"
+        ],
+        "dependent_variables": [
+          "Accuracy of fidelity scores (mean absolute error)"
+        ],
+        "controls": [
+          "Process specification complexity",
+          "Agent behavior consistency",
+          "Imputation method (Markov model constrained by specification)"
+        ],
+        "falsifying_observation": "No threshold θ is observed (imputed error is always better or always worse than raw error) or granularity does not affect the threshold location."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A clear threshold θ exists where imputed error surpasses raw error.",
+          "θ is lower for fine-grained actions (e.g., θ_fine=20% vs θ_coarse=40%)."
+        ],
+        "rejects_hypothesis": [
+          "Imputed error is always lower than raw error regardless of missingness.",
+          "Imputed error is always higher than raw error.",
+          "θ is independent of granularity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "No threshold exists or granularity does not affect imputation effectiveness.",
+        "assumption_to_revise": "The assumption that there is a nonlinear phase transition in imputation effectiveness may be incorrect; perhaps imputation effectiveness degrades linearly with missingness.",
+        "next_question": "What is the functional form of the relationship between missingness, granularity, and imputation effectiveness?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a specific threshold deviation rate (d*) such that when the agent's deviation rate exceeds d*, process fidelity sharply declines (phase transition) in tasks with novel states. Moreover, d* is higher when the specification includes more allowed variations (i.e., less strict).",
+      "independent_variables": [
+        "Deviation rate (continuous from 0% to 100% in steps of 5%)",
+        "Specification strictness (strict vs lenient)"
+      ],
+      "dependent_variables": [
+        "Process fidelity (percentage of actions that follow the specification)",
+        "Task completion rate"
+      ],
+      "controlled_variables": [
+        "Task complexity (fixed number of waypoints and obstacles)",
+        "Environment randomness (same random seed across conditions)",
+        "Agent architecture (same base model with adjustable deviation threshold)",
+        "Frequency of novel states (30% of trials)"
+      ],
+      "baselines": [
+        {
+          "name": "No deviation baseline",
+          "description": "Deviation rate = 0% for both strict and lenient specifications, to establish maximum fidelity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Process fidelity",
+          "definition": "Percentage of agent actions that adhere to the process specification over the entire trial."
+        },
+        {
+          "name": "Task completion rate",
+          "definition": "Percentage of trials where the agent successfully completes the navigation task."
+        }
+      ],
+      "expected_result": "For each specification strictness, process fidelity remains above 90% for deviation rates below a threshold d*, and drops sharply below 50% for rates above d*. The threshold d* for lenient specifications is at least 20 percentage points higher than for strict specifications.",
+      "falsifying_result": "Process fidelity decreases linearly with deviation rate (no sharp threshold), or the threshold d* does not differ significantly between strict and lenient specifications, or process fidelity remains high even at high deviation rates.",
+      "minimum_viable_experiment": "In a simulated grid-world navigation task with a strict process specification (no allowed variations) and a lenient specification (allows 20% variation in step sequence), introduce novel states (unforeseen obstacles) in 30% of trials. Vary the agent's deviation rate from 0% to 100% in steps of 5% by adjusting a threshold in its decision policy. Measure process fidelity and task completion rate across 100 trials per condition.",
+      "risks_and_confounds": [
+        "The definition of 'allowed variations' in the lenient specification must be carefully operationalized; too lenient may trivialize the test.",
+        "Novel states might not be truly unforeseen if the agent can anticipate them; ensure they are unpredictable.",
+        "The 30% frequency of novel states may not be ideal; it is a starting point."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical granularity threshold beyond which process fidelity measurement precision does not significantly improve, forming a phase transition. This threshold increases with the ambiguity of the process specification.",
+      "independent_variables": [
+        "Process specification ambiguity (low, high)",
+        "Action granularity (coarse, medium, fine)"
+      ],
+      "dependent_variables": [
+        "Precision (1/variance of fidelity scores across runs)"
+      ],
+      "controlled_variables": [
+        "Task: simple sequential task (e.g., making a sandwich)",
+        "Correspondence measure: normalized edit distance",
+        "Agent: fixed LLM (GPT-4, temperature=0, seed=42)",
+        "Number of runs per condition: 30",
+        "Process specification: for low ambiguity, fully ordered steps; for high ambiguity, steps with optional ordering and conditional branches"
+      ],
+      "baselines": [
+        {
+          "name": "Low ambiguity with coarse granularity",
+          "description": "Serves as reference point for precision; expected to have low precision due to coarse actions."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Precision",
+          "definition": "Inverse of the variance of fidelity scores across 30 runs. Higher precision indicates more consistent measurement."
+        },
+        {
+          "name": "Breakpoint",
+          "definition": "Granularity level where precision stops improving significantly, detected by piecewise linear regression or pairwise comparisons."
+        }
+      ],
+      "expected_result": "For low ambiguity, precision increases from coarse to medium granularity but shows no significant improvement from medium to fine (plateau). For high ambiguity, precision increases across all three granularities (coarse to medium to fine), indicating a higher threshold.",
+      "falsifying_result": "No plateau is observed for either ambiguity level (precision continues to increase linearly from coarse to fine) OR the threshold is the same for both ambiguity levels OR the threshold is lower for high ambiguity than low.",
+      "minimum_viable_experiment": "Two levels of ambiguity (low, high) and three levels of granularity (coarse, medium, fine), with 30 runs per condition (total 180 runs). Use normalized edit distance as correspondence measure. Compare precision between adjacent granularity levels within each ambiguity level using t-tests or ANOVA. If precision stops increasing from medium to fine for low ambiguity but continues increasing for high ambiguity, the hypothesis is supported; otherwise, it is falsified.",
+      "risks_and_confounds": [
+        "Observability noise: If agent actions are not perfectly recorded, variance may increase artificially, obscuring plateau detection.",
+        "Granularity operationalization: The chosen granularity levels may not span the threshold; need to ensure they cover the likely transition.",
+        "Agent variability: Even with fixed seed, LLM outputs may have variance; 30 runs may be insufficient to estimate variance accurately.",
+        "Task specificity: Results may not generalize to other tasks or correspondence measures."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold of missingness proportion (θ) such that for missingness < θ, imputation reduces fidelity score error, but for missingness ≥ θ, imputation fails and error increases sharply. This threshold decreases as action granularity increases (i.e., finer-grained actions are more vulnerable).",
+      "independent_variables": [
+        "Missingness proportion (0%, 10%, 20%, 40%, 60%, 80%)",
+        "Action granularity (coarse: 5 actions/task, fine: 20 actions/task)"
+      ],
+      "dependent_variables": [
+        "Accuracy of fidelity scores (mean absolute error between imputed/raw scores and true fidelity score)"
+      ],
+      "controlled_variables": [
+        "Process specification complexity (fixed), Agent behavior consistency (agents follow specification perfectly), Imputation method (specification-constrained Markov model)"
+      ],
+      "baselines": [
+        {
+          "name": "Raw incomplete sequence",
+          "description": "Fidelity score computed directly from the incomplete action sequence without imputation."
+        },
+        {
+          "name": "True fidelity score",
+          "description": "Fidelity score computed from the complete, uncorrupted action sequence."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Mean absolute error (MAE) of fidelity scores",
+          "definition": "For each condition, compute the absolute difference between the fidelity score from imputed (or raw incomplete) sequence and the true fidelity score, then average over multiple trials."
+        }
+      ],
+      "expected_result": "We observe a threshold θ where imputed MAE exceeds raw MAE, and θ is lower for fine-grained actions (e.g., θ_fine=20%, θ_coarse=40%).",
+      "falsifying_result": "No threshold θ is observed; either imputed MAE is always lower than raw MAE for all missingness levels, or imputed MAE is always higher, or granularity does not affect the threshold location.",
+      "minimum_viable_experiment": "Simulate agents performing a known process with two action granularity levels and six missingness proportions. For each combination, compute fidelity score errors from raw incomplete sequences and from imputed sequences (using specification-constrained Markov model). Identify the missingness proportion at which imputed error first exceeds raw error. Repeat for each granularity level.",
+      "risks_and_confounds": [
+        "Imputation method may not be optimal for all granularities, potentially biasing results.",
+        "Specification completeness assumption may be violated if process is ambiguous.",
+        "Agent behavior consistency may not hold if agents deviate from specification."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "At what critical deviation rate does an agent's process fidelity collapse when encountering novel states outside the process specification, and how does this threshold depend on the specification's strictness (extensiveness of allowed variations)?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what action granularity level does process fidelity measurement precision saturate, and how does this threshold depend on process specification ambiguity?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what missingness proportion and action granularity does imputation of incomplete action sequences cease to recover process fidelity scores, revealing a phase transition in the reliability of correspondence-based measurement?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

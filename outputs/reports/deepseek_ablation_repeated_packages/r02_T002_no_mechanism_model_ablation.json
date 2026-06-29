@@ -1,0 +1,788 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Action",
+        "definition": "An atomic unit of behavior executed by an agent in the course of performing a task.",
+        "why_primitive": "Process fidelity decomposes into matching each action to a prescribed step; without defining actions, measurement is impossible."
+      },
+      {
+        "name": "Prescribed Process",
+        "definition": "A normative specification of the sequence, constraints, or rules that the agent should follow when executing a task.",
+        "why_primitive": "Fidelity is inherently relational—it compares actual behavior to a standard; the standard is the prescribed process."
+      },
+      {
+        "name": "Deviation",
+        "definition": "Any discrepancy between an agent's actual action and the corresponding action prescribed by the process, including omissions, commissions, or order errors.",
+        "why_primitive": "The core of fidelity measurement is detecting and quantifying deviations; all metrics build on this concept."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Agent actions are observable and categorizable",
+        "rationale": "Measurement requires the ability to record and classify each action the agent takes; otherwise, no comparison can occur.",
+        "possible_failure": "Actions may be ambiguous, continuous, or not logged, making categorization subjective or incomplete."
+      },
+      {
+        "assumption": "The prescribed process is well-defined and deterministic",
+        "rationale": "For fidelity to be meaningful, there must be a clear, unambiguous standard; otherwise, any behavior can be justified, and variance cannot be attributed to the agent.",
+        "possible_failure": "Real-world processes often involve probabilistic steps, conditional branches, or underspecified instructions, undermining unambiguous measurement."
+      },
+      {
+        "assumption": "The agent is capable of following the process",
+        "rationale": "Fidelity measurement presupposes that the agent has the necessary knowledge, skills, and resources to comply; otherwise, deviation reflects incapability rather than infidelity.",
+        "possible_failure": "Agents (e.g., LLMs) may have architectural limitations that make perfect fidelity impossible, confounding interpretation."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity of action decomposition vs. practical feasibility of measurement",
+        "variables": [
+          "action granularity",
+          "measurement effort",
+          "accuracy of deviation detection"
+        ]
+      },
+      {
+        "tradeoff": "Completeness of deviation coverage vs. cost of evaluation",
+        "variables": [
+          "number of deviation types considered",
+          "evaluation cost",
+          "risk of missing critical deviations"
+        ]
+      },
+      {
+        "tradeoff": "Objectivity of metrics vs. contextual relevance",
+        "variables": [
+          "metric standardization",
+          "task specificity",
+          "generalizability of fidelity scores"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "topic condition",
+        "role": "input",
+        "description": "The observed condition in How should we measure agent process fidelity?."
+      },
+      {
+        "name": "research outcome",
+        "role": "outcome",
+        "description": "The measured outcome or failure mode proposed by the research question."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+        "source": null,
+        "relation": null,
+        "target": null,
+        "explanation": null
+      }
+    ],
+    "bottlenecks": [],
+    "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Granularity of action decomposition vs. practical feasibility of measurement: finer granularity improves deviation detection accuracy but increases measurement effort and cost, creating a tradeoff that existing methods often resolve arbitrarily.",
+      "derived_from": [
+        "core_tradeoffs: Granularity vs feasibility"
+      ],
+      "why_it_matters": "This tradeoff directly impacts whether fidelity metrics are actionable; too coarse might miss critical deviations, too fine may be impractical.",
+      "what_existing_methods_may_miss": "Methods often assume a fixed granularity without justifying why that level is appropriate for the task, potentially misrepresenting true fidelity.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Assumption that the prescribed process is well-defined and deterministic conflicts with real-world processes that involve probabilistic steps, conditional branches, or underspecified instructions, making unambiguous fidelity measurement impossible.",
+      "derived_from": [
+        "assumptions: Prescribed process is well-defined and deterministic",
+        "primitive_definitions: Prescribed Process"
+      ],
+      "why_it_matters": "If the standard is ambiguous, then deviations become subjective, undermining the validity of fidelity comparisons across agents or tasks.",
+      "what_existing_methods_may_miss": "Existing metrics often assume a fixed process; they may not handle conditional flows or hidden branching, leading to misleading deviation counts.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Objectivity of metrics vs. contextual relevance: standardized fidelity scores generalize across tasks but may fail to capture task-specific nuances that are critical for evaluating agent performance in situ.",
+      "derived_from": [
+        "core_tradeoffs: Objectivity vs contextual relevance"
+      ],
+      "why_it_matters": "Overemphasis on objective metrics can lead to gaming or misalignment with actual task goals; context-dependent measures are harder to validate but more meaningful.",
+      "what_existing_methods_may_miss": "Benchmarks often use context-free metrics, ignoring that the same deviation may have different impact depending on the domain or user intent.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying the granularity of action decomposition (e.g., coarse vs fine) affect the accuracy of deviation detection in process fidelity measurement, and what is the optimal tradeoff point to minimize both false positives and measurement cost?",
+      "question_type": "causal",
+      "source_tension": "T1: Granularity of action decomposition vs. practical feasibility of measurement",
+      "expected_contribution": "Quantify the tradeoff between granularity and measurement feasibility, providing empirical guidance for selecting an optimal decomposition level that balances detection accuracy with practical constraints."
+    },
+    {
+      "question": "Under what conditions does ambiguity in the prescribed process (e.g., probabilistic vs deterministic steps) lead to irreproducible fidelity scores across different raters, and can a formal framework that maps process uncertainties to measurement confidence intervals resolve this?",
+      "question_type": "diagnostic",
+      "source_tension": "T2: Assumption that the prescribed process is well-defined and deterministic conflicts with real-world processes",
+      "expected_contribution": "Develop a diagnostic framework to identify sources of ambiguity in prescribed processes and propose a method to quantify fidelity uncertainty, enabling reproducible measurement in non-deterministic settings."
+    },
+    {
+      "question": "How does the inclusion of task-specific contextual features (e.g., domain keywords, user intent) in fidelity metrics change the correlation of those metrics with expert judgment of agent performance compared to context-free standardized metrics?",
+      "question_type": "benchmark",
+      "source_tension": "T3: Objectivity of metrics vs. contextual relevance",
+      "expected_contribution": "Provide empirical evidence comparing context-free and context-aware fidelity metrics against expert evaluations, demonstrating whether contextual relevance improves alignment with human judgment of agent performance."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "An atomic unit of behavior executed by an agent in the course of performing a task.",
+          "why_primitive": "Process fidelity decomposes into matching each action to a prescribed step; without defining actions, measurement is impossible."
+        },
+        {
+          "name": "Prescribed Process",
+          "definition": "A normative specification of the sequence, constraints, or rules that the agent should follow when executing a task.",
+          "why_primitive": "Fidelity is inherently relational—it compares actual behavior to a standard; the standard is the prescribed process."
+        },
+        {
+          "name": "Deviation",
+          "definition": "Any discrepancy between an agent's actual action and the corresponding action prescribed by the process, including omissions, commissions, or order errors.",
+          "why_primitive": "The core of fidelity measurement is detecting and quantifying deviations; all metrics build on this concept."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Agent actions are observable and categorizable",
+          "rationale": "Measurement requires the ability to record and classify each action the agent takes; otherwise, no comparison can occur.",
+          "possible_failure": "Actions may be ambiguous, continuous, or not logged, making categorization subjective or incomplete."
+        },
+        {
+          "assumption": "The prescribed process is well-defined and deterministic",
+          "rationale": "For fidelity to be meaningful, there must be a clear, unambiguous standard; otherwise, any behavior can be justified, and variance cannot be attributed to the agent.",
+          "possible_failure": "Real-world processes often involve probabilistic steps, conditional branches, or underspecified instructions, undermining unambiguous measurement."
+        },
+        {
+          "assumption": "The agent is capable of following the process",
+          "rationale": "Fidelity measurement presupposes that the agent has the necessary knowledge, skills, and resources to comply; otherwise, deviation reflects incapability rather than infidelity.",
+          "possible_failure": "Agents (e.g., LLMs) may have architectural limitations that make perfect fidelity impossible, confounding interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in How should we measure agent process fidelity?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Granularity of action decomposition vs. practical feasibility of measurement: finer granularity improves deviation detection accuracy but increases measurement effort and cost, creating a tradeoff that existing methods often resolve arbitrarily.",
+        "derived_from": [
+          "core_tradeoffs: Granularity vs feasibility"
+        ],
+        "why_it_matters": "This tradeoff directly impacts whether fidelity metrics are actionable; too coarse might miss critical deviations, too fine may be impractical.",
+        "what_existing_methods_may_miss": "Methods often assume a fixed granularity without justifying why that level is appropriate for the task, potentially misrepresenting true fidelity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical granularity threshold in action decomposition where the false positive rate (FPR) of deviation detection increases disproportionately relative to the true positive rate (TPR), such that the optimal granularity lies exactly at this threshold, and does this threshold shift predictably with task entropy?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identification of a phase transition in the granularity-fidelity tradeoff, providing a principled rule (threshold-based) for selecting decomposition granularity that adapts to task uncertainty."
+      },
+      "hypothesis": {
+        "statement": "As action granularity increases, TPR improves logarithmically while FPR increases exponentially beyond a critical granularity level; the optimal granularity is the point where the derivative of FPR with respect to granularity first exceeds the derivative of TPR. This critical granularity is positively correlated with task entropy (uncertainty in action sequences).",
+        "predicted_effect": "A clear phase transition: below the threshold, increasing granularity yields net benefit; above it, net cost accelerates. The threshold shifts right as task entropy increases."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Design three benchmark tasks with low, medium, and high entropy (e.g., deterministic web form vs. open-ended data analysis). For each, define 5 granularity levels from coarse (step-level) to very fine (keystroke-level). Run the same LLM agent on 50 trials per task per granularity. Compute TPR and FPR against ground truth deviations. Fit curves to identify the critical granularity where dFPR/dG > dTPR/dG. For each entropy condition, locate the threshold. If the threshold exists and shifts with entropy, support; if not, falsify.",
+        "independent_variables": [
+          "Granularity level (5 levels: step, sub-step, action, sub-action, keystroke)",
+          "Task entropy (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "True positive rate (TPR)",
+          "False positive rate (FPR)",
+          "Derivative of TPR and FPR with respect to granularity",
+          "Critical granularity threshold (where dFPR/dG > dTPR/dG)"
+        ],
+        "controls": [
+          "Same LLM model and version across all conditions",
+          "Same environment and initial state",
+          "Same deviation detection algorithm (only granularity changes)",
+          "Equal number of prescribed actions across tasks by normalizing task length"
+        ],
+        "falsifying_observation": "If no critical granularity is found (i.e., TPR and FPR do not diverge in slope), or if the threshold does not vary with task entropy in a monotonic manner, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "TPR increases logarithmically with granularity, FPR increases exponentially after a certain point",
+          "A critical granularity exists where dFPR/dG exceeds dTPR/dG for all entropy levels",
+          "Critical granularity is higher for high-entropy tasks than low-entropy tasks"
+        ],
+        "rejects_hypothesis": [
+          "No clear threshold: TPR and FPR both increase linearly and at similar rates",
+          "Critical granularity does not change with entropy (remains constant) or changes non-monotonically"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is observed, then the relationship between granularity and detection metrics is not characterized by a phase transition but is linear or concave, invalidating the threshold-based tradeoff.",
+        "assumption_to_revise": "The assumption that the granularity-fidelity tradeoff involves a non-linearity (exponential vs. logarithmic) may be wrong; instead, the relationship could be monotonic with diminishing returns. Furthermore, the assumption that task entropy modulates the tradeoff must be revised.",
+        "next_question": "What is the functional form of the relationship between granularity and detection accuracy, and what factors other than entropy (e.g., action type, agent variability) determine the optimal granularity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "An atomic unit of behavior executed by an agent in the course of performing a task.",
+          "why_primitive": "Process fidelity decomposes into matching each action to a prescribed step; without defining actions, measurement is impossible."
+        },
+        {
+          "name": "Prescribed Process",
+          "definition": "A normative specification of the sequence, constraints, or rules that the agent should follow when executing a task.",
+          "why_primitive": "Fidelity is inherently relational—it compares actual behavior to a standard; the standard is the prescribed process."
+        },
+        {
+          "name": "Deviation",
+          "definition": "Any discrepancy between an agent's actual action and the corresponding action prescribed by the process, including omissions, commissions, or order errors.",
+          "why_primitive": "The core of fidelity measurement is detecting and quantifying deviations; all metrics build on this concept."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Agent actions are observable and categorizable",
+          "rationale": "Measurement requires the ability to record and classify each action the agent takes; otherwise, no comparison can occur.",
+          "possible_failure": "Actions may be ambiguous, continuous, or not logged, making categorization subjective or incomplete."
+        },
+        {
+          "assumption": "The prescribed process is well-defined and deterministic",
+          "rationale": "For fidelity to be meaningful, there must be a clear, unambiguous standard; otherwise, any behavior can be justified, and variance cannot be attributed to the agent.",
+          "possible_failure": "Real-world processes often involve probabilistic steps, conditional branches, or underspecified instructions, undermining unambiguous measurement."
+        },
+        {
+          "assumption": "The agent is capable of following the process",
+          "rationale": "Fidelity measurement presupposes that the agent has the necessary knowledge, skills, and resources to comply; otherwise, deviation reflects incapability rather than infidelity.",
+          "possible_failure": "Agents (e.g., LLMs) may have architectural limitations that make perfect fidelity impossible, confounding interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in How should we measure agent process fidelity?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Granularity of action decomposition vs. practical feasibility of measurement: finer granularity improves deviation detection accuracy but increases measurement effort and cost, creating a tradeoff that existing methods often resolve arbitrarily.",
+        "derived_from": [
+          "core_tradeoffs: Granularity vs feasibility"
+        ],
+        "why_it_matters": "This tradeoff directly impacts whether fidelity metrics are actionable; too coarse might miss critical deviations, too fine may be impractical.",
+        "what_existing_methods_may_miss": "Methods often assume a fixed granularity without justifying why that level is appropriate for the task, potentially misrepresenting true fidelity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of task complexity does context-aware fidelity measurement become significantly more aligned with expert judgment than context-free measurement?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a quantitative boundary condition on task complexity that determines when context-aware metrics are necessary, providing actionable guidance for metric selection."
+      },
+      "hypothesis": {
+        "statement": "There exists a task complexity threshold C such that for tasks with complexity greater than C, context-aware fidelity metrics show a significantly higher positive correlation with expert judgment than context-free metrics; for tasks with complexity less than or equal to C, the correlation difference is negligible (less than 0.1).",
+        "predicted_effect": "The interaction between metric type and task complexity on correlation with expert judgment will be significant, with a sharp increase in the advantage of context-aware metrics above a specific complexity value."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select 100 tasks spanning a validated low-to-high complexity continuum (e.g., measured by number of steps, ambiguity, reasoning requirements). For each task, have an LLM agent execute it. Compute context-free edit distance and context-aware weighted deviation metrics. Have three expert judges rate overall performance on a 1-5 scale. Use a moderated regression model (with metric type, complexity, and their interaction) to predict correlation between metric and expert rating. Apply Johnson-Neyman technique to identify the complexity range where the simple slope of context-aware metric significantly exceeds that of context-free metric (p < 0.05).",
+        "independent_variables": [
+          "type of fidelity metric (context-free vs context-aware)",
+          "task complexity (continuous)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation coefficient between metric score and expert rating (z-transformed)"
+        ],
+        "controls": [
+          "same LLM agent",
+          "same set of tasks",
+          "same expert judges",
+          "randomized order of tasks",
+          "balanced presentation of metrics to judges"
+        ],
+        "falsifying_observation": "If the interaction between metric type and complexity is not significant (p > 0.05), or if the Johnson-Neyman region of significance does not identify a threshold where context-aware metrics outperform (i.e., the simple slope for context-aware is not significantly greater than for context-free at any complexity level), then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant interaction term (p < 0.05) in moderated regression.",
+          "Johnson-Neyman identifies a threshold C (e.g., complexity > 0.6 on normalized scale) where context-aware metric's correlation differs significantly from context-free metric.",
+          "Correlation for context-aware above C is at least 0.5, while context-free is below 0.3."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction (p > 0.05).",
+          "Context-free metric shows higher correlation across all complexity levels.",
+          "Context-aware metric never significantly outperforms context-free at any complexity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no threshold or context-aware does not outperform above any complexity),",
+        "assumption_to_revise": "the assumption that task complexity moderates the relative value of context-aware metrics may be incorrect; instead, the key moderator might be task domain, instruction ambiguity, or agent capability.",
+        "next_question": "Which specific dimensions of task complexity (e.g., number of steps, semantic ambiguity, required background knowledge) are most predictive of when context-aware metrics improve alignment with expert judgment?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Action",
+          "definition": "An atomic unit of behavior executed by an agent in the course of performing a task.",
+          "why_primitive": "Process fidelity decomposes into matching each action to a prescribed step; without defining actions, measurement is impossible."
+        },
+        {
+          "name": "Prescribed Process",
+          "definition": "A normative specification of the sequence, constraints, or rules that the agent should follow when executing a task.",
+          "why_primitive": "Fidelity is inherently relational—it compares actual behavior to a standard; the standard is the prescribed process."
+        },
+        {
+          "name": "Deviation",
+          "definition": "Any discrepancy between an agent's actual action and the corresponding action prescribed by the process, including omissions, commissions, or order errors.",
+          "why_primitive": "The core of fidelity measurement is detecting and quantifying deviations; all metrics build on this concept."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Agent actions are observable and categorizable",
+          "rationale": "Measurement requires the ability to record and classify each action the agent takes; otherwise, no comparison can occur.",
+          "possible_failure": "Actions may be ambiguous, continuous, or not logged, making categorization subjective or incomplete."
+        },
+        {
+          "assumption": "The prescribed process is well-defined and deterministic",
+          "rationale": "For fidelity to be meaningful, there must be a clear, unambiguous standard; otherwise, any behavior can be justified, and variance cannot be attributed to the agent.",
+          "possible_failure": "Real-world processes often involve probabilistic steps, conditional branches, or underspecified instructions, undermining unambiguous measurement."
+        },
+        {
+          "assumption": "The agent is capable of following the process",
+          "rationale": "Fidelity measurement presupposes that the agent has the necessary knowledge, skills, and resources to comply; otherwise, deviation reflects incapability rather than infidelity.",
+          "possible_failure": "Agents (e.g., LLMs) may have architectural limitations that make perfect fidelity impossible, confounding interpretation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in How should we measure agent process fidelity?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Granularity of action decomposition vs. practical feasibility of measurement: finer granularity improves deviation detection accuracy but increases measurement effort and cost, creating a tradeoff that existing methods often resolve arbitrarily.",
+        "derived_from": [
+          "core_tradeoffs: Granularity vs feasibility"
+        ],
+        "why_it_matters": "This tradeoff directly impacts whether fidelity metrics are actionable; too coarse might miss critical deviations, too fine may be impractical.",
+        "what_existing_methods_may_miss": "Methods often assume a fixed granularity without justifying why that level is appropriate for the task, potentially misrepresenting true fidelity.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what level of process ambiguity (quantified by the proportion of probabilistic steps) does inter-rater reliability of fidelity scores exhibit a sharp phase transition from reproducible to irreproducible, and can a confidence-interval framework extend the reproducible regime above this threshold?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a critical ambiguity threshold that triggers a phase transition in reproducibility, and evaluate whether a confidence-interval framework can shift that threshold, enabling robust fidelity measurement in ambiguous settings."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical ambiguity threshold (e.g., >30% probabilistic steps) where inter-rater reliability drops below a practical threshold (Cohen's kappa < 0.6) and remains low even with a confidence-interval framework; below the threshold, the framework maintains reliability above 0.6.",
+        "predicted_effect": "The relationship between ambiguity level and inter-rater reliability is not linear but exhibits a sharp drop at a certain threshold; the confidence-interval framework increases the threshold at which this drop occurs."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Design prescribed processes with varying proportions of probabilistic steps: 0%, 10%, 30%, 50%, 70%. Each process is used to generate agent actions. Multiple raters evaluate fidelity using both standard exact-match rate and a confidence-interval-based framework. Inter-rater reliability (Cohen's kappa) is measured for each condition. Analyze the relationship between ambiguity level and reliability to identify a sharp drop point.",
+        "independent_variables": [
+          "Proportion of probabilistic steps (0%, 10%, 30%, 50%, 70%)",
+          "Evaluation method (standard vs confidence-interval framework)"
+        ],
+        "dependent_variables": [
+          "Inter-rater reliability (Cohen's kappa)",
+          "Threshold value (the ambiguity level at which kappa drops below 0.6)"
+        ],
+        "controls": [
+          "Same agent actions across ambiguity levels",
+          "Same number of raters and training",
+          "Randomized order of evaluation methods"
+        ],
+        "falsifying_observation": "If inter-rater reliability declines linearly with ambiguity (no sharp drop), or if the confidence-interval framework maintains reliability above 0.6 at all ambiguity levels (no threshold), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Inter-rater reliability exhibits a sharp drop (e.g., from >0.7 to <0.5) at a specific ambiguity level (e.g., 30%) when using standard method.",
+          "The confidence-interval framework delays this drop to a higher ambiguity level (e.g., 50%) or eliminates it entirely (reliability stays >0.6).",
+          "The variance of fidelity scores increases abruptly at the threshold."
+        ],
+        "rejects_hypothesis": [
+          "No sharp drop: reliability decreases linearly with ambiguity level.",
+          "The confidence-interval framework does not alter the threshold or even lowers it.",
+          "The framework maintains high reliability regardless of ambiguity (suggesting ambiguity is not the primary driver)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (no threshold or framework fails to shift it), then revise the assumption that the proportion of probabilistic steps is the key factor causing irreproducibility.",
+        "assumption_to_revise": "The assumption that process ambiguity (quantified by probabilistic steps) alone dictates the reproducibility threshold; other factors like action granularity or rater background may interact.",
+        "next_question": "How does action granularity moderate the effect of process ambiguity on the reproducibility threshold, and can a combined framework that adapts granularity based on ambiguity level improve reproducibility?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "As action granularity increases, TPR improves logarithmically while FPR increases exponentially beyond a critical granularity level; the optimal granularity is the point where the derivative of FPR with respect to granularity first exceeds the derivative of TPR. This critical granularity is positively correlated with task entropy (uncertainty in action sequences).",
+      "independent_variables": [
+        "Granularity level (step, sub-step, action, sub-action, keystroke)",
+        "Task entropy (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "True positive rate (TPR)",
+        "False positive rate (FPR)",
+        "Derivative of TPR with respect to granularity",
+        "Derivative of FPR with respect to granularity",
+        "Critical granularity threshold (where dFPR/dG > dTPR/dG)"
+      ],
+      "controlled_variables": [
+        "Same LLM model and version across all conditions",
+        "Same environment and initial state",
+        "Same deviation detection algorithm (only granularity changes)",
+        "Equal number of prescribed actions across tasks by normalizing task length",
+        "Same agent (LLM) temperature and parameters"
+      ],
+      "baselines": [
+        {
+          "name": "Coarse granularity (step-level)",
+          "description": "Actions defined at highest level (e.g., whole task steps), representing the coarsest decomposition."
+        },
+        {
+          "name": "Fine granularity (keystroke-level)",
+          "description": "Actions defined at the finest level (e.g., each keystroke), representing the most detailed decomposition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "True positive rate (TPR)",
+          "definition": "Proportion of actual deviations correctly detected by the deviation detection algorithm."
+        },
+        {
+          "name": "False positive rate (FPR)",
+          "definition": "Proportion of non-deviations incorrectly flagged as deviations."
+        },
+        {
+          "name": "Derivative ratio",
+          "definition": "Comparison of the slopes of TPR and FPR as functions of granularity, used to identify the critical threshold."
+        }
+      ],
+      "expected_result": "TPR increases logarithmically with granularity, FPR increases exponentially after a certain point; a critical granularity exists where dFPR/dG exceeds dTPR/dG for all entropy levels; critical granularity is higher for high-entropy tasks than low-entropy tasks.",
+      "falsifying_result": "No clear threshold is observed (i.e., TPR and FPR do not diverge in slope) or the critical granularity does not vary with task entropy in a monotonic manner (e.g., remains constant or changes non-monotonically).",
+      "minimum_viable_experiment": "Design three benchmark tasks with low, medium, and high entropy (e.g., deterministic web form vs. open-ended data analysis). For each, define 5 granularity levels from coarse (step-level) to very fine (keystroke-level). Run the same LLM agent on 50 trials per task per granularity. Compute TPR and FPR against ground truth deviations. Fit curves to identify the critical granularity where dFPR/dG > dTPR/dG. For each entropy condition, locate the threshold. If the threshold exists and shifts with entropy, support; if not, falsify.",
+      "risks_and_confounds": [
+        "Action logging accuracy may vary with granularity, introducing measurement noise.",
+        "Task entropy quantification may be subjective; use information-theoretic measures.",
+        "LLM behavior may be stochastic across trials; ensure sufficient trials for statistical power.",
+        "Ground truth deviations must be meticulously defined for each granularity level."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical ambiguity threshold (e.g., >30% probabilistic steps) where inter-rater reliability drops below a practical threshold (Cohen's kappa < 0.6) and remains low even with a confidence-interval framework; below the threshold, the framework maintains reliability above 0.6.",
+      "independent_variables": [
+        "Proportion of probabilistic steps (0%, 30%, 70%)",
+        "Evaluation method (standard exact-match rate vs confidence-interval framework)"
+      ],
+      "dependent_variables": [
+        "Inter-rater reliability (Cohen's kappa)",
+        "Ambiguity threshold (proportion of probabilistic steps where kappa drops below 0.6)"
+      ],
+      "controlled_variables": [
+        "Same agent actions across ambiguity levels",
+        "Same number of raters (at least 5 per method)",
+        "Same rater training and instructions",
+        "Randomized order of evaluation methods",
+        "Same task type (e.g., multi-step sequence)"
+      ],
+      "baselines": [
+        {
+          "name": "Standard exact-match evaluation at 0% ambiguity",
+          "description": "Baseline condition with no probabilistic steps, evaluated using standard exact-match method."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cohen's kappa",
+          "definition": "Inter-rater reliability measure for categorical ratings; values range from -1 to 1, with >0.6 considered substantial agreement."
+        },
+        {
+          "name": "Ambiguity threshold",
+          "definition": "The lowest proportion of probabilistic steps at which Cohen's kappa falls below 0.6 for the given evaluation method."
+        }
+      ],
+      "expected_result": "The confidence-interval framework maintains Cohen's kappa above 0.6 at 0% and 30% ambiguity, while the standard method drops below 0.6 at 30%. At 70% ambiguity, both methods yield kappa below 0.6, but the framework shows a smaller drop. A sharp threshold is observed for the standard method but is shifted to a higher ambiguity level for the framework.",
+      "falsifying_result": "No sharp drop: Cohen's kappa decreases linearly with ambiguity for both methods, or the confidence-interval framework does not maintain kappa >0.6 at 30% ambiguity, or the framework's threshold is equal to or lower than the standard method, or kappa remains above 0.6 for all ambiguity levels even with the standard method.",
+      "minimum_viable_experiment": "Create three prescribed processes with 0%, 30%, and 70% probabilistic steps. For each, simulate or collect agent actions that include both following and deviating from the process. Randomly assign two groups of at least 5 raters: one group evaluates fidelity using standard exact-match rate, the other using a confidence-interval framework (e.g., report mean and 95% CI of fidelity across steps). Compute Cohen's kappa for each condition (3 ambiguity levels x 2 methods). Analyze whether kappa exhibits a sharp drop at a specific ambiguity level and whether the confidence-interval framework shifts the drop point to a higher ambiguity level or eliminates it.",
+      "risks_and_confounds": [
+        "Small number of raters may lead to unstable kappa estimates; need at least 5 per group.",
+        "Order or learning effects if same raters evaluate multiple conditions; use between-subjects design or counterbalance.",
+        "Definition of probabilistic steps may not capture all aspects of process ambiguity; ensure consistent operationalization.",
+        "Artificial processes may not generalize to real-world tasks; but this is acceptable for a controlled experiment."
+      ]
+    },
+    {
+      "hypothesis": "There exists a task complexity threshold C such that for tasks with complexity greater than C, context-aware fidelity metrics show a significantly higher positive correlation with expert judgment than context-free metrics; for tasks with complexity less than or equal to C, the correlation difference is negligible (less than 0.1).",
+      "independent_variables": [
+        "type of fidelity metric (context-free vs context-aware)",
+        "task complexity group (low vs high)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation coefficient between metric score and average expert rating (z-transformed)"
+      ],
+      "controlled_variables": [
+        "same LLM agent (e.g., GPT-4)",
+        "same set of 20 tasks (10 simple, 10 complex)",
+        "same three expert judges",
+        "randomized order of task presentation to judges",
+        "blinded judges to metric scores",
+        "fixed number of steps/ambiguity for simple vs complex tasks"
+      ],
+      "baselines": [
+        {
+          "name": "Context-free edit distance",
+          "description": "Normalized Levenshtein distance between agent action sequence and prescribed process sequence, treating all steps equally."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Context-aware weighted deviation",
+          "definition": "Sum of step-wise penalties weighted by step importance (e.g., critical vs optional) and semantic similarity, normalized to [0,1]."
+        }
+      ],
+      "expected_result": "For complex tasks (Complexity > C), the correlation between context-aware metric and expert rating is significantly higher (p < 0.05, one-tailed) than the correlation for context-free metric, with difference > 0.2. For simple tasks (Complexity ≤ C), the difference between correlations is less than 0.1 and not significant.",
+      "falsifying_result": "If the difference in correlations (context-aware minus context-free) is not significantly larger for complex tasks than for simple tasks (p > 0.05), or if context-free metric shows higher correlation in complex tasks, or if the difference for simple tasks exceeds 0.1, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Select 10 simple tasks (≤3 steps, low ambiguity) and 10 complex tasks (≥10 steps, high ambiguity). Use an LLM to generate one execution per task. Obtain expert ratings (1-5) from three judges for each task. Compute context-free edit distance and context-aware deviation for each task. Compute Pearson correlations separately for simple and complex groups, then compare the difference between metric types across groups using Fisher z-test. A significant interaction (p<0.05) with larger advantage for complex tasks supports hypothesis.",
+      "risks_and_confounds": [
+        "Expert judges may have inconsistent standards; use predefined rubric.",
+        "LLM execution may have high variance; consider multiple runs per task.",
+        "Simple tasks might still contain enough complexity to trigger context-aware advantage; pre-test tasks to ensure clear distinction.",
+        "Correlations based on small samples (n=10 per group) have low power; effect size must be large.",
+        "Task complexity operationalization may not align with theoretical construct; validate with pilot."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a first-principles analysis of measuring agent process fidelity, identifying key primitives, assumptions, and tradeoffs. It proposes three concrete hypotheses with falsifiable experiments targeting tensions in granularity, process ambiguity, and context sensitivity. The work is well-structured and grounded, but the explicit omission of a mechanistic model and lack of baseline comparisons limit its completeness.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives and assumptions.",
+      "Identification of novel tensions (e.g., granularity vs feasibility, process ambiguity, objectivity vs context).",
+      "Each hypothesis includes a precise falsifiable test with controls and expected outcomes.",
+      "Experiments are designed to isolate causal mechanisms and identify phase transitions.",
+      "Strong focus on testability and empirical validation."
+    ],
+    "weaknesses": [
+      "Mechanism model is ablated; no explicit causal chain is provided, weakening theoretical grounding.",
+      "Some redundancy between candidate questions and certificate experiments.",
+      "Reliance on expert judgment in some experiments introduces subjectivity.",
+      "Limited discussion of existing faithfulness metrics (e.g., BLEU, ROUGE, process-specific baselines).",
+      "Overclaiming: the term 'optimal' is used without empirical support; the package proposes hypotheses, not solutions."
+    ],
+    "questions": [
+      "How would the proposed granularity threshold change if the agent's actions are continuous rather than discrete?",
+      "Could the confidence-interval framework for ambiguous processes be applied retroactively to existing datasets?",
+      "How do the proposed metrics compare to standard faithfulness metrics like BLEU or edit distance in terms of correlation with human judgment?"
+    ],
+    "missing_baselines": [
+      "Standard edit distance or Levenshtein distance for sequence alignment.",
+      "Process-specific metrics such as action-level accuracy.",
+      "Existing benchmarks like KQA Pro or FiD for fidelity evaluation.",
+      "Simple baselines like random or agent-agnostic scoring."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Mechanism model omission",
+    "root_cause": "Mechanism builder was disabled in ablation settings, leading to no explicit causal chain between variables.",
+    "violated_principle": "Every research package must contain an explicit mechanism model that specifies causal variables and their relationships, not just a generic topic-to-outcome relation.",
+    "new_or_updated_principle": "Mechanism models must include at least one causal path from independent variables to dependent variables, with clear bottlenecks or moderators, before tension finding.",
+    "new_or_updated_skill": "Skill: Constructing a mechanism model from primitives and assumptions, identifying causal paths and potential bottlenecks.",
+    "regression_test": "When given a topic and first-principles decomposition, the mechanism builder must output a non-empty causal chain with at least two variables and one explicit relation; failing to do so should trigger a repair request."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical granularity threshold in action decomposition where the false positive rate (FPR) of deviation detection increases disproportionately relative to the true positive rate (TPR), such that the optimal granularity lies exactly at this threshold, and does this threshold shift predictably with task entropy?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "At what level of process ambiguity (quantified by the proportion of probabilistic steps) does inter-rater reliability of fidelity scores exhibit a sharp phase transition from reproducible to irreproducible, and can a confidence-interval framework extend the reproducible regime above this threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of task complexity does context-aware fidelity measurement become significantly more aligned with expert judgment than context-free measurement?",
+        "original_suggestions": [
+          "Make the mechanism variables and causal chain more explicit.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": false,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_mechanism_model_ablation",
+    "ablation": "mechanism_builder_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

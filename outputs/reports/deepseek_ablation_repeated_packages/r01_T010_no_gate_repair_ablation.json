@@ -1,0 +1,1547 @@
+{
+  "topic": {
+    "topic": "When does retrieval help or hurt autonomous research agents?",
+    "topic_id": "T010",
+    "goal": null,
+    "domain": "auto research",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does retrieval help or hurt autonomous research agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Retrieval",
+        "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+        "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+      },
+      {
+        "name": "Knowledge",
+        "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+        "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+      },
+      {
+        "name": "Research Task",
+        "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+        "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Perfect retrieval accuracy",
+        "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+        "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+      },
+      {
+        "assumption": "Non-negligible retrieval cost",
+        "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+        "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Information gain vs. cost of retrieval",
+        "variables": [
+          "information gain",
+          "retrieval cost"
+        ]
+      },
+      {
+        "tradeoff": "Reduced uncertainty vs. potential bias from external sources",
+        "variables": [
+          "uncertainty reduction",
+          "bias introduction"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "retrieval_cost",
+        "role": "input",
+        "description": "The non-negligible cost in time or compute per retrieval operation."
+      },
+      {
+        "name": "knowledge_gap",
+        "role": "input",
+        "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+      },
+      {
+        "name": "retrieval_use",
+        "role": "input",
+        "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+      },
+      {
+        "name": "information_gain",
+        "role": "mediator",
+        "description": "The amount of new relevant and correct information obtained from retrieval."
+      },
+      {
+        "name": "bias_introduced",
+        "role": "mediator",
+        "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+      },
+      {
+        "name": "research_outcome",
+        "role": "outcome",
+        "description": "The quality or success of the research task, measured by progress toward the research goal."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "knowledge_gap",
+        "relation": "increases",
+        "target": "information_gain",
+        "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+      },
+      {
+        "step": "2",
+        "source": "retrieval_use",
+        "relation": "increases",
+        "target": "information_gain",
+        "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+      },
+      {
+        "step": "3",
+        "source": "retrieval_use",
+        "relation": "increases",
+        "target": "retrieval_cost",
+        "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+      },
+      {
+        "step": "4",
+        "source": "retrieval_use",
+        "relation": "increases",
+        "target": "bias_introduced",
+        "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+      },
+      {
+        "step": "5",
+        "source": "information_gain",
+        "relation": "increases",
+        "target": "research_outcome",
+        "explanation": "More relevant information improves the quality of research."
+      },
+      {
+        "step": "6",
+        "source": "bias_introduced",
+        "relation": "decreases",
+        "target": "research_outcome",
+        "explanation": "Bias can mislead reasoning and reduce research quality."
+      },
+      {
+        "step": "7",
+        "source": "retrieval_cost",
+        "relation": "decreases",
+        "target": "research_outcome",
+        "explanation": "High retrieval costs consume resources that could be used for other research activities."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "High retrieval cost",
+        "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+      },
+      {
+        "bottleneck": "Bias from external sources",
+        "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+      },
+      {
+        "bottleneck": "Over-reliance on retrieval",
+        "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+      }
+    ],
+    "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption of perfect retrieval accuracy contradicts real-world retrieval systems that inevitably introduce errors, which can mislead the agent and negate the benefits of information gain.",
+      "derived_from": [
+        "assumptions: Perfect retrieval accuracy",
+        "causal_chain step 6: bias_introduced decreases research_outcome"
+      ],
+      "why_it_matters": "If retrieval errors are ignored, the model may overestimate the net benefit of retrieval, leading to suboptimal decisions in practice.",
+      "what_existing_methods_may_miss": "Existing methods often assume noise-free retrieval and do not model the probability of incorrect information, missing the risk of propagating misinformation.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The core tradeoff between information gain and retrieval cost is underdetermined when retrieval cost can vary widely (e.g., near-zero vs. high), as the optimal strategy flips depending on cost magnitude.",
+      "derived_from": [
+        "core_tradeoffs: Information gain vs. cost of retrieval",
+        "assumptions: Non-negligible retrieval cost"
+      ],
+      "why_it_matters": "The assumption of non-negligible cost may not hold in all applications, making the tradeoff irrelevant and the mechanism model less general.",
+      "what_existing_methods_may_miss": "Existing cost-benefit analyses often assume a fixed cost, ignoring scenarios where retrieval is essentially free and thus always beneficial.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Reducing uncertainty via retrieval simultaneously introduces bias from external sources, creating a tension where the agent must trade off knowledge completeness against impartiality.",
+      "derived_from": [
+        "core_tradeoffs: Reduced uncertainty vs. potential bias from external sources",
+        "causal_chain steps 2 and 4: retrieval_use increases both information_gain and bias_introduced"
+      ],
+      "why_it_matters": "This tradeoff is critical for research integrity; ignoring bias can lead to flawed conclusions even if information is accurate.",
+      "what_existing_methods_may_miss": "Current agent frameworks rarely model the provenance of retrieved information and its potential biases, focusing only on factual accuracy.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Over-reliance on retrieval may impair internal reasoning, yet the mechanism model does not capture the opportunity cost of not engaging in deep thinking, leading to an under-tested assumption that retrieval always complements reasoning.",
+      "derived_from": [
+        "bottlenecks: Over-reliance on retrieval",
+        "mechanism_summary: retrieval is beneficial when net benefit positive"
+      ],
+      "why_it_matters": "If retrieval substitutes for critical thinking, research progress may stagnate; the model's assumption that more information always helps is flawed.",
+      "what_existing_methods_may_miss": "Existing methods evaluate retrieval in isolation, not considering how it affects the agent's cognitive load or reasoning depth.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The knowledge gap is assumed to directly increase information gain, but this neglects the possibility that the agent may not have the optimal query to exploit the gap, reducing the realized gain.",
+      "derived_from": [
+        "causal_chain step 1: knowledge_gap increases information_gain",
+        "primitive_definitions: Retrieval depends on query formulation"
+      ],
+      "why_it_matters": "If query formulation is imperfect, a large knowledge gap may not translate into useful information, breaking the assumed causal link and affecting cost-benefit calculations.",
+      "what_existing_methods_may_miss": "Most models treat retrieval as a black box that returns relevant info based on a perfect query, ignoring the challenge of query generation.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the probability of retrieval errors moderate the net benefit of retrieval on research outcome in autonomous agents?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the effect of imperfect retrieval accuracy, challenging the assumption of perfect retrieval and informing robust retrieval strategies."
+    },
+    {
+      "question": "Under what retrieval cost conditions does the information gain vs. cost tradeoff flip, and what characterizes the boundary?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Provides empirical boundaries for the tradeoff, enabling adaptive retrieval decisions based on cost magnitude."
+    },
+    {
+      "question": "What is the causal impact of bias introduced from external sources on research outcome, controlling for information gain?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Isolates the negative effect of bias, highlighting the need for provenance-aware retrieval to mitigate bias."
+    },
+    {
+      "question": "Does increased retrieval usage reduce the depth of internal reasoning, and how does this affect research outcome in tasks requiring synthesis?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Tests the over-reliance bottleneck, revealing whether retrieval substitutes for reasoning and guides balanced agent design."
+    },
+    {
+      "question": "How does the quality of query formulation mediate the relationship between knowledge gap and information gain?",
+      "question_type": "diagnostic",
+      "source_tension": "T5",
+      "expected_contribution": "Identifies query formulation as a critical mediator, suggesting that improving query generation can enhance retrieval effectiveness."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+          "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+        },
+        {
+          "name": "Knowledge",
+          "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+          "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+        },
+        {
+          "name": "Research Task",
+          "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+          "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Perfect retrieval accuracy",
+          "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+          "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+        },
+        {
+          "assumption": "Non-negligible retrieval cost",
+          "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+          "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "retrieval_cost",
+            "role": "input",
+            "description": "The non-negligible cost in time or compute per retrieval operation."
+          },
+          {
+            "name": "knowledge_gap",
+            "role": "input",
+            "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+          },
+          {
+            "name": "retrieval_use",
+            "role": "input",
+            "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+          },
+          {
+            "name": "information_gain",
+            "role": "mediator",
+            "description": "The amount of new relevant and correct information obtained from retrieval."
+          },
+          {
+            "name": "bias_introduced",
+            "role": "mediator",
+            "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+          },
+          {
+            "name": "research_outcome",
+            "role": "outcome",
+            "description": "The quality or success of the research task, measured by progress toward the research goal."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "knowledge_gap",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "retrieval_cost",
+            "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+          },
+          {
+            "step": "4",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "bias_introduced",
+            "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+          },
+          {
+            "step": "5",
+            "source": "information_gain",
+            "relation": "increases",
+            "target": "research_outcome",
+            "explanation": "More relevant information improves the quality of research."
+          },
+          {
+            "step": "6",
+            "source": "bias_introduced",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "Bias can mislead reasoning and reduce research quality."
+          },
+          {
+            "step": "7",
+            "source": "retrieval_cost",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "High retrieval costs consume resources that could be used for other research activities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "High retrieval cost",
+            "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+          },
+          {
+            "bottleneck": "Bias from external sources",
+            "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+          },
+          {
+            "bottleneck": "Over-reliance on retrieval",
+            "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+          }
+        ],
+        "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The knowledge gap is assumed to directly increase information gain, but this neglects the possibility that the agent may not have the optimal query to exploit the gap, reducing the realized gain.",
+        "derived_from": [
+          "causal_chain step 1: knowledge_gap increases information_gain",
+          "primitive_definitions: Retrieval depends on query formulation"
+        ],
+        "why_it_matters": "If query formulation is imperfect, a large knowledge gap may not translate into useful information, breaking the assumed causal link and affecting cost-benefit calculations.",
+        "what_existing_methods_may_miss": "Most models treat retrieval as a black box that returns relevant info based on a perfect query, ignoring the challenge of query generation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the quality of query formulation mediate the relationship between knowledge gap and information gain?",
+        "question_type": "diagnostic",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies query formulation as a critical mediator, suggesting that improving query generation can enhance retrieval effectiveness."
+      },
+      "hypothesis": {
+        "statement": "The quality of query formulation positively moderates the relationship between knowledge gap and information gain: higher query formulation quality amplifies the positive effect of knowledge gap on information gain.",
+        "predicted_effect": "For a given knowledge gap, information gain is higher when query formulation quality is high compared to when it is low."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a simulated research agent that performs retrieval from a fixed knowledge base. Manipulate knowledge gap by varying the novelty of the research question (low vs high knowledge gap). Manipulate query formulation quality by using either a naive query generator (e.g., simple keyword extraction) or an optimized query generator (e.g., using query expansion). Measure the information gain as the number of relevant novel facts retrieved per query. Control for retrieval cost (fixed time per query), bias (use unbiased sources), and agent's baseline knowledge.",
+        "independent_variables": [
+          "knowledge_gap (low vs high)",
+          "query_formulation_quality (low vs high)"
+        ],
+        "dependent_variables": [
+          "information_gain (number of relevant novel facts retrieved)"
+        ],
+        "controls": [
+          "retrieval_cost (fixed)",
+          "bias (none)",
+          "agent baseline knowledge (same across conditions)",
+          "retrieval system (same across conditions)"
+        ],
+        "falsifying_observation": "The interaction effect between knowledge gap and query formulation quality on information gain is not statistically significant, or the effect of knowledge gap on information gain does not differ significantly between high and low query formulation quality conditions."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Information gain increases more with knowledge gap when query formulation quality is high compared to when it is low.",
+          "A significant positive interaction between knowledge gap and query formulation quality on information gain."
+        ],
+        "rejects_hypothesis": [
+          "The effect of knowledge gap on information gain does not differ across levels of query formulation quality.",
+          "Higher query formulation quality does not lead to larger information gain for larger knowledge gaps."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the moderating effect of query formulation quality is not observed, then the original assumption that knowledge gap directly increases information gain may be too simplistic. The failure suggests that other factors, such as the agent's ability to interpret retrieved information or the alignment between query and knowledge base indexing, may be more critical.",
+        "assumption_to_revise": "The causal chain step 1: knowledge_gap increases information_gain, which assumes a direct relationship without considering query formulation quality.",
+        "next_question": "How does the agent's internal knowledge structure and indexing affect the translation of knowledge gap into effective queries?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+          "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+        },
+        {
+          "name": "Knowledge",
+          "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+          "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+        },
+        {
+          "name": "Research Task",
+          "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+          "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Perfect retrieval accuracy",
+          "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+          "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+        },
+        {
+          "assumption": "Non-negligible retrieval cost",
+          "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+          "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "retrieval_cost",
+            "role": "input",
+            "description": "The non-negligible cost in time or compute per retrieval operation."
+          },
+          {
+            "name": "knowledge_gap",
+            "role": "input",
+            "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+          },
+          {
+            "name": "retrieval_use",
+            "role": "input",
+            "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+          },
+          {
+            "name": "information_gain",
+            "role": "mediator",
+            "description": "The amount of new relevant and correct information obtained from retrieval."
+          },
+          {
+            "name": "bias_introduced",
+            "role": "mediator",
+            "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+          },
+          {
+            "name": "research_outcome",
+            "role": "outcome",
+            "description": "The quality or success of the research task, measured by progress toward the research goal."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "knowledge_gap",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "retrieval_cost",
+            "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+          },
+          {
+            "step": "4",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "bias_introduced",
+            "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+          },
+          {
+            "step": "5",
+            "source": "information_gain",
+            "relation": "increases",
+            "target": "research_outcome",
+            "explanation": "More relevant information improves the quality of research."
+          },
+          {
+            "step": "6",
+            "source": "bias_introduced",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "Bias can mislead reasoning and reduce research quality."
+          },
+          {
+            "step": "7",
+            "source": "retrieval_cost",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "High retrieval costs consume resources that could be used for other research activities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "High retrieval cost",
+            "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+          },
+          {
+            "bottleneck": "Bias from external sources",
+            "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+          },
+          {
+            "bottleneck": "Over-reliance on retrieval",
+            "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+          }
+        ],
+        "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Reducing uncertainty via retrieval simultaneously introduces bias from external sources, creating a tension where the agent must trade off knowledge completeness against impartiality.",
+        "derived_from": [
+          "core_tradeoffs: Reduced uncertainty vs. potential bias from external sources",
+          "causal_chain steps 2 and 4: retrieval_use increases both information_gain and bias_introduced"
+        ],
+        "why_it_matters": "This tradeoff is critical for research integrity; ignoring bias can lead to flawed conclusions even if information is accurate.",
+        "what_existing_methods_may_miss": "Current agent frameworks rarely model the provenance of retrieved information and its potential biases, focusing only on factual accuracy.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the causal impact of bias introduced from external sources on research outcome, controlling for information gain?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Isolates the negative effect of bias, highlighting the need for provenance-aware retrieval to mitigate bias."
+      },
+      "hypothesis": {
+        "statement": "Controlling for information gain, bias introduced from external sources has a negative causal effect on research outcome.",
+        "predicted_effect": "An increase in bias introduced from retrieval decreases research outcome, holding information gain constant."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a controlled simulation of autonomous research agents performing a standard research task (e.g., hypothesis generation in a biomedical domain). Vary the level of bias in the retrieved information while keeping the amount of relevant information (information gain) constant. Measure research outcome quality (e.g., accuracy of conclusions, novelty of insights, or efficiency in reaching a correct answer).",
+        "independent_variables": [
+          "Level of bias in retrieved information (low vs. high)"
+        ],
+        "dependent_variables": [
+          "Research outcome quality (e.g., F1 score of generated hypotheses, correctness of final conclusion)"
+        ],
+        "controls": [
+          "Information gain (kept constant by controlling the number and relevance of retrieved documents)",
+          "Retrieval cost (held constant)",
+          "Agent architecture and initial knowledge",
+          "Research task complexity"
+        ],
+        "falsifying_observation": "If agents exposed to high-bias information achieve equal or higher research outcomes compared to those with low-bias information (controlling for information gain), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Agents with high-bias retrieval produce lower-quality research outcomes than those with low-bias retrieval, despite equal information gain.",
+          "There is a significant negative coefficient for bias in a regression of research outcome on bias and information gain.",
+          "Bias introduces systematic errors in the agent's reasoning, leading to conclusions that diverge from ground truth."
+        ],
+        "rejects_hypothesis": [
+          "Agents with high-bias retrieval perform equally well or better than low-bias agents when information gain is equal.",
+          "Bias has no detectable effect on research outcome in the controlled experiment.",
+          "In some cases, bias marginally improves outcome by providing a heuristic that speeds up convergence to a correct answer."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment shows that bias does not negatively impact research outcome (or has a positive effect), this suggests that the assumption of bias being universally detrimental may be incorrect. It may be that certain types of bias are beneficial or that the negative effect is offset by other factors (e.g., bias might reduce search complexity).",
+        "assumption_to_revise": "The assumption that bias always decreases research outcome (from causal chain step 6) should be revised to consider that bias may be beneficial in some contexts or neutral when information gain is high.",
+        "next_question": "Under what conditions, if any, does bias from retrieval improve research outcomes, and what are the mechanisms (e.g., heuristic guidance, reduction of search space)?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+          "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+        },
+        {
+          "name": "Knowledge",
+          "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+          "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+        },
+        {
+          "name": "Research Task",
+          "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+          "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Perfect retrieval accuracy",
+          "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+          "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+        },
+        {
+          "assumption": "Non-negligible retrieval cost",
+          "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+          "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "retrieval_cost",
+            "role": "input",
+            "description": "The non-negligible cost in time or compute per retrieval operation."
+          },
+          {
+            "name": "knowledge_gap",
+            "role": "input",
+            "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+          },
+          {
+            "name": "retrieval_use",
+            "role": "input",
+            "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+          },
+          {
+            "name": "information_gain",
+            "role": "mediator",
+            "description": "The amount of new relevant and correct information obtained from retrieval."
+          },
+          {
+            "name": "bias_introduced",
+            "role": "mediator",
+            "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+          },
+          {
+            "name": "research_outcome",
+            "role": "outcome",
+            "description": "The quality or success of the research task, measured by progress toward the research goal."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "knowledge_gap",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "retrieval_cost",
+            "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+          },
+          {
+            "step": "4",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "bias_introduced",
+            "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+          },
+          {
+            "step": "5",
+            "source": "information_gain",
+            "relation": "increases",
+            "target": "research_outcome",
+            "explanation": "More relevant information improves the quality of research."
+          },
+          {
+            "step": "6",
+            "source": "bias_introduced",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "Bias can mislead reasoning and reduce research quality."
+          },
+          {
+            "step": "7",
+            "source": "retrieval_cost",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "High retrieval costs consume resources that could be used for other research activities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "High retrieval cost",
+            "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+          },
+          {
+            "bottleneck": "Bias from external sources",
+            "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+          },
+          {
+            "bottleneck": "Over-reliance on retrieval",
+            "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+          }
+        ],
+        "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption of perfect retrieval accuracy contradicts real-world retrieval systems that inevitably introduce errors, which can mislead the agent and negate the benefits of information gain.",
+        "derived_from": [
+          "assumptions: Perfect retrieval accuracy",
+          "causal_chain step 6: bias_introduced decreases research_outcome"
+        ],
+        "why_it_matters": "If retrieval errors are ignored, the model may overestimate the net benefit of retrieval, leading to suboptimal decisions in practice.",
+        "what_existing_methods_may_miss": "Existing methods often assume noise-free retrieval and do not model the probability of incorrect information, missing the risk of propagating misinformation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the probability of retrieval errors moderate the net benefit of retrieval on research outcome in autonomous agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the effect of imperfect retrieval accuracy, challenging the assumption of perfect retrieval and informing robust retrieval strategies."
+      },
+      "hypothesis": {
+        "statement": "The net benefit of retrieval on research outcome decreases as the probability of retrieval errors increases.",
+        "predicted_effect": "Higher retrieval error probability reduces the positive impact of information gain, leading to a lower research outcome compared to a scenario with perfect retrieval."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an autonomous research agent performing a hypothesis generation task on a dataset with a known ground truth. Vary the retrieval error probability across conditions (0%, 10%, 20%, 50%) and compare agents that always retrieve versus never retrieve.",
+        "independent_variables": [
+          "retrieval error probability",
+          "retrieval use"
+        ],
+        "dependent_variables": [
+          "research outcome (e.g., accuracy of generated hypotheses)"
+        ],
+        "controls": [
+          "knowledge gap (fixed task difficulty)",
+          "retrieval cost (fixed time per retrieval)",
+          "task complexity (same dataset)"
+        ],
+        "falsifying_observation": "If agents with higher retrieval error probability still achieve higher research outcomes than those with no retrieval, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Research outcome declines monotonically as retrieval error probability increases; at high error rates, retrieval yields worse outcomes than no retrieval."
+        ],
+        "rejects_hypothesis": [
+          "Retrieval improves outcome regardless of error probability, or error probability has no effect."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesis is not supported.",
+        "assumption_to_revise": "We assumed that retrieval errors introduce bias that directly reduces outcome; maybe errors are random and can be filtered or the agent can compensate.",
+        "next_question": "How do autonomous agents detect and mitigate retrieval errors to maintain research performance?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+          "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+        },
+        {
+          "name": "Knowledge",
+          "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+          "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+        },
+        {
+          "name": "Research Task",
+          "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+          "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Perfect retrieval accuracy",
+          "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+          "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+        },
+        {
+          "assumption": "Non-negligible retrieval cost",
+          "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+          "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "retrieval_cost",
+            "role": "input",
+            "description": "The non-negligible cost in time or compute per retrieval operation."
+          },
+          {
+            "name": "knowledge_gap",
+            "role": "input",
+            "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+          },
+          {
+            "name": "retrieval_use",
+            "role": "input",
+            "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+          },
+          {
+            "name": "information_gain",
+            "role": "mediator",
+            "description": "The amount of new relevant and correct information obtained from retrieval."
+          },
+          {
+            "name": "bias_introduced",
+            "role": "mediator",
+            "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+          },
+          {
+            "name": "research_outcome",
+            "role": "outcome",
+            "description": "The quality or success of the research task, measured by progress toward the research goal."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "knowledge_gap",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "retrieval_cost",
+            "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+          },
+          {
+            "step": "4",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "bias_introduced",
+            "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+          },
+          {
+            "step": "5",
+            "source": "information_gain",
+            "relation": "increases",
+            "target": "research_outcome",
+            "explanation": "More relevant information improves the quality of research."
+          },
+          {
+            "step": "6",
+            "source": "bias_introduced",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "Bias can mislead reasoning and reduce research quality."
+          },
+          {
+            "step": "7",
+            "source": "retrieval_cost",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "High retrieval costs consume resources that could be used for other research activities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "High retrieval cost",
+            "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+          },
+          {
+            "bottleneck": "Bias from external sources",
+            "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+          },
+          {
+            "bottleneck": "Over-reliance on retrieval",
+            "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+          }
+        ],
+        "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The core tradeoff between information gain and retrieval cost is underdetermined when retrieval cost can vary widely (e.g., near-zero vs. high), as the optimal strategy flips depending on cost magnitude.",
+        "derived_from": [
+          "core_tradeoffs: Information gain vs. cost of retrieval",
+          "assumptions: Non-negligible retrieval cost"
+        ],
+        "why_it_matters": "The assumption of non-negligible cost may not hold in all applications, making the tradeoff irrelevant and the mechanism model less general.",
+        "what_existing_methods_may_miss": "Existing cost-benefit analyses often assume a fixed cost, ignoring scenarios where retrieval is essentially free and thus always beneficial.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Under what retrieval cost conditions does the information gain vs. cost tradeoff flip, and what characterizes the boundary?",
+        "question_type": "descriptive",
+        "source_tension": "T2",
+        "expected_contribution": "Provides empirical boundaries for the tradeoff, enabling adaptive retrieval decisions based on cost magnitude."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold retrieval cost such that when the cost is below this threshold, retrieval improves research outcomes, and when the cost is above, retrieval degrades outcomes.",
+        "predicted_effect": "Research outcome quality will be highest at low retrieval costs, decrease with increasing cost, and cross below the no-retrieval baseline at a specific cost threshold."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate autonomous research agents performing a standardized research task (e.g., literature analysis, hypothesis generation) under systematically varied retrieval costs (e.g., 0, 10, 20, 50 time units per retrieval) and measure the quality of research outcomes (e.g., correctness of hypotheses, completeness of analysis). Include a control condition where no retrieval is allowed.",
+        "independent_variables": [
+          "retrieval cost (continuous or ordinal levels)"
+        ],
+        "dependent_variables": [
+          "research outcome quality (e.g., accuracy score, comprehensiveness score)"
+        ],
+        "controls": [
+          "knowledge gap (same initial knowledge base)",
+          "task difficulty (standardized task)",
+          "retrieval accuracy (perfect retrieval)",
+          "bias level (unbiased sources)",
+          "agent architecture (fixed)"
+        ],
+        "falsifying_observation": "Research outcome quality does not exhibit a crossover relative to the no-retrieval baseline as retrieval cost varies, or the relationship is monotonic (always better or always worse regardless of cost)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low retrieval costs, agents with retrieval achieve higher outcome quality than those without.",
+          "At high retrieval costs, agents with retrieval achieve lower outcome quality than those without.",
+          "There is a statistically significant interaction between retrieval cost and retrieval use on outcome quality, with a clear inflection point."
+        ],
+        "rejects_hypothesis": [
+          "Outcome quality with retrieval is consistently higher or lower than without across all cost levels.",
+          "No crossover point is observed; the effect of retrieval cost is linear and does not cross the no-retrieval baseline."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (no clear threshold or no crossover), then the assumption of non-negligible retrieval cost may be invalid in the experimental setup, or the tradeoff is dominated by other factors such as knowledge gap or bias.",
+        "assumption_to_revise": "The assumption that retrieval cost is non-negligible and has a monotonic effect on research outcome.",
+        "next_question": "How does the knowledge gap moderate the effect of retrieval cost on research outcomes? or Under what conditions does retrieval never hurt (i.e., cost is always negligible)?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Retrieval",
+          "definition": "The process of fetching information from an external storage (e.g., database, web) based on a query formulated by the agent.",
+          "why_primitive": "It is a fundamental operation that augments the agent's internal knowledge base and is essential for research tasks that require external information."
+        },
+        {
+          "name": "Knowledge",
+          "definition": "The collection of facts, theories, and uncertainties that the agent holds internally and uses for reasoning and decision-making.",
+          "why_primitive": "The effectiveness of retrieval depends on the gap between what the agent knows and what it needs; knowledge is the baseline against which retrieval benefits are measured."
+        },
+        {
+          "name": "Research Task",
+          "definition": "An activity with the goal of producing new knowledge or insights, involving steps such as hypothesis generation, experimentation, and analysis.",
+          "why_primitive": "The purpose of retrieval is to aid in completing a research task; without this context, retrieval's utility is undefined."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Perfect retrieval accuracy",
+          "rationale": "We assume that the retrieval system returns only relevant and correct information because we want to isolate the effect of retrieval on research outcomes without confounding from retrieval errors.",
+          "possible_failure": "In practice, retrieval systems have precision and recall issues, leading to irrelevant or misleading information that can harm the research process."
+        },
+        {
+          "assumption": "Non-negligible retrieval cost",
+          "rationale": "We assume that each retrieval operation consumes significant resources (time, compute) such that the agent must decide whether the benefit outweighs the cost.",
+          "possible_failure": "In some scenarios, retrieval may be nearly instantaneous and cost-free, making the tradeoff less relevant."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "retrieval_cost",
+            "role": "input",
+            "description": "The non-negligible cost in time or compute per retrieval operation."
+          },
+          {
+            "name": "knowledge_gap",
+            "role": "input",
+            "description": "The difference between the knowledge required for the research task and the agent's current knowledge."
+          },
+          {
+            "name": "retrieval_use",
+            "role": "input",
+            "description": "Binary indicator of whether retrieval is performed (1) or not (0)."
+          },
+          {
+            "name": "information_gain",
+            "role": "mediator",
+            "description": "The amount of new relevant and correct information obtained from retrieval."
+          },
+          {
+            "name": "bias_introduced",
+            "role": "mediator",
+            "description": "The degree of bias from external sources introduced into the agent's knowledge through retrieval."
+          },
+          {
+            "name": "research_outcome",
+            "role": "outcome",
+            "description": "The quality or success of the research task, measured by progress toward the research goal."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "knowledge_gap",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "A larger knowledge gap leads to more potential information to retrieve, increasing the information gain when retrieval is performed."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "information_gain",
+            "explanation": "Performing retrieval directly adds new information to the agent's knowledge."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "retrieval_cost",
+            "explanation": "Each retrieval operation incurs a cost in time and compute resources."
+          },
+          {
+            "step": "4",
+            "source": "retrieval_use",
+            "relation": "increases",
+            "target": "bias_introduced",
+            "explanation": "External sources may contain biases that are incorporated into the agent's knowledge."
+          },
+          {
+            "step": "5",
+            "source": "information_gain",
+            "relation": "increases",
+            "target": "research_outcome",
+            "explanation": "More relevant information improves the quality of research."
+          },
+          {
+            "step": "6",
+            "source": "bias_introduced",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "Bias can mislead reasoning and reduce research quality."
+          },
+          {
+            "step": "7",
+            "source": "retrieval_cost",
+            "relation": "decreases",
+            "target": "research_outcome",
+            "explanation": "High retrieval costs consume resources that could be used for other research activities."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "High retrieval cost",
+            "why_it_matters": "When retrieval cost exceeds the benefit from information gain, retrieval hurts overall research progress, making the agent worse off than not retrieving."
+          },
+          {
+            "bottleneck": "Bias from external sources",
+            "why_it_matters": "Even with perfect retrieval accuracy, biased information can mislead the agent's reasoning and degrade research outcomes, negating the benefits of information gain."
+          },
+          {
+            "bottleneck": "Over-reliance on retrieval",
+            "why_it_matters": "If the agent retrieves excessively, it may neglect critical internal reasoning and synthesis, reducing the effectiveness of the research process."
+          }
+        ],
+        "mechanism_summary": "The mechanism models how retrieval impacts autonomous research agents through the tradeoff between information gain and the costs (time/compute) and biases introduced. Retrieval is beneficial when the net benefit (information gain minus cost and bias) is positive, which depends on the knowledge gap, retrieval cost, and credibility of external sources. Retrieval hurts when costs or biases outweigh the informational gains, or when over-reliance undermines internal reasoning."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Over-reliance on retrieval may impair internal reasoning, yet the mechanism model does not capture the opportunity cost of not engaging in deep thinking, leading to an under-tested assumption that retrieval always complements reasoning.",
+        "derived_from": [
+          "bottlenecks: Over-reliance on retrieval",
+          "mechanism_summary: retrieval is beneficial when net benefit positive"
+        ],
+        "why_it_matters": "If retrieval substitutes for critical thinking, research progress may stagnate; the model's assumption that more information always helps is flawed.",
+        "what_existing_methods_may_miss": "Existing methods evaluate retrieval in isolation, not considering how it affects the agent's cognitive load or reasoning depth.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Does increased retrieval usage reduce the depth of internal reasoning, and how does this affect research outcome in tasks requiring synthesis?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Tests the over-reliance bottleneck, revealing whether retrieval substitutes for reasoning and guides balanced agent design."
+      },
+      "hypothesis": {
+        "statement": "Increased retrieval usage reduces the depth of internal reasoning, leading to worse research outcomes in tasks requiring synthesis.",
+        "predicted_effect": "For synthesis-intensive research tasks, agents with higher retrieval frequency will exhibit shallower internal reasoning and produce lower-quality research outcomes compared to agents with lower retrieval frequency."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a controlled experiment where an autonomous research agent performs a set of synthesis-intensive tasks (e.g., literature survey to propose a new hypothesis) under two conditions: high retrieval (e.g., 10 retrievals per step) and low retrieval (e.g., 1 retrieval per step). Measure depth of internal reasoning via trace analysis (e.g., number of reasoning steps, diversity of arguments) and research outcome via expert evaluation of the final hypothesis quality.",
+        "independent_variables": [
+          "Retrieval frequency (high vs. low)"
+        ],
+        "dependent_variables": [
+          "Depth of internal reasoning (operationalized as number of reasoning steps, depth of argumentation)",
+          "Research outcome quality (score by domain experts on a 1-5 scale)"
+        ],
+        "controls": [
+          "Base agent architecture",
+          "Task type (synthesis-intensive)",
+          "Retrieval system (same source, perfect accuracy)",
+          "Time budget (allow equal total time)"
+        ],
+        "falsifying_observation": "If agents with high retrieval show equal or greater reasoning depth and equal or better research outcomes compared to low retrieval, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "High retrieval agents have significantly fewer internal reasoning steps and lower argument diversity.",
+          "Expert ratings of final hypotheses are significantly lower for high retrieval agents.",
+          "Qualitative analysis shows high retrieval agents rely more on quoted text and less on original synthesis."
+        ],
+        "rejects_hypothesis": [
+          "High retrieval agents show equal or more reasoning steps and deeper argumentation.",
+          "Expert ratings are equal or higher for high retrieval agents.",
+          "No significant difference in originality or synthesis quality between conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (i.e., high retrieval does not reduce reasoning depth or outcome), then the assumption that retrieval substitutes for internal reasoning is incorrect.",
+        "assumption_to_revise": "The assumption that retrieval and deeper reasoning are competing processes; instead they may be complementary.",
+        "next_question": "Under what conditions does retrieval enhance rather than impair internal reasoning in synthesis tasks?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 3,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Improve primitive-to-question traceability to at least 4/5.",
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 3,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The net benefit of retrieval on research outcome decreases as the probability of retrieval errors increases.",
+      "independent_variables": [
+        "retrieval error probability",
+        "retrieval use"
+      ],
+      "dependent_variables": [
+        "research outcome (accuracy of generated hypotheses)"
+      ],
+      "controlled_variables": [
+        "knowledge gap (fixed task difficulty)",
+        "retrieval cost (fixed time per retrieval)",
+        "task complexity (same dataset)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent never performs retrieval."
+        },
+        {
+          "name": "Perfect retrieval",
+          "description": "Agent retrieves with 0% error probability."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Hypothesis accuracy",
+          "definition": "Proportion of generated hypotheses that match the ground truth."
+        }
+      ],
+      "expected_result": "Research outcome declines monotonically as retrieval error probability increases; at high error rates (e.g., 50%), retrieval yields worse outcomes than no retrieval.",
+      "falsifying_result": "Agents with higher retrieval error probability still achieve higher research outcomes than those with no retrieval, or error probability has no effect on outcome.",
+      "minimum_viable_experiment": "Simulate an autonomous research agent performing a hypothesis generation task on a dataset with known ground truth. Vary retrieval error probability across conditions (0%, 10%, 20%, 50%) and compare agents that always retrieve versus never retrieve. Measure accuracy of generated hypotheses for each condition.",
+      "risks_and_confounds": [
+        "Stochasticity: repeated runs needed to estimate outcome reliably.",
+        "Knowledge gap must be consistent across conditions; vary it as a robustness check.",
+        "Retrieval cost must be non-negligible; otherwise retrieval always beneficial.",
+        "Error model must be realistic (e.g., errors are random and not systematic bias)."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold retrieval cost such that when the cost is below this threshold, retrieval improves research outcomes, and when the cost is above, retrieval degrades outcomes.",
+      "independent_variables": [
+        "retrieval cost (0, 25, 50 time units per retrieval)"
+      ],
+      "dependent_variables": [
+        "research outcome quality (composite score of hypothesis correctness and analysis comprehensiveness)"
+      ],
+      "controlled_variables": [
+        "initial knowledge base (identical for all agents)",
+        "research task (standardized literature analysis on a fixed topic)",
+        "retrieval accuracy (perfect, returns only relevant correct information)",
+        "bias level (external sources are unbiased)",
+        "agent architecture (same LLM and prompt template)",
+        "number of retrieval operations allowed (fixed at 5 per agent)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent performs the research task without any retrieval; relies solely on internal knowledge."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Outcome quality score",
+          "definition": "Weighted average of (1) F1 score of key facts extracted from the literature, and (2) expert rating of hypothesis plausibility and analysis completeness on a 1-10 scale."
+        }
+      ],
+      "expected_result": "Quality scores for retrieval conditions will be higher than no-retrieval baseline at cost=0, approximately equal at cost=25, and lower at cost=50, showing a clear crossover. The difference between retrieval and no-retrieval will be significantly positive at low cost and significantly negative at high cost.",
+      "falsifying_result": "Quality scores for retrieval conditions are either consistently above or consistently below the no-retrieval baseline across all cost levels, or there is no statistically significant interaction between retrieval cost and retrieval use on outcome quality.",
+      "minimum_viable_experiment": "Run three retrieval conditions (costs 0, 25, 50) and one no-retrieval baseline, each with 10 independent trials using the same agent and task. Measure outcome quality as defined. Perform ANOVA with post-hoc tests to compare retrieval vs. baseline at each cost level.",
+      "risks_and_confounds": [
+        "Threshold may lie outside the chosen cost range (e.g., below 0 or above 50).",
+        "Knowledge gap may be too narrow to benefit from retrieval, making retrieval always neutral or harmful.",
+        "Retrieval cost may not be salient if agents are not resource-constrained; need to impose a time budget or penalty.",
+        "Agents might develop retrieval strategies that mitigate high cost (e.g., batching queries), reducing the effect.",
+        "The composite metric may not capture nuanced tradeoffs; separate metrics for speed and accuracy could be considered."
+      ]
+    },
+    {
+      "hypothesis": "Controlling for information gain, bias introduced from external sources has a negative causal effect on research outcome.",
+      "independent_variables": [
+        "Level of bias in retrieved information (low vs. high)"
+      ],
+      "dependent_variables": [
+        "Research outcome quality (e.g., accuracy of final conclusion)"
+      ],
+      "controlled_variables": [
+        "Information gain (number of relevant facts retrieved)",
+        "Retrieval cost (fixed per operation)",
+        "Agent architecture and initial knowledge",
+        "Research task complexity and domain"
+      ],
+      "baselines": [
+        {
+          "name": "Low bias retrieval",
+          "description": "Agents retrieve documents from unbiased sources (e.g., peer-reviewed literature) with same information gain as high bias condition."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Conclusion Accuracy",
+          "definition": "Proportion of tasks where the agent's final hypothesis matches the ground truth, averaged over multiple runs."
+        }
+      ],
+      "expected_result": "The high bias condition yields lower conclusion accuracy than the low bias condition, indicating a negative causal effect of bias on research outcome.",
+      "falsifying_result": "The high bias condition yields equal or higher conclusion accuracy compared to the low bias condition, controlling for information gain.",
+      "minimum_viable_experiment": "Simulate 100 autonomous research agents performing a hypothesis generation task in a biomedical domain. Each agent starts with identical internal knowledge. For each agent, provide a set of retrieved documents that contain the same number of relevant facts but differ in bias: low-bias documents from curated peer-reviewed sources, high-bias documents from sponsored studies with a systematic slant. Agents process the information and output a hypothesis. Compare the accuracy of hypotheses across conditions using a t-test. Repeat across multiple task instances to ensure robustness.",
+      "risks_and_confounds": [
+        "Imperfect control of information gain if the number of relevant facts is not exactly equal across conditions.",
+        "Variations in agent's internal reasoning processes may introduce noise.",
+        "Bias may be multidimensional and not uniform across documents, making operationalization challenging.",
+        "The definition of bias may be subjective or context-dependent."
+      ]
+    },
+    {
+      "hypothesis": "Increased retrieval usage reduces the depth of internal reasoning, leading to worse research outcomes in tasks requiring synthesis.",
+      "independent_variables": [
+        "Retrieval frequency: high (10 retrievals per step) vs. low (1 retrieval per step)"
+      ],
+      "dependent_variables": [
+        "Depth of internal reasoning",
+        "Research outcome quality"
+      ],
+      "controlled_variables": [
+        "Base agent architecture (same LLM, same prompt template)",
+        "Task type (synthesis-intensive, e.g., literature survey to propose hypothesis)",
+        "Retrieval system (same source, perfect accuracy)",
+        "Time budget (equal total elapsed time, e.g., 30 minutes per agent)"
+      ],
+      "baselines": [
+        {
+          "name": "Low retrieval condition",
+          "description": "Agent performs retrieval once per step (1 retrieval per step)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Reasoning steps count",
+          "definition": "Number of distinct reasoning steps in the agent's trace, where each step involves a new inference or analysis."
+        },
+        {
+          "name": "Argumentation depth score",
+          "definition": "Average depth of argumentation measured by the number of levels in argument trees from the final report (e.g., claims supported by sub-claims)."
+        },
+        {
+          "name": "Research outcome quality (expert rating)",
+          "definition": "Average rating by domain experts on a 1-5 scale for the quality of the final hypothesis (originality, coherence, support)."
+        }
+      ],
+      "expected_result": "High retrieval agents will have significantly fewer reasoning steps and lower argumentation depth, and their research outcomes will be rated significantly lower by experts compared to low retrieval agents.",
+      "falsifying_result": "High retrieval agents show equal or greater reasoning steps and argumentation depth, and equal or higher expert ratings, compared to low retrieval agents.",
+      "minimum_viable_experiment": "Conduct a controlled experiment where an autonomous research agent performs a set of synthesis-intensive tasks (e.g., literature survey to propose a new hypothesis) under two conditions: high retrieval (e.g., 10 retrievals per step) and low retrieval (e.g., 1 retrieval per step). Measure depth of internal reasoning via trace analysis (e.g., number of reasoning steps, depth of argumentation) and research outcome via expert evaluation of the final hypothesis quality. Use the same base agent architecture, retrieval system, and time budget for both conditions.",
+      "risks_and_confounds": [
+        "Task difficulty may vary across tasks, affecting reasoning depth independently of retrieval frequency.",
+        "Perfect retrieval accuracy assumption may not hold in practice, introducing confounds from retrieval errors.",
+        "Time budget may not fully account for retrieval overhead; high retrieval agents may have less time for reasoning.",
+        "Expert evaluation may be subjective; use multiple experts and inter-rater reliability checks.",
+        "Order effects if agents perform multiple tasks; counterbalance task order."
+      ]
+    },
+    {
+      "hypothesis": "The quality of query formulation positively moderates the relationship between knowledge gap and information gain: higher query formulation quality amplifies the positive effect of knowledge gap on information gain.",
+      "independent_variables": [
+        "knowledge_gap (low, high)",
+        "query_formulation_quality (low, high)"
+      ],
+      "dependent_variables": [
+        "information_gain (number of relevant novel facts retrieved per query)"
+      ],
+      "controlled_variables": [
+        "retrieval_cost (fixed time per query)",
+        "bias (unbiased sources)",
+        "agent baseline knowledge (same across conditions)",
+        "retrieval system (same across conditions)",
+        "research task (same across conditions)"
+      ],
+      "baselines": [
+        {
+          "name": "low knowledge gap, low query formulation quality",
+          "description": "Condition where knowledge gap is low and query formulation quality is low, serving as reference for interaction."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "information_gain",
+          "definition": "Number of relevant novel facts retrieved per query, where relevant means directly applicable to the research task and novel means not already in agent's knowledge base."
+        }
+      ],
+      "expected_result": "A statistically significant interaction between knowledge_gap and query_formulation_quality on information_gain, such that the increase in information_gain from low to high knowledge_gap is larger when query_formulation_quality is high compared to when it is low.",
+      "falsifying_result": "No statistically significant interaction effect, or the effect of knowledge_gap on information_gain does not differ significantly across levels of query_formulation_quality.",
+      "minimum_viable_experiment": "A 2x2 factorial experiment with 20 trials per condition. Each trial uses a simulated research agent with a fixed knowledge base. Knowledge_gap is manipulated by varying the novelty of the research question (low: question whose answer is mostly in the knowledge base; high: question requiring information not in the knowledge base). Query_formulation_quality is manipulated by using a naive query generator (simple keyword extraction) vs. optimized query generator (query expansion with synonyms). The agent performs one retrieval per trial, and information_gain is recorded. Statistical analysis uses two-way ANOVA to test interaction.",
+      "risks_and_confounds": [
+        "The manipulation of query formulation quality may not create a large enough difference in actual query quality.",
+        "Knowledge gap manipulation may not be orthogonal to other factors like question difficulty.",
+        "The retrieval system's indexing may favor certain query types, confounding results.",
+        "Agent's internal knowledge state may drift across trials."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of when retrieval helps or hurts autonomous research agents. It defines primitives, assumptions, and a causal mechanism model, identifies tensions, and proposes testable hypotheses with experimental designs. The work is systematic and clearly presented, but the novelty is limited given existing RAG literature, and the assumptions (perfect retrieval, binary retrieval use) oversimplify reality.",
+    "strengths": [
+      "Rigorous first-principles decomposition with clear definitions and assumptions.",
+      "Well-structured causal mechanism model that captures key tradeoffs.",
+      "Concrete, testable hypotheses and experimental designs with falsification criteria.",
+      "Falsifiability and clarity are strong; experiments are feasible."
+    ],
+    "weaknesses": [
+      "Limited novelty: core tradeoffs (cost vs. gain, bias) are well-explored in RAG research; the autonomous research agent angle is incremental.",
+      "Assumption of perfect retrieval accuracy is unrealistic and limits practical relevance.",
+      "Mechanism model is oversimplified (e.g., binary retrieval_use, linear causal links).",
+      "Relies heavily on simulation experiments; real-world validation is absent.",
+      "Primitive definitions could be more foundational (e.g., 'knowledge' is vague)."
+    ],
+    "questions": [
+      "How do you operationalize 'research outcome' across diverse research tasks (e.g., literature survey vs. hypothesis generation)?",
+      "Are the derived tensions testable in real-world autonomous research agents, or only in simplified simulations?",
+      "How does the model account for an agent's ability to critically evaluate and filter retrieved information, which could mitigate bias and errors?"
+    ],
+    "missing_baselines": [
+      "Comparison with existing retrieval-augmented generation methods (e.g., ReAct, Reflexion, Self-Ask) that incorporate iterative retrieval and reasoning.",
+      "Baseline where retrieval is free (zero cost) to isolate the effect of cost assumption.",
+      "Baseline where retrieval uses error mitigation strategies (e.g., cross-referencing multiple sources).",
+      "Comparison of different retrieval frequencies (not just binary use) to test over-reliance."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Limited novelty and oversimplified assumptions",
+    "root_cause": "The model assumes perfect retrieval accuracy and binary retrieval usage, ignoring real-world imperfections and continuous decision-making, leading to limited novelty and practical relevance.",
+    "violated_principle": "First-principles derivations must account for real-world imperfections and continuous variables to ensure practical relevance and novelty.",
+    "new_or_updated_principle": "Retrieval benefit analysis must incorporate probabilistic accuracy and continuous usage levels, and must explicitly model the tradeoff with internal reasoning depth.",
+    "new_or_updated_skill": "Skill: Modeling retrieval as a stochastic process with cost-benefit tradeoffs under uncertainty, including probabilistic accuracy and continuous frequency, and integrating with internal reasoning depth analysis.",
+    "regression_test": "Generate a research package for the topic 'When does retrieval help or hurt autonomous research agents?' that includes a mechanism model where retrieval accuracy is a continuous probability variable, retrieval usage is a continuous frequency, and the tradeoff with internal reasoning depth is explicitly modeled. The package must derive at least one testable hypothesis that falsifies a core assumption if the experiment fails, and must score at least 4/5 on novelty and mechanism clarity."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T185850Z"
+  }
+}

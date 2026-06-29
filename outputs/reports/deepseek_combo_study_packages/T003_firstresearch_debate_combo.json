@@ -1,0 +1,1424 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "tool",
+        "definition": "An external function or API that a coding agent can invoke to perform a specific operation, such as code execution, file I/O, or web search.",
+        "why_primitive": "This is the atomic action unit in an agent's environment; all agent behavior is built upon tool invocations."
+      },
+      {
+        "name": "routing",
+        "definition": "The decision process by which a coding agent selects which tool to use at each step, including when to switch tools or repeat usage.",
+        "why_primitive": "Routing determines the sequence and choice of actions; it is the core of agent strategy and directly impacts task success."
+      },
+      {
+        "name": "failure",
+        "definition": "A state where the agent's output does not satisfy the user's intent, introduces errors, or cannot complete the task within constraints.",
+        "why_primitive": "Failure is the event we aim to predict and avoid; it is defined relative to the user's goal and the agent's behavior."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The coding agent has perfect perception of the environment state and tool outputs.",
+        "rationale": "Many routing failure analyses assume that the agent accurately observes tool results and environment changes, allowing for optimal routing decisions.",
+        "possible_failure": "If perception is imperfect (e.g., due to partial observability or noise), routing decisions may be based on incorrect information, leading to failure."
+      },
+      {
+        "assumption": "Tools are deterministic and consistently return correct results for valid inputs.",
+        "rationale": "Deterministic tool behavior simplifies the routing problem; agents can rely on previous experiences with tools.",
+        "possible_failure": "Non-determinism (e.g., network timeouts, random outputs) or tool bugs can cause routing to fail even if the agent's decision logic is sound."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploitation vs. Exploration",
+        "variables": [
+          "novelty",
+          "reliability"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. Accuracy",
+        "variables": [
+          "latency",
+          "correctness"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_complexity",
+        "role": "input",
+        "description": "The difficulty of the coding task, affecting the number and types of tools needed."
+      },
+      {
+        "name": "tool_reliability",
+        "role": "input",
+        "description": "The probability that each tool returns correct and consistent results."
+      },
+      {
+        "name": "exploration_rate",
+        "role": "input",
+        "description": "The agent's tendency to try unfamiliar tools versus exploiting known ones."
+      },
+      {
+        "name": "routing_decision",
+        "role": "mediator",
+        "description": "The agent's choice of which tool to invoke at each step."
+      },
+      {
+        "name": "tool_selection_accuracy",
+        "role": "mediator",
+        "description": "How well the selected tool matches the requirements of the current subtask."
+      },
+      {
+        "name": "latency",
+        "role": "mediator",
+        "description": "The time taken for the chosen tool to execute and return results."
+      },
+      {
+        "name": "correctness",
+        "role": "outcome",
+        "description": "Whether the agent's final output satisfies the user's intent without errors."
+      },
+      {
+        "name": "failure",
+        "role": "outcome",
+        "description": "Binary outcome: 1 if correctness is false (task not completed or erroneous), 0 otherwise."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": null,
+        "source": "task_complexity",
+        "relation": "increases",
+        "target": "routing_decision",
+        "explanation": "Higher task complexity demands more sophisticated routing, increasing decision difficulty."
+      },
+      {
+        "step": null,
+        "source": "tool_reliability",
+        "relation": "affects",
+        "target": "routing_decision",
+        "explanation": "If tool reliability is low, the agent must account for possible failures when routing."
+      },
+      {
+        "step": null,
+        "source": "exploration_rate",
+        "relation": "influences",
+        "target": "routing_decision",
+        "explanation": "A high exploration rate leads the agent to try new tools, which may be suboptimal."
+      },
+      {
+        "step": null,
+        "source": "routing_decision",
+        "relation": "determines",
+        "target": "tool_selection_accuracy",
+        "explanation": "The routing decision directly selects which tool is used, affecting how well it fits the subtask."
+      },
+      {
+        "step": null,
+        "source": "routing_decision",
+        "relation": "determines",
+        "target": "latency",
+        "explanation": "Different tools have different execution times, so routing affects total latency."
+      },
+      {
+        "step": null,
+        "source": "tool_selection_accuracy",
+        "relation": "positively affects",
+        "target": "correctness",
+        "explanation": "Better tool selection leads to fewer errors and higher correctness."
+      },
+      {
+        "step": null,
+        "source": "latency",
+        "relation": "negatively affects",
+        "target": "correctness",
+        "explanation": "Higher latency may cause timeouts or incomplete results, reducing correctness."
+      },
+      {
+        "step": null,
+        "source": "correctness",
+        "relation": "inversely determines",
+        "target": "failure",
+        "explanation": "Failure occurs when correctness is false."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "routing_decision under high complexity",
+        "why_it_matters": "When task complexity is high, the agent may make suboptimal routing choices, leading to tool selection errors and eventually failure."
+      },
+      {
+        "bottleneck": "exploration-exploitation tradeoff",
+        "why_it_matters": "If exploration rate is too high, the agent may use unreliable tools; if too low, it may miss better tools. Both can cause failure."
+      },
+      {
+        "bottleneck": "latency constraints",
+        "why_it_matters": "Even if tool selection is accurate, high latency can cause the agent to exceed time limits, resulting in failure."
+      }
+    ],
+    "mechanism_summary": "Coding agent tool-use routing fails when the routing decision process, influenced by task complexity, tool reliability, and exploration rate, leads to poor tool selection accuracy or excessive latency, ultimately resulting in incorrect or incomplete outputs. The key failure points are the routing decision under high complexity, the exploration-exploitation tradeoff, and latency constraints."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Assumption that tools are deterministic and consistently correct vs. real-world non-determinism and bugs. This contradiction can cause routing decisions based on past experience to be invalid, leading to failure.",
+      "derived_from": [
+        "assumptions: tools deterministic",
+        "mechanism: tool_reliability"
+      ],
+      "why_it_matters": "If tools are not deterministic, the agent's learned routing policies may not generalize, resulting in unexpected failures.",
+      "what_existing_methods_may_miss": "Existing analyses often treat tools as reliable or assume perfect tool behavior, ignoring the impact of stochasticity.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Balancing exploration of new tools vs. exploitation of known reliable tools is critical; excessive exploration may lead to unreliable tool use, while insufficient exploration may miss better tools.",
+      "derived_from": [
+        "core_tradeoffs: Exploitation vs. Exploration",
+        "mechanism: exploration_rate"
+      ],
+      "why_it_matters": "Directly impacts routing decision and can cause failure if exploration rate is poorly tuned.",
+      "what_existing_methods_may_miss": "Many agent systems use fixed exploration rates or ignore the dynamic nature of this tradeoff across tasks.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Agents must balance latency (speed) and correctness (accuracy); optimizing for speed may reduce accuracy and vice versa, affecting overall success.",
+      "derived_from": [
+        "core_tradeoffs: Speed vs. Accuracy",
+        "mechanism: latency, correctness"
+      ],
+      "why_it_matters": "Routing decisions that prioritize speed may lead to errors, while those prioritizing accuracy may cause timeouts.",
+      "what_existing_methods_may_miss": "Common benchmarks often measure accuracy or speed separately, not their interaction in routing.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that the agent perfectly perceives environment state and tool outputs may conflict with real-world partial observability, leading to incorrect routing decisions.",
+      "derived_from": [
+        "assumptions: perfect perception",
+        "mechanism: routing_decision"
+      ],
+      "why_it_matters": "Imperfect perception can cause the agent to act on false information, directly causing failure.",
+      "what_existing_methods_may_miss": "Most agent models assume full observability; few account for perceptual noise or missing information.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Is there a critical threshold of tool reliability below which agent failure probability increases discontinuously, and does this threshold vary with task complexity?",
+      "question_type": "diagnostic",
+      "source_tension": "T1",
+      "expected_contribution": "Identifies a potential nonlinear failure regime and interaction with task complexity, guiding robust routing design and reliability requirements."
+    },
+    {
+      "question": "How does the optimal exploration rate that minimizes failure depend on task complexity and tool reliability? Is there a nonlinear trade-off where both low and high exploration increase failure, but the sweet spot shifts with task difficulty?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Maps the exploration rate optimum as a function of task and environment conditions, enabling adaptive exploration strategies that reduce failure."
+    },
+    {
+      "question": "For time-constrained coding tasks, what is the maximum tolerable latency per tool invocation such that correctness remains above 90%, and how does this boundary depend on tool reliability?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Establishes a practical latency threshold for routing decisions, quantifying the speed-accuracy tradeoff under reliability constraints."
+    },
+    {
+      "question": "At what level of perceptual noise (error rate in tool output perception) does the agent's failure rate exceed 50%, and does this critical noise level interact with tool reliability?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Determines the robustness boundary of routing to perception errors, and reveals whether tool reliability amplifies or mitigates noise effects."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that a coding agent can invoke to perform a specific operation, such as code execution, file I/O, or web search.",
+          "why_primitive": "This is the atomic action unit in an agent's environment; all agent behavior is built upon tool invocations."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which a coding agent selects which tool to use at each step, including when to switch tools or repeat usage.",
+          "why_primitive": "Routing determines the sequence and choice of actions; it is the core of agent strategy and directly impacts task success."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output does not satisfy the user's intent, introduces errors, or cannot complete the task within constraints.",
+          "why_primitive": "Failure is the event we aim to predict and avoid; it is defined relative to the user's goal and the agent's behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has perfect perception of the environment state and tool outputs.",
+          "rationale": "Many routing failure analyses assume that the agent accurately observes tool results and environment changes, allowing for optimal routing decisions.",
+          "possible_failure": "If perception is imperfect (e.g., due to partial observability or noise), routing decisions may be based on incorrect information, leading to failure."
+        },
+        {
+          "assumption": "Tools are deterministic and consistently return correct results for valid inputs.",
+          "rationale": "Deterministic tool behavior simplifies the routing problem; agents can rely on previous experiences with tools.",
+          "possible_failure": "Non-determinism (e.g., network timeouts, random outputs) or tool bugs can cause routing to fail even if the agent's decision logic is sound."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, affecting the number and types of tools needed."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The probability that each tool returns correct and consistent results."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "The agent's tendency to try unfamiliar tools versus exploiting known ones."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The agent's choice of which tool to invoke at each step."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "How well the selected tool matches the requirements of the current subtask."
+          },
+          {
+            "name": "latency",
+            "role": "mediator",
+            "description": "The time taken for the chosen tool to execute and return results."
+          },
+          {
+            "name": "correctness",
+            "role": "outcome",
+            "description": "Whether the agent's final output satisfies the user's intent without errors."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Binary outcome: 1 if correctness is false (task not completed or erroneous), 0 otherwise."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "Higher task complexity demands more sophisticated routing, increasing decision difficulty."
+          },
+          {
+            "step": null,
+            "source": "tool_reliability",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "If tool reliability is low, the agent must account for possible failures when routing."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "A high exploration rate leads the agent to try new tools, which may be suboptimal."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "The routing decision directly selects which tool is used, affecting how well it fits the subtask."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "latency",
+            "explanation": "Different tools have different execution times, so routing affects total latency."
+          },
+          {
+            "step": null,
+            "source": "tool_selection_accuracy",
+            "relation": "positively affects",
+            "target": "correctness",
+            "explanation": "Better tool selection leads to fewer errors and higher correctness."
+          },
+          {
+            "step": null,
+            "source": "latency",
+            "relation": "negatively affects",
+            "target": "correctness",
+            "explanation": "Higher latency may cause timeouts or incomplete results, reducing correctness."
+          },
+          {
+            "step": null,
+            "source": "correctness",
+            "relation": "inversely determines",
+            "target": "failure",
+            "explanation": "Failure occurs when correctness is false."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "routing_decision under high complexity",
+            "why_it_matters": "When task complexity is high, the agent may make suboptimal routing choices, leading to tool selection errors and eventually failure."
+          },
+          {
+            "bottleneck": "exploration-exploitation tradeoff",
+            "why_it_matters": "If exploration rate is too high, the agent may use unreliable tools; if too low, it may miss better tools. Both can cause failure."
+          },
+          {
+            "bottleneck": "latency constraints",
+            "why_it_matters": "Even if tool selection is accurate, high latency can cause the agent to exceed time limits, resulting in failure."
+          }
+        ],
+        "mechanism_summary": "Coding agent tool-use routing fails when the routing decision process, influenced by task complexity, tool reliability, and exploration rate, leads to poor tool selection accuracy or excessive latency, ultimately resulting in incorrect or incomplete outputs. The key failure points are the routing decision under high complexity, the exploration-exploitation tradeoff, and latency constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Assumption that tools are deterministic and consistently correct vs. real-world non-determinism and bugs. This contradiction can cause routing decisions based on past experience to be invalid, leading to failure.",
+        "derived_from": [
+          "assumptions: tools deterministic",
+          "mechanism: tool_reliability"
+        ],
+        "why_it_matters": "If tools are not deterministic, the agent's learned routing policies may not generalize, resulting in unexpected failures.",
+        "what_existing_methods_may_miss": "Existing analyses often treat tools as reliable or assume perfect tool behavior, ignoring the impact of stochasticity.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical ratio of exploration rate to tool unreliability (exploration_rate / (1 - tool_reliability)) below which agent failure probability undergoes a phase transition from gradual degradation to catastrophic collapse, and does this critical ratio depend on task interdependency?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp phase transition governed by a ratio of two primitive factors, providing a more precise boundary condition for robust routing design and highlighting the non-linear interaction between exploration and reliability."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical value of the ratio R = exploration_rate / (1 - tool_reliability) such that for R below the critical value, failure probability increases smoothly with decreasing reliability, while for R above the critical value, failure probability jumps discontinuously. Moreover, this critical ratio is lower for tasks with high step interdependence (sequential tasks) compared to low interdependence (parallelizable tasks).",
+        "predicted_effect": "As the ratio R is increased (by increasing exploration rate or decreasing reliability), the failure probability will initially rise slowly, then sharply spike at a threshold R_c. In high-interdependence tasks, R_c is smaller, meaning the transition occurs at lower exploration or higher reliability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent on two types of coding tasks: sequential (each step depends on previous) and parallelizable (independent steps). Vary exploration_rate from 0 to 0.5 in steps of 0.05, and tool_reliability from 0.9 down to 0.4 in steps of 0.05. For each combination, run 500 trials, measuring failure rate. Compute R = exploration_rate / (1 - reliability). Plot failure rate vs R for each task type. Use fixed latency constraints and perfect perception.",
+        "independent_variables": [
+          "exploration_rate",
+          "tool_reliability",
+          "task interdependency (sequential vs parallel)"
+        ],
+        "dependent_variables": [
+          "failure rate"
+        ],
+        "controls": [
+          "agent architecture",
+          "tool set",
+          "latency",
+          "perception accuracy"
+        ],
+        "falsifying_observation": "No discontinuous jump in failure rate as R increases, or the critical R does not differ significantly between sequential and parallel tasks."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each task type, failure rate shows a clear discontinuity at a specific R value.",
+          "The critical R_c is lower for sequential tasks than for parallel tasks (e.g., R_c=2 for sequential, R_c=5 for parallel)."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate increases smoothly with R for both task types.",
+          "The R_c values are similar or reversed between the two task types."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no discontinuous threshold is observed or task interdependency does not modulate the threshold, then the hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that exploration and unreliability combine linearly is false; instead, they may interact in a sub-additive or additive manner without a phase change.",
+        "next_question": "How does the agent's routing memory (e.g., recent tool failures) mediate the transition between graceful and catastrophic failure regimes?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that a coding agent can invoke to perform a specific operation, such as code execution, file I/O, or web search.",
+          "why_primitive": "This is the atomic action unit in an agent's environment; all agent behavior is built upon tool invocations."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which a coding agent selects which tool to use at each step, including when to switch tools or repeat usage.",
+          "why_primitive": "Routing determines the sequence and choice of actions; it is the core of agent strategy and directly impacts task success."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output does not satisfy the user's intent, introduces errors, or cannot complete the task within constraints.",
+          "why_primitive": "Failure is the event we aim to predict and avoid; it is defined relative to the user's goal and the agent's behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has perfect perception of the environment state and tool outputs.",
+          "rationale": "Many routing failure analyses assume that the agent accurately observes tool results and environment changes, allowing for optimal routing decisions.",
+          "possible_failure": "If perception is imperfect (e.g., due to partial observability or noise), routing decisions may be based on incorrect information, leading to failure."
+        },
+        {
+          "assumption": "Tools are deterministic and consistently return correct results for valid inputs.",
+          "rationale": "Deterministic tool behavior simplifies the routing problem; agents can rely on previous experiences with tools.",
+          "possible_failure": "Non-determinism (e.g., network timeouts, random outputs) or tool bugs can cause routing to fail even if the agent's decision logic is sound."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, affecting the number and types of tools needed."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The probability that each tool returns correct and consistent results."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "The agent's tendency to try unfamiliar tools versus exploiting known ones."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The agent's choice of which tool to invoke at each step."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "How well the selected tool matches the requirements of the current subtask."
+          },
+          {
+            "name": "latency",
+            "role": "mediator",
+            "description": "The time taken for the chosen tool to execute and return results."
+          },
+          {
+            "name": "correctness",
+            "role": "outcome",
+            "description": "Whether the agent's final output satisfies the user's intent without errors."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Binary outcome: 1 if correctness is false (task not completed or erroneous), 0 otherwise."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "Higher task complexity demands more sophisticated routing, increasing decision difficulty."
+          },
+          {
+            "step": null,
+            "source": "tool_reliability",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "If tool reliability is low, the agent must account for possible failures when routing."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "A high exploration rate leads the agent to try new tools, which may be suboptimal."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "The routing decision directly selects which tool is used, affecting how well it fits the subtask."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "latency",
+            "explanation": "Different tools have different execution times, so routing affects total latency."
+          },
+          {
+            "step": null,
+            "source": "tool_selection_accuracy",
+            "relation": "positively affects",
+            "target": "correctness",
+            "explanation": "Better tool selection leads to fewer errors and higher correctness."
+          },
+          {
+            "step": null,
+            "source": "latency",
+            "relation": "negatively affects",
+            "target": "correctness",
+            "explanation": "Higher latency may cause timeouts or incomplete results, reducing correctness."
+          },
+          {
+            "step": null,
+            "source": "correctness",
+            "relation": "inversely determines",
+            "target": "failure",
+            "explanation": "Failure occurs when correctness is false."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "routing_decision under high complexity",
+            "why_it_matters": "When task complexity is high, the agent may make suboptimal routing choices, leading to tool selection errors and eventually failure."
+          },
+          {
+            "bottleneck": "exploration-exploitation tradeoff",
+            "why_it_matters": "If exploration rate is too high, the agent may use unreliable tools; if too low, it may miss better tools. Both can cause failure."
+          },
+          {
+            "bottleneck": "latency constraints",
+            "why_it_matters": "Even if tool selection is accurate, high latency can cause the agent to exceed time limits, resulting in failure."
+          }
+        ],
+        "mechanism_summary": "Coding agent tool-use routing fails when the routing decision process, influenced by task complexity, tool reliability, and exploration rate, leads to poor tool selection accuracy or excessive latency, ultimately resulting in incorrect or incomplete outputs. The key failure points are the routing decision under high complexity, the exploration-exploitation tradeoff, and latency constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Balancing exploration of new tools vs. exploitation of known reliable tools is critical; excessive exploration may lead to unreliable tool use, while insufficient exploration may miss better tools.",
+        "derived_from": [
+          "core_tradeoffs: Exploitation vs. Exploration",
+          "mechanism: exploration_rate"
+        ],
+        "why_it_matters": "Directly impacts routing decision and can cause failure if exploration rate is poorly tuned.",
+        "what_existing_methods_may_miss": "Many agent systems use fixed exploration rates or ignore the dynamic nature of this tradeoff across tasks.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical exploration rate threshold beyond which tool-use routing failure in coding agents increases discontinuously, and how does this threshold depend on task complexity and tool reliability?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a phase transition in failure dynamics, enabling dynamic exploration rate controls that avoid catastrophic failure regimes."
+      },
+      "hypothesis": {
+        "statement": "Failure rate in coding agents exhibits a discontinuous jump at a critical exploration rate; this critical rate increases linearly with task complexity and decreases linearly with tool reliability.",
+        "predicted_effect": "For each (task complexity, tool reliability) pair, failure rate remains low for exploration rates below a threshold, then sharply increases beyond it. The threshold varies systematically with both factors."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a ReAct-style coding agent on a fixed set of coding tasks (e.g., 50 tasks per complexity level). Vary exploration rate from 0.0 to 1.0 in steps of 0.05, task complexity (low: 2-step tasks, medium: 5-step, high: 10-step), and tool reliability (low: 0.7, high: 0.95 success probability). For each condition, run 100 trials and measure failure rate (proportion of tasks with incorrect/incomplete output). Use a Bayesian changepoint detection algorithm to identify if and where a discontinuity in failure rate occurs as exploration rate increases.",
+        "independent_variables": [
+          "exploration_rate (continuous, 0.0 to 1.0, step 0.05)",
+          "task_complexity (categorical: low, medium, high)",
+          "tool_reliability (categorical: low=0.7, high=0.95)"
+        ],
+        "dependent_variables": [
+          "failure_rate (proportion of tasks failed)",
+          "presence of discontinuity (binary, detected by changepoint model)"
+        ],
+        "controls": [
+          "Same set of 50 tasks per complexity level across conditions",
+          "Same agent architecture (ReAct with fixed memory and tool set)",
+          "Same tool set: code_executor, file_reader, web_search",
+          "Random seed fixed across runs for reproducibility"
+        ],
+        "falsifying_observation": "If failure rate varies continuously (no significant jump) for all conditions, or if the critical threshold does not shift systematically with task complexity or tool reliability (e.g., no trend or opposite trend), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each condition, failure rate shows a clear jump (e.g., >0.2 increase within 0.1 exploration rate step) at some critical exploration rate.",
+          "The critical exploration rate increases with task complexity (low < medium < high) for both reliability levels.",
+          "The critical exploration rate decreases with tool reliability (higher reliability leads to lower threshold) for all complexity levels.",
+          "Below the threshold, failure rate is below 0.1; above, it exceeds 0.4."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate changes smoothly (e.g., linear or concave) with exploration rate across all conditions.",
+          "No significant discontinuity detected via changepoint analysis.",
+          "The critical rate does not vary with task complexity or tool reliability, or varies in unexpected directions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no phase transition is observed, then the exploration-exploitation tradeoff does not produce a sharp failure boundary; failure may accumulate gradually.",
+        "assumption_to_revise": "The assumption that failure is governed by a threshold mechanism is wrong. Instead, failure may follow a continuous saturating curve, or the key driver is something else like tool ordering or context window limits.",
+        "next_question": "What is the functional form of failure rate as a function of exploration rate? Is it sigmoidal, quadratic, or linear? Does the curvature depend on task complexity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that a coding agent can invoke to perform a specific operation, such as code execution, file I/O, or web search.",
+          "why_primitive": "This is the atomic action unit in an agent's environment; all agent behavior is built upon tool invocations."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which a coding agent selects which tool to use at each step, including when to switch tools or repeat usage.",
+          "why_primitive": "Routing determines the sequence and choice of actions; it is the core of agent strategy and directly impacts task success."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output does not satisfy the user's intent, introduces errors, or cannot complete the task within constraints.",
+          "why_primitive": "Failure is the event we aim to predict and avoid; it is defined relative to the user's goal and the agent's behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has perfect perception of the environment state and tool outputs.",
+          "rationale": "Many routing failure analyses assume that the agent accurately observes tool results and environment changes, allowing for optimal routing decisions.",
+          "possible_failure": "If perception is imperfect (e.g., due to partial observability or noise), routing decisions may be based on incorrect information, leading to failure."
+        },
+        {
+          "assumption": "Tools are deterministic and consistently return correct results for valid inputs.",
+          "rationale": "Deterministic tool behavior simplifies the routing problem; agents can rely on previous experiences with tools.",
+          "possible_failure": "Non-determinism (e.g., network timeouts, random outputs) or tool bugs can cause routing to fail even if the agent's decision logic is sound."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, affecting the number and types of tools needed."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The probability that each tool returns correct and consistent results."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "The agent's tendency to try unfamiliar tools versus exploiting known ones."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The agent's choice of which tool to invoke at each step."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "How well the selected tool matches the requirements of the current subtask."
+          },
+          {
+            "name": "latency",
+            "role": "mediator",
+            "description": "The time taken for the chosen tool to execute and return results."
+          },
+          {
+            "name": "correctness",
+            "role": "outcome",
+            "description": "Whether the agent's final output satisfies the user's intent without errors."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Binary outcome: 1 if correctness is false (task not completed or erroneous), 0 otherwise."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "Higher task complexity demands more sophisticated routing, increasing decision difficulty."
+          },
+          {
+            "step": null,
+            "source": "tool_reliability",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "If tool reliability is low, the agent must account for possible failures when routing."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "A high exploration rate leads the agent to try new tools, which may be suboptimal."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "The routing decision directly selects which tool is used, affecting how well it fits the subtask."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "latency",
+            "explanation": "Different tools have different execution times, so routing affects total latency."
+          },
+          {
+            "step": null,
+            "source": "tool_selection_accuracy",
+            "relation": "positively affects",
+            "target": "correctness",
+            "explanation": "Better tool selection leads to fewer errors and higher correctness."
+          },
+          {
+            "step": null,
+            "source": "latency",
+            "relation": "negatively affects",
+            "target": "correctness",
+            "explanation": "Higher latency may cause timeouts or incomplete results, reducing correctness."
+          },
+          {
+            "step": null,
+            "source": "correctness",
+            "relation": "inversely determines",
+            "target": "failure",
+            "explanation": "Failure occurs when correctness is false."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "routing_decision under high complexity",
+            "why_it_matters": "When task complexity is high, the agent may make suboptimal routing choices, leading to tool selection errors and eventually failure."
+          },
+          {
+            "bottleneck": "exploration-exploitation tradeoff",
+            "why_it_matters": "If exploration rate is too high, the agent may use unreliable tools; if too low, it may miss better tools. Both can cause failure."
+          },
+          {
+            "bottleneck": "latency constraints",
+            "why_it_matters": "Even if tool selection is accurate, high latency can cause the agent to exceed time limits, resulting in failure."
+          }
+        ],
+        "mechanism_summary": "Coding agent tool-use routing fails when the routing decision process, influenced by task complexity, tool reliability, and exploration rate, leads to poor tool selection accuracy or excessive latency, ultimately resulting in incorrect or incomplete outputs. The key failure points are the routing decision under high complexity, the exploration-exploitation tradeoff, and latency constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Agents must balance latency (speed) and correctness (accuracy); optimizing for speed may reduce accuracy and vice versa, affecting overall success.",
+        "derived_from": [
+          "core_tradeoffs: Speed vs. Accuracy",
+          "mechanism: latency, correctness"
+        ],
+        "why_it_matters": "Routing decisions that prioritize speed may lead to errors, while those prioritizing accuracy may cause timeouts.",
+        "what_existing_methods_may_miss": "Common benchmarks often measure accuracy or speed separately, not their interaction in routing.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "In time-constrained coding tasks, does tool-use routing failure exhibit a phase transition such that correctness remains above 90% until a critical latency threshold, beyond which it drops below 50% within a narrow latency interval (≤1s), and how does this critical threshold depend on tool reliability?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a phase transition in tool-use routing failure, providing a critical latency threshold for safe operation under varying reliability, and quantifying the sharpness of the collapse."
+      },
+      "hypothesis": {
+        "statement": "For time-constrained coding tasks, there exists a critical latency per tool invocation above which correctness collapses from ≥90% to ≤50% within a latency interval of ≤1 second; this critical latency decreases with decreasing tool reliability in a non-linear fashion, and the transition region becomes sharper as reliability decreases.",
+        "predicted_effect": "Lower tool reliability shifts the collapse threshold to lower latencies and narrows the latency window over which correctness drops."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent on a benchmark of time-constrained tasks. Vary latency per tool invocation from 0.5s to 10s in increments of 0.1s near expected thresholds (0.5s steps elsewhere), and tool reliability from 0.7 to 1.0 in steps of 0.05. For each combination, run the agent with a fixed routing policy that optimizes for speed given a latency budget. Record the correctness (fraction of tasks completed without errors) for each latency-reliability pair. Identify the latency at which correctness first drops below 90% and below 50%, and measure the width of the transition interval (latency difference between 90% and 50%).",
+        "independent_variables": [
+          "latency per tool invocation (0.5s to 10s, with fine 0.1s steps near suspected thresholds)",
+          "tool reliability (0.7 to 1.0 in 0.05 steps)"
+        ],
+        "dependent_variables": [
+          "correctness (percentage of tasks completed without errors)"
+        ],
+        "controls": [
+          "fixed routing policy (greedy latency minimization)",
+          "fixed task complexity (moderate)",
+          "fixed exploration rate (set to zero)",
+          "deterministic environment (no noise beyond tool reliability)"
+        ],
+        "falsifying_observation": "If correctness does not exhibit a sharp drop (i.e., declines gradually over an interval >2s) for any reliability level, or if the critical latency does not decrease systematically with decreasing reliability, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For tool reliability = 0.95: correctness remains >90% up to 6.5s, drops to <50% by 7.0s (transition width ≈ 0.5s).",
+          "For tool reliability = 0.85: correctness remains >90% up to 4.0s, drops to <50% by 4.5s (transition width ≈ 0.5s).",
+          "For tool reliability = 0.75: correctness remains >90% up to 2.0s, drops to <50% by 2.5s (transition width ≈ 0.5s).",
+          "Transition width decreases as reliability decreases (e.g., 0.5s at 0.95, 0.4s at 0.85, 0.3s at 0.75)."
+        ],
+        "rejects_hypothesis": [
+          "Correctness declines linearly with latency for all reliability levels (no sharp drop).",
+          "Critical latency does not change with reliability or changes non-monotonically.",
+          "Transition width is constant or increases with decreasing reliability."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp phase transition is observed, revise the assumption that failure is a binary outcome triggered by a single bottleneck. The failure may be gradual due to compounding of small errors.",
+        "assumption_to_revise": "Assumption: 'Tools are deterministic and consistently return correct results for valid inputs.' The actual failure may arise from gradual degradation rather than a tipping point.",
+        "next_question": "How does the interaction between tool latency and tool reliability affect the shape of the correctness degradation curve in coding agents when multiple tools are used sequentially?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "tool",
+          "definition": "An external function or API that a coding agent can invoke to perform a specific operation, such as code execution, file I/O, or web search.",
+          "why_primitive": "This is the atomic action unit in an agent's environment; all agent behavior is built upon tool invocations."
+        },
+        {
+          "name": "routing",
+          "definition": "The decision process by which a coding agent selects which tool to use at each step, including when to switch tools or repeat usage.",
+          "why_primitive": "Routing determines the sequence and choice of actions; it is the core of agent strategy and directly impacts task success."
+        },
+        {
+          "name": "failure",
+          "definition": "A state where the agent's output does not satisfy the user's intent, introduces errors, or cannot complete the task within constraints.",
+          "why_primitive": "Failure is the event we aim to predict and avoid; it is defined relative to the user's goal and the agent's behavior."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The coding agent has perfect perception of the environment state and tool outputs.",
+          "rationale": "Many routing failure analyses assume that the agent accurately observes tool results and environment changes, allowing for optimal routing decisions.",
+          "possible_failure": "If perception is imperfect (e.g., due to partial observability or noise), routing decisions may be based on incorrect information, leading to failure."
+        },
+        {
+          "assumption": "Tools are deterministic and consistently return correct results for valid inputs.",
+          "rationale": "Deterministic tool behavior simplifies the routing problem; agents can rely on previous experiences with tools.",
+          "possible_failure": "Non-determinism (e.g., network timeouts, random outputs) or tool bugs can cause routing to fail even if the agent's decision logic is sound."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_complexity",
+            "role": "input",
+            "description": "The difficulty of the coding task, affecting the number and types of tools needed."
+          },
+          {
+            "name": "tool_reliability",
+            "role": "input",
+            "description": "The probability that each tool returns correct and consistent results."
+          },
+          {
+            "name": "exploration_rate",
+            "role": "input",
+            "description": "The agent's tendency to try unfamiliar tools versus exploiting known ones."
+          },
+          {
+            "name": "routing_decision",
+            "role": "mediator",
+            "description": "The agent's choice of which tool to invoke at each step."
+          },
+          {
+            "name": "tool_selection_accuracy",
+            "role": "mediator",
+            "description": "How well the selected tool matches the requirements of the current subtask."
+          },
+          {
+            "name": "latency",
+            "role": "mediator",
+            "description": "The time taken for the chosen tool to execute and return results."
+          },
+          {
+            "name": "correctness",
+            "role": "outcome",
+            "description": "Whether the agent's final output satisfies the user's intent without errors."
+          },
+          {
+            "name": "failure",
+            "role": "outcome",
+            "description": "Binary outcome: 1 if correctness is false (task not completed or erroneous), 0 otherwise."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "task_complexity",
+            "relation": "increases",
+            "target": "routing_decision",
+            "explanation": "Higher task complexity demands more sophisticated routing, increasing decision difficulty."
+          },
+          {
+            "step": null,
+            "source": "tool_reliability",
+            "relation": "affects",
+            "target": "routing_decision",
+            "explanation": "If tool reliability is low, the agent must account for possible failures when routing."
+          },
+          {
+            "step": null,
+            "source": "exploration_rate",
+            "relation": "influences",
+            "target": "routing_decision",
+            "explanation": "A high exploration rate leads the agent to try new tools, which may be suboptimal."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "tool_selection_accuracy",
+            "explanation": "The routing decision directly selects which tool is used, affecting how well it fits the subtask."
+          },
+          {
+            "step": null,
+            "source": "routing_decision",
+            "relation": "determines",
+            "target": "latency",
+            "explanation": "Different tools have different execution times, so routing affects total latency."
+          },
+          {
+            "step": null,
+            "source": "tool_selection_accuracy",
+            "relation": "positively affects",
+            "target": "correctness",
+            "explanation": "Better tool selection leads to fewer errors and higher correctness."
+          },
+          {
+            "step": null,
+            "source": "latency",
+            "relation": "negatively affects",
+            "target": "correctness",
+            "explanation": "Higher latency may cause timeouts or incomplete results, reducing correctness."
+          },
+          {
+            "step": null,
+            "source": "correctness",
+            "relation": "inversely determines",
+            "target": "failure",
+            "explanation": "Failure occurs when correctness is false."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "routing_decision under high complexity",
+            "why_it_matters": "When task complexity is high, the agent may make suboptimal routing choices, leading to tool selection errors and eventually failure."
+          },
+          {
+            "bottleneck": "exploration-exploitation tradeoff",
+            "why_it_matters": "If exploration rate is too high, the agent may use unreliable tools; if too low, it may miss better tools. Both can cause failure."
+          },
+          {
+            "bottleneck": "latency constraints",
+            "why_it_matters": "Even if tool selection is accurate, high latency can cause the agent to exceed time limits, resulting in failure."
+          }
+        ],
+        "mechanism_summary": "Coding agent tool-use routing fails when the routing decision process, influenced by task complexity, tool reliability, and exploration rate, leads to poor tool selection accuracy or excessive latency, ultimately resulting in incorrect or incomplete outputs. The key failure points are the routing decision under high complexity, the exploration-exploitation tradeoff, and latency constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that the agent perfectly perceives environment state and tool outputs may conflict with real-world partial observability, leading to incorrect routing decisions.",
+        "derived_from": [
+          "assumptions: perfect perception",
+          "mechanism: routing_decision"
+        ],
+        "why_it_matters": "Imperfect perception can cause the agent to act on false information, directly causing failure.",
+        "what_existing_methods_may_miss": "Most agent models assume full observability; few account for perceptual noise or missing information.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "At what critical perceptual noise level does a sharp phase transition in tool-use routing failure (failure rate > 80%) occur, and how does this critical noise level vary with tool reliability in coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a discontinuous phase transition boundary in routing failure due to perceptual noise, and demonstrates how tool reliability modulates this critical threshold."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical perceptual noise level ε* such that for ε < ε*, failure rate is low (<20%) and for ε > ε*, failure rate is high (>80%); ε* is lower when tool reliability is low (0.7) compared to high (0.95), indicating a two-way interaction where low reliability lowers the phase transition boundary.",
+        "predicted_effect": "Failure rate exhibits a sharp jump near ε* rather than a gradual increase, and the location of this jump shifts leftward (lower noise) under low tool reliability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent on a fixed set of tasks, systematically varying perceptual noise at fine granularity (0%, 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%) and tool reliability (high: 0.95, low: 0.7) with 1000 trials per condition. Record failure rate (binary: task incomplete or incorrect). Fit a logistic regression or piecewise function to detect a discontinuity. Identify the noise level where failure rate jumps from below 20% to above 80%.",
+        "independent_variables": [
+          "perceptual noise level (0%, 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%)",
+          "tool reliability (high: 0.95, low: 0.7)"
+        ],
+        "dependent_variables": [
+          "failure rate (proportion of trials where agent output is incorrect or incomplete)"
+        ],
+        "controls": [
+          "task complexity (fixed set of moderate complexity tasks)",
+          "exploration rate (fixed at 0.2)",
+          "agent architecture (same routing algorithm, e.g., LLM with fixed prompts)",
+          "latency constraints (no time limits to isolate perception effects)"
+        ],
+        "falsifying_observation": "If failure rate increases gradually (<20% point change across adjacent noise levels) for both reliability conditions, or if the noise level at which failure rate first exceeds 80% is identical for high and low reliability."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Failure rate remains below 20% for noise levels below a certain threshold, then jumps to above 80% within a 5% noise increase.",
+          "The threshold noise level is at least 10% lower for low reliability (0.7) than for high reliability (0.95).",
+          "The transition for low reliability occurs at a noise level <= 20%, while for high reliability it occurs at >= 30%."
+        ],
+        "rejects_hypothesis": [
+          "Failure rate never exceeds 80% for any noise level (e.g., agent adapts perfectly).",
+          "Failure rate increases by less than 30% across any 5% noise increment (gradual increase).",
+          "The noise level at which failure rate exceeds 80% is the same for both reliability conditions (within 5% margin)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (no sharp transition or no interaction), then the assumption that perceptual noise alone causes a discrete phase transition may be incorrect; the failure rate may increase smoothly with noise.",
+        "assumption_to_revise": "The assumption that routing failure exhibits a clear phase transition; instead, failure may accumulate gradually without a distinct threshold.",
+        "next_question": "Does the presence of a time limit (latency constraint) introduce a sharp phase transition in routing failure, even if perceptual noise alone does not?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical value of the ratio R = exploration_rate / (1 - tool_reliability) such that for R below the critical value, failure probability increases smoothly with decreasing reliability, while for R above the critical value, failure probability jumps discontinuously. Moreover, this critical ratio is lower for tasks with high step interdependence (sequential tasks) compared to low interdependence (parallelizable tasks).",
+      "independent_variables": [
+        "exploration_rate",
+        "tool_reliability",
+        "task interdependency (sequential vs parallel)"
+      ],
+      "dependent_variables": [
+        "failure rate"
+      ],
+      "controlled_variables": [
+        "agent architecture",
+        "tool set",
+        "latency",
+        "perception accuracy"
+      ],
+      "baselines": [
+        {
+          "name": "No exploration",
+          "description": "Exploration rate set to 0, so agent only exploits known tools."
+        },
+        {
+          "name": "Perfect reliability",
+          "description": "Tool reliability set to 1.0, so all tools always return correct results."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure rate",
+          "definition": "Proportion of trials where the agent's output does not satisfy user intent or introduces errors."
+        }
+      ],
+      "expected_result": "Failure rate shows a discontinuous jump at a critical R value, and that critical R is lower for sequential tasks than for parallel tasks.",
+      "falsifying_result": "No discontinuous jump in failure rate is observed as R increases, or the critical R does not differ significantly between sequential and parallel tasks.",
+      "minimum_viable_experiment": "Simulate a coding agent on two types of coding tasks: sequential (each step depends on previous) and parallelizable (independent steps). Vary exploration_rate from 0 to 0.5 in steps of 0.05, and tool_reliability from 0.4 to 0.9 in steps of 0.05. For each combination, run 500 trials, measuring failure rate. Compute R = exploration_rate / (1 - reliability). Plot failure rate vs R for each task type and analyze for discontinuity.",
+      "risks_and_confounds": [
+        "Interaction between exploration rate and task complexity beyond interdependency",
+        "Sample size may not detect discontinuity if effect is small",
+        "Threshold may depend on specific tool set"
+      ]
+    },
+    {
+      "hypothesis": "Failure rate in coding agents exhibits a discontinuous jump at a critical exploration rate; this critical rate increases linearly with task complexity and decreases linearly with tool reliability.",
+      "independent_variables": [
+        "exploration_rate (continuous, 0.0 to 1.0, step 0.05)",
+        "task_complexity (categorical: low, medium, high)",
+        "tool_reliability (categorical: low=0.7, high=0.95)"
+      ],
+      "dependent_variables": [
+        "failure_rate (proportion of tasks failed)",
+        "presence of discontinuity (binary, detected by changepoint model)"
+      ],
+      "controlled_variables": [
+        "Same set of 50 tasks per complexity level across conditions",
+        "Same agent architecture (ReAct with fixed memory and tool set)",
+        "Same tool set: code_executor, file_reader, web_search",
+        "Random seed fixed across runs for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "ReAct agent with no exploration (exploration_rate=0)",
+          "description": "Agent always chooses the tool with highest expected success, no random exploration."
+        },
+        {
+          "name": "Random tool selection",
+          "description": "Agent selects tools uniformly at random at each step, independent of context."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure_rate",
+          "definition": "Proportion of tasks (out of 100 trials per condition) where the agent's output is incorrect or incomplete."
+        },
+        {
+          "name": "discontinuity_presence",
+          "definition": "Binary indicator of whether a Bayesian changepoint detection algorithm identifies a significant jump in failure rate as exploration rate increases."
+        }
+      ],
+      "expected_result": "For each condition, failure rate shows a clear jump (e.g., >0.2 increase within 0.1 exploration rate step) at some critical exploration rate. The critical exploration rate increases with task complexity and decreases with tool reliability. Below the threshold, failure rate is below 0.1; above, it exceeds 0.4.",
+      "falsifying_result": "Failure rate varies continuously (no significant jump) for all conditions, or the critical threshold does not shift systematically with task complexity or tool reliability (e.g., no trend or opposite trend).",
+      "minimum_viable_experiment": "Simulate a ReAct-style coding agent on a fixed set of coding tasks (e.g., 50 tasks per complexity level). Vary exploration rate from 0.0 to 1.0 in steps of 0.05, task complexity (low: 2-step tasks, medium: 5-step, high: 10-step), and tool reliability (low: 0.7, high: 0.95 success probability). For each condition, run 100 trials and measure failure rate (proportion of tasks with incorrect/incomplete output). Use a Bayesian changepoint detection algorithm to identify if and where a discontinuity in failure rate occurs as exploration rate increases.",
+      "risks_and_confounds": [
+        "Tool outputs may be non-deterministic despite assumption of determinism, affecting routing decisions.",
+        "Agent perception assumed perfect but may be imperfect in practice, leading to additional failure modes.",
+        "Limited task set (50 per complexity level) may not generalize to other coding tasks.",
+        "Random seed fixed may not capture variance across different seeds; we fix one seed for reproducibility but results may be sensitive.",
+        "Changepoint detection algorithm may have false positives or negatives; need to validate with multiple methods."
+      ]
+    },
+    {
+      "hypothesis": "For time-constrained coding tasks, there exists a critical latency per tool invocation above which correctness collapses from ≥90% to ≤50% within a latency interval of ≤1 second; this critical latency decreases with decreasing tool reliability in a non-linear fashion, and the transition region becomes sharper as reliability decreases.",
+      "independent_variables": [
+        "latency per tool invocation (0.5s to 10s, with fine 0.1s steps near suspected thresholds)",
+        "tool reliability (0.7 to 1.0 in 0.05 steps)"
+      ],
+      "dependent_variables": [
+        "correctness (percentage of tasks completed without errors)"
+      ],
+      "controlled_variables": [
+        "fixed routing policy (greedy latency minimization)",
+        "fixed task complexity (moderate)",
+        "fixed exploration rate (set to zero)",
+        "deterministic environment (no noise beyond tool reliability)"
+      ],
+      "baselines": [
+        {
+          "name": "Low latency high reliability",
+          "description": "Agent with latency=0.5s and reliability=0.95"
+        },
+        {
+          "name": "High latency low reliability",
+          "description": "Agent with latency=10s and reliability=0.7"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Correctness",
+          "definition": "Fraction of tasks completed without errors"
+        },
+        {
+          "name": "Critical latency threshold",
+          "definition": "Latency at which correctness first drops below 90%"
+        },
+        {
+          "name": "Transition width",
+          "definition": "Latency interval between 90% and 50% correctness"
+        }
+      ],
+      "expected_result": "For tool reliability = 0.95: correctness remains >90% up to ~6.5s, drops to <50% by ~7.0s (transition width ≈ 0.5s). For reliability = 0.85: >90% up to ~4.0s, <50% by ~4.5s. For reliability = 0.75: >90% up to ~2.0s, <50% by ~2.5s. Transition width decreases with decreasing reliability.",
+      "falsifying_result": "If correctness does not exhibit a sharp drop (i.e., declines gradually over an interval >2s) for any reliability level, or if the critical latency does not decrease systematically with decreasing reliability, or if the transition width does not shrink with decreasing reliability, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a coding agent on a benchmark of time-constrained tasks. Vary latency per tool invocation from 0.5s to 10s in increments of 0.1s near expected thresholds (0.5s steps elsewhere), and tool reliability from 0.7 to 1.0 in steps of 0.05. Use a fixed routing policy that optimizes for speed given a latency budget (exploration rate set to zero). For each (latency, reliability) combination, run the agent on a fixed set of tasks (e.g., 100 trials) and record correctness. Analyze the function correctness(latency) for each reliability level to identify the critical latency where correctness drops below 90% and below 50%, and compute the transition width.",
+      "risks_and_confounds": [
+        "The fixed routing policy (greedy latency minimization) may not be representative of all coding agent strategies; results could differ with other policies.",
+        "Task complexity is fixed at moderate; the phase transition may depend on complexity.",
+        "The simulation assumes a deterministic environment aside from tool reliability; real-world factors like network variability may alter the transition.",
+        "The exploration rate is set to zero, which may not reflect agents that learn to adapt routing over time.",
+        "Fine-grained latency increments (0.1s) near thresholds require accurate timing simulation; too coarse steps may miss the transition.",
+        "The benchmark tasks must be consistently defined to ensure reproducibility."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical perceptual noise level ε* such that for ε < ε*, failure rate is low (<20%) and for ε > ε*, failure rate is high (>80%); ε* is lower when tool reliability is low (0.7) compared to high (0.95), indicating a two-way interaction where low reliability lowers the phase transition boundary.",
+      "independent_variables": [
+        "perceptual noise level (0%, 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%)",
+        "tool reliability (high: 0.95, low: 0.7)"
+      ],
+      "dependent_variables": [
+        "failure rate (proportion of trials where agent output is incorrect or incomplete)"
+      ],
+      "controlled_variables": [
+        "task complexity (fixed set of moderate complexity tasks)",
+        "exploration rate (fixed at 0.2)",
+        "agent architecture (same routing algorithm, e.g., LLM with fixed prompts)",
+        "latency constraints (no time limits to isolate perception effects)"
+      ],
+      "baselines": [
+        {
+          "name": "No perceptual noise, high reliability",
+          "description": "Perceptual noise = 0%, tool reliability = 0.95"
+        },
+        {
+          "name": "No perceptual noise, low reliability",
+          "description": "Perceptual noise = 0%, tool reliability = 0.7"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "failure_rate",
+          "definition": "Proportion of trials where the agent's output is incorrect or incomplete"
+        },
+        {
+          "name": "critical_noise_level",
+          "definition": "The noise level at which failure rate first exceeds 80% (estimated via interpolation or piecewise fitting)"
+        }
+      ],
+      "expected_result": "For high reliability (0.95), failure rate remains below 20% for noise ≤ 25%, then jumps above 80% at 30% noise. For low reliability (0.7), failure rate jumps above 80% at a lower noise level (≤ 20%), e.g., at 15% or 20% noise, showing at least a 10% difference in the critical threshold.",
+      "falsifying_result": "Failure rate increases by less than 30% across any 5% noise increment (gradual increase) OR the noise level at which failure rate first exceeds 80% is within 5% for both reliability conditions (no interaction).",
+      "minimum_viable_experiment": "Simulate a coding agent on a fixed set of moderate-complexity tasks. Systematically vary perceptual noise at fine granularity (0%, 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%) and tool reliability (high: 0.95, low: 0.7) with 1000 trials per condition. Record failure rate (binary: task incomplete or incorrect). Fit a logistic regression or piecewise function to detect a discontinuity. Identify the noise level where failure rate jumps from below 20% to above 80%.",
+      "risks_and_confounds": [
+        "Stochasticity in agent behavior may require more trials to detect a sharp transition.",
+        "The choice of 'moderate complexity' tasks may not generalize; use a diverse task set to ensure robustness.",
+        "The agent's routing algorithm may be sensitive to implementation details; use a standardized architecture.",
+        "No time limits might allow the agent to eventually succeed; ensure tasks have finite completion steps."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of when tool-use routing fails in coding agents, identifying phase transitions in failure modes under manipulation of exploration rate, tool reliability, latency, and perceptual noise. The work is rigorous in its decomposition, mechanism modeling, and formulation of falsifiable hypotheses. However, the reliance on simulated environments and strong assumptions (perfect perception, deterministic tools) limits immediate real-world applicability. The novelty of the phase transition framing is compelling but may overclaim given the controlled settings.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives and causal mechanism model.",
+      "Identification of four key tensions, each leading to falsifiable hypotheses about phase transitions.",
+      "Well-specified minimal decisive tests with controlled variables and clear falsifying observations.",
+      "High quality scores in first-principles derivation, falsifiability, mechanism clarity, novelty, and experimentability.",
+      "Systematic treatment of exploration-exploitation, speed-accuracy, and perception-reliability tradeoffs."
+    ],
+    "weaknesses": [
+      "Assumptions of perfect perception and deterministic tools are unrealistic; real-world agents face partial observability and stochasticity.",
+      "All experiments are simulation-based; lack of validation on actual coding agent platforms (e.g., SWE-bench, HumanEval) reduces significance.",
+      "Potential overclaiming of 'phase transition' – the observed sharp changes may be artifacts of simulation parameters or discrete step sizes.",
+      "Limited comparison with existing routing methods (e.g., heuristic, learned, or hybrid approaches) as baselines.",
+      "The mechanism model does not consider agent learning or adaptation over time; static routing policies may not reflect real agents."
+    ],
+    "questions": [
+      "How would the results change if the agent had imperfect perception or non-deterministic tools, as commonly found in practice?",
+      "Are the predicted phase transitions observable in real-world coding agents (e.g., GPT-4 with tool use) or are they artifacts of simulation?",
+      "Can the critical thresholds be derived analytically from the mechanism model, or is empirical measurement required?",
+      "How do the failure regimes interact when multiple tensions (e.g., exploration and latency) are present simultaneously?"
+    ],
+    "missing_baselines": [
+      "Comparison with heuristic routing policies (e.g., always use most reliable tool, round-robin) instead of only greedy.",
+      "Comparison with learning-based routing (e.g., RL, prompt-based adaptation) as an alternative to fixed exploration rates.",
+      "Baseline with no exploration (exploitation-only) already included, but missing random routing as a lower bound.",
+      "For latency experiments, baseline with adaptive latency budgets or timeout recovery mechanisms."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient real-world grounding",
+    "root_cause": "The research relies exclusively on simulated environments with unrealistic assumptions (perfect perception, deterministic tools) and does not validate findings on actual coding agent platforms, leading to potential overclaiming and limited applicability.",
+    "violated_principle": "Empirical validation principle: claims about agent behavior must be verified on real-world systems or widely-accepted benchmarks to ensure external validity.",
+    "new_or_updated_principle": "Simulation-first findings must be cross-validated on at least two real-world coding agent benchmarks (e.g., SWE-bench, HumanEval) before claiming phase transitions or thresholds. The assumptions of perfect perception and deterministic tools must be explicitly tested for robustness.",
+    "new_or_updated_skill": "Ability to design and execute experiments on real coding agent platforms, including handling non-determinism, partial observability, and interpreting results in presence of noise.",
+    "regression_test": "When a research package claims a phase transition or critical threshold in agent routing failure, the minimal decisive test must include at least one experiment on a real coding agent system (e.g., GPT-4 with tool-use) or a standardized benchmark, with the same independent variables, and report whether the predicted discontinuity is observed. The test must also include a sensitivity analysis relaxing the perfect perception and deterministic tool assumptions."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical ratio of exploration rate to tool unreliability (exploration_rate / (1 - tool_reliability)) below which agent failure probability undergoes a phase transition from gradual degradation to catastrophic collapse, and does this critical ratio depend on task interdependency?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical exploration rate threshold beyond which tool-use routing failure in coding agents increases discontinuously, and how does this threshold depend on task complexity and tool reliability?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "In time-constrained coding tasks, does tool-use routing failure exhibit a phase transition such that correctness remains above 90% until a critical latency threshold, beyond which it drops below 50% within a narrow latency interval (≤1s), and how does this critical threshold depend on tool reliability?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what critical perceptual noise level does a sharp phase transition in tool-use routing failure (failure rate > 80%) occur, and how does this critical noise level vary with tool reliability in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true,
+      "enable_question_debate_refinement": true
+    },
+    "baseline": "firstresearch_debate_combo",
+    "ablation": "co_scientist_debate_refinement_added",
+    "replicate": 1,
+    "run_id": "run-20260628T212839Z"
+  }
+}

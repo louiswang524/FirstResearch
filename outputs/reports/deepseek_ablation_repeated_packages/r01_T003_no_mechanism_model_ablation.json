@@ -1,0 +1,810 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool",
+        "definition": "A discrete computational capability or API that an agent can invoke, such as a code interpreter, search engine, or version control command.",
+        "why_primitive": "This is the atomic unit of action in the agent's environment; without a clear definition of what constitutes a tool, analyzing routing failures is impossible."
+      },
+      {
+        "name": "Routing",
+        "definition": "The decision process by which the agent selects which tool to use at each step of code generation or debugging, based on current context and internal state.",
+        "why_primitive": "Routing is the core mechanism under study; failures are defined as failures in this decision process."
+      },
+      {
+        "name": "Failure",
+        "definition": "An outcome where the agent's tool selection leads to suboptimal or incorrect code, increased time, or inability to complete the task.",
+        "why_primitive": "Failure is the event we want to predict; it must be defined independently of specific tools or routing algorithms to allow general analysis."
+      },
+      {
+        "name": "Coding Agent",
+        "definition": "An autonomous system that generates, modifies, or debugs code by invoking tools in a sequence determined by its routing policy.",
+        "why_primitive": "The agent is the subject of the analysis; its design constraints define the space of possible routing failures."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The agent has a finite, known set of tools available.",
+        "rationale": "Without a finite set, routing is unbounded and failure becomes ill-defined; standard coding agents operate with a fixed toolbox.",
+        "possible_failure": "If new tools are added dynamically or the set is unknown, routing can fail due to incomplete knowledge rather than poor selection."
+      },
+      {
+        "assumption": "Routing decisions are based on a learned or engineered policy that maps context to tool choice.",
+        "rationale": "We assume some deterministic or probabilistic mechanism exists behind routing; otherwise failure analysis reduces to random chance.",
+        "possible_failure": "If the policy is not properly trained or has weak generalization, routing will fail in novel contexts."
+      },
+      {
+        "assumption": "The cost of invoking a tool is non-zero and varies (e.g., time, tokens, side effects).",
+        "rationale": "Costs are what make routing non-trivial; if all tools were free and instantaneous, any routing would succeed.",
+        "possible_failure": "Ignoring cost asymmetries leads to failures where the agent oversues expensive tools."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs. exploitation in tool selection",
+        "variables": [
+          "novelty of task",
+          "cost of trying new tools",
+          "prior success with known tools"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs. accuracy of routing decisions",
+        "variables": [
+          "time budget",
+          "complexity of context",
+          "error tolerance"
+        ]
+      },
+      {
+        "tradeoff": "Generality vs. specialization of routing policy",
+        "variables": [
+          "diversity of tasks",
+          "amount of training data",
+          "overfitting risk"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "topic condition",
+        "role": "input",
+        "description": "The observed condition in When does tool-use routing fail in coding agents?."
+      },
+      {
+        "name": "research outcome",
+        "role": "outcome",
+        "description": "The measured outcome or failure mode proposed by the research question."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+        "source": null,
+        "relation": null,
+        "target": null,
+        "explanation": null
+      }
+    ],
+    "bottlenecks": [],
+    "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption of a finite, known tool set conflicts with dynamic tool addition, leading to routing failures from incomplete knowledge rather than poor selection.",
+      "derived_from": [
+        "Tool",
+        "Routing",
+        "Failure"
+      ],
+      "why_it_matters": "If tool sets are dynamic, standard routing policies fail due to missing tools, not flawed decision-making, conflating failure causes.",
+      "what_existing_methods_may_miss": "Existing evaluations assume fixed tool sets; they miss failures induced by tool set changes.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Policy-based routing requires generalization across tasks, but specialization on training data leads to route failures in novel contexts.",
+      "derived_from": [
+        "Routing",
+        "Coding Agent",
+        "Failure"
+      ],
+      "why_it_matters": "This tension explains why routing policies often underperform on unseen tasks despite strong in-distribution results.",
+      "what_existing_methods_may_miss": "Benchmarks that don't vary task diversity may overestimate generalization.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Non-zero, asymmetric tool costs make routing nontrivial, but ignoring cost asymmetries (e.g., overusing expensive tools) is a common failure mode.",
+      "derived_from": [
+        "Tool",
+        "Routing",
+        "Failure"
+      ],
+      "why_it_matters": "Cost-aware routing is critical for efficiency; neglecting costs yields suboptimal code and wasted resources.",
+      "what_existing_methods_may_miss": "Many routing algorithms treat all tools as equal cost, missing cost-driven failures.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does the rate of tool set expansion affect the frequency of routing failures due to missing tools compared to failures due to poor selection?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Distinguishes failure causes in dynamic tool environments, informing adaptive routing strategies that detect and handle missing tools."
+    },
+    {
+      "question": "Does the generalization gap of routing policies on training vs. novel tasks increase with the diversity of the training task distribution?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Reveals when policy-based routing fails due to over-specialization, guiding benchmark design to include diverse tasks."
+    },
+    {
+      "question": "What is the impact of ignoring tool cost asymmetries on the total cost of code generation in a multi-tool agent?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Quantifies cost inefficiency from naive routing, motivating cost-aware routing algorithms."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A discrete computational capability or API that an agent can invoke, such as a code interpreter, search engine, or version control command.",
+          "why_primitive": "This is the atomic unit of action in the agent's environment; without a clear definition of what constitutes a tool, analyzing routing failures is impossible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which the agent selects which tool to use at each step of code generation or debugging, based on current context and internal state.",
+          "why_primitive": "Routing is the core mechanism under study; failures are defined as failures in this decision process."
+        },
+        {
+          "name": "Failure",
+          "definition": "An outcome where the agent's tool selection leads to suboptimal or incorrect code, increased time, or inability to complete the task.",
+          "why_primitive": "Failure is the event we want to predict; it must be defined independently of specific tools or routing algorithms to allow general analysis."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system that generates, modifies, or debugs code by invoking tools in a sequence determined by its routing policy.",
+          "why_primitive": "The agent is the subject of the analysis; its design constraints define the space of possible routing failures."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a finite, known set of tools available.",
+          "rationale": "Without a finite set, routing is unbounded and failure becomes ill-defined; standard coding agents operate with a fixed toolbox.",
+          "possible_failure": "If new tools are added dynamically or the set is unknown, routing can fail due to incomplete knowledge rather than poor selection."
+        },
+        {
+          "assumption": "Routing decisions are based on a learned or engineered policy that maps context to tool choice.",
+          "rationale": "We assume some deterministic or probabilistic mechanism exists behind routing; otherwise failure analysis reduces to random chance.",
+          "possible_failure": "If the policy is not properly trained or has weak generalization, routing will fail in novel contexts."
+        },
+        {
+          "assumption": "The cost of invoking a tool is non-zero and varies (e.g., time, tokens, side effects).",
+          "rationale": "Costs are what make routing non-trivial; if all tools were free and instantaneous, any routing would succeed.",
+          "possible_failure": "Ignoring cost asymmetries leads to failures where the agent oversues expensive tools."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Non-zero, asymmetric tool costs make routing nontrivial, but ignoring cost asymmetries (e.g., overusing expensive tools) is a common failure mode.",
+        "derived_from": [
+          "Tool",
+          "Routing",
+          "Failure"
+        ],
+        "why_it_matters": "Cost-aware routing is critical for efficiency; neglecting costs yields suboptimal code and wasted resources.",
+        "what_existing_methods_may_miss": "Many routing algorithms treat all tools as equal cost, missing cost-driven failures.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of tool cost variance does ignoring cost asymmetries cause routing failure in coding agents?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a critical variance threshold that triggers cost-oblivious routing failure, enabling cost-aware routing only when necessary."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of relative tool cost variance above which cost-oblivious routing yields significantly higher total cost compared to cost-aware routing.",
+        "predicted_effect": "For tasks with tool cost variance exceeding 0.5 (normalized), cost-oblivious routing incurs at least 30% higher total cost."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Vary tool cost variance across a suite of coding tasks, measure total cost (tokens or time) for cost-oblivious vs cost-aware agents, and identify the variance threshold at which cost difference becomes statistically significant.",
+        "independent_variables": [
+          "Tool cost variance: low (0.1), medium (0.5), high (0.9)"
+        ],
+        "dependent_variables": [
+          "Total cost: cumulative tokens consumed across all tool invocations"
+        ],
+        "controls": [
+          "Same coding tasks (e.g., 50 benchmark problems)",
+          "Same tool set with controlled costs",
+          "Same agent architecture",
+          "Same random seed for reproducibility"
+        ],
+        "falsifying_observation": "If no threshold exists: cost-oblivious agent is never significantly worse than cost-aware, or is always worse regardless of variance."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Above a certain variance threshold, cost-oblivious agent shows significantly higher total cost (p<0.05) than cost-aware agent.",
+          "Below threshold, no significant cost difference between the two agents."
+        ],
+        "rejects_hypothesis": [
+          "Cost-oblivious agent is always worse regardless of variance.",
+          "No significant cost difference at any variance level."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found, then the assumption that cost variance alone drives routing failure may be invalid.",
+        "assumption_to_revise": "The primacy of cost variance as the key factor; consider interaction with task complexity.",
+        "next_question": "Does task complexity moderate the effect of cost variance on routing failure?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A discrete computational capability or API that an agent can invoke, such as a code interpreter, search engine, or version control command.",
+          "why_primitive": "This is the atomic unit of action in the agent's environment; without a clear definition of what constitutes a tool, analyzing routing failures is impossible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which the agent selects which tool to use at each step of code generation or debugging, based on current context and internal state.",
+          "why_primitive": "Routing is the core mechanism under study; failures are defined as failures in this decision process."
+        },
+        {
+          "name": "Failure",
+          "definition": "An outcome where the agent's tool selection leads to suboptimal or incorrect code, increased time, or inability to complete the task.",
+          "why_primitive": "Failure is the event we want to predict; it must be defined independently of specific tools or routing algorithms to allow general analysis."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system that generates, modifies, or debugs code by invoking tools in a sequence determined by its routing policy.",
+          "why_primitive": "The agent is the subject of the analysis; its design constraints define the space of possible routing failures."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a finite, known set of tools available.",
+          "rationale": "Without a finite set, routing is unbounded and failure becomes ill-defined; standard coding agents operate with a fixed toolbox.",
+          "possible_failure": "If new tools are added dynamically or the set is unknown, routing can fail due to incomplete knowledge rather than poor selection."
+        },
+        {
+          "assumption": "Routing decisions are based on a learned or engineered policy that maps context to tool choice.",
+          "rationale": "We assume some deterministic or probabilistic mechanism exists behind routing; otherwise failure analysis reduces to random chance.",
+          "possible_failure": "If the policy is not properly trained or has weak generalization, routing will fail in novel contexts."
+        },
+        {
+          "assumption": "The cost of invoking a tool is non-zero and varies (e.g., time, tokens, side effects).",
+          "rationale": "Costs are what make routing non-trivial; if all tools were free and instantaneous, any routing would succeed.",
+          "possible_failure": "Ignoring cost asymmetries leads to failures where the agent oversues expensive tools."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption of a finite, known tool set conflicts with dynamic tool addition, leading to routing failures from incomplete knowledge rather than poor selection.",
+        "derived_from": [
+          "Tool",
+          "Routing",
+          "Failure"
+        ],
+        "why_it_matters": "If tool sets are dynamic, standard routing policies fail due to missing tools, not flawed decision-making, conflating failure causes.",
+        "what_existing_methods_may_miss": "Existing evaluations assume fixed tool sets; they miss failures induced by tool set changes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical rate of tool set expansion at which the dominant cause of routing failures shifts from poor selection to missing tools in coding agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a threshold that distinguishes two failure regimes, enabling adaptive routing policies that anticipate when missing-tool failures become dominant."
+      },
+      "hypothesis": {
+        "statement": "Below a critical expansion rate r*, the majority of routing failures are due to poor selection (ratio of missing-tool to poor-selection failures < 1); above r*, the majority are due to missing tools (ratio > 1).",
+        "predicted_effect": "The ratio of missing-tool to poor-selection failures crosses 1 at a specific expansion rate, revealing a phase transition in failure causation."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed routing policy (trained on a static initial tool set of 5 tools) and no fallback for unknown tools. Vary the tool set expansion rate across 5 levels: 0 (no expansion), 1 new tool per 100 tasks, 1 per 50 tasks, 1 per 10 tasks, and 1 per task. Each condition runs 1000 randomly generated coding tasks. For each task, record routing decisions and classify failures: 'missing tool' if the optimal tool is not in the current set, 'poor selection' if the agent chooses a suboptimal available tool. Compute the ratio of missing-tool to poor-selection failures per condition. Determine if there exists an expansion rate r* where the ratio crosses 1.",
+        "independent_variables": [
+          "Rate of tool set expansion (frequency of new tool additions)"
+        ],
+        "dependent_variables": [
+          "Ratio of missing-tool to poor-selection failures",
+          "Crossing point (expansion rate where ratio = 1)"
+        ],
+        "controls": [
+          "Base tool set composition (5 initial tools)",
+          "Routing policy (fixed, unchanged across conditions)",
+          "Task distribution (same set of 1000 tasks used for all conditions)",
+          "No fallback mechanism for unknown tools",
+          "Tool success probabilities (all tools equally likely to succeed when appropriate)"
+        ],
+        "falsifying_observation": "If the ratio never exceeds 1 at any expansion rate, or if it never falls below 1 (i.e., missing-tool failures always dominate), or if the ratio crosses 1 multiple times, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At low expansion rates (e.g., 0 or 1 per 100 tasks), ratio < 1, indicating poor-selection failures dominate.",
+          "At high expansion rates (e.g., 1 per task), ratio > 1, indicating missing-tool failures dominate.",
+          "There is a clearly identifiable rate r* where the ratio crosses 1, and this crossing is monotonic."
+        ],
+        "rejects_hypothesis": [
+          "The ratio remains below 1 for all expansion rates (missing-tool failures never become dominant).",
+          "The ratio remains above 1 for all expansion rates (poor-selection failures never dominate even at low rates).",
+          "The ratio crosses 1 multiple times or exhibits non-monotonic behavior."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the ratio never crosses 1, then the hypothesis of a critical threshold is rejected. The relationship between expansion rate and failure type may be linear or constant.",
+        "assumption_to_revise": "The assumption that missing-tool failures become dominant at high expansion rates is invalid if the policy implicitly handles new tools (e.g., via a generic fallback like 'use code interpreter') or if poor-selection failures are also highly sensitive to expansion rate.",
+        "next_question": "Under what conditions (e.g., policy adaptability, tool heterogeneity) does the threshold shift or disappear? How does the presence of a fallback mechanism affect the threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "A discrete computational capability or API that an agent can invoke, such as a code interpreter, search engine, or version control command.",
+          "why_primitive": "This is the atomic unit of action in the agent's environment; without a clear definition of what constitutes a tool, analyzing routing failures is impossible."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process by which the agent selects which tool to use at each step of code generation or debugging, based on current context and internal state.",
+          "why_primitive": "Routing is the core mechanism under study; failures are defined as failures in this decision process."
+        },
+        {
+          "name": "Failure",
+          "definition": "An outcome where the agent's tool selection leads to suboptimal or incorrect code, increased time, or inability to complete the task.",
+          "why_primitive": "Failure is the event we want to predict; it must be defined independently of specific tools or routing algorithms to allow general analysis."
+        },
+        {
+          "name": "Coding Agent",
+          "definition": "An autonomous system that generates, modifies, or debugs code by invoking tools in a sequence determined by its routing policy.",
+          "why_primitive": "The agent is the subject of the analysis; its design constraints define the space of possible routing failures."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The agent has a finite, known set of tools available.",
+          "rationale": "Without a finite set, routing is unbounded and failure becomes ill-defined; standard coding agents operate with a fixed toolbox.",
+          "possible_failure": "If new tools are added dynamically or the set is unknown, routing can fail due to incomplete knowledge rather than poor selection."
+        },
+        {
+          "assumption": "Routing decisions are based on a learned or engineered policy that maps context to tool choice.",
+          "rationale": "We assume some deterministic or probabilistic mechanism exists behind routing; otherwise failure analysis reduces to random chance.",
+          "possible_failure": "If the policy is not properly trained or has weak generalization, routing will fail in novel contexts."
+        },
+        {
+          "assumption": "The cost of invoking a tool is non-zero and varies (e.g., time, tokens, side effects).",
+          "rationale": "Costs are what make routing non-trivial; if all tools were free and instantaneous, any routing would succeed.",
+          "possible_failure": "Ignoring cost asymmetries leads to failures where the agent oversues expensive tools."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "topic condition",
+            "role": "input",
+            "description": "The observed condition in When does tool-use routing fail in coding agents?."
+          },
+          {
+            "name": "research outcome",
+            "role": "outcome",
+            "description": "The measured outcome or failure mode proposed by the research question."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "The ablation omits explicit mechanism construction and passes only a generic topic-to-outcome relation downstream.",
+            "source": null,
+            "relation": null,
+            "target": null,
+            "explanation": null
+          }
+        ],
+        "bottlenecks": [],
+        "mechanism_summary": "Mechanism-builder ablation: no explicit mechanism model was constructed before tension finding."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Policy-based routing requires generalization across tasks, but specialization on training data leads to route failures in novel contexts.",
+        "derived_from": [
+          "Routing",
+          "Coding Agent",
+          "Failure"
+        ],
+        "why_it_matters": "This tension explains why routing policies often underperform on unseen tasks despite strong in-distribution results.",
+        "what_existing_methods_may_miss": "Benchmarks that don't vary task diversity may overestimate generalization.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "When the diversity of training tasks exceeds a critical threshold, does the generalization gap of routing policies in coding agents exhibit a sharp increase, indicating a phase transition to more severe failure?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a critical diversity threshold beyond which routing policies fail catastrophically due to over-specialization, providing a concrete boundary condition for when tool-use routing fails in coding agents."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical diversity threshold (in terms of number of distinct task types) such that when the diversity of the training task distribution exceeds this threshold, the generalization gap (difference in success rate between training and novel tasks) increases significantly more than linearly, indicative of a phase transition.",
+        "predicted_effect": "The generalization gap as a function of task diversity shows a piecewise linear pattern with a breakpoint: below the threshold, gap increases slowly; above the threshold, gap increases steeply."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Train a coding agent with a fixed routing policy on training sets with continuously varying diversity (e.g., varying the number of distinct task types from 5 to 50, with equal total training examples across levels). Evaluate on a fixed set of novel tasks. Measure the generalization gap (difference in success rate between training and novel tasks). Fit a piecewise linear regression model with an unknown breakpoint to detect a threshold where the slope changes significantly. Use Bayesian information criterion (BIC) to compare the piecewise model to a linear model.",
+        "independent_variables": [
+          "Number of distinct task types in the training set (diversity), varied from low (e.g., 5) to high (e.g., 50)"
+        ],
+        "dependent_variables": [
+          "Generalization gap (difference in success rate between training tasks and novel tasks)"
+        ],
+        "controls": [
+          "Same total number of training examples across all diversity levels",
+          "Same routing policy architecture and training procedure",
+          "Same evaluation set of novel tasks",
+          "Same computational budget (e.g., number of training steps)",
+          "Same tool set and cost structure"
+        ],
+        "falsifying_observation": "If the piecewise linear model does not fit significantly better than a simple linear model (i.e., no evidence of a change point), or the slope change is not in the predicted direction (i.e., gap increases more slowly after threshold), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The piecewise linear regression identifies a statistically significant breakpoint in the generalization gap as a function of diversity.",
+          "Above the breakpoint, the slope of the generalization gap is at least twice the slope below the breakpoint.",
+          "BIC favors the piecewise model over the linear model by a margin of at least 10."
+        ],
+        "rejects_hypothesis": [
+          "No significant breakpoint is detected (linear model fits best).",
+          "The slope above the breakpoint is not significantly steeper than below.",
+          "The direction of slope change contradicts the hypothesis (e.g., gap increases more slowly above threshold)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (no threshold or wrong direction), then the assumption that routing policy failure exhibits a phase transition with respect to task diversity is incorrect.",
+        "assumption_to_revise": "The assumption that task diversity is the dominant factor driving a sharp failure transition in routing policies.",
+        "next_question": "Do interactions between task diversity and tool cost asymmetry produce a threshold effect in routing failure? Alternatively, does the structure of the routing policy (e.g., attention-based vs. rule-based) determine the shape of the failure curve?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Below a critical expansion rate r*, the majority of routing failures are due to poor selection (ratio of missing-tool to poor-selection failures < 1); above r*, the majority are due to missing tools (ratio > 1).",
+      "independent_variables": [
+        "Tool set expansion rate (new tools per task): 0, 0.01, 0.02, 0.1, 1.0"
+      ],
+      "dependent_variables": [
+        "Ratio of missing-tool to poor-selection failures",
+        "Crossing point (expansion rate where ratio = 1)"
+      ],
+      "controlled_variables": [
+        "Base tool set composition (5 initial tools)",
+        "Routing policy (fixed, unchanged across conditions)",
+        "Task distribution (same set of 1000 tasks used for all conditions)",
+        "No fallback mechanism for unknown tools",
+        "Tool success probabilities (all tools equally likely to succeed when appropriate)"
+      ],
+      "baselines": [
+        {
+          "name": "No expansion",
+          "description": "Static tool set of 5 initial tools; no new tools added."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Failure type ratio",
+          "definition": "Number of tasks where failure is due to missing optimal tool divided by number of tasks where failure is due to poor selection among available tools."
+        }
+      ],
+      "expected_result": "At expansion rates 0 and 0.01, ratio < 1; at 1.0, ratio > 1; there is a monotonic increase crossing 1 at some rate r* between 0.02 and 0.1.",
+      "falsifying_result": "Ratio never exceeds 1 (missing-tool failures never dominate), or ratio never falls below 1 (poor-selection failures never dominate even at no expansion), or ratio crosses 1 multiple times non-monotonically.",
+      "minimum_viable_experiment": "Simulate a coding agent with a fixed routing policy (trained on a static initial tool set of 5 tools) and no fallback for unknown tools. Vary the tool set expansion rate across 5 levels: 0 (no expansion), 1 new tool per 100 tasks, 1 per 50 tasks, 1 per 10 tasks, and 1 per task. Each condition runs 1000 randomly generated coding tasks. For each task, record routing decisions and classify failures: 'missing tool' if the optimal tool is not in the current set, 'poor selection' if the agent chooses a suboptimal available tool. Compute the ratio of missing-tool to poor-selection failures per condition.",
+      "risks_and_confounds": []
+    },
+    {
+      "hypothesis": "There exists a critical diversity threshold (in terms of number of distinct task types) such that when the diversity of the training task distribution exceeds this threshold, the generalization gap increases significantly more than linearly, indicative of a phase transition.",
+      "independent_variables": [
+        "Number of distinct task types in training set (diversity), varied from 5 to 50"
+      ],
+      "dependent_variables": [
+        "Generalization gap: difference in success rate between training tasks and novel tasks"
+      ],
+      "controlled_variables": [
+        "Total number of training examples across all diversity levels",
+        "Routing policy architecture and training procedure",
+        "Evaluation set of novel tasks",
+        "Computational budget (number of training steps)",
+        "Tool set and cost structure"
+      ],
+      "baselines": [
+        {
+          "name": "Linear model baseline",
+          "description": "Fit a linear regression model to generalization gap vs. diversity; used to compare against piecewise linear model."
+        },
+        {
+          "name": "Random routing baseline",
+          "description": "Agent that selects tools uniformly at random; measures gap due to policy vs. random."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Generalization gap",
+          "definition": "Difference in success rate (or task completion rate) between training task subset and novel task subset, expressed as a percentage."
+        },
+        {
+          "name": "Breakpoint significance",
+          "definition": "P-value for the slope change in piecewise linear regression; significant if p < 0.05 after multiple comparison correction."
+        },
+        {
+          "name": "BIC difference",
+          "definition": "Difference in Bayesian Information Criterion between piecewise linear model and simple linear model; >10 indicates strong support for piecewise model."
+        }
+      ],
+      "expected_result": "The piecewise linear regression identifies a statistically significant breakpoint in the generalization gap as a function of diversity. Above the breakpoint, the slope of the generalization gap is at least twice the slope below the breakpoint. BIC favors the piecewise model over the linear model by at least 10.",
+      "falsifying_result": "No significant breakpoint is detected (linear model fits best) OR the slope above the breakpoint is not significantly steeper than below OR the direction of slope change contradicts the hypothesis (e.g., gap increases more slowly above threshold).",
+      "minimum_viable_experiment": "Train a coding agent with a fixed routing policy (e.g., a transformer-based policy) on training sets with varying diversity: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50 distinct task types, each with equal total number of training examples (e.g., 1000 examples per diversity level). Evaluate on a fixed set of 100 novel tasks (unseen during training). Repeat each condition 5 times with different random seeds. Measure generalization gap. Fit piecewise linear regression with unknown breakpoint using segmented regression (R package 'segmented' or Python 'piecewise-regression'). Compare to simple linear regression via BIC. If BIC difference <10 or breakpoint p-value >0.05, reject hypothesis.",
+      "risks_and_confounds": [
+        "Confounding by task difficulty: if harder tasks are correlated with diversity, results may be biased. Mitigate by random assignment of task types to training sets.",
+        "Nonlinearity from finite sample size: small number of diversity levels may miss threshold. Mitigate by ensuring sufficient granularity (at least 10 levels).",
+        "Overfitting to specific policy architecture: results may not generalize to other routing policies. Mitigate by testing with at least one alternative architecture (e.g., rule-based) as secondary analysis.",
+        "Computational cost: training many agents may be expensive. Mitigate by using efficient simulation or surrogate tasks."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold of relative tool cost variance above which cost-oblivious routing yields significantly higher total cost compared to cost-aware routing.",
+      "independent_variables": [
+        "Tool cost variance: low (0.1), medium (0.5), high (0.9) (normalized)"
+      ],
+      "dependent_variables": [
+        "Total cost: cumulative tokens consumed across all tool invocations"
+      ],
+      "controlled_variables": [
+        "Same coding tasks (50 benchmark problems)",
+        "Same tool set with controlled costs",
+        "Same agent architecture",
+        "Same random seed for reproducibility"
+      ],
+      "baselines": [
+        {
+          "name": "Cost-aware routing agent",
+          "description": "An agent that selects tools to minimize expected total cost given current state, using a learned or engineered cost-sensitive routing policy."
+        },
+        {
+          "name": "Cost-oblivious routing agent",
+          "description": "An agent that selects tools based solely on task relevance, ignoring tool costs."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Total cost",
+          "definition": "Sum of tokens consumed by all tool invocations for a given task and agent."
+        },
+        {
+          "name": "Cost difference percentage",
+          "definition": "((cost_oblivious - cost_aware) / cost_aware) * 100%"
+        },
+        {
+          "name": "Statistical significance",
+          "definition": "p-value from a paired t-test comparing total costs per task between agents, with significance threshold at 0.05"
+        }
+      ],
+      "expected_result": "For tool cost variance > 0.5, the cost-oblivious agent incurs at least 30% higher total cost than the cost-aware agent, and the difference is statistically significant (p<0.05). For variance ≤ 0.5, no significant cost difference is observed.",
+      "falsifying_result": "If no variance level shows a statistically significant cost difference ≥30%, or if the cost-oblivious agent is always significantly worse (or always not worse) regardless of variance, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Conduct a within-subjects experiment with 50 coding tasks. For each task, vary tool cost variance across three levels (0.1, 0.5, 0.9). Run both the cost-aware and cost-oblivious agents on each task-variance combination, recording total tokens used. Compute mean total cost per agent per variance level. Perform paired t-tests to compare agents at each variance level, and compute relative cost increase for the cost-oblivious agent. Identify the variance threshold where the increase becomes significant and ≥30%.",
+      "risks_and_confounds": [
+        "Task difficulty may interact with cost variance, affecting routing choices.",
+        "Tool costs must be realistic and non-trivial to elicit cost sensitivity.",
+        "Randomness in agent policies (if stochastic) could introduce noise; averaging over multiple runs per task is needed.",
+        "The set of 50 tasks may lack statistical power to detect moderate effects; power analysis should be performed.",
+        "The cost-oblivious agent must be truly cost-ignorant; otherwise, it may inadvertently account for costs."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The research package provides a thorough first-principles decomposition of tool-use routing failures in coding agents, with clear primitive definitions, assumptions, and tradeoffs. It derives three interesting tensions and proposes concrete experiments with high falsifiability. However, the mechanism model is explicitly ablated (no causal chain is built), which is a critical gap that undermines the soundness of the derivation. The experiments are well-designed but lack some baselines and justifications for parameter choices. Overall, the work is promising but has a significant weakness in mechanism clarity.",
+    "strengths": [
+      "Strong first-principles derivation with clear primitive definitions, assumptions, and core tradeoffs.",
+      "Tensions are logically derived from primitives and lead to specific, testable candidate questions.",
+      "Three detailed experiment plans with independent/dependent variables, controls, baselines, and explicit falsifying observations.",
+      "High falsifiability and testability; each hypothesis has a clear rejection criterion.",
+      "Addresses a timely and important problem in AI and coding agents."
+    ],
+    "weaknesses": [
+      "Mechanism model is absent (ablation), making the causal chain from primitives to tensions unclear and reducing mechanistic understanding.",
+      "Overclaiming in quality scores: certificates rate 'first_principles_derivation' as 5 despite missing mechanism model.",
+      "Experiment parameters (e.g., tool cost variance levels, expansion rates) are arbitrary and not justified.",
+      "Missing baselines in experiments: e.g., in cost variance experiment, no random routing or rule-based baseline; in diversity experiment, no fixed-policy baseline without training.",
+      "The assumption of a finite, known tool set may be too restrictive for real-world coding agents, limiting generalizability."
+    ],
+    "questions": [
+      "How would the proposed experiments change if tools have overlapping capabilities or if the optimal tool is not unique?",
+      "Can the critical thresholds (e.g., r*, diversity threshold) be derived theoretically from information-theoretic or learning-theoretic principles?",
+      "How do the results depend on the specific routing policy architecture (e.g., transformer vs. rule-based)? The current plan tests only one architecture."
+    ],
+    "missing_baselines": [
+      "Cost variance experiment: include a random routing agent and a 'cheapest-tool-first' heuristic baseline.",
+      "Diversity experiment: include a fixed routing policy that always uses the most common tool, and an agent trained on uniform distribution across all task types.",
+      "Tool expansion experiment: include a baseline with a fallback mechanism (e.g., use code interpreter when optimal tool missing)."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": {
+    "failure_type": "Mechanism model ablation",
+    "root_cause": "The mechanism_builder was disabled in ablation settings, so no explicit causal model was constructed between primitive definitions and tensions, leading to a gap in mechanistic understanding and reduced research soundness.",
+    "violated_principle": "Every first-principles research package must include an explicit mechanism model that causally connects primitive definitions and assumptions to the derived tensions, ensuring traceability and falsifiability.",
+    "new_or_updated_principle": "FirstResearchers must always construct a mechanism model (including variables, causal chains, and bottlenecks) before deriving tensions; the mechanism model must be directly derived from the primitive definitions and assumptions, and its presence must be verified by the gate.",
+    "new_or_updated_skill": "Mechanism modeling from first principles: ability to identify key variables, map causal relationships, and pinpoint bottlenecks using the primitive definitions and assumptions as building blocks.",
+    "regression_test": "For any research package, verify that the mechanism_model field contains a non-empty causal_chain with at least one step that has non-null source, relation, and target, and that each variable in the mechanism model is traceable to a primitive definition or assumption. If the mechanism model is absent or ablated, the package must be rejected with a specific repair suggestion to build it."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 3,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical rate of tool set expansion at which the dominant cause of routing failures shifts from poor selection to missing tools in coding agents?",
+        "original_suggestions": [
+          "Make the mechanism variables and causal chain more explicit.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      },
+      {
+        "question": "When the diversity of training tasks exceeds a critical threshold, does the generalization gap of routing policies in coding agents exhibit a sharp increase, indicating a phase transition to more severe failure?",
+        "original_suggestions": [
+          "Improve primitive-to-question traceability to at least 4/5.",
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of tool cost variance does ignoring cost asymmetries cause routing failure in coding agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": false,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_mechanism_model_ablation",
+    "ablation": "mechanism_builder_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

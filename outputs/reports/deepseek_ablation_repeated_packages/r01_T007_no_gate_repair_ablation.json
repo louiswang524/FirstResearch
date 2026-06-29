@@ -1,0 +1,1306 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable behavioral module that maps states to actions to achieve a specific goal or subgoal.",
+        "why_primitive": "It is the atomic unit of learned behavior in a lifelong-learning agent."
+      },
+      {
+        "name": "Skill Library",
+        "definition": "A collection of skills stored and maintained by the agent over its lifetime.",
+        "why_primitive": "It is the storage mechanism for accumulated knowledge and directly determines the agent's capacity and efficiency."
+      },
+      {
+        "name": "Bloat",
+        "definition": "An undesirable increase in the number of skills in the library without proportional improvement in performance or coverage.",
+        "why_primitive": "It is the central phenomenon under investigation, arising from fundamental tensions in knowledge accumulation."
+      },
+      {
+        "name": "Lifelong-learning Agent",
+        "definition": "An agent that learns continuously from a stream of tasks, aiming to retain and reuse knowledge across tasks.",
+        "why_primitive": "It defines the context and constraints that lead to skill-library dynamics."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are acquired incrementally and specialized to narrow task niches.",
+        "rationale": "In lifelong learning, agents often add a new skill for each new task to avoid interference with existing skills.",
+        "possible_failure": "Skills may actually be general and reusable across tasks if the agent leverages transfer learning mechanisms."
+      },
+      {
+        "assumption": "The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills.",
+        "rationale": "Without such a mechanism, conceptually similar skills accumulate in the library as separate entries.",
+        "possible_failure": "Some agents incorporate skill consolidation or abstraction, which would mitigate bloat."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Specialization vs. Generalization",
+        "variables": [
+          "skill specificity",
+          "skill library size",
+          "negative transfer",
+          "positive transfer"
+        ]
+      },
+      {
+        "tradeoff": "Memory vs. Computation",
+        "variables": [
+          "number of stored skills",
+          "skill retrieval time",
+          "memory usage",
+          "computation for pruning"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_diversity",
+        "role": "input",
+        "description": "Degree of dissimilarity among consecutive tasks faced by the agent."
+      },
+      {
+        "name": "task_frequency",
+        "role": "input",
+        "description": "Rate at which new tasks arrive in the lifelong learning stream."
+      },
+      {
+        "name": "specialization_pressure",
+        "role": "mediator",
+        "description": "Tendency to create narrow, task-specific skills to avoid negative transfer."
+      },
+      {
+        "name": "skill_creation_rate",
+        "role": "mediator",
+        "description": "Rate at which new skills are added to the library per unit time."
+      },
+      {
+        "name": "library_size",
+        "role": "mediator",
+        "description": "Total number of skills stored in the skill library."
+      },
+      {
+        "name": "redundancy",
+        "role": "mediator",
+        "description": "Fraction of skills that are highly similar or functionally overlapping due to lack of merging."
+      },
+      {
+        "name": "bloat",
+        "role": "outcome",
+        "description": "Undesirable increase in library size without proportional improvement in task performance or coverage."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "task_diversity",
+        "relation": "increases",
+        "target": "specialization_pressure",
+        "explanation": "Higher diversity between tasks makes it harder to reuse a single skill, so the agent creates more specialized skills."
+      },
+      {
+        "step": "2",
+        "source": "task_frequency",
+        "relation": "increases",
+        "target": "skill_creation_rate",
+        "explanation": "More frequent tasks lead to more opportunities and necessity to add new skills."
+      },
+      {
+        "step": "3",
+        "source": "specialization_pressure",
+        "relation": "increases",
+        "target": "skill_creation_rate",
+        "explanation": "Strong specialization pressure encourages the agent to create a new skill for each new task."
+      },
+      {
+        "step": "4",
+        "source": "skill_creation_rate",
+        "relation": "increases",
+        "target": "library_size",
+        "explanation": "Each newly created skill is added to the library, increasing its size."
+      },
+      {
+        "step": "5",
+        "source": "library_size",
+        "relation": "increases",
+        "target": "redundancy",
+        "explanation": "As the library grows, the probability of storing similar skills across tasks increases, especially without merging."
+      },
+      {
+        "step": "6",
+        "source": "redundancy",
+        "relation": "causes",
+        "target": "bloat",
+        "explanation": "Redundant skills occupy memory and retrieval time without contributing new capabilities, leading to bloat."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Lack of skill merging or consolidation mechanism",
+        "why_it_matters": "Without a way to detect and merge overlapping skills, similar skills accumulate independently, causing linear growth in library size even when functional overlap is high."
+      },
+      {
+        "bottleneck": "Specialization pressure from negative transfer avoidance",
+        "why_it_matters": "To prevent performance degradation on new tasks, the agent creates narrowly specialized skills. This pushes the library toward many small, non-reusable modules, exacerbating bloat."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat occurs when a lifelong-learning agent continuously faces diverse tasks and lacks a mechanism to consolidate similar skills. The agent creates a new specialized skill for each task to avoid negative transfer, leading to a growing library. Over time, many skills are redundant yet remain separate, increasing memory and retrieval overhead without proportional performance gains, resulting in bloat."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Specializing skills to avoid negative transfer increases library size and redundancy, ultimately causing bloat; yet generalizing skills might cause interference. This creates a tradeoff where no clear optimum exists without consolidation.",
+      "derived_from": [
+        "core_tradeoffs.Specialization vs. Generalization",
+        "mechanism_model.causal_chain.steps 1-6"
+      ],
+      "why_it_matters": "Determines whether skill-library growth is sustainable or leads to performance degradation due to retrieval overhead.",
+      "what_existing_methods_may_miss": "Existing methods often assume either pure specialization or full transfer, ignoring dynamic adjustment per task.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The assumption that agents lack a centralized merging mechanism is critical: if merging were present, bloat could be mitigated; but merging itself requires computation and may risk negative transfer across merged skills.",
+      "derived_from": [
+        "assumptions.assumption 2",
+        "mechanism_model.bottlenecks.Lack of skill merging or consolidation mechanism"
+      ],
+      "why_it_matters": "Determines whether bloat is an inherent property or an artifact of a design choice.",
+      "what_existing_methods_may_miss": "Evolutionary or reinforcement learning approaches that implicitly merge via parameter sharing are not captured.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "High task frequency increases skill creation rate and leaves less time for consolidation, but low frequency might cause forgetting of earlier tasks (catastrophic interference), creating a tension between bloat and stability.",
+      "derived_from": [
+        "mechanism_model.variables.task_frequency",
+        "mechanism_model.causal_chain.steps 2,6"
+      ],
+      "why_it_matters": "Balancing learning speed with library growth is key for lifelong learning.",
+      "what_existing_methods_may_miss": "Most lifelong learning benchmarks fix task frequency; the effect on bloat is underexplored.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The claim that 'skills are acquired incrementally and specialized to narrow task niches' may be violated if the agent uses transfer learning, leading to reused skills and less bloat, but then negative transfer risk increases.",
+      "derived_from": [
+        "assumptions.assumption 1",
+        "core_tradeoffs.Specialization vs. Generalization"
+      ],
+      "why_it_matters": "If this assumption does not hold, the whole bloat mechanism may be weaker than expected.",
+      "what_existing_methods_may_miss": "Few lifelong learning algorithms explicitly test this assumption; they vary in how they define and reuse skills.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "To what extent does the degree of specialization (measured by the cosine similarity between skill embeddings and task-specific features) mediate the causal effect of task diversity on library bloat?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the role of specialization pressure as a mediator, testing whether bloat is inherently driven by diversity or can be mitigated by allowing some generalization."
+    },
+    {
+      "question": "Do lifelong learning agents that implicitly merge skills via parameter sharing (e.g., in neural networks) exhibit significantly less library bloat compared to those that store skills as explicit, separate modules, controlling for task diversity and frequency?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Tests the assumption that lack of merging causes bloat by comparing architectures that naturally merge vs. those that do not."
+    },
+    {
+      "question": "How does varying task frequency (number of tasks per unit time) affect the trade-off between skill library size (bloat) and average performance across tasks, measured over a fixed total number of tasks?",
+      "question_type": "descriptive",
+      "source_tension": "T3",
+      "expected_contribution": "Characterizes the non-linear relationship between frequency and bloat, identifying regimes where bloat is most severe."
+    },
+    {
+      "question": "Under what conditions (e.g., task similarity threshold, number of tasks) do lifelong learning agents with transfer learning exhibit lower library bloat than those that strictly specialize per task, and does this benefit come at the cost of increased negative transfer?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Provides guidelines for when to encourage transfer vs. specialization to minimize bloat while maintaining performance."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavioral module that maps states to actions to achieve a specific goal or subgoal.",
+          "why_primitive": "It is the atomic unit of learned behavior in a lifelong-learning agent."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A collection of skills stored and maintained by the agent over its lifetime.",
+          "why_primitive": "It is the storage mechanism for accumulated knowledge and directly determines the agent's capacity and efficiency."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An undesirable increase in the number of skills in the library without proportional improvement in performance or coverage.",
+          "why_primitive": "It is the central phenomenon under investigation, arising from fundamental tensions in knowledge accumulation."
+        },
+        {
+          "name": "Lifelong-learning Agent",
+          "definition": "An agent that learns continuously from a stream of tasks, aiming to retain and reuse knowledge across tasks.",
+          "why_primitive": "It defines the context and constraints that lead to skill-library dynamics."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are acquired incrementally and specialized to narrow task niches.",
+          "rationale": "In lifelong learning, agents often add a new skill for each new task to avoid interference with existing skills.",
+          "possible_failure": "Skills may actually be general and reusable across tasks if the agent leverages transfer learning mechanisms."
+        },
+        {
+          "assumption": "The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills.",
+          "rationale": "Without such a mechanism, conceptually similar skills accumulate in the library as separate entries.",
+          "possible_failure": "Some agents incorporate skill consolidation or abstraction, which would mitigate bloat."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Degree of dissimilarity among consecutive tasks faced by the agent."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "Rate at which new tasks arrive in the lifelong learning stream."
+          },
+          {
+            "name": "specialization_pressure",
+            "role": "mediator",
+            "description": "Tendency to create narrow, task-specific skills to avoid negative transfer."
+          },
+          {
+            "name": "skill_creation_rate",
+            "role": "mediator",
+            "description": "Rate at which new skills are added to the library per unit time."
+          },
+          {
+            "name": "library_size",
+            "role": "mediator",
+            "description": "Total number of skills stored in the skill library."
+          },
+          {
+            "name": "redundancy",
+            "role": "mediator",
+            "description": "Fraction of skills that are highly similar or functionally overlapping due to lack of merging."
+          },
+          {
+            "name": "bloat",
+            "role": "outcome",
+            "description": "Undesirable increase in library size without proportional improvement in task performance or coverage."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "specialization_pressure",
+            "explanation": "Higher diversity between tasks makes it harder to reuse a single skill, so the agent creates more specialized skills."
+          },
+          {
+            "step": "2",
+            "source": "task_frequency",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "More frequent tasks lead to more opportunities and necessity to add new skills."
+          },
+          {
+            "step": "3",
+            "source": "specialization_pressure",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "Strong specialization pressure encourages the agent to create a new skill for each new task."
+          },
+          {
+            "step": "4",
+            "source": "skill_creation_rate",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Each newly created skill is added to the library, increasing its size."
+          },
+          {
+            "step": "5",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "redundancy",
+            "explanation": "As the library grows, the probability of storing similar skills across tasks increases, especially without merging."
+          },
+          {
+            "step": "6",
+            "source": "redundancy",
+            "relation": "causes",
+            "target": "bloat",
+            "explanation": "Redundant skills occupy memory and retrieval time without contributing new capabilities, leading to bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Lack of skill merging or consolidation mechanism",
+            "why_it_matters": "Without a way to detect and merge overlapping skills, similar skills accumulate independently, causing linear growth in library size even when functional overlap is high."
+          },
+          {
+            "bottleneck": "Specialization pressure from negative transfer avoidance",
+            "why_it_matters": "To prevent performance degradation on new tasks, the agent creates narrowly specialized skills. This pushes the library toward many small, non-reusable modules, exacerbating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat occurs when a lifelong-learning agent continuously faces diverse tasks and lacks a mechanism to consolidate similar skills. The agent creates a new specialized skill for each task to avoid negative transfer, leading to a growing library. Over time, many skills are redundant yet remain separate, increasing memory and retrieval overhead without proportional performance gains, resulting in bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "High task frequency increases skill creation rate and leaves less time for consolidation, but low frequency might cause forgetting of earlier tasks (catastrophic interference), creating a tension between bloat and stability.",
+        "derived_from": [
+          "mechanism_model.variables.task_frequency",
+          "mechanism_model.causal_chain.steps 2,6"
+        ],
+        "why_it_matters": "Balancing learning speed with library growth is key for lifelong learning.",
+        "what_existing_methods_may_miss": "Most lifelong learning benchmarks fix task frequency; the effect on bloat is underexplored.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does varying task frequency (number of tasks per unit time) affect the trade-off between skill library size (bloat) and average performance across tasks, measured over a fixed total number of tasks?",
+        "question_type": "descriptive",
+        "source_tension": "T3",
+        "expected_contribution": "Characterizes the non-linear relationship between frequency and bloat, identifying regimes where bloat is most severe."
+      },
+      "hypothesis": {
+        "statement": "Increasing task frequency (number of tasks per unit time) leads to a larger skill library size (bloat) and a non-monotonic effect on average performance: performance increases up to a moderate frequency but declines at high frequencies due to insufficient consolidation.",
+        "predicted_effect": "Library size will grow faster at higher frequencies, while average performance will peak at an intermediate frequency."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong-learning agent on a stream of tasks from a standard benchmark (e.g., MiniGrid or a set of classification tasks) with varying task frequencies. The total number of tasks is fixed at 100. Low frequency: 1 task per 10 time steps (sparse), medium frequency: 1 task per 5 time steps, high frequency: 1 task per 2 time steps. The agent uses a fixed skill learning algorithm (e.g., a DQN with a skill library that adds a new skill for each new task, without any merging or consolidation mechanism). Measure library size and average cumulative reward across tasks for each condition.",
+        "independent_variables": [
+          "task frequency (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "skill library size after each task",
+          "average cumulative reward across all tasks"
+        ],
+        "controls": [
+          "total number of tasks (100)",
+          "task diversity (tasks sampled from same distribution)",
+          "skill learning algorithm (fixed)",
+          "no skill merging or consolidation"
+        ],
+        "falsifying_observation": "If increasing task frequency leads to a smaller library size at the end of the experiment, or if average performance increases monotonically with frequency, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library size is significantly larger at high frequency compared to low and moderate frequencies.",
+          "Average performance is highest at moderate frequency, lower at low frequency (due to forgetting?) and lower at high frequency (due to bloat)."
+        ],
+        "rejects_hypothesis": [
+          "Library size does not differ significantly across frequencies.",
+          "Average performance increases monotonically with frequency."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis fails (e.g., bloat does not increase or performance does not decline at high frequency), then the assumed lack of consolidation mechanism may not be the main driver; perhaps the agent implicitly merges skills or specialization pressure is weaker than expected.",
+        "assumption_to_revise": "The assumption that 'The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills' may be incorrect for the chosen agent; or the assumption that specialization pressure is high may be invalid.",
+        "next_question": "What mechanisms prevent bloat under high task frequency, and how do skill reuse and generalization mitigate library growth?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavioral module that maps states to actions to achieve a specific goal or subgoal.",
+          "why_primitive": "It is the atomic unit of learned behavior in a lifelong-learning agent."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A collection of skills stored and maintained by the agent over its lifetime.",
+          "why_primitive": "It is the storage mechanism for accumulated knowledge and directly determines the agent's capacity and efficiency."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An undesirable increase in the number of skills in the library without proportional improvement in performance or coverage.",
+          "why_primitive": "It is the central phenomenon under investigation, arising from fundamental tensions in knowledge accumulation."
+        },
+        {
+          "name": "Lifelong-learning Agent",
+          "definition": "An agent that learns continuously from a stream of tasks, aiming to retain and reuse knowledge across tasks.",
+          "why_primitive": "It defines the context and constraints that lead to skill-library dynamics."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are acquired incrementally and specialized to narrow task niches.",
+          "rationale": "In lifelong learning, agents often add a new skill for each new task to avoid interference with existing skills.",
+          "possible_failure": "Skills may actually be general and reusable across tasks if the agent leverages transfer learning mechanisms."
+        },
+        {
+          "assumption": "The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills.",
+          "rationale": "Without such a mechanism, conceptually similar skills accumulate in the library as separate entries.",
+          "possible_failure": "Some agents incorporate skill consolidation or abstraction, which would mitigate bloat."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Degree of dissimilarity among consecutive tasks faced by the agent."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "Rate at which new tasks arrive in the lifelong learning stream."
+          },
+          {
+            "name": "specialization_pressure",
+            "role": "mediator",
+            "description": "Tendency to create narrow, task-specific skills to avoid negative transfer."
+          },
+          {
+            "name": "skill_creation_rate",
+            "role": "mediator",
+            "description": "Rate at which new skills are added to the library per unit time."
+          },
+          {
+            "name": "library_size",
+            "role": "mediator",
+            "description": "Total number of skills stored in the skill library."
+          },
+          {
+            "name": "redundancy",
+            "role": "mediator",
+            "description": "Fraction of skills that are highly similar or functionally overlapping due to lack of merging."
+          },
+          {
+            "name": "bloat",
+            "role": "outcome",
+            "description": "Undesirable increase in library size without proportional improvement in task performance or coverage."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "specialization_pressure",
+            "explanation": "Higher diversity between tasks makes it harder to reuse a single skill, so the agent creates more specialized skills."
+          },
+          {
+            "step": "2",
+            "source": "task_frequency",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "More frequent tasks lead to more opportunities and necessity to add new skills."
+          },
+          {
+            "step": "3",
+            "source": "specialization_pressure",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "Strong specialization pressure encourages the agent to create a new skill for each new task."
+          },
+          {
+            "step": "4",
+            "source": "skill_creation_rate",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Each newly created skill is added to the library, increasing its size."
+          },
+          {
+            "step": "5",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "redundancy",
+            "explanation": "As the library grows, the probability of storing similar skills across tasks increases, especially without merging."
+          },
+          {
+            "step": "6",
+            "source": "redundancy",
+            "relation": "causes",
+            "target": "bloat",
+            "explanation": "Redundant skills occupy memory and retrieval time without contributing new capabilities, leading to bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Lack of skill merging or consolidation mechanism",
+            "why_it_matters": "Without a way to detect and merge overlapping skills, similar skills accumulate independently, causing linear growth in library size even when functional overlap is high."
+          },
+          {
+            "bottleneck": "Specialization pressure from negative transfer avoidance",
+            "why_it_matters": "To prevent performance degradation on new tasks, the agent creates narrowly specialized skills. This pushes the library toward many small, non-reusable modules, exacerbating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat occurs when a lifelong-learning agent continuously faces diverse tasks and lacks a mechanism to consolidate similar skills. The agent creates a new specialized skill for each task to avoid negative transfer, leading to a growing library. Over time, many skills are redundant yet remain separate, increasing memory and retrieval overhead without proportional performance gains, resulting in bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The assumption that agents lack a centralized merging mechanism is critical: if merging were present, bloat could be mitigated; but merging itself requires computation and may risk negative transfer across merged skills.",
+        "derived_from": [
+          "assumptions.assumption 2",
+          "mechanism_model.bottlenecks.Lack of skill merging or consolidation mechanism"
+        ],
+        "why_it_matters": "Determines whether bloat is an inherent property or an artifact of a design choice.",
+        "what_existing_methods_may_miss": "Evolutionary or reinforcement learning approaches that implicitly merge via parameter sharing are not captured.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Do lifelong learning agents that implicitly merge skills via parameter sharing (e.g., in neural networks) exhibit significantly less library bloat compared to those that store skills as explicit, separate modules, controlling for task diversity and frequency?",
+        "question_type": "benchmark",
+        "source_tension": "T2",
+        "expected_contribution": "Tests the assumption that lack of merging causes bloat by comparing architectures that naturally merge vs. those that do not."
+      },
+      "hypothesis": {
+        "statement": "Lifelong learning agents that implicitly merge skills via parameter sharing exhibit significantly less library bloat than those using explicit separate skill modules, when task diversity and frequency are controlled.",
+        "predicted_effect": "Parameter sharing reduces skill library growth rate and redundancy, decreasing bloat."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare two lifelong learning agents on a sequence of tasks: Agent A uses a neural network with a shared backbone and task-specific heads (implicit merging via parameter sharing); Agent B uses a separate network per task (explicit separate modules). Both agents learn tasks sequentially with the same order and no replay. Measure library size (number of distinct skill modules) and task performance over time.",
+        "independent_variables": [
+          "Architecture type (parameter sharing vs. separate modules)",
+          "Task diversity (low vs. high)",
+          "Task frequency (slow vs. fast)"
+        ],
+        "dependent_variables": [
+          "Skill library size",
+          "Redundancy rate (e.g., pairwise similarity among skills)",
+          "Average task performance"
+        ],
+        "controls": [
+          "Task set and order",
+          "Learning algorithm details (e.g., learning rate, optimizer)",
+          "Network capacity (total parameters held constant)",
+          "Task difficulty"
+        ],
+        "falsifying_observation": "If the parameter-sharing agent does not show a statistically significant lower library size or redundancy compared to the separate-module agent, or if its performance is significantly worse without compensating bloat reduction."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The parameter-sharing agent's library grows slower and has lower redundancy across all diversity and frequency conditions.",
+          "Parameter-sharing agent maintains comparable or better performance with fewer skills."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in library size or redundancy between architectures.",
+          "Parameter-sharing agent has higher redundancy due to interference."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., no significant reduction in bloat from parameter sharing).",
+        "assumption_to_revise": "The assumption that implicit merging via parameter sharing effectively consolidates distinct skills and reduces bloat.",
+        "next_question": "Under what conditions does parameter sharing fail to reduce bloat? Could it be that the shared parameters become overloaded, leading to the need for additional specialized units that counteract merging?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavioral module that maps states to actions to achieve a specific goal or subgoal.",
+          "why_primitive": "It is the atomic unit of learned behavior in a lifelong-learning agent."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A collection of skills stored and maintained by the agent over its lifetime.",
+          "why_primitive": "It is the storage mechanism for accumulated knowledge and directly determines the agent's capacity and efficiency."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An undesirable increase in the number of skills in the library without proportional improvement in performance or coverage.",
+          "why_primitive": "It is the central phenomenon under investigation, arising from fundamental tensions in knowledge accumulation."
+        },
+        {
+          "name": "Lifelong-learning Agent",
+          "definition": "An agent that learns continuously from a stream of tasks, aiming to retain and reuse knowledge across tasks.",
+          "why_primitive": "It defines the context and constraints that lead to skill-library dynamics."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are acquired incrementally and specialized to narrow task niches.",
+          "rationale": "In lifelong learning, agents often add a new skill for each new task to avoid interference with existing skills.",
+          "possible_failure": "Skills may actually be general and reusable across tasks if the agent leverages transfer learning mechanisms."
+        },
+        {
+          "assumption": "The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills.",
+          "rationale": "Without such a mechanism, conceptually similar skills accumulate in the library as separate entries.",
+          "possible_failure": "Some agents incorporate skill consolidation or abstraction, which would mitigate bloat."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Degree of dissimilarity among consecutive tasks faced by the agent."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "Rate at which new tasks arrive in the lifelong learning stream."
+          },
+          {
+            "name": "specialization_pressure",
+            "role": "mediator",
+            "description": "Tendency to create narrow, task-specific skills to avoid negative transfer."
+          },
+          {
+            "name": "skill_creation_rate",
+            "role": "mediator",
+            "description": "Rate at which new skills are added to the library per unit time."
+          },
+          {
+            "name": "library_size",
+            "role": "mediator",
+            "description": "Total number of skills stored in the skill library."
+          },
+          {
+            "name": "redundancy",
+            "role": "mediator",
+            "description": "Fraction of skills that are highly similar or functionally overlapping due to lack of merging."
+          },
+          {
+            "name": "bloat",
+            "role": "outcome",
+            "description": "Undesirable increase in library size without proportional improvement in task performance or coverage."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "specialization_pressure",
+            "explanation": "Higher diversity between tasks makes it harder to reuse a single skill, so the agent creates more specialized skills."
+          },
+          {
+            "step": "2",
+            "source": "task_frequency",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "More frequent tasks lead to more opportunities and necessity to add new skills."
+          },
+          {
+            "step": "3",
+            "source": "specialization_pressure",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "Strong specialization pressure encourages the agent to create a new skill for each new task."
+          },
+          {
+            "step": "4",
+            "source": "skill_creation_rate",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Each newly created skill is added to the library, increasing its size."
+          },
+          {
+            "step": "5",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "redundancy",
+            "explanation": "As the library grows, the probability of storing similar skills across tasks increases, especially without merging."
+          },
+          {
+            "step": "6",
+            "source": "redundancy",
+            "relation": "causes",
+            "target": "bloat",
+            "explanation": "Redundant skills occupy memory and retrieval time without contributing new capabilities, leading to bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Lack of skill merging or consolidation mechanism",
+            "why_it_matters": "Without a way to detect and merge overlapping skills, similar skills accumulate independently, causing linear growth in library size even when functional overlap is high."
+          },
+          {
+            "bottleneck": "Specialization pressure from negative transfer avoidance",
+            "why_it_matters": "To prevent performance degradation on new tasks, the agent creates narrowly specialized skills. This pushes the library toward many small, non-reusable modules, exacerbating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat occurs when a lifelong-learning agent continuously faces diverse tasks and lacks a mechanism to consolidate similar skills. The agent creates a new specialized skill for each task to avoid negative transfer, leading to a growing library. Over time, many skills are redundant yet remain separate, increasing memory and retrieval overhead without proportional performance gains, resulting in bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The claim that 'skills are acquired incrementally and specialized to narrow task niches' may be violated if the agent uses transfer learning, leading to reused skills and less bloat, but then negative transfer risk increases.",
+        "derived_from": [
+          "assumptions.assumption 1",
+          "core_tradeoffs.Specialization vs. Generalization"
+        ],
+        "why_it_matters": "If this assumption does not hold, the whole bloat mechanism may be weaker than expected.",
+        "what_existing_methods_may_miss": "Few lifelong learning algorithms explicitly test this assumption; they vary in how they define and reuse skills.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Under what conditions (e.g., task similarity threshold, number of tasks) do lifelong learning agents with transfer learning exhibit lower library bloat than those that strictly specialize per task, and does this benefit come at the cost of increased negative transfer?",
+        "question_type": "algorithmic",
+        "source_tension": "T4",
+        "expected_contribution": "Provides guidelines for when to encourage transfer vs. specialization to minimize bloat while maintaining performance."
+      },
+      "hypothesis": {
+        "statement": "Lifelong learning agents that use transfer learning (e.g., skill reuse or composition) exhibit lower library bloat than agents that strictly specialize per task when consecutive tasks have high similarity (e.g., similarity above a threshold), but this reduction in bloat is accompanied by increased negative transfer on tasks that are dissimilar to previous ones.",
+        "predicted_effect": "For task similarity above a threshold τ, transfer learning leads to fewer skills added and slower library growth; for similarity below τ, transfer learning may cause negative transfer and potential skill corruption."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a curriculum of tasks with controlled pairwise similarity (e.g., using a parameterized task generator). Compare two agent variants: one that always creates a new skill for each task (specialist) and one that attempts to reuse existing skills or compose them (transfer). Measure library size and average task performance over a sequence of tasks. Vary the similarity between consecutive tasks from 0 (orthogonal) to 1 (identical).",
+        "independent_variables": [
+          "task similarity (continuous between 0 and 1)",
+          "number of tasks (e.g., 50)"
+        ],
+        "dependent_variables": [
+          "library size after all tasks",
+          "average negative transfer (performance drop on old tasks after new learning)",
+          "average task performance on new tasks"
+        ],
+        "controls": [
+          "same base learning algorithm",
+          "same skill library capacity",
+          "same total number of tasks",
+          "same task order"
+        ],
+        "falsifying_observation": "If the transfer agent shows larger library size than the specialist agent across all similarity levels, or if the transfer agent shows no significant difference in negative transfer compared to specialist, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For high task similarity (e.g., >0.7), transfer agent ends with fewer skills than specialist.",
+          "For high similarity, transfer agent's performance on old tasks (negative transfer) is not significantly worse than specialist.",
+          "For low similarity (e.g., <0.3), transfer agent's library size is similar or larger than specialist, and negative transfer is higher."
+        ],
+        "rejects_hypothesis": [
+          "Transfer agent's library size is never smaller than specialist, or is smaller only at similarity=1.",
+          "Transfer agent's negative transfer is always higher than specialist regardless of similarity.",
+          "Transfer agent's performance on new tasks is always worse than specialist."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (e.g., transfer never reduces bloat or always increases negative transfer without benefit), then the core assumption that transfer learning reduces skill addition rate may be incorrect or requires additional mechanisms (like skill merging).",
+        "assumption_to_revise": "Assumption that transfer learning can effectively reuse skills without significant skill interference; it may be that skill composition or reuse in lifelong learning is hindered by task-specific adaptations that still require separate skills.",
+        "next_question": "What specific skill reuse mechanisms (e.g., parameter sharing, skill composition, or skill abstraction) are necessary to reduce bloat without incurring excessive negative transfer?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavioral module that maps states to actions to achieve a specific goal or subgoal.",
+          "why_primitive": "It is the atomic unit of learned behavior in a lifelong-learning agent."
+        },
+        {
+          "name": "Skill Library",
+          "definition": "A collection of skills stored and maintained by the agent over its lifetime.",
+          "why_primitive": "It is the storage mechanism for accumulated knowledge and directly determines the agent's capacity and efficiency."
+        },
+        {
+          "name": "Bloat",
+          "definition": "An undesirable increase in the number of skills in the library without proportional improvement in performance or coverage.",
+          "why_primitive": "It is the central phenomenon under investigation, arising from fundamental tensions in knowledge accumulation."
+        },
+        {
+          "name": "Lifelong-learning Agent",
+          "definition": "An agent that learns continuously from a stream of tasks, aiming to retain and reuse knowledge across tasks.",
+          "why_primitive": "It defines the context and constraints that lead to skill-library dynamics."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are acquired incrementally and specialized to narrow task niches.",
+          "rationale": "In lifelong learning, agents often add a new skill for each new task to avoid interference with existing skills.",
+          "possible_failure": "Skills may actually be general and reusable across tasks if the agent leverages transfer learning mechanisms."
+        },
+        {
+          "assumption": "The agent lacks a centralized mechanism to detect and merge redundant or highly similar skills.",
+          "rationale": "Without such a mechanism, conceptually similar skills accumulate in the library as separate entries.",
+          "possible_failure": "Some agents incorporate skill consolidation or abstraction, which would mitigate bloat."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Degree of dissimilarity among consecutive tasks faced by the agent."
+          },
+          {
+            "name": "task_frequency",
+            "role": "input",
+            "description": "Rate at which new tasks arrive in the lifelong learning stream."
+          },
+          {
+            "name": "specialization_pressure",
+            "role": "mediator",
+            "description": "Tendency to create narrow, task-specific skills to avoid negative transfer."
+          },
+          {
+            "name": "skill_creation_rate",
+            "role": "mediator",
+            "description": "Rate at which new skills are added to the library per unit time."
+          },
+          {
+            "name": "library_size",
+            "role": "mediator",
+            "description": "Total number of skills stored in the skill library."
+          },
+          {
+            "name": "redundancy",
+            "role": "mediator",
+            "description": "Fraction of skills that are highly similar or functionally overlapping due to lack of merging."
+          },
+          {
+            "name": "bloat",
+            "role": "outcome",
+            "description": "Undesirable increase in library size without proportional improvement in task performance or coverage."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "task_diversity",
+            "relation": "increases",
+            "target": "specialization_pressure",
+            "explanation": "Higher diversity between tasks makes it harder to reuse a single skill, so the agent creates more specialized skills."
+          },
+          {
+            "step": "2",
+            "source": "task_frequency",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "More frequent tasks lead to more opportunities and necessity to add new skills."
+          },
+          {
+            "step": "3",
+            "source": "specialization_pressure",
+            "relation": "increases",
+            "target": "skill_creation_rate",
+            "explanation": "Strong specialization pressure encourages the agent to create a new skill for each new task."
+          },
+          {
+            "step": "4",
+            "source": "skill_creation_rate",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Each newly created skill is added to the library, increasing its size."
+          },
+          {
+            "step": "5",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "redundancy",
+            "explanation": "As the library grows, the probability of storing similar skills across tasks increases, especially without merging."
+          },
+          {
+            "step": "6",
+            "source": "redundancy",
+            "relation": "causes",
+            "target": "bloat",
+            "explanation": "Redundant skills occupy memory and retrieval time without contributing new capabilities, leading to bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Lack of skill merging or consolidation mechanism",
+            "why_it_matters": "Without a way to detect and merge overlapping skills, similar skills accumulate independently, causing linear growth in library size even when functional overlap is high."
+          },
+          {
+            "bottleneck": "Specialization pressure from negative transfer avoidance",
+            "why_it_matters": "To prevent performance degradation on new tasks, the agent creates narrowly specialized skills. This pushes the library toward many small, non-reusable modules, exacerbating bloat."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat occurs when a lifelong-learning agent continuously faces diverse tasks and lacks a mechanism to consolidate similar skills. The agent creates a new specialized skill for each task to avoid negative transfer, leading to a growing library. Over time, many skills are redundant yet remain separate, increasing memory and retrieval overhead without proportional performance gains, resulting in bloat."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Specializing skills to avoid negative transfer increases library size and redundancy, ultimately causing bloat; yet generalizing skills might cause interference. This creates a tradeoff where no clear optimum exists without consolidation.",
+        "derived_from": [
+          "core_tradeoffs.Specialization vs. Generalization",
+          "mechanism_model.causal_chain.steps 1-6"
+        ],
+        "why_it_matters": "Determines whether skill-library growth is sustainable or leads to performance degradation due to retrieval overhead.",
+        "what_existing_methods_may_miss": "Existing methods often assume either pure specialization or full transfer, ignoring dynamic adjustment per task.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "To what extent does the degree of specialization (measured by the cosine similarity between skill embeddings and task-specific features) mediate the causal effect of task diversity on library bloat?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the role of specialization pressure as a mediator, testing whether bloat is inherently driven by diversity or can be mitigated by allowing some generalization."
+      },
+      "hypothesis": {
+        "statement": "The degree of specialization, measured by cosine similarity between skill embeddings and task-specific features, mediates the causal effect of task diversity on library bloat. Specifically, higher task diversity leads to lower cosine similarity (greater specialization), which in turn leads to increased library bloat.",
+        "predicted_effect": "A significant indirect effect of task diversity on bloat through specialization, such that the total effect is largely mediated by specialization, and the direct effect (controlling for specialization) is reduced or non-significant."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong-learning agent facing a sequence of tasks from a generator that controls task diversity. Manipulate task diversity (e.g., number of distinct task clusters) across multiple runs while keeping total number of tasks fixed. Record the cosine similarity between skill embeddings and task-specific features for each skill (as a measure of specialization) and library bloat (normalized library size). Perform a mediation analysis using bootstrapping to test the indirect effect.",
+        "independent_variables": [
+          "Task diversity (e.g., number of distinct task clusters, sampled uniformly from {2,4,6,8,10})"
+        ],
+        "dependent_variables": [
+          "Specialization: average cosine similarity between skill embeddings and task-specific features for skills used in each task",
+          "Bloat: library size at the end of training normalized by the total number of tasks faced"
+        ],
+        "controls": [
+          "Total number of tasks (fixed at 100)",
+          "Skill creation threshold (fixed at 0.5 cosine similarity to existing skills)",
+          "Learning rate and optimizer (fixed)",
+          "Task ordering (randomized across runs)"
+        ],
+        "falsifying_observation": "If the indirect effect of task diversity on bloat through specialization is not statistically significant (e.g., 95% bootstrap confidence interval includes zero), or if the direct effect remains significant and large after controlling for specialization, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Significant negative correlation between task diversity and average cosine similarity (i.e., higher diversity → more specialization)",
+          "Significant positive correlation between specialization (lower cosine similarity) and bloat",
+          "Mediation analysis shows a significant indirect effect of task diversity on bloat through specialization, with the direct effect reduced to non-significance or substantially weakened"
+        ],
+        "rejects_hypothesis": [
+          "No significant correlation between task diversity and specialization",
+          "No significant correlation between specialization and bloat",
+          "Mediation analysis shows no significant indirect effect, or direct effect remains strong and significant even after controlling for specialization"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is rejected (i.e., specialization does not mediate the effect of task diversity on bloat), then the key assumption that specialization pressure (driven by negative transfer avoidance) is the primary driver of bloat may be incorrect.",
+        "assumption_to_revise": "The assumption that specialization is the main mediating mechanism; instead, other factors such as task frequency or memory constraints might be more important, or there may be a confounding variable that was not controlled.",
+        "next_question": "What is the relative importance of task frequency versus task diversity in driving skill-library bloat, and does task ordering (e.g., interleaving vs. blocked) moderate these effects?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "The degree of specialization, measured by cosine similarity between skill embeddings and task-specific features, mediates the causal effect of task diversity on library bloat.",
+      "independent_variables": [
+        "Task diversity (number of distinct task clusters)"
+      ],
+      "dependent_variables": [
+        "Specialization (average cosine similarity between skill embeddings and task-specific features)",
+        "Bloat (normalized library size)"
+      ],
+      "controlled_variables": [
+        "Total number of tasks (fixed at 100)",
+        "Skill creation threshold (fixed at 0.5 cosine similarity to existing skills)",
+        "Learning rate and optimizer (fixed)",
+        "Task ordering (randomized across runs)"
+      ],
+      "baselines": [
+        {
+          "name": "Low diversity baseline",
+          "description": "Task diversity = 2 clusters (lowest level of independent variable)"
+        },
+        {
+          "name": "High diversity baseline",
+          "description": "Task diversity = 10 clusters (highest level of independent variable)"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Specialization",
+          "definition": "Average cosine similarity between skill embeddings and task-specific features for skills used in each task."
+        },
+        {
+          "name": "Bloat",
+          "definition": "Library size at the end of training normalized by the total number of tasks faced."
+        }
+      ],
+      "expected_result": "Significant indirect effect of task diversity on bloat through specialization, with direct effect reduced to non-significance after controlling for specialization.",
+      "falsifying_result": "Indirect effect not statistically significant (95% bootstrap confidence interval includes zero) or direct effect remains significant and large after controlling for specialization.",
+      "minimum_viable_experiment": "Simulate a lifelong-learning agent facing 100 tasks from a generator. Manipulate task diversity across 5 levels (2,4,6,8,10 clusters) with 10 runs each. Measure average cosine similarity (specialization) and normalized library size (bloat). Perform bootstrapped mediation analysis (5000 samples) to test indirect effect of diversity on bloat through specialization.",
+      "risks_and_confounds": [
+        "Task diversity may correlate with task difficulty, confounding results.",
+        "Skill embedding quality may affect cosine similarity measurement.",
+        "Randomization of task ordering may not fully eliminate order effects.",
+        "Skill creation threshold influences number of skills created and could interact with diversity."
+      ]
+    },
+    {
+      "hypothesis": "Lifelong learning agents that implicitly merge skills via parameter sharing exhibit significantly less library bloat than those using explicit separate skill modules, when task diversity and frequency are controlled.",
+      "independent_variables": [
+        "Architecture type (parameter sharing vs. separate modules)",
+        "Task diversity (low vs. high)",
+        "Task frequency (slow vs. fast)"
+      ],
+      "dependent_variables": [
+        "Skill library size (number of distinct skill modules)",
+        "Redundancy rate (pairwise similarity among skills)",
+        "Average task performance"
+      ],
+      "controlled_variables": [
+        "Task set and order",
+        "Learning algorithm details (e.g., learning rate, optimizer)",
+        "Network capacity (total parameters held constant)",
+        "Task difficulty"
+      ],
+      "baselines": [
+        {
+          "name": "Separate-module agent",
+          "description": "Agent B: uses a separate neural network per task (no parameter sharing), representing explicit separate skill modules."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "Total number of distinct skill modules (e.g., task-specific heads or separate networks) stored in the skill library at any point."
+        },
+        {
+          "name": "Redundancy rate",
+          "definition": "Fraction of skill pairs with functional similarity above a threshold, computed by comparing skill embeddings or task-specific parameters."
+        },
+        {
+          "name": "Average task performance",
+          "definition": "Mean accuracy or reward achieved on held-out test sets across all tasks learned so far."
+        }
+      ],
+      "expected_result": "The parameter-sharing agent (shared backbone + task-specific heads) will have a significantly lower library size and redundancy rate compared to the separate-module agent, while maintaining comparable or better average task performance across all combinations of task diversity and frequency.",
+      "falsifying_result": "If no significant difference in library size or redundancy is observed between the two architectures, or if the parameter-sharing agent shows significantly worse average task performance without a corresponding reduction in library size, the hypothesis is falsified.",
+      "minimum_viable_experiment": "Two lifelong learning agents learn a sequence of tasks: Agent A uses a neural network with a shared backbone and task-specific heads (implicit merging via parameter sharing); Agent B uses a separate network per task (explicit separate modules). Both agents learn tasks sequentially with the same order, no replay, and identical hyperparameters. Task diversity and frequency are varied across 2x2 conditions. We measure library size, redundancy, and task performance over time for each condition and compare statistically.",
+      "risks_and_confounds": [
+        "If the total parameter count is not exactly matched, differences in capacity may confound results.",
+        "Task similarity may inadvertently be high for some sequences, reducing apparent diversity even when intended to be high.",
+        "Parameter-sharing may introduce interference that degrades performance, which could be mistaken for bloat reduction if not controlled.",
+        "The definition of 'skill' as a separate network vs. task-specific head may not fully capture implicit merging in more complex architectures."
+      ]
+    },
+    {
+      "hypothesis": "Increasing task frequency (number of tasks per unit time) leads to a larger skill library size (bloat) and a non-monotonic effect on average performance: performance increases up to a moderate frequency but declines at high frequencies due to insufficient consolidation.",
+      "independent_variables": [
+        "task frequency: low (1 task per 10 time steps), medium (1 task per 5 time steps), high (1 task per 2 time steps)"
+      ],
+      "dependent_variables": [
+        "skill library size after completing all 100 tasks",
+        "average cumulative reward across all 100 tasks"
+      ],
+      "controlled_variables": [
+        "total number of tasks (100)",
+        "task diversity (tasks sampled from same distribution, e.g., MiniGrid rooms)",
+        "skill learning algorithm (fixed: DQN with a new skill for each task, no merging/consolidation)",
+        "no skill merging or consolidation mechanism"
+      ],
+      "baselines": [
+        {
+          "name": "Low frequency condition",
+          "description": "Task frequency of 1 task per 10 time steps, representing sparse task arrival."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill Library Size",
+          "definition": "Number of skills stored in the library after the final task."
+        },
+        {
+          "name": "Average Cumulative Reward",
+          "definition": "Mean cumulative reward obtained across all 100 tasks, averaged over multiple runs."
+        }
+      ],
+      "expected_result": "Library size is significantly larger in high frequency than low; average performance is highest in medium frequency, lower in low (due to forgetting) and lower in high (due to bloat).",
+      "falsifying_result": "If library size does not increase with frequency (e.g., high frequency yields similar or smaller library than low), or if average performance increases monotonically with frequency (high frequency yields highest performance), the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a lifelong-learning agent on a stream of 100 tasks from a standard benchmark (e.g., MiniGrid). Vary task frequency at three levels: low (1 task per 10 steps), medium (1 per 5), high (1 per 2). The agent uses a fixed skill learning algorithm that adds a new skill for each task without any consolidation. Measure library size after all tasks and average cumulative reward. Compare across frequencies using multiple random seeds.",
+      "risks_and_confounds": [
+        "Task distribution may not be sufficiently diverse to trigger specialization pressure.",
+        "The specific choice of benchmark may influence the results.",
+        "Random seed variability could obscure effects; use sufficient repetitions.",
+        "The fixed algorithm may not be representative of all lifelong-learning agents."
+      ]
+    },
+    {
+      "hypothesis": "Lifelong learning agents that use transfer learning (e.g., skill reuse or composition) exhibit lower library bloat than agents that strictly specialize per task when consecutive tasks have high similarity (e.g., similarity above a threshold), but this reduction in bloat is accompanied by increased negative transfer on tasks that are dissimilar to previous ones.",
+      "independent_variables": [
+        "Task similarity (continuous between 0 and 1)",
+        "Number of tasks (e.g., 10)"
+      ],
+      "dependent_variables": [
+        "Library size after all tasks",
+        "Average negative transfer (performance drop on old tasks after new learning)",
+        "Average task performance on new tasks"
+      ],
+      "controlled_variables": [
+        "Same base learning algorithm",
+        "Same skill library capacity",
+        "Same total number of tasks",
+        "Same task order"
+      ],
+      "baselines": [
+        {
+          "name": "Specialist Agent",
+          "description": "An agent that always creates a new skill for each task, without any transfer or reuse."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library Size",
+          "definition": "Total number of skills stored in the skill library at the end of the task sequence."
+        },
+        {
+          "name": "Negative Transfer",
+          "definition": "Average performance drop on previously learned tasks after learning a new task, measured as (performance before new task - performance after new task) averaged over all old tasks."
+        },
+        {
+          "name": "New Task Performance",
+          "definition": "Average performance (e.g., accuracy) on the most recent task after learning it."
+        }
+      ],
+      "expected_result": "For high task similarity (e.g., >0.7), the transfer agent ends with fewer skills than the specialist agent, and its negative transfer is not significantly worse. For low similarity (e.g., <0.3), the transfer agent's library size is similar or larger than the specialist, and negative transfer is higher.",
+      "falsifying_result": "If the transfer agent's library size is never smaller than the specialist's across all similarity levels, or if the transfer agent's negative transfer is always higher than specialist's regardless of similarity, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Use a curriculum of 10 tasks with pairwise similarity either high (0.8) or low (0.2). Compare a specialist agent that always creates a new skill vs. a transfer agent that attempts to reuse or compose existing skills. Run each condition once. Measure final library size and negative transfer on a hold-out set of old tasks. If the pattern does not match expected, hypothesis falsified.",
+      "risks_and_confounds": [
+        "The results may depend on the specific transfer mechanism used; different mechanisms (e.g., parameter sharing vs. skill composition) might yield different outcomes.",
+        "Task ordering effects; repeating with different orders could reveal confounds.",
+        "The definition of task similarity might not capture all aspects of task relatedness."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles analysis of skill-library bloat in lifelong-learning agents. It defines primitive concepts, constructs a causal mechanism model, derives tensions, and proposes falsifiable experiments. The work is systematic and clearly structured, addressing an important issue. However, the novelty is moderate as the proposed mechanisms align with known intuitions, and the experiments, while well-designed, lack comparisons to existing lifelong learning methods.",
+    "strengths": [
+      "Clear first-principles derivation from primitive definitions to causal mechanism.",
+      "Well-structured generation of testable hypotheses and experimental plans.",
+      "Explicitly identifies tensions and tradeoffs, such as specialization vs. generalization.",
+      "Falsifiability is high; each hypothesis has a clear falsifying observation."
+    ],
+    "weaknesses": [
+      "Novelty is limited; the idea that specialization and lack of merging cause bloat is intuitive and already discussed in literature.",
+      "The assumptions (e.g., no consolidation mechanism, incremental specialization) may be too restrictive and not representative of all lifelong learning agents.",
+      "Missing baselines: The experiments only compare parameter sharing vs. separate modules, but do not include common lifelong learning methods like progressive neural networks, elastic weight consolidation, or replay-based methods.",
+      "The experiment plans rely on simple task simulations; real-world applicability is not addressed."
+    ],
+    "questions": [
+      "How does the proposed mechanism model account for agents that use episode memory or generative replay to reduce interference?",
+      "Could the observed bloat be an artifact of the specific skill representation (e.g., explicit modules) rather than a fundamental property?",
+      "What is the role of task ordering (e.g., interleaved vs. blocked) in exacerbating or mitigating bloat?"
+    ],
+    "missing_baselines": [
+      "Progressive Neural Networks",
+      "Elastic Weight Consolidation",
+      "Generative Replay methods",
+      "Memory-augmented neural networks"
+    ],
+    "score": 7,
+    "confidence": 5,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient_novelty_and_narrow_assumptions",
+    "root_cause": "The research package is built on two assumptions that are too restrictive (incremental specialization and no merging/consolidation), which limit the generalizability of the causal mechanism and reduce novelty. The experiments also omit common lifelong learning baselines, making the contribution incremental.",
+    "violated_principle": "A first-principles analysis must derive its assumptions from the broadest possible definition of the phenomenon; overly narrow assumptions that exclude common mechanisms (e.g., replay, consolidation) reduce the applicability and novelty of the derived model.",
+    "new_or_updated_principle": "When decomposing a phenomenon, explicitly consider and test the boundaries of each assumption by including at least one alternative assumption (e.g., presence of skill merging) in the causal model to identify regimes where the hypothesized bloat mechanism fails or reverses.",
+    "new_or_updated_skill": "Skill: Assumption Stress Testing – systematically vary each key assumption (e.g., no merging vs. allowed merging, incremental specialization vs. allowed transfer) in the experiment design to map the conditions under which the causal chain holds, yielding a crisp novelty boundary.",
+    "regression_test": "For any new lifelong-learning bloat hypothesis, the experiment plan must include at least one condition where the central assumption is relaxed (e.g., a version of the agent that can merge skills) and verify that the predicted outcome (e.g., bloat reduction) is statistically different across conditions. If no significant difference is found, the assumption is not critical and the principle must be revised."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T170131Z"
+  }
+}

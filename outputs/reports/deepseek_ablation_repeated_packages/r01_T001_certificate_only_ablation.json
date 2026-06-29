@@ -1,0 +1,1267 @@
+{
+  "topic": {
+    "topic": "When should an agent discover a new skill rather than compose existing skills?",
+    "topic_id": "T001",
+    "goal": null,
+    "domain": "LLM agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When should an agent discover a new skill rather than compose existing skills?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent",
+        "definition": "An entity that perceives its environment, reasons about actions, and executes actions to achieve goals.",
+        "why_primitive": "Agency is the fundamental concept underlying all decisions about skill acquisition and use; without an agent there is no problem."
+      },
+      {
+        "name": "Skill",
+        "definition": "A reusable, parameterized capability that transforms a set of inputs into desired outputs, typically learned or programmed.",
+        "why_primitive": "Skills are the atomic building blocks of agent behavior; the core question is whether to reuse or create them."
+      },
+      {
+        "name": "Composition",
+        "definition": "The process of combining two or more existing skills in sequence, parallel, or nested fashion to accomplish a task.",
+        "why_primitive": "Composition defines the alternative to discovery; it is the default mechanism for leveraging prior knowledge."
+      },
+      {
+        "name": "Discovery",
+        "definition": "The process of generating a new skill de novo, typically via learning, search, or reasoning, without relying on composition of existing skills.",
+        "why_primitive": "Discovery represents the creative act of expanding the agent's repertoire; it is the alternative to composition."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills have nonzero storage, retrieval, and execution costs, and composing skills incurs overhead (e.g., state handoff, error propagation).",
+        "rationale": "If skills were free and composition costless, there would be no reason to ever discover new skills – all tasks would be solvable by infinite composition. Real systems have limited memory and compute.",
+        "possible_failure": "If costs are negligible in practice, the trade-off disappears and discovery is never optimal, contradicting observed behavior of agents."
+      },
+      {
+        "assumption": "The agent operates in an environment where tasks arrive from a distribution that includes both tasks solvable by composition and tasks requiring genuinely novel skills.",
+        "rationale": "Without novelty in the task distribution, composition would always suffice, making discovery unnecessary. The question only arises when composition fails.",
+        "possible_failure": "If the environment is entirely static and known, discovery is never needed; conversely, if every task is novel, composition is never helpful."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Efficiency vs. Expressiveness: Composition leverages existing knowledge quickly but may fail for novel tasks; discovery expands capability but requires time and resources.",
+        "variables": [
+          "Composition success rate",
+          "Discovery cost (time, compute)",
+          "Task novelty frequency"
+        ]
+      },
+      {
+        "tradeoff": "Reliability vs. Adaptability: Composed skills are typically well-tested and predictable; discovered skills may be brittle or unoptimized but can handle edge cases.",
+        "variables": [
+          "Skill reliability variance",
+          "Penalty for failure",
+          "Need for generalization"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Task Novelty",
+        "role": "input",
+        "description": "Degree to which the current task requires skills beyond the agent's existing repertoire."
+      },
+      {
+        "name": "Composition Cost",
+        "role": "input",
+        "description": "Overhead (time, compute, error) incurred by composing existing skills."
+      },
+      {
+        "name": "Discovery Cost",
+        "role": "input",
+        "description": "Resources (time, compute, data) required to learn or generate a new skill."
+      },
+      {
+        "name": "Skill Gap",
+        "role": "mediator",
+        "description": "Perceived mismatch between task requirements and capabilities of available skills."
+      },
+      {
+        "name": "Expected Performance Ratio",
+        "role": "mediator",
+        "description": "Ratio of expected task success via composition versus discovery, accounting for costs and reliability."
+      },
+      {
+        "name": "Action Choice",
+        "role": "output",
+        "description": "Binary decision: compose existing skills or discover a new skill."
+      },
+      {
+        "name": "Task Success",
+        "role": "outcome",
+        "description": "Whether the task is completed successfully after executing the chosen action."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Task Novelty",
+        "relation": "increases",
+        "target": "Skill Gap",
+        "explanation": "Higher novelty directly implies a larger gap between task demands and existing skills."
+      },
+      {
+        "step": "2",
+        "source": "Skill Gap",
+        "relation": "and",
+        "target": "Discovery Cost",
+        "explanation": "Skill Gap and Discovery Cost jointly affect Expected Performance Ratio: larger gap favors discovery, but high discovery cost reduces its expected performance."
+      },
+      {
+        "step": "3",
+        "source": "Expected Performance Ratio",
+        "relation": "determines",
+        "target": "Action Choice",
+        "explanation": "The agent selects the action (compose or discover) with higher expected performance ratio."
+      },
+      {
+        "step": "4",
+        "source": "Action Choice",
+        "relation": "influences",
+        "target": "Task Success",
+        "explanation": "The chosen action directly impacts whether the task is completed successfully, moderated by execution quality."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Accurate Skill Gap Assessment",
+        "why_it_matters": "If the agent misjudges the gap, it may choose composition for truly novel tasks (failure) or discovery for composable tasks (waste)."
+      },
+      {
+        "bottleneck": "Reliable Discovery Cost Estimation",
+        "why_it_matters": "Overestimating discovery cost biases toward composition; underestimating leads to unnecessary discovery, squandering resources."
+      }
+    ],
+    "mechanism_summary": "The agent decides whether to discover a new skill or compose existing ones by evaluating the task novelty (which creates a skill gap) and the costs of discovery versus composition. When the skill gap is large and discovery cost is low relative to composition overhead, discovery is favored; otherwise composition is preferred. The decision hinges on accurate estimation of both the gap and the costs, as misjudgment leads to suboptimal outcomes."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Composition leverages existing knowledge efficiently but fails for novel tasks, while discovery expands capability at high cost; the optimal choice depends on accurate skill gap and cost estimates that are often uncertain.",
+      "derived_from": [
+        "Core Tradeoff: Efficiency vs. Expressiveness",
+        "Assumption: Skills have nonzero costs",
+        "Bottleneck: Accurate Skill Gap Assessment"
+      ],
+      "why_it_matters": "This tension lies at the heart of the agent's decision; misjudgment leads to wasted resources or task failure. Real-world agents must navigate this tradeoff continuously.",
+      "what_existing_methods_may_miss": "Existing methods often assume costs are static or ignore the interplay between gap assessment accuracy and cost estimation, leading to brittle policies.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "If skills and composition had negligible cost, composition would always be preferred, rendering discovery superfluous; yet the assumption of nonzero costs is often unverified in practice.",
+      "derived_from": [
+        "Assumption: Skills have nonzero costs",
+        "Causal chain: Composition Cost and Discovery Cost affect Expected Performance Ratio"
+      ],
+      "why_it_matters": "The entire model rests on the assumption that costs are significant. If costs are negligible in a given domain, the tradeoff disappears and discovery becomes never optimal, contradicting observed learning behavior.",
+      "what_existing_methods_may_miss": "Most research implicitly assumes costs matter, but few studies quantify these costs or test their impact on the composition-discovery decision.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The agent's decision hinges on accurate perception of the 'skill gap', but in dynamic environments the gap is inherently uncertain and may be misestimated, leading to systematic biases (e.g., over-reliance on composition).",
+      "derived_from": [
+        "Bottleneck: Accurate Skill Gap Assessment",
+        "Causal chain: Task Novelty increases Skill Gap"
+      ],
+      "why_it_matters": "Misjudging the skill gap can cause the agent to choose composition when discovery is needed, or vice versa. Without reliable gap detection, the agent cannot optimize its strategy.",
+      "what_existing_methods_may_miss": "Existing methods often assume the agent can perfectly perceive novelty or gap, ignoring the challenge of measuring task requirements relative to current skills.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Composed skills are generally more reliable because they are well-tested, but they lack adaptability to edge cases; discovered skills can handle novelty but may be brittle, creating a reliability-adaptability tradeoff.",
+      "derived_from": [
+        "Core Tradeoff: Reliability vs. Adaptability",
+        "Assumption: Task distribution includes novel tasks"
+      ],
+      "why_it_matters": "In safety-critical applications, reliability is paramount, but the need to adapt to new situations pushes for discovery. Balancing these requires understanding the cost of failure and the frequency of novelty.",
+      "what_existing_methods_may_miss": "Many approaches treat reliability as a fixed property or ignore the variance in skill reliability, leading to overconfident composition or reckless discovery.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does uncertainty in skill gap estimates affect the optimal decision between composition and discovery?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Reveals the sensitivity of the decision boundary to estimation noise, guiding robust policy design."
+    },
+    {
+      "question": "Under what conditions do skill composition costs become negligible enough to make discovery never optimal?",
+      "question_type": "diagnostic",
+      "source_tension": "T2",
+      "expected_contribution": "Empirically tests the core assumption of the model, clarifying the necessity of discovery."
+    },
+    {
+      "question": "Does misestimation of the skill gap causally lead to over-reliance on composition?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Empirically validates a key bottleneck in the decision process, highlighting the need for adaptive gap estimators."
+    },
+    {
+      "question": "How does the frequency of edge cases in the task distribution influence the optimal balance between reliability and adaptability?",
+      "question_type": "causal",
+      "source_tension": "T4",
+      "expected_contribution": "Quantifies the trade-off between reliability and adaptability, informing design for safety-critical applications."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment, reasons about actions, and executes actions to achieve goals.",
+          "why_primitive": "Agency is the fundamental concept underlying all decisions about skill acquisition and use; without an agent there is no problem."
+        },
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized capability that transforms a set of inputs into desired outputs, typically learned or programmed.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; the core question is whether to reuse or create them."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence, parallel, or nested fashion to accomplish a task.",
+          "why_primitive": "Composition defines the alternative to discovery; it is the default mechanism for leveraging prior knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill de novo, typically via learning, search, or reasoning, without relying on composition of existing skills.",
+          "why_primitive": "Discovery represents the creative act of expanding the agent's repertoire; it is the alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills have nonzero storage, retrieval, and execution costs, and composing skills incurs overhead (e.g., state handoff, error propagation).",
+          "rationale": "If skills were free and composition costless, there would be no reason to ever discover new skills – all tasks would be solvable by infinite composition. Real systems have limited memory and compute.",
+          "possible_failure": "If costs are negligible in practice, the trade-off disappears and discovery is never optimal, contradicting observed behavior of agents."
+        },
+        {
+          "assumption": "The agent operates in an environment where tasks arrive from a distribution that includes both tasks solvable by composition and tasks requiring genuinely novel skills.",
+          "rationale": "Without novelty in the task distribution, composition would always suffice, making discovery unnecessary. The question only arises when composition fails.",
+          "possible_failure": "If the environment is entirely static and known, discovery is never needed; conversely, if every task is novel, composition is never helpful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which the current task requires skills beyond the agent's existing repertoire."
+          },
+          {
+            "name": "Composition Cost",
+            "role": "input",
+            "description": "Overhead (time, compute, error) incurred by composing existing skills."
+          },
+          {
+            "name": "Discovery Cost",
+            "role": "input",
+            "description": "Resources (time, compute, data) required to learn or generate a new skill."
+          },
+          {
+            "name": "Skill Gap",
+            "role": "mediator",
+            "description": "Perceived mismatch between task requirements and capabilities of available skills."
+          },
+          {
+            "name": "Expected Performance Ratio",
+            "role": "mediator",
+            "description": "Ratio of expected task success via composition versus discovery, accounting for costs and reliability."
+          },
+          {
+            "name": "Action Choice",
+            "role": "output",
+            "description": "Binary decision: compose existing skills or discover a new skill."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Whether the task is completed successfully after executing the chosen action."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Gap",
+            "explanation": "Higher novelty directly implies a larger gap between task demands and existing skills."
+          },
+          {
+            "step": "2",
+            "source": "Skill Gap",
+            "relation": "and",
+            "target": "Discovery Cost",
+            "explanation": "Skill Gap and Discovery Cost jointly affect Expected Performance Ratio: larger gap favors discovery, but high discovery cost reduces its expected performance."
+          },
+          {
+            "step": "3",
+            "source": "Expected Performance Ratio",
+            "relation": "determines",
+            "target": "Action Choice",
+            "explanation": "The agent selects the action (compose or discover) with higher expected performance ratio."
+          },
+          {
+            "step": "4",
+            "source": "Action Choice",
+            "relation": "influences",
+            "target": "Task Success",
+            "explanation": "The chosen action directly impacts whether the task is completed successfully, moderated by execution quality."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate Skill Gap Assessment",
+            "why_it_matters": "If the agent misjudges the gap, it may choose composition for truly novel tasks (failure) or discovery for composable tasks (waste)."
+          },
+          {
+            "bottleneck": "Reliable Discovery Cost Estimation",
+            "why_it_matters": "Overestimating discovery cost biases toward composition; underestimating leads to unnecessary discovery, squandering resources."
+          }
+        ],
+        "mechanism_summary": "The agent decides whether to discover a new skill or compose existing ones by evaluating the task novelty (which creates a skill gap) and the costs of discovery versus composition. When the skill gap is large and discovery cost is low relative to composition overhead, discovery is favored; otherwise composition is preferred. The decision hinges on accurate estimation of both the gap and the costs, as misjudgment leads to suboptimal outcomes."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Composed skills are generally more reliable because they are well-tested, but they lack adaptability to edge cases; discovered skills can handle novelty but may be brittle, creating a reliability-adaptability tradeoff.",
+        "derived_from": [
+          "Core Tradeoff: Reliability vs. Adaptability",
+          "Assumption: Task distribution includes novel tasks"
+        ],
+        "why_it_matters": "In safety-critical applications, reliability is paramount, but the need to adapt to new situations pushes for discovery. Balancing these requires understanding the cost of failure and the frequency of novelty.",
+        "what_existing_methods_may_miss": "Many approaches treat reliability as a fixed property or ignore the variance in skill reliability, leading to overconfident composition or reckless discovery.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does the variance in composition success rates across similar tasks govern the critical edge case frequency at which agents should switch from composition to discovery?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a novel mechanism interaction—composition success variance—that more precisely determines the optimal switch point between composition and discovery, going beyond simple edge-case frequency thresholds."
+      },
+      "hypothesis": {
+        "statement": "When the variance of composition success rates across similar tasks is high, the critical edge case frequency for switching from composition to discovery is lower than when variance is low, because high variance makes composition unreliable even for moderate novelty.",
+        "predicted_effect": "Agents operating in environments with high composition variance will show a discontinuous drop in composition performance and a lower crossover frequency to discovery, compared to low-variance environments."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an LLM agent in a grid-world task environment where tasks are drawn from a distribution with controlled edge case frequency (0%, 10%, 20%, 30%) and two levels of composition success variance (low vs. high, achieved by varying the similarity of tasks within the same category). Agents are given a fixed set of composable skills and a discovery module with fixed budget. Task success rate is measured over 500 episodes per condition. The critical frequency is estimated as the point where discovery-allowed agents first outperform composition-only agents.",
+        "independent_variables": [
+          "Edge case frequency (0%, 10%, 20%, 30%)",
+          "Composition success variance (low, high)"
+        ],
+        "dependent_variables": [
+          "Crossover frequency (estimated threshold)",
+          "Task success rate",
+          "Average cost per task"
+        ],
+        "controls": [
+          "Initial skill set identical across conditions",
+          "Discovery algorithm fixed (same RL hyperparameters)",
+          "Task difficulty for non-edge-case tasks held constant",
+          "Environment dynamics identical",
+          "Composition success variance operationalized by varying intra-category task similarity"
+        ],
+        "falsifying_observation": "The crossover frequency does not differ significantly between low and high variance conditions at any edge case frequency, or composition-only agents always outperform discovery-allowed agents regardless of variance."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In the high variance condition, the crossover frequency is at a lower edge case frequency (e.g., 10%) compared to the low variance condition (e.g., 25%).",
+          "Composition-only agents in high variance show a steeper decline in success rate as edge case frequency increases, relative to low variance.",
+          "Discovery-allowed agents in high variance show earlier adoption of discovery and higher overall success."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in crossover frequency between variance conditions.",
+          "Composition-only agents maintain high success rates even at high edge case frequencies and high variance.",
+          "Discovery-allowed agents do not outperform composition-only agents at any edge case frequency in either variance condition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If composition success variance does not affect the crossover frequency, the hypothesis that variance governs the threshold is rejected.",
+        "assumption_to_revise": "The assumption that composition success rates are independent across similar tasks may be invalid; perhaps composition success variance is not a meaningful factor for edge case handling.",
+        "next_question": "Does the cost of discovery relative to composition overhead modulate the effect of composition variance on the optimal switch?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment, reasons about actions, and executes actions to achieve goals.",
+          "why_primitive": "Agency is the fundamental concept underlying all decisions about skill acquisition and use; without an agent there is no problem."
+        },
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized capability that transforms a set of inputs into desired outputs, typically learned or programmed.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; the core question is whether to reuse or create them."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence, parallel, or nested fashion to accomplish a task.",
+          "why_primitive": "Composition defines the alternative to discovery; it is the default mechanism for leveraging prior knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill de novo, typically via learning, search, or reasoning, without relying on composition of existing skills.",
+          "why_primitive": "Discovery represents the creative act of expanding the agent's repertoire; it is the alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills have nonzero storage, retrieval, and execution costs, and composing skills incurs overhead (e.g., state handoff, error propagation).",
+          "rationale": "If skills were free and composition costless, there would be no reason to ever discover new skills – all tasks would be solvable by infinite composition. Real systems have limited memory and compute.",
+          "possible_failure": "If costs are negligible in practice, the trade-off disappears and discovery is never optimal, contradicting observed behavior of agents."
+        },
+        {
+          "assumption": "The agent operates in an environment where tasks arrive from a distribution that includes both tasks solvable by composition and tasks requiring genuinely novel skills.",
+          "rationale": "Without novelty in the task distribution, composition would always suffice, making discovery unnecessary. The question only arises when composition fails.",
+          "possible_failure": "If the environment is entirely static and known, discovery is never needed; conversely, if every task is novel, composition is never helpful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which the current task requires skills beyond the agent's existing repertoire."
+          },
+          {
+            "name": "Composition Cost",
+            "role": "input",
+            "description": "Overhead (time, compute, error) incurred by composing existing skills."
+          },
+          {
+            "name": "Discovery Cost",
+            "role": "input",
+            "description": "Resources (time, compute, data) required to learn or generate a new skill."
+          },
+          {
+            "name": "Skill Gap",
+            "role": "mediator",
+            "description": "Perceived mismatch between task requirements and capabilities of available skills."
+          },
+          {
+            "name": "Expected Performance Ratio",
+            "role": "mediator",
+            "description": "Ratio of expected task success via composition versus discovery, accounting for costs and reliability."
+          },
+          {
+            "name": "Action Choice",
+            "role": "output",
+            "description": "Binary decision: compose existing skills or discover a new skill."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Whether the task is completed successfully after executing the chosen action."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Gap",
+            "explanation": "Higher novelty directly implies a larger gap between task demands and existing skills."
+          },
+          {
+            "step": "2",
+            "source": "Skill Gap",
+            "relation": "and",
+            "target": "Discovery Cost",
+            "explanation": "Skill Gap and Discovery Cost jointly affect Expected Performance Ratio: larger gap favors discovery, but high discovery cost reduces its expected performance."
+          },
+          {
+            "step": "3",
+            "source": "Expected Performance Ratio",
+            "relation": "determines",
+            "target": "Action Choice",
+            "explanation": "The agent selects the action (compose or discover) with higher expected performance ratio."
+          },
+          {
+            "step": "4",
+            "source": "Action Choice",
+            "relation": "influences",
+            "target": "Task Success",
+            "explanation": "The chosen action directly impacts whether the task is completed successfully, moderated by execution quality."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate Skill Gap Assessment",
+            "why_it_matters": "If the agent misjudges the gap, it may choose composition for truly novel tasks (failure) or discovery for composable tasks (waste)."
+          },
+          {
+            "bottleneck": "Reliable Discovery Cost Estimation",
+            "why_it_matters": "Overestimating discovery cost biases toward composition; underestimating leads to unnecessary discovery, squandering resources."
+          }
+        ],
+        "mechanism_summary": "The agent decides whether to discover a new skill or compose existing ones by evaluating the task novelty (which creates a skill gap) and the costs of discovery versus composition. When the skill gap is large and discovery cost is low relative to composition overhead, discovery is favored; otherwise composition is preferred. The decision hinges on accurate estimation of both the gap and the costs, as misjudgment leads to suboptimal outcomes."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Composition leverages existing knowledge efficiently but fails for novel tasks, while discovery expands capability at high cost; the optimal choice depends on accurate skill gap and cost estimates that are often uncertain.",
+        "derived_from": [
+          "Core Tradeoff: Efficiency vs. Expressiveness",
+          "Assumption: Skills have nonzero costs",
+          "Bottleneck: Accurate Skill Gap Assessment"
+        ],
+        "why_it_matters": "This tension lies at the heart of the agent's decision; misjudgment leads to wasted resources or task failure. Real-world agents must navigate this tradeoff continuously.",
+        "what_existing_methods_may_miss": "Existing methods often assume costs are static or ignore the interplay between gap assessment accuracy and cost estimation, leading to brittle policies.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of skill gap uncertainty does an agent optimally switch from composing existing skills to discovering a new skill, and how does this threshold depend on the cost of discovery relative to composition failure?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical uncertainty threshold and its scaling with cost ratio, providing a sharp, testable boundary for optimal skill acquisition."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical level of skill gap uncertainty beyond which the optimal action discontinuously switches from composition to discovery. This critical uncertainty increases linearly with the ratio of discovery cost to composition failure cost.",
+        "predicted_effect": "For a given task novelty, as skill gap estimate noise increases past a threshold, the optimal decision shifts abruptly from composition to discovery; the threshold scales with the cost ratio."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an agent with a fixed skill set facing tasks of moderate novelty. The agent estimates the skill gap with Gaussian noise of controllable standard deviation σ. The agent knows true costs: composition failure cost C_fail and discovery cost C_discover. For each σ, compute the expected utility-maximizing action (composition vs. discovery) across many task instances. Vary σ from 0 to a maximum and record the optimal action. Repeat for different ratios C_discover / C_fail. Identify the σ threshold where the optimal action flips.",
+        "independent_variables": [
+          "Noise standard deviation σ in skill gap estimate",
+          "Cost ratio R = C_discover / C_fail"
+        ],
+        "dependent_variables": [
+          "Optimal action (composition or discovery) for each (σ, R) combination"
+        ],
+        "controls": [
+          "Task novelty (true skill gap fixed)",
+          "Composition success probability given true gap",
+          "Discovery success probability (assumed perfect after cost)",
+          "Utility function (expected success minus cost)"
+        ],
+        "falsifying_observation": "The optimal action changes gradually with σ (no sharp threshold), or the threshold does not vary systematically with R."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For each fixed R, there is a clear σ_c where the optimal action switches from composition to discovery.",
+          "σ_c increases monotonically with R (higher relative discovery cost requires more uncertainty to switch)."
+        ],
+        "rejects_hypothesis": [
+          "The decision boundary is not sharp; the probability of choosing discovery increases continuously with σ.",
+          "σ_c does not change with R or changes unpredictably."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed, or the threshold does not scale with cost ratio, the hypothesis that the decision is threshold-based is invalid.",
+        "assumption_to_revise": "The assumption that the decision is driven by a rational expected utility calculation with a clear separation may be incorrect; instead, the agent might use a heuristic or a probabilistic mixing strategy.",
+        "next_question": "How do heuristic decision rules (e.g., lexicographic or satisficing) compare to the expected utility threshold in the composition-discovery tradeoff?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment, reasons about actions, and executes actions to achieve goals.",
+          "why_primitive": "Agency is the fundamental concept underlying all decisions about skill acquisition and use; without an agent there is no problem."
+        },
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized capability that transforms a set of inputs into desired outputs, typically learned or programmed.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; the core question is whether to reuse or create them."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence, parallel, or nested fashion to accomplish a task.",
+          "why_primitive": "Composition defines the alternative to discovery; it is the default mechanism for leveraging prior knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill de novo, typically via learning, search, or reasoning, without relying on composition of existing skills.",
+          "why_primitive": "Discovery represents the creative act of expanding the agent's repertoire; it is the alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills have nonzero storage, retrieval, and execution costs, and composing skills incurs overhead (e.g., state handoff, error propagation).",
+          "rationale": "If skills were free and composition costless, there would be no reason to ever discover new skills – all tasks would be solvable by infinite composition. Real systems have limited memory and compute.",
+          "possible_failure": "If costs are negligible in practice, the trade-off disappears and discovery is never optimal, contradicting observed behavior of agents."
+        },
+        {
+          "assumption": "The agent operates in an environment where tasks arrive from a distribution that includes both tasks solvable by composition and tasks requiring genuinely novel skills.",
+          "rationale": "Without novelty in the task distribution, composition would always suffice, making discovery unnecessary. The question only arises when composition fails.",
+          "possible_failure": "If the environment is entirely static and known, discovery is never needed; conversely, if every task is novel, composition is never helpful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which the current task requires skills beyond the agent's existing repertoire."
+          },
+          {
+            "name": "Composition Cost",
+            "role": "input",
+            "description": "Overhead (time, compute, error) incurred by composing existing skills."
+          },
+          {
+            "name": "Discovery Cost",
+            "role": "input",
+            "description": "Resources (time, compute, data) required to learn or generate a new skill."
+          },
+          {
+            "name": "Skill Gap",
+            "role": "mediator",
+            "description": "Perceived mismatch between task requirements and capabilities of available skills."
+          },
+          {
+            "name": "Expected Performance Ratio",
+            "role": "mediator",
+            "description": "Ratio of expected task success via composition versus discovery, accounting for costs and reliability."
+          },
+          {
+            "name": "Action Choice",
+            "role": "output",
+            "description": "Binary decision: compose existing skills or discover a new skill."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Whether the task is completed successfully after executing the chosen action."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Gap",
+            "explanation": "Higher novelty directly implies a larger gap between task demands and existing skills."
+          },
+          {
+            "step": "2",
+            "source": "Skill Gap",
+            "relation": "and",
+            "target": "Discovery Cost",
+            "explanation": "Skill Gap and Discovery Cost jointly affect Expected Performance Ratio: larger gap favors discovery, but high discovery cost reduces its expected performance."
+          },
+          {
+            "step": "3",
+            "source": "Expected Performance Ratio",
+            "relation": "determines",
+            "target": "Action Choice",
+            "explanation": "The agent selects the action (compose or discover) with higher expected performance ratio."
+          },
+          {
+            "step": "4",
+            "source": "Action Choice",
+            "relation": "influences",
+            "target": "Task Success",
+            "explanation": "The chosen action directly impacts whether the task is completed successfully, moderated by execution quality."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate Skill Gap Assessment",
+            "why_it_matters": "If the agent misjudges the gap, it may choose composition for truly novel tasks (failure) or discovery for composable tasks (waste)."
+          },
+          {
+            "bottleneck": "Reliable Discovery Cost Estimation",
+            "why_it_matters": "Overestimating discovery cost biases toward composition; underestimating leads to unnecessary discovery, squandering resources."
+          }
+        ],
+        "mechanism_summary": "The agent decides whether to discover a new skill or compose existing ones by evaluating the task novelty (which creates a skill gap) and the costs of discovery versus composition. When the skill gap is large and discovery cost is low relative to composition overhead, discovery is favored; otherwise composition is preferred. The decision hinges on accurate estimation of both the gap and the costs, as misjudgment leads to suboptimal outcomes."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "If skills and composition had negligible cost, composition would always be preferred, rendering discovery superfluous; yet the assumption of nonzero costs is often unverified in practice.",
+        "derived_from": [
+          "Assumption: Skills have nonzero costs",
+          "Causal chain: Composition Cost and Discovery Cost affect Expected Performance Ratio"
+        ],
+        "why_it_matters": "The entire model rests on the assumption that costs are significant. If costs are negligible in a given domain, the tradeoff disappears and discovery becomes never optimal, contradicting observed learning behavior.",
+        "what_existing_methods_may_miss": "Most research implicitly assumes costs matter, but few studies quantify these costs or test their impact on the composition-discovery decision.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task novelty beyond which discovery becomes optimal regardless of composition cost?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Empirically identifies a sharp boundary (novelty threshold) where composition is no longer viable, moving beyond the assumption that costs alone drive the trade-off."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold of task novelty such that for all tasks above this threshold, discovering a new skill yields higher expected performance than composing existing skills, even when composition costs are negligible.",
+        "predicted_effect": "When task novelty exceeds a critical value, agents will consistently choose discovery over composition, irrespective of composition cost variations."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a grid-world where tasks vary in novelty (e.g., require new object combinations or unseen obstacles), agents can either compose 'move' and 'grab' skills or discover a novel 'fetch' skill. Fix composition cost at a low constant (e.g., 1 time step, 99% success). Systematically vary task novelty from low to high. Measure action choice and success rate.",
+        "independent_variables": [
+          "Task novelty (continuous, e.g., number of new elements in task)"
+        ],
+        "dependent_variables": [
+          "Agent's action choice (compose/discover)",
+          "Task success rate",
+          "Total cost (time steps)"
+        ],
+        "controls": [
+          "Composition cost is fixed at a low value",
+          "Discovery cost is fixed (e.g., 10 time steps, 95% success)",
+          "Agent's initial skill set is identical",
+          "Environment size and layout constant"
+        ],
+        "falsifying_observation": "If the agent ever composes for a task above the hypothesized threshold (i.e., when novelty is high), the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For low novelty tasks, agent composes; for high novelty tasks, agent discovers",
+          "A clear discontinuity in action choice at a specific novelty level",
+          "Success rate is higher when agent matches choice to novelty (compose for low, discover for high)"
+        ],
+        "rejects_hypothesis": [
+          "Agent composes across all novelty levels despite novelty being high",
+          "Action choice varies only with cost, not novelty",
+          "No clear threshold; agent randomly alternates"
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If observations reject hypothesis, then the decision may not be driven by a novelty threshold but by a continuous trade-off or other factors like composition reliability.",
+        "assumption_to_revise": "Assumption that a discrete threshold exists; the actual mechanism may involve a gradual shift or an interaction between novelty and composition cost.",
+        "next_question": "What is the functional form of the composition-discovery trade-off as a function of both novelty and cost?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When should an agent discover a new skill rather than compose existing skills?",
+      "primitive_definitions": [
+        {
+          "name": "Agent",
+          "definition": "An entity that perceives its environment, reasons about actions, and executes actions to achieve goals.",
+          "why_primitive": "Agency is the fundamental concept underlying all decisions about skill acquisition and use; without an agent there is no problem."
+        },
+        {
+          "name": "Skill",
+          "definition": "A reusable, parameterized capability that transforms a set of inputs into desired outputs, typically learned or programmed.",
+          "why_primitive": "Skills are the atomic building blocks of agent behavior; the core question is whether to reuse or create them."
+        },
+        {
+          "name": "Composition",
+          "definition": "The process of combining two or more existing skills in sequence, parallel, or nested fashion to accomplish a task.",
+          "why_primitive": "Composition defines the alternative to discovery; it is the default mechanism for leveraging prior knowledge."
+        },
+        {
+          "name": "Discovery",
+          "definition": "The process of generating a new skill de novo, typically via learning, search, or reasoning, without relying on composition of existing skills.",
+          "why_primitive": "Discovery represents the creative act of expanding the agent's repertoire; it is the alternative to composition."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills have nonzero storage, retrieval, and execution costs, and composing skills incurs overhead (e.g., state handoff, error propagation).",
+          "rationale": "If skills were free and composition costless, there would be no reason to ever discover new skills – all tasks would be solvable by infinite composition. Real systems have limited memory and compute.",
+          "possible_failure": "If costs are negligible in practice, the trade-off disappears and discovery is never optimal, contradicting observed behavior of agents."
+        },
+        {
+          "assumption": "The agent operates in an environment where tasks arrive from a distribution that includes both tasks solvable by composition and tasks requiring genuinely novel skills.",
+          "rationale": "Without novelty in the task distribution, composition would always suffice, making discovery unnecessary. The question only arises when composition fails.",
+          "possible_failure": "If the environment is entirely static and known, discovery is never needed; conversely, if every task is novel, composition is never helpful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which the current task requires skills beyond the agent's existing repertoire."
+          },
+          {
+            "name": "Composition Cost",
+            "role": "input",
+            "description": "Overhead (time, compute, error) incurred by composing existing skills."
+          },
+          {
+            "name": "Discovery Cost",
+            "role": "input",
+            "description": "Resources (time, compute, data) required to learn or generate a new skill."
+          },
+          {
+            "name": "Skill Gap",
+            "role": "mediator",
+            "description": "Perceived mismatch between task requirements and capabilities of available skills."
+          },
+          {
+            "name": "Expected Performance Ratio",
+            "role": "mediator",
+            "description": "Ratio of expected task success via composition versus discovery, accounting for costs and reliability."
+          },
+          {
+            "name": "Action Choice",
+            "role": "output",
+            "description": "Binary decision: compose existing skills or discover a new skill."
+          },
+          {
+            "name": "Task Success",
+            "role": "outcome",
+            "description": "Whether the task is completed successfully after executing the chosen action."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Gap",
+            "explanation": "Higher novelty directly implies a larger gap between task demands and existing skills."
+          },
+          {
+            "step": "2",
+            "source": "Skill Gap",
+            "relation": "and",
+            "target": "Discovery Cost",
+            "explanation": "Skill Gap and Discovery Cost jointly affect Expected Performance Ratio: larger gap favors discovery, but high discovery cost reduces its expected performance."
+          },
+          {
+            "step": "3",
+            "source": "Expected Performance Ratio",
+            "relation": "determines",
+            "target": "Action Choice",
+            "explanation": "The agent selects the action (compose or discover) with higher expected performance ratio."
+          },
+          {
+            "step": "4",
+            "source": "Action Choice",
+            "relation": "influences",
+            "target": "Task Success",
+            "explanation": "The chosen action directly impacts whether the task is completed successfully, moderated by execution quality."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Accurate Skill Gap Assessment",
+            "why_it_matters": "If the agent misjudges the gap, it may choose composition for truly novel tasks (failure) or discovery for composable tasks (waste)."
+          },
+          {
+            "bottleneck": "Reliable Discovery Cost Estimation",
+            "why_it_matters": "Overestimating discovery cost biases toward composition; underestimating leads to unnecessary discovery, squandering resources."
+          }
+        ],
+        "mechanism_summary": "The agent decides whether to discover a new skill or compose existing ones by evaluating the task novelty (which creates a skill gap) and the costs of discovery versus composition. When the skill gap is large and discovery cost is low relative to composition overhead, discovery is favored; otherwise composition is preferred. The decision hinges on accurate estimation of both the gap and the costs, as misjudgment leads to suboptimal outcomes."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The agent's decision hinges on accurate perception of the 'skill gap', but in dynamic environments the gap is inherently uncertain and may be misestimated, leading to systematic biases (e.g., over-reliance on composition).",
+        "derived_from": [
+          "Bottleneck: Accurate Skill Gap Assessment",
+          "Causal chain: Task Novelty increases Skill Gap"
+        ],
+        "why_it_matters": "Misjudging the skill gap can cause the agent to choose composition when discovery is needed, or vice versa. Without reliable gap detection, the agent cannot optimize its strategy.",
+        "what_existing_methods_may_miss": "Existing methods often assume the agent can perfectly perceive novelty or gap, ignoring the challenge of measuring task requirements relative to current skills.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical threshold of task novelty beyond which underestimation of the skill gap causes a phase transition from optimal decision-making to systematic over-reliance on composition?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a sharp boundary condition in the composition-discovery trade-off, showing that misestimation effects are not uniform but manifest only above a novelty threshold."
+      },
+      "hypothesis": {
+        "statement": "When task novelty exceeds a specific threshold, agents that underestimate the skill gap show a significant increase in composition attempts (over-reliance) and a corresponding drop in task success compared to agents with accurate estimation. Below the threshold, the difference between accurate and biased estimators is negligible.",
+        "predicted_effect": "The composition rate and task success rate for biased estimators diverge sharply from accurate estimators only above a certain novelty level, indicating a phase transition."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a controlled agent simulation where task novelty is systematically varied from low to high (e.g., 5 levels). Two groups: one with accurate skill gap estimation, one with a fixed underestimation bias. For each novelty level, measure composition frequency and task success. Determine the novelty threshold where the composition rate difference between groups becomes statistically significant (e.g., Cohen's d > 0.8).",
+        "independent_variables": [
+          "Task novelty level (5 discrete levels)",
+          "Accuracy of skill gap estimation (accurate vs. underestimation bias)"
+        ],
+        "dependent_variables": [
+          "Composition frequency (proportion of tasks where composition was chosen)",
+          "Task success rate (for tasks where composition was chosen)"
+        ],
+        "controls": [
+          "Fixed composition and discovery costs",
+          "Same set of available base skills across all conditions",
+          "Identical task distribution except for novelty dimension",
+          "Environment dynamics held constant"
+        ],
+        "falsifying_observation": "No significant interaction between novelty level and estimation accuracy on composition frequency, or the significant difference appears uniformly across all novelty levels (no threshold)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Biased estimators show a sharp increase in composition rate relative to accurate estimators beyond a certain novelty threshold (e.g., novelty level > 3 out of 5).",
+          "Task success rate for biased estimators declines significantly beyond the same threshold, while accurate estimators maintain high success.",
+          "Below the threshold, composition rates and success rates are statistically indistinguishable between groups."
+        ],
+        "rejects_hypothesis": [
+          "No threshold is observed; the difference in composition rate between groups is monotonically increasing or constant across novelty levels.",
+          "The composition rate difference is present at all levels, including the lowest novelty, indicating no transition.",
+          "Biased estimators compose less often than accurate estimators at high novelty (contradicting over-reliance)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found or the predicted phase transition does not occur, then the role of skill gap estimation bias may be more nuanced (e.g., it interacts with discovery cost perception or task complexity in a non-threshold manner).",
+        "assumption_to_revise": "The assumption that misestimation effects are conditional on a novelty threshold; perhaps the bias has a continuous effect regardless of novelty level.",
+        "next_question": "What is the functional form of the relationship between novelty, estimation accuracy, and decision bias, and is there a different mechanism (e.g., cost perception) dominating the decision?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical level of skill gap uncertainty beyond which the optimal action discontinuously switches from composition to discovery. This critical uncertainty increases linearly with the ratio of discovery cost to composition failure cost.",
+      "independent_variables": [
+        "Noise standard deviation σ in skill gap estimate",
+        "Cost ratio R = C_discover / C_fail"
+      ],
+      "dependent_variables": [
+        "Optimal action (composition or discovery) for each (σ, R) combination",
+        "Critical uncertainty threshold σ_c (where optimal action switches)"
+      ],
+      "controlled_variables": [
+        "Task novelty (fixed true skill gap)",
+        "Composition success probability given true gap",
+        "Discovery success probability (assumed perfect after cost)",
+        "Utility function (expected success minus cost)"
+      ],
+      "baselines": [
+        {
+          "name": "Zero-noise optimal",
+          "description": "Agent with perfect knowledge of skill gap (σ=0) selects action based on true expected utility."
+        },
+        {
+          "name": "Random baseline",
+          "description": "Agent selects action randomly (50% composition, 50% discovery) independent of task."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Sharpness of switch",
+          "definition": "Difference in probability of composition at σ just below and just above threshold, measured via logistic regression slope."
+        },
+        {
+          "name": "Threshold σ_c",
+          "definition": "Value of σ where probability of choosing composition falls below 0.5, estimated via logistic regression."
+        },
+        {
+          "name": "Linearity of σ_c vs R",
+          "definition": "R-squared of linear fit of σ_c on R, indicating how well the threshold scales linearly with cost ratio."
+        }
+      ],
+      "expected_result": "For each fixed R, the probability of choosing composition drops sharply from near 1 to near 0 at a critical σ_c. As R increases, σ_c increases linearly.",
+      "falsifying_result": "The probability of composition decreases smoothly with σ (no sharp drop), or σ_c does not vary systematically with R (e.g., constant or non-monotonic).",
+      "minimum_viable_experiment": "Simulate an agent with a fixed skill set (e.g., 5 primitive skills and known composition operators) facing a task with moderate novelty (true skill gap = 0.3 on a 0-1 scale). The agent estimates the skill gap with Gaussian noise N(0, σ). The agent knows C_fail = 10 and C_discover = R*10, with R ranging from 0.1 to 10. For each σ (0 to 1 in steps of 0.05) and each R (log-spaced), compute the expected utility of composition and discovery over 1000 task instances, and record which action maximizes expected utility. Repeat 100 independent runs to estimate the threshold σ_c where the probability of choosing composition falls below 0.5. Then fit a linear model σ_c ~ a + b*R.",
+      "risks_and_confounds": [
+        "The assumption of Gaussian noise may not reflect realistic skill gap estimation errors.",
+        "The fixed true skill gap may limit generalizability to different levels of novelty.",
+        "The utility function assumes linear trade-off between success and cost, which may not hold in all settings."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold of task novelty such that for all tasks above this threshold, discovering a new skill yields higher expected performance than composing existing skills, even when composition costs are negligible.",
+      "independent_variables": [
+        "Task novelty (continuous, e.g., number of new elements in task)"
+      ],
+      "dependent_variables": [
+        "Agent's action choice (compose/discover)",
+        "Task success rate",
+        "Total cost (time steps)",
+        "Expected performance ratio (success rate / total cost)"
+      ],
+      "controlled_variables": [
+        "Composition cost fixed at a low constant (e.g., 1 time step, 99% success)",
+        "Discovery cost fixed (e.g., 10 time steps, 95% success)",
+        "Agent's initial skill set identical across conditions",
+        "Environment size and layout constant",
+        "Task presentation order randomized"
+      ],
+      "baselines": [
+        {
+          "name": "Compose-only agent",
+          "description": "Agent always composes existing skills regardless of task novelty."
+        },
+        {
+          "name": "Discover-only agent",
+          "description": "Agent always discovers a new skill regardless of task novelty."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Action choice",
+          "definition": "Binary indicator: 1 if agent chooses to discover a new skill, 0 if composes."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks successfully completed within a fixed time limit."
+        },
+        {
+          "name": "Total cost",
+          "definition": "Average number of time steps per task."
+        },
+        {
+          "name": "Expected performance ratio",
+          "definition": "For each task, success rate divided by total cost; used to evaluate which action yields better performance."
+        }
+      ],
+      "expected_result": "For low novelty tasks (below threshold), agent composes; for high novelty tasks (above threshold), agent discovers. A clear discontinuity in action choice is observed at a specific novelty level. Success rate is higher when agent's choice matches the novelty level (compose for low, discover for high) compared to baselines.",
+      "falsifying_result": "If the agent ever composes for a task above the hypothesized threshold (i.e., when novelty is high), the hypothesis is falsified. Alternatively, if the agent's action choice shows no discontinuity across novelty levels, varies only with cost, or randomly alternates, the hypothesis is rejected.",
+      "minimum_viable_experiment": "In a grid-world environment, agents are presented with a series of tasks that vary in novelty (e.g., number of new object combinations or unseen obstacles). The agent possesses two primitive skills: 'move' and 'grab'. For each task, the agent must decide either to compose these two skills or to discover a novel 'fetch' skill. Composition cost is fixed at 1 time step with 99% success. Discovery cost is fixed at 10 time steps with 95% success. Task novelty is systematically varied from low (0 new elements) to high (10 new elements) in increments of 1. For each novelty level, 100 trials are run. The agent's action choice and success are recorded.",
+      "risks_and_confounds": [
+        "Agent may learn across trials, affecting later decisions; use between-subjects design or reset after each trial.",
+        "Novelty quantification may be subjective; ensure objective metric (e.g., number of new object types).",
+        "Fixed costs may not reflect real-world variability; but this is a controlled test of threshold existence.",
+        "Agent's internal model of costs may differ from true costs; use explicit cost information to agent."
+      ]
+    },
+    {
+      "hypothesis": "When task novelty exceeds a specific threshold, agents that underestimate the skill gap show a significant increase in composition attempts (over-reliance) and a corresponding drop in task success compared to agents with accurate estimation. Below the threshold, the difference between accurate and biased estimators is negligible.",
+      "independent_variables": [
+        "Task novelty level (5 discrete levels: very low, low, moderate, high, very high)",
+        "Accuracy of skill gap estimation (two levels: accurate vs. underestimation bias)"
+      ],
+      "dependent_variables": [
+        "Composition frequency: proportion of tasks where the agent chooses composition over discovery",
+        "Task success rate: proportion of completed tasks successfully (only for tasks where composition was chosen)"
+      ],
+      "controlled_variables": [
+        "Fixed composition cost (overhead)",
+        "Fixed discovery cost",
+        "Same set of available base skills across all conditions",
+        "Identical task distribution except for novelty dimension",
+        "Constant environment dynamics"
+      ],
+      "baselines": [
+        {
+          "name": "Accurate estimator",
+          "description": "Agent that has perfect knowledge of the skill gap (i.e., matches the true novelty). This serves as the reference for optimal decision-making."
+        },
+        {
+          "name": "Uniform random choice",
+          "description": "Agent that randomly chooses between composition and discovery with equal probability, independent of novelty. This controls for chance-level performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Composition frequency",
+          "definition": "Number of tasks where composition was chosen divided by total number of tasks in that condition."
+        },
+        {
+          "name": "Task success rate",
+          "definition": "Number of tasks successfully completed (out of those where composition was chosen) divided by the number of tasks where composition was chosen."
+        }
+      ],
+      "expected_result": "For the biased estimator group, the composition frequency will be significantly higher than for the accurate estimator group only at high novelty levels (e.g., novelty level 4 and 5), and task success rate will be significantly lower at those levels. At low novelty levels (1-3), the differences between groups will be small and statistically non-significant. This pattern indicates a threshold effect.",
+      "falsifying_result": "The composition frequency difference between biased and accurate estimators is either (a) present at all novelty levels (including the lowest), (b) monotonic without a clear threshold, or (c) absent entirely (no significant difference at any level). Additionally, if biased estimators show lower composition frequency at high novelty (contrary to over-reliance), the hypothesis is also falsified.",
+      "minimum_viable_experiment": "A simulation with 2 groups (accurate vs. biased) × 5 novelty levels, each with at least 100 tasks per condition. The agent has a fixed set of base skills and incurs fixed costs for composition and discovery. The novelty of each task is controlled by varying the degree to which the required skill differs from existing skills. The biased estimator consistently underestimates the skill gap by a fixed percentage (e.g., 30%). Record composition choices and success outcomes. Analyze with a two-way ANOVA (novelty × estimation accuracy) to detect an interaction effect, and post-hoc comparisons to identify the novelty threshold where groups diverge.",
+      "risks_and_confounds": [
+        "The magnitude of underestimation bias might affect the threshold location; a fixed bias may not generalize.",
+        "The distribution of task types within each novelty level could introduce variance if not tightly controlled.",
+        "Discovery cost might interact with novelty perception; ensuring costs are constant is critical.",
+        "The agent’s initial skill set could influence the skill gap; using a standard set mitigates this."
+      ]
+    },
+    {
+      "hypothesis": "When the variance of composition success rates across similar tasks is high, the critical edge case frequency for switching from composition to discovery is lower than when variance is low.",
+      "independent_variables": [
+        "Edge case frequency (0%, 10%, 20%, 30%)",
+        "Composition success variance (low, high)"
+      ],
+      "dependent_variables": [
+        "Crossover frequency (estimated threshold)",
+        "Task success rate",
+        "Average cost per task"
+      ],
+      "controlled_variables": [
+        "Initial skill set identical across conditions",
+        "Discovery algorithm fixed (same RL hyperparameters)",
+        "Task difficulty for non-edge-case tasks held constant",
+        "Environment dynamics identical",
+        "Composition success variance operationalized by varying intra-category task similarity"
+      ],
+      "baselines": [
+        {
+          "name": "Composition-only agent",
+          "description": "Agent that only composes existing skills, never discovers new ones."
+        },
+        {
+          "name": "Discovery-allowed agent",
+          "description": "Agent that can choose to discover a new skill or compose existing ones."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Task success rate",
+          "definition": "Proportion of tasks successfully completed."
+        },
+        {
+          "name": "Crossover frequency",
+          "definition": "Edge case frequency at which discovery-allowed agents first outperform composition-only agents."
+        },
+        {
+          "name": "Average cost per task",
+          "definition": "Total resource cost (time/compute) averaged over all tasks."
+        }
+      ],
+      "expected_result": "In the high variance condition, the crossover frequency is at a lower edge case frequency (e.g., 10%) compared to the low variance condition (e.g., 25%). Composition-only agents in high variance show a steeper decline in success rate as edge case frequency increases. Discovery-allowed agents in high variance show earlier adoption of discovery and higher overall success.",
+      "falsifying_result": "No significant difference in crossover frequency between low and high variance conditions at any edge case frequency, or composition-only agents always outperform discovery-allowed agents regardless of variance.",
+      "minimum_viable_experiment": "Simulate an LLM agent in a grid-world task environment with controlled edge case frequency (0%, 10%, 20%, 30%) and two levels of composition success variance (low, high). Agents have a fixed set of composable skills and a discovery module with fixed budget. Measure task success rate over 500 episodes per condition. Estimate crossover frequency as the point where discovery-allowed agents first outperform composition-only agents.",
+      "risks_and_confounds": [
+        "Operationalization of composition success variance may introduce unintended differences in task similarity.",
+        "Discovery algorithm hyperparameters may interact with variance conditions.",
+        "Small number of edge case frequencies may miss true crossover point.",
+        "Grid-world environment may not generalize to real-world tasks."
+      ]
+    }
+  ],
+  "review": null,
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "At what threshold of skill gap uncertainty does an agent optimally switch from composing existing skills to discovering a new skill, and how does this threshold depend on the cost of discovery relative to composition failure?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical threshold of task novelty beyond which discovery becomes optimal regardless of composition cost?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "Is there a critical threshold of task novelty beyond which underestimation of the skill gap causes a phase transition from optimal decision-making to systematic over-reliance on composition?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "How does the variance in composition success rates across similar tasks govern the critical edge case frequency at which agents should switch from composition to discovery?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": false,
+      "enable_meta_researcher": false
+    },
+    "baseline": "certificate_only_ablation",
+    "ablation": "reviewer_and_meta_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

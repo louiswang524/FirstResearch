@@ -1,0 +1,1618 @@
+{
+  "topic": {
+    "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+    "topic_id": "T005",
+    "goal": null,
+    "domain": "agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How can we distinguish true agent planning from post-hoc explanation?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "planning",
+        "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+        "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+      },
+      {
+        "name": "post-hoc explanation",
+        "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+        "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+      },
+      {
+        "name": "ground truth",
+        "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+        "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+        "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+        "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+      },
+      {
+        "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+        "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+        "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Fidelity vs. Practicality of measurement",
+        "variables": [
+          "measurement technique (e.g., neural recording vs. behavioral logs)",
+          "invasiveness",
+          "resolution of temporal data"
+        ]
+      },
+      {
+        "tradeoff": "Internal validity vs. external generalizability",
+        "variables": [
+          "type of ground truth access (e.g., open-source agent vs. black-box)",
+          "domain specificity",
+          "sample size"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "observed_behavior",
+        "role": "input",
+        "description": "The sequence of actions performed by the agent."
+      },
+      {
+        "name": "behavioral_traces",
+        "role": "mediator",
+        "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+      },
+      {
+        "name": "planning_presence",
+        "role": "mediator",
+        "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+      },
+      {
+        "name": "post_hoc_presence",
+        "role": "mediator",
+        "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+      },
+      {
+        "name": "ground_truth",
+        "role": "confounder",
+        "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+      },
+      {
+        "name": "classification",
+        "role": "outcome",
+        "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "observed_behavior",
+        "relation": "produces",
+        "target": "behavioral_traces",
+        "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+      },
+      {
+        "step": "2",
+        "source": "behavioral_traces",
+        "relation": "differentiates between",
+        "target": "planning_presence",
+        "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+      },
+      {
+        "step": "3",
+        "source": "behavioral_traces",
+        "relation": "differentiates between",
+        "target": "post_hoc_presence",
+        "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+      },
+      {
+        "step": "4",
+        "source": "planning_presence",
+        "relation": "contrasts with",
+        "target": "post_hoc_presence",
+        "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+      },
+      {
+        "step": "5",
+        "source": "planning_presence",
+        "relation": "determines",
+        "target": "classification",
+        "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+      },
+      {
+        "step": "6",
+        "source": "post_hoc_presence",
+        "relation": "determines",
+        "target": "classification",
+        "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+      },
+      {
+        "step": "7",
+        "source": "ground_truth",
+        "relation": "confounds",
+        "target": "behavioral_traces",
+        "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Measurement resolution and coverage",
+        "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+      },
+      {
+        "bottleneck": "Access to ground truth",
+        "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+      },
+      {
+        "bottleneck": "Sophistication of the explanation generator",
+        "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+      }
+    ],
+    "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that planning leaves measurable behavioral traces distinct from post-hoc explanation may fail if planning is instantaneous or mimicked by a sophisticated explanation generator.",
+      "derived_from": [
+        "assumption 1",
+        "bottleneck 3"
+      ],
+      "why_it_matters": "If false, the entire differentiation mechanism collapses, as behavioral traces become non-diagnostic.",
+      "what_existing_methods_may_miss": "Existing methods that rely on reaction times or error rates may not detect instantaneous planning or highly sophisticated post-hoc generation.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Tradeoff between fidelity and practicality: high-resolution measurements (e.g., neural recording) provide better differentiation but are often invasive and not scalable, while low-resolution behavioral logs are practical but may not capture subtle traces.",
+      "derived_from": [
+        "core_tradeoffs: fidelity vs. practicality of measurement"
+      ],
+      "why_it_matters": "This tradeoff limits the applicability of the mechanism in real-world settings where practical constraints dominate.",
+      "what_existing_methods_may_miss": "Low-resolution methods may miss crucial temporal or neural signatures, leading to misclassification.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Lack of ground truth access makes any classification hypothetical, as without knowing the actual causal process, we cannot validate the inference from traces to planning or post-hoc.",
+      "derived_from": [
+        "bottleneck 2",
+        "primitive definition: ground truth"
+      ],
+      "why_it_matters": "It weakens causal claims and generalizability; the mechanism remains an unverified model.",
+      "what_existing_methods_may_miss": "Existing experimental paradigms often assume ground truth via control conditions, but in naturalistic settings, ground truth is unknown.",
+      "testability": 2
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Post-hoc explanations may not be purely retrospective; an agent might engage in concurrent explanation that shapes ongoing actions, blurring the line between planning and post-hoc.",
+      "derived_from": [
+        "assumption 2 possible failure"
+      ],
+      "why_it_matters": "The mutual exclusivity of planning and post-hoc presence is violated, complicating classification.",
+      "what_existing_methods_may_miss": "Methods that assume temporal separation (e.g., action first, then explanation) may misclassify concurrent processes.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T5",
+      "statement": "Measurement resolution and coverage may be insufficient to detect the subtle differences between planning and post-hoc traces, leading to misclassification.",
+      "derived_from": [
+        "bottleneck 1"
+      ],
+      "why_it_matters": "Errors in inference propagate to classification, reducing the reliability of the mechanism.",
+      "what_existing_methods_may_miss": "Existing methods may overlook micro-behaviors or neural signals that differentiate the two processes.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Under what conditions do behavioral traces of planning become indistinguishable from those of a sophisticated post-hoc explanation generator?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Identifies boundary conditions for the diagnostic value of behavioral traces, thereby refining the mechanism's applicability."
+    },
+    {
+      "question": "Does increasing measurement resolution beyond a threshold yield diminishing returns in accurately differentiating planning from post-hoc explanation, given practical constraints?",
+      "question_type": "benchmark",
+      "source_tension": "T2",
+      "expected_contribution": "Quantifies the tradeoff and guides choice of measurement methods in real-world applications."
+    },
+    {
+      "question": "Can classification accuracy be validated through cross-method agreement using multiple independent trace types (e.g., behavioral, neural, verbal) without access to ground truth?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Provides a validation framework that mitigates the absence of ground truth by triangulating across measurement modalities."
+    },
+    {
+      "question": "When agents engage in concurrent explanation during action, do behavioral traces systematically deviate from those predicted by mutually exclusive planning or post-hoc models?",
+      "question_type": "descriptive",
+      "source_tension": "T4",
+      "expected_contribution": "Tests the assumption of mutual exclusivity and informs the development of models that allow concurrent processes."
+    },
+    {
+      "question": "What minimum measurement resolution (e.g., time scales, signal types) is required to reliably differentiate planning from post-hoc traces in naturalistic settings?",
+      "question_type": "benchmark",
+      "source_tension": "T5",
+      "expected_contribution": "Establishes lower bounds on measurement requirements for practical deployment of the mechanism."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "planning",
+          "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+          "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+        },
+        {
+          "name": "post-hoc explanation",
+          "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+          "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+        },
+        {
+          "name": "ground truth",
+          "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+          "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+          "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+          "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+        },
+        {
+          "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+          "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+          "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "observed_behavior",
+            "role": "input",
+            "description": "The sequence of actions performed by the agent."
+          },
+          {
+            "name": "behavioral_traces",
+            "role": "mediator",
+            "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+          },
+          {
+            "name": "planning_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+          },
+          {
+            "name": "post_hoc_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+          },
+          {
+            "name": "ground_truth",
+            "role": "confounder",
+            "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+          },
+          {
+            "name": "classification",
+            "role": "outcome",
+            "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "observed_behavior",
+            "relation": "produces",
+            "target": "behavioral_traces",
+            "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+          },
+          {
+            "step": "2",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "planning_presence",
+            "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+          },
+          {
+            "step": "3",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "post_hoc_presence",
+            "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+          },
+          {
+            "step": "4",
+            "source": "planning_presence",
+            "relation": "contrasts with",
+            "target": "post_hoc_presence",
+            "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+          },
+          {
+            "step": "5",
+            "source": "planning_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+          },
+          {
+            "step": "6",
+            "source": "post_hoc_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+          },
+          {
+            "step": "7",
+            "source": "ground_truth",
+            "relation": "confounds",
+            "target": "behavioral_traces",
+            "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Measurement resolution and coverage",
+            "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+          },
+          {
+            "bottleneck": "Access to ground truth",
+            "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+          },
+          {
+            "bottleneck": "Sophistication of the explanation generator",
+            "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that planning leaves measurable behavioral traces distinct from post-hoc explanation may fail if planning is instantaneous or mimicked by a sophisticated explanation generator.",
+        "derived_from": [
+          "assumption 1",
+          "bottleneck 3"
+        ],
+        "why_it_matters": "If false, the entire differentiation mechanism collapses, as behavioral traces become non-diagnostic.",
+        "what_existing_methods_may_miss": "Existing methods that rely on reaction times or error rates may not detect instantaneous planning or highly sophisticated post-hoc generation.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the minimum post-hoc generator sophistication threshold (measured by access to forward simulation) at which behavioral traces become indistinguishable from those of planning agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp transition point in generator sophistication that invalidates trace-based diagnostics, establishing a boundary condition for the mechanism's validity."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical sophistication level of the post-hoc generator, defined by its ability to simulate at least k steps ahead with accuracy matching the planner, above which the distributions of behavioral traces (e.g., reaction times, gaze patterns) become statistically indistinguishable (AUC < 0.6).",
+        "predicted_effect": "As generator sophistication increases from low to high, discrimination accuracy will drop gradually until a threshold, after which accuracy remains at chance."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use the same two-group design (planner vs. post-hoc generator) but vary sophistication by controlling the number of forward simulation steps (k) accessible to the post-hoc generator during explanation generation. For each k (0 to planner's max steps), collect behavioral traces (reaction time, gaze entropy) and train a logistic regression classifier to distinguish the two groups. Compute AUC for each k and identify the smallest k where AUC ≤ 0.6, indicating indistinguishability.",
+        "independent_variables": [
+          "Post-hoc generator sophistication (k forward simulation steps)"
+        ],
+        "dependent_variables": [
+          "AUC of classifier distinguishing planning vs. post-hoc traces",
+          "Elbow point of AUC vs. k curve"
+        ],
+        "controls": [
+          "Same task and action sequences for both groups",
+          "Equal total time for action+explanation vs. planning+execution",
+          "Randomized condition order",
+          "Blind experimenters to condition"
+        ],
+        "falsifying_observation": "AUC remains above 0.8 for all k ≤ planner's max steps, or AUC decreases monotonically but never reaches 0.6, showing no sharp transition."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "AUC decreases as k increases, with a sharp drop from >0.9 to <0.6 at a specific k0 (e.g., k0 = 3).",
+          "Similarity of trace distributions (e.g., KL divergence) shows a steep increase at k0.",
+          "The threshold k0 is robust across different random seeds and task variants."
+        ],
+        "rejects_hypothesis": [
+          "AUC remains high (>0.9) for all k tested, showing no convergence to chance.",
+          "AUC decreases smoothly without a clear inflection point, suggesting no threshold.",
+          "The threshold (if any) varies greatly across tasks or exceeds the planner's capacity, implying generator sophistication is not the sole determinant."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is observed (AUC remains high for all k), then the hypothesis of a critical sophistication level is false. This suggests that planning leaves inherently distinct traces that cannot be mimicked by forward simulation alone.",
+        "assumption_to_revise": "Assumption that post-hoc generators can approximate planning traces through increased sophistication. The revised assumption would be that planning traces are fundamentally different in kind, not degree.",
+        "next_question": "What intrinsic feature of planning (e.g., online updating, counterfactual reasoning) resists mimicry even with arbitrarily sophisticated post-hoc generation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "planning",
+          "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+          "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+        },
+        {
+          "name": "post-hoc explanation",
+          "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+          "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+        },
+        {
+          "name": "ground truth",
+          "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+          "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+          "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+          "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+        },
+        {
+          "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+          "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+          "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "observed_behavior",
+            "role": "input",
+            "description": "The sequence of actions performed by the agent."
+          },
+          {
+            "name": "behavioral_traces",
+            "role": "mediator",
+            "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+          },
+          {
+            "name": "planning_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+          },
+          {
+            "name": "post_hoc_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+          },
+          {
+            "name": "ground_truth",
+            "role": "confounder",
+            "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+          },
+          {
+            "name": "classification",
+            "role": "outcome",
+            "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "observed_behavior",
+            "relation": "produces",
+            "target": "behavioral_traces",
+            "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+          },
+          {
+            "step": "2",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "planning_presence",
+            "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+          },
+          {
+            "step": "3",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "post_hoc_presence",
+            "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+          },
+          {
+            "step": "4",
+            "source": "planning_presence",
+            "relation": "contrasts with",
+            "target": "post_hoc_presence",
+            "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+          },
+          {
+            "step": "5",
+            "source": "planning_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+          },
+          {
+            "step": "6",
+            "source": "post_hoc_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+          },
+          {
+            "step": "7",
+            "source": "ground_truth",
+            "relation": "confounds",
+            "target": "behavioral_traces",
+            "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Measurement resolution and coverage",
+            "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+          },
+          {
+            "bottleneck": "Access to ground truth",
+            "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+          },
+          {
+            "bottleneck": "Sophistication of the explanation generator",
+            "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Lack of ground truth access makes any classification hypothetical, as without knowing the actual causal process, we cannot validate the inference from traces to planning or post-hoc.",
+        "derived_from": [
+          "bottleneck 2",
+          "primitive definition: ground truth"
+        ],
+        "why_it_matters": "It weakens causal claims and generalizability; the mechanism remains an unverified model.",
+        "what_existing_methods_may_miss": "Existing experimental paradigms often assume ground truth via control conditions, but in naturalistic settings, ground truth is unknown.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "Is there a threshold in post-hoc explanation sophistication, measured by internal consistency, beyond which cross-method agreement fails to discriminate planning from post-hoc explanation?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Identifies a boundary condition where post-hoc explanation becomes indistinguishable from planning, providing a principled limit to discriminability."
+      },
+      "hypothesis": {
+        "statement": "When post-hoc explanations exhibit high internal consistency (better-than-chance prediction of own future actions), cross-method agreement (behavioral, neural, verbal) will be equally high for both planning and post-hoc conditions; when consistency is low, agreement will be significantly higher for planning than for post-hoc.",
+        "predicted_effect": "A significant interaction between condition (planning vs. post-hoc) and post-hoc sophistication level on cross-method agreement, with diminishing differences as sophistication increases."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a controlled laboratory setting, human participants perform a planning-requiring task (e.g., Tower of Hanoi) under two conditions: (1) Plan condition: participants think aloud while planning moves. (2) Post-hoc condition: participants perform random moves, then generate a detailed explanation of why those moves were optimal. Besides, manipulate post-hoc sophistication by providing participants with a trained neural network that generates consistent narratives (high consistency) vs. a simple rule-based generator (low consistency). For each trial, collect behavioral traces (reaction times, keystroke dynamics), neural traces (EEG), and verbal traces (think-aloud transcripts or post-hoc narratives). Classify each trial as planning or post-hoc using classifiers trained on each trace type. Compute pairwise Cohen's kappa between classification outcomes from different trace types. Measure cross-method agreement as average kappa. Compare agreement between planning and post-hoc conditions at each sophistication level.",
+        "independent_variables": [
+          "Condition (planning vs. post-hoc)",
+          "Post-hoc sophistication (low, high)"
+        ],
+        "dependent_variables": [
+          "Cross-method agreement score (average pairwise Cohen's kappa across behavioral, neural, verbal classifiers)"
+        ],
+        "controls": [
+          "Task difficulty and domain are constant across conditions.",
+          "Participants are matched in cognitive abilities (e.g., working memory span).",
+          "Order of conditions and sophistication levels is counterbalanced.",
+          "Classifiers are trained on independent data not used in test trials."
+        ],
+        "falsifying_observation": "If cross-method agreement does not show a significant interaction with condition and sophistication, or if agreement in the high-sophistication post-hoc condition remains significantly lower than in the planning condition, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In the low-sophistication condition, agreement is significantly higher for planning than post-hoc (p < 0.05).",
+          "In the high-sophistication condition, agreement differences between planning and post-hoc are non-significant or reversed.",
+          "A significant condition × sophistication interaction (p < 0.05) on agreement."
+        ],
+        "rejects_hypothesis": [
+          "No significant interaction between condition and sophistication on agreement.",
+          "In the high-sophistication condition, agreement for planning remains significantly higher than for post-hoc.",
+          "Agreement is at chance levels in all conditions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the interaction is not found or the hypothesis is falsified,",
+        "assumption_to_revise": "the assumption that cross-method agreement is a reliable proxy for planning may be false, or the chosen trace types may not capture the essential features that differentiate planning from post-hoc.",
+        "next_question": "Which specific trace features (e.g., temporal dynamics, neural signatures) are most robust to post-hoc sophistication?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "planning",
+          "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+          "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+        },
+        {
+          "name": "post-hoc explanation",
+          "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+          "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+        },
+        {
+          "name": "ground truth",
+          "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+          "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+          "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+          "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+        },
+        {
+          "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+          "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+          "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "observed_behavior",
+            "role": "input",
+            "description": "The sequence of actions performed by the agent."
+          },
+          {
+            "name": "behavioral_traces",
+            "role": "mediator",
+            "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+          },
+          {
+            "name": "planning_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+          },
+          {
+            "name": "post_hoc_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+          },
+          {
+            "name": "ground_truth",
+            "role": "confounder",
+            "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+          },
+          {
+            "name": "classification",
+            "role": "outcome",
+            "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "observed_behavior",
+            "relation": "produces",
+            "target": "behavioral_traces",
+            "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+          },
+          {
+            "step": "2",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "planning_presence",
+            "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+          },
+          {
+            "step": "3",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "post_hoc_presence",
+            "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+          },
+          {
+            "step": "4",
+            "source": "planning_presence",
+            "relation": "contrasts with",
+            "target": "post_hoc_presence",
+            "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+          },
+          {
+            "step": "5",
+            "source": "planning_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+          },
+          {
+            "step": "6",
+            "source": "post_hoc_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+          },
+          {
+            "step": "7",
+            "source": "ground_truth",
+            "relation": "confounds",
+            "target": "behavioral_traces",
+            "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Measurement resolution and coverage",
+            "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+          },
+          {
+            "bottleneck": "Access to ground truth",
+            "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+          },
+          {
+            "bottleneck": "Sophistication of the explanation generator",
+            "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Post-hoc explanations may not be purely retrospective; an agent might engage in concurrent explanation that shapes ongoing actions, blurring the line between planning and post-hoc.",
+        "derived_from": [
+          "assumption 2 possible failure"
+        ],
+        "why_it_matters": "The mutual exclusivity of planning and post-hoc presence is violated, complicating classification.",
+        "what_existing_methods_may_miss": "Methods that assume temporal separation (e.g., action first, then explanation) may misclassify concurrent processes.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a phase transition in behavioral traces as a function of concurrent explanation latency, where below a critical latency traces resemble planning and above they resemble post-hoc?",
+        "question_type": "descriptive",
+        "source_tension": "T4",
+        "expected_contribution": "Identifies a critical threshold that distinguishes planning-like from post-hoc-like concurrent explanation, sharpening the boundary between the two processes."
+      },
+      "hypothesis": {
+        "statement": "As the delay between thought and concurrent explanation decreases, behavioral traces (reaction time, gaze patterns) transition from post-hoc-like to planning-like at a critical latency threshold, exhibiting a discontinuity rather than a linear trend.",
+        "predicted_effect": "Below the critical delay, reaction times and gaze patterns match those of the planning condition; above, they match the post-hoc condition. At the threshold, there is a sharp jump in trace metrics."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Human participants perform a maze navigation task under three conditions: Plan (plan then act, no explanation), Post-hoc (act then explain), and Concurrent (explain while acting) with varying explanation latency. In the Concurrent condition, we manipulate the time delay between the action decision and the start of explanation (e.g., 0ms, 100ms, 200ms, 500ms, 1s). Behavioral traces (step reaction time, gaze fixation duration on future vs. past path) are recorded. We search for a critical delay where trace metrics abruptly change from resembling Plan to resembling Post-hoc.",
+        "independent_variables": [
+          "Explanation condition (Plan, Post-hoc, Concurrent with varying latency)"
+        ],
+        "dependent_variables": [
+          "Step-level reaction time",
+          "Fixation duration on future path vs. past path",
+          "Gaze transition entropy"
+        ],
+        "controls": [
+          "Maze size (constant)",
+          "Order counterbalancing",
+          "Time pressure (none)",
+          "Verbal instruction fidelity checked",
+          "Same participants across conditions"
+        ],
+        "falsifying_observation": "Concurrent condition traces change linearly with latency without a sharp discontinuity, or no latency produces traces identical to Plan or Post-hoc conditions."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "At latencies below a critical threshold (e.g., <200ms), concurrent condition reaction times are statistically indistinguishable from the Plan condition, and gaze patterns show forward-looking fixations.",
+          "At latencies above the threshold (e.g., >500ms), concurrent condition traces are indistinguishable from Post-hoc condition.",
+          "A discontinuity (jump) in mean reaction time is observed at the critical latency.",
+          "The critical latency is consistent across participants."
+        ],
+        "rejects_hypothesis": [
+          "Concurrent condition reaction times decrease linearly with latency without a sharp break.",
+          "At all latencies, traces are a mixture (e.g., intermediate reaction times) rather than matching one pure condition.",
+          "No latency produces gaze patterns identical to either pure condition."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no discontinuous threshold is found and traces vary continuously with latency, the phase transition hypothesis is rejected.",
+        "assumption_to_revise": "The assumption that concurrent explanation is a discrete mixture of planning and post-hoc; it may be a continuous blend rather than switching at a threshold.",
+        "next_question": "Is concurrent explanation best modeled as a single continuous process that interpolates between planning and post-hoc, or does it rely on a different mechanism entirely?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "planning",
+          "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+          "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+        },
+        {
+          "name": "post-hoc explanation",
+          "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+          "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+        },
+        {
+          "name": "ground truth",
+          "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+          "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+          "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+          "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+        },
+        {
+          "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+          "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+          "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "observed_behavior",
+            "role": "input",
+            "description": "The sequence of actions performed by the agent."
+          },
+          {
+            "name": "behavioral_traces",
+            "role": "mediator",
+            "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+          },
+          {
+            "name": "planning_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+          },
+          {
+            "name": "post_hoc_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+          },
+          {
+            "name": "ground_truth",
+            "role": "confounder",
+            "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+          },
+          {
+            "name": "classification",
+            "role": "outcome",
+            "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "observed_behavior",
+            "relation": "produces",
+            "target": "behavioral_traces",
+            "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+          },
+          {
+            "step": "2",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "planning_presence",
+            "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+          },
+          {
+            "step": "3",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "post_hoc_presence",
+            "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+          },
+          {
+            "step": "4",
+            "source": "planning_presence",
+            "relation": "contrasts with",
+            "target": "post_hoc_presence",
+            "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+          },
+          {
+            "step": "5",
+            "source": "planning_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+          },
+          {
+            "step": "6",
+            "source": "post_hoc_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+          },
+          {
+            "step": "7",
+            "source": "ground_truth",
+            "relation": "confounds",
+            "target": "behavioral_traces",
+            "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Measurement resolution and coverage",
+            "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+          },
+          {
+            "bottleneck": "Access to ground truth",
+            "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+          },
+          {
+            "bottleneck": "Sophistication of the explanation generator",
+            "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Tradeoff between fidelity and practicality: high-resolution measurements (e.g., neural recording) provide better differentiation but are often invasive and not scalable, while low-resolution behavioral logs are practical but may not capture subtle traces.",
+        "derived_from": [
+          "core_tradeoffs: fidelity vs. practicality of measurement"
+        ],
+        "why_it_matters": "This tradeoff limits the applicability of the mechanism in real-world settings where practical constraints dominate.",
+        "what_existing_methods_may_miss": "Low-resolution methods may miss crucial temporal or neural signatures, leading to misclassification.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical working memory capacity threshold below which agents exhibit planning (as evidenced by behavioral traces) and above which they revert to post-hoc rationalization, and does this transition occur abruptly or continuously?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Identifies a sharp cognitive boundary condition that differentiates planning from post-hoc explanation, enabling precise measurement design."
+      },
+      "hypothesis": {
+        "statement": "There exists a sharp working memory capacity threshold (e.g., 4 items ± 1) such that below it, agents engage in genuine planning, and above it, they switch to post-hoc rationalization, producing a discontinuous change in behavioral traces.",
+        "predicted_effect": "Classification accuracy of planning vs. post-hoc will show a sudden jump at the threshold, with values below threshold strongly indicating planning and values above threshold strongly indicating post-hoc."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a grid-navigation task where an agent (either a planning algorithm like Monte Carlo Tree Search or a post-hoc explanation generator) operates under varying working memory loads (1-9 items) imposed by a secondary memorization task. For each load, record behavioral traces (e.g., reaction time, path optimality, lookahead patterns). Use a classifier trained on known ground-truth agents (pure planner vs. pure post-hoc) to label each load condition. Repeat across multiple runs with random seeds.",
+        "independent_variables": [
+          "working memory load (integer: 1 to 9)"
+        ],
+        "dependent_variables": [
+          "classification probability (planning vs. post-hoc)",
+          "trace features (e.g., reaction time variance, lookahead frequency)"
+        ],
+        "controls": [
+          "same task structure",
+          "same agent perception model",
+          "fixed computational budget for planning",
+          "same secondary task modality"
+        ],
+        "falsifying_observation": "Classification probability changes linearly with load, or no significant change across loads, or the threshold is not clearly discernible (e.g., gradual transition across more than 2 load levels)."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Classification probability for 'planning' drops sharply (e.g., >30% change) between two adjacent load levels (e.g., load 4 and 5).",
+          "Reaction time variance shows a sudden increase at the threshold, indicating a switch from systematic planning to ad-hoc execution.",
+          "The threshold is consistent across multiple runs and within ±1 load unit."
+        ],
+        "rejects_hypothesis": [
+          "Classification probability decreases smoothly with increasing load, showing no clear step.",
+          "No significant change in classification across the full load range (all loads yield similar classification).",
+          "The threshold varies by more than 2 load units across runs, indicating no fixed critical point."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp threshold is found, then the assumption that planning and post-hoc are separated by a discrete cognitive resource limit may be incorrect.",
+        "assumption_to_revise": "The key assumption that working memory capacity acts as a sharp bottleneck determining the mode of decision-making.",
+        "next_question": "Does the transition depend on task complexity or time pressure, and does it become continuous when multiple resources are involved?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How can we distinguish true agent planning from post-hoc explanation?",
+      "primitive_definitions": [
+        {
+          "name": "planning",
+          "definition": "Internal cognitive process that selects actions by simulating future outcomes and evaluating them against goals, prior to execution.",
+          "why_primitive": "Cannot be directly observed; only inferred from behavior or neural correlates. Foundational to distinguishing genuine goal-directedness."
+        },
+        {
+          "name": "post-hoc explanation",
+          "definition": "A retrospective rationalization that constructs a causal narrative for observed actions, without necessarily reflecting the actual decision process.",
+          "why_primitive": "Distinct from planning in temporal order and causal role; forms the alternative hypothesis in differentiation."
+        },
+        {
+          "name": "ground truth",
+          "definition": "The actual causal sequence of internal states (e.g., plans, intentions) that produces the observed actions.",
+          "why_primitive": "Without access to ground truth, any distinction relies on indirect evidence and assumptions about its properties."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Planning leaves measurable behavioral traces that differ from those of post-hoc explanation.",
+          "rationale": "If planning occurs, it imposes computational demands (e.g., reaction time, distraction susceptibility) that post-hoc explanation does not.",
+          "possible_failure": "Planning might be instantaneous or perfectly mimicked by a sufficiently sophisticated explanation generator, making traces indistinguishable."
+        },
+        {
+          "assumption": "Post-hoc explanations are generated after actions and are not causally efficacious in producing those actions.",
+          "rationale": "By definition, post-hoc explanations are narratives constructed after the fact; if they causally influenced the action, they would be part of planning.",
+          "possible_failure": "An agent might engage in concurrent explanation that shapes ongoing action, blurring the line between planning and explanation."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "observed_behavior",
+            "role": "input",
+            "description": "The sequence of actions performed by the agent."
+          },
+          {
+            "name": "behavioral_traces",
+            "role": "mediator",
+            "description": "Measurable features of behavior such as reaction times, error rates, eye movements, and neural signals that may reflect planning or post-hoc generation."
+          },
+          {
+            "name": "planning_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the agent engaged in internal simulation before acting."
+          },
+          {
+            "name": "post_hoc_presence",
+            "role": "mediator",
+            "description": "Latent variable indicating whether the explanation was generated after the action without causal influence."
+          },
+          {
+            "name": "ground_truth",
+            "role": "confounder",
+            "description": "Unknown actual causal process (planning or post-hoc) that generated the observed behavior."
+          },
+          {
+            "name": "classification",
+            "role": "outcome",
+            "description": "The inferred label ('planning' or 'post-hoc') assigned to the agent's behavior."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "observed_behavior",
+            "relation": "produces",
+            "target": "behavioral_traces",
+            "explanation": "Actions generate measurable traces (e.g., response times) that carry information about the underlying process."
+          },
+          {
+            "step": "2",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "planning_presence",
+            "explanation": "Specific trace patterns (e.g., longer deliberation, sensitivity to distractions) are indicative of planning."
+          },
+          {
+            "step": "3",
+            "source": "behavioral_traces",
+            "relation": "differentiates between",
+            "target": "post_hoc_presence",
+            "explanation": "Alternative trace patterns (e.g., fast action, then lengthy explanation) are indicative of post-hoc generation."
+          },
+          {
+            "step": "4",
+            "source": "planning_presence",
+            "relation": "contrasts with",
+            "target": "post_hoc_presence",
+            "explanation": "The two latent variables are mutually exclusive; only one can be true for a given action sequence."
+          },
+          {
+            "step": "5",
+            "source": "planning_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If planning_presence is inferred, classification is 'planning'; otherwise 'post-hoc'."
+          },
+          {
+            "step": "6",
+            "source": "post_hoc_presence",
+            "relation": "determines",
+            "target": "classification",
+            "explanation": "If post_hoc_presence is inferred, classification is 'post-hoc'."
+          },
+          {
+            "step": "7",
+            "source": "ground_truth",
+            "relation": "confounds",
+            "target": "behavioral_traces",
+            "explanation": "Without knowing ground truth, trace patterns may be ambiguous; a post-hoc process could mimic planning traces if sufficiently sophisticated."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Measurement resolution and coverage",
+            "why_it_matters": "Behavioral traces may be too coarse to detect subtle differences between planning and post-hoc processes, leading to misclassification."
+          },
+          {
+            "bottleneck": "Access to ground truth",
+            "why_it_matters": "Without independent validation (e.g., open-source agent with known internals), any classification remains hypothetical, limiting the strength of causal inference."
+          },
+          {
+            "bottleneck": "Sophistication of the explanation generator",
+            "why_it_matters": "A powerful post-hoc system could produce traces indistinguishable from planning, violating the assumption that traces are diagnostic."
+          }
+        ],
+        "mechanism_summary": "The mechanism distinguishes planning from post-hoc explanation by operationalizing the assumption that planning leaves distinct behavioral traces. Inputs are observed actions; these generate behavioral traces (e.g., response times, neural correlates). The traces are compared against signatures of planning (e.g., early deliberation) and post-hoc generation (e.g., rapid action followed by narrative). The latent variables planning_presence and post_hoc_presence are inferred from the traces and are mutually exclusive. Classification is based on which latent variable is supported. The main bottlenecks are measurement quality (limited resolution or coverage) and lack of ground truth, which can undermine the validity of inferred distinctions."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "Measurement resolution and coverage may be insufficient to detect the subtle differences between planning and post-hoc traces, leading to misclassification.",
+        "derived_from": [
+          "bottleneck 1"
+        ],
+        "why_it_matters": "Errors in inference propagate to classification, reducing the reliability of the mechanism.",
+        "what_existing_methods_may_miss": "Existing methods may overlook micro-behaviors or neural signals that differentiate the two processes.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what combination of temporal resolution and cognitive load does the planning-versus-post-hoc classification accuracy undergo a phase transition?",
+        "question_type": "diagnostic",
+        "source_tension": "T5",
+        "expected_contribution": "Identifies a critical boundary where measurement accuracy discontinuously shifts, revealing a nonlinear interaction between resolution and task demands."
+      },
+      "hypothesis": {
+        "statement": "Classification accuracy for distinguishing planning from post-hoc explanation exhibits a phase transition at a temporal resolution of 200ms when cognitive load is high (dual-task condition), but remains near-chance at coarser resolutions. Under low load, accuracy remains above 85% even at 500ms resolution.",
+        "predicted_effect": "At high load, accuracy will drop sharply from >85% at 200ms to <60% at 500ms; at low load, accuracy will stay >85% across 100-500ms."
+      },
+      "minimal_decisive_test": {
+        "experiment": "In a controlled environment with an open-source agent (known ground truth), the agent performs a naturalistic task (e.g., navigation with obstacles) under two cognitive load conditions (low: no secondary task; high: concurrent n-back task). Behavioral logs are recorded at multiple temporal resolutions (100ms, 200ms, 300ms, 500ms). A classifier is trained on traces (including reaction times, hesitation patterns) to predict planning vs. post-hoc ground truth. We measure classification accuracy across resolution and load conditions.",
+        "independent_variables": [
+          "temporal resolution of behavioral logs (100ms, 200ms, 300ms, 500ms)",
+          "cognitive load (low vs. high via dual-task)"
+        ],
+        "dependent_variables": [
+          "classification accuracy (planning vs. post-hoc)",
+          "confidence scores"
+        ],
+        "controls": [
+          "same agent architecture, task, and action sequences across conditions",
+          "balanced number of planning and post-hoc trials per condition",
+          "randomized order of resolution and load conditions"
+        ],
+        "falsifying_observation": "If accuracy does not show a sharp drop at 200ms under high load but instead declines linearly, or if load has no effect on the resolution-accuracy relationship, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under high load, accuracy drops from >85% at 200ms to <60% at 500ms, with a clear threshold near 200ms.",
+          "Under low load, accuracy remains >85% across all resolutions from 100ms to 500ms.",
+          "The interaction effect (load × resolution) is statistically significant with a nonlinear component."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy declines smoothly with no threshold under high load.",
+          "Under low load, accuracy also drops significantly at coarse resolutions.",
+          "Load has no significant effect on accuracy across resolutions."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the phase transition is not observed (e.g., no sharp drop or load effect), then the hypothesis that planning traces are distinguishable via temporal resolution under cognitive load is unsupported.",
+        "assumption_to_revise": "Assumption 1: Planning leaves measurable behavioral traces that differ from those of post-hoc explanation. Perhaps the traces are not sensitive to load or resolution in the predicted way, or the interaction is not nonlinear.",
+        "next_question": "What alternative cognitive manipulations (e.g., time pressure, reward structure) or measurement modalities (e.g., eye tracking, response time distributions) reveal a phase transition in planning vs. post-hoc classification?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a critical sophistication level of the post-hoc generator, defined by its ability to simulate at least k steps ahead with accuracy matching the planner, above which the distributions of behavioral traces (e.g., reaction times, gaze patterns) become statistically indistinguishable (AUC < 0.6).",
+      "independent_variables": [
+        "Post-hoc generator sophistication (k forward simulation steps)"
+      ],
+      "dependent_variables": [
+        "AUC of classifier distinguishing planning vs. post-hoc traces",
+        "Elbow point of AUC vs. k curve"
+      ],
+      "controlled_variables": [
+        "Same task and action sequences for both groups",
+        "Equal total time for action+explanation vs. planning+execution",
+        "Randomized condition order",
+        "Blind experimenters to condition",
+        "Fixed planner's maximum forward simulation steps"
+      ],
+      "baselines": [
+        {
+          "name": "k=0 baseline",
+          "description": "Post-hoc generator with no forward simulation (k=0) should yield high AUC (>0.9) as traces are clearly different from planner."
+        },
+        {
+          "name": "Ground truth oracle baseline",
+          "description": "Use simulated agents with known ground truth (planning or post-hoc) to validate that the classifier performs as expected on labeled data."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "AUC",
+          "definition": "Area under the Receiver Operating Characteristic curve for a logistic regression classifier distinguishing planning from post-hoc traces."
+        },
+        {
+          "name": "KL divergence",
+          "definition": "Kullback-Leibler divergence between the reaction time distributions of planning and post-hoc groups for each k."
+        }
+      ],
+      "expected_result": "AUC decreases as k increases, with a sharp drop from >0.9 to <0.6 at a specific k0 (e.g., k0=3). The elbow point in AUC vs. k curve is clear and robust across random seeds.",
+      "falsifying_result": "AUC remains above 0.8 for all k ≤ planner's max steps, or AUC decreases monotonically but never reaches 0.6, showing no sharp transition.",
+      "minimum_viable_experiment": "Implement a grid-world planning task. One group plans using forward simulation (up to max steps S), another group acts randomly then generates post-hoc explanations using a generator with access to k forward simulation steps (k from 0 to S). For each k, collect reaction times and gaze entropy, train a logistic regression to classify group membership, and record AUC. Identify the smallest k where AUC ≤ 0.6.",
+      "risks_and_confounds": [
+        "Measurement noise in behavioral traces may obscure the threshold.",
+        "The classifier's performance may depend on feature engineering (e.g., choice of traces).",
+        "Participants may adapt their strategies if they learn the manipulation.",
+        "The planner's max steps S may not be known a priori; need to calibrate.",
+        "Confound: order effects if conditions are not properly randomized."
+      ]
+    },
+    {
+      "hypothesis": "There exists a sharp working memory capacity threshold (e.g., 4 items ± 1) such that below it, agents engage in genuine planning, and above it, they switch to post-hoc rationalization, producing a discontinuous change in behavioral traces.",
+      "independent_variables": [
+        "working memory load (integer: 1 to 9)"
+      ],
+      "dependent_variables": [
+        "classification probability (planning vs. post-hoc)",
+        "reaction time variance",
+        "lookahead frequency"
+      ],
+      "controlled_variables": [
+        "same task structure (grid navigation)",
+        "same agent perception model",
+        "fixed computational budget for planning (e.g., limited MCTS simulations)",
+        "same secondary task modality (digit memorization)"
+      ],
+      "baselines": [
+        {
+          "name": "pure planner baseline",
+          "description": "Agent using Monte Carlo Tree Search (MCTS) with no secondary task, expected to exhibit strong planning traces."
+        },
+        {
+          "name": "pure post-hoc baseline",
+          "description": "Agent that selects actions randomly and then generates a plausible explanation, expected to exhibit post-hoc traces."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "planning classification probability",
+          "definition": "Proportion of trials (for a given load) where the classifier trained on pure planner and pure post-hoc agents outputs 'planning'."
+        },
+        {
+          "name": "reaction time variance",
+          "definition": "Variance of reaction times across trials within a given load condition."
+        },
+        {
+          "name": "lookahead frequency",
+          "definition": "Number of times the agent simulates future steps (e.g., MCTS rollouts) normalized by number of actions."
+        }
+      ],
+      "expected_result": "Classification probability for 'planning' drops sharply (e.g., >30% change) between two adjacent load levels (e.g., load 4 and 5). Reaction time variance shows a sudden increase at the threshold. The threshold is consistent across multiple runs and within ±1 load unit.",
+      "falsifying_result": "Classification probability changes linearly with load, or no significant change across loads, or the threshold is not clearly discernible (e.g., gradual transition across more than 2 load levels) or varies by more than 2 load units across runs.",
+      "minimum_viable_experiment": "Implement a grid-navigation task where an agent (either a planning algorithm like MCTS or a post-hoc explanation generator) operates under varying working memory loads (1-9 items) imposed by a secondary memorization task. For each load, record behavioral traces (e.g., reaction time, path optimality, lookahead patterns). Use a classifier trained on known ground-truth agents (pure planner vs. pure post-hoc) to label each load condition. Repeat across multiple runs with random seeds.",
+      "risks_and_confounds": [
+        "Classifier may overfit to specific features of the baseline agents and not generalize to unknown agents.",
+        "Secondary task may interfere with planning differently depending on load, potentially confounding the effect.",
+        "Agent's internal architecture may not be representative of natural cognitive systems.",
+        "The threshold may depend on task complexity or time pressure, not solely on working memory capacity."
+      ]
+    },
+    {
+      "hypothesis": "When post-hoc explanations exhibit high internal consistency (better-than-chance prediction of own future actions), cross-method agreement (behavioral, neural, verbal) will be equally high for both planning and post-hoc conditions; when consistency is low, agreement will be significantly higher for planning than for post-hoc.",
+      "independent_variables": [
+        "Condition (planning vs. post-hoc)",
+        "Post-hoc sophistication level (low, high)"
+      ],
+      "dependent_variables": [
+        "Cross-method agreement score (average pairwise Cohen's kappa between behavioral and verbal classifiers)"
+      ],
+      "controlled_variables": [
+        "Task: Tower of Hanoi with fixed difficulty",
+        "Number of trials per condition: 50",
+        "Classifier training on independent dataset (100 trials per condition)",
+        "Order of conditions and sophistication levels counterbalanced",
+        "Agent parameters (e.g., search depth for planning, randomness seed for post-hoc) matched"
+      ],
+      "baselines": [
+        {
+          "name": "Ground-truth planning",
+          "description": "Trials from a planning agent with known internal planning process (e.g., A* search)"
+        },
+        {
+          "name": "Ground-truth post-hoc (low sophistication)",
+          "description": "Trials from a random agent that generates explanations using a rule-based system with low consistency"
+        },
+        {
+          "name": "Ground-truth post-hoc (high sophistication)",
+          "description": "Trials from a random agent that generates explanations using a language model fine-tuned for high consistency"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Cohen's kappa (behavioral vs. verbal)",
+          "definition": "Pairwise agreement between the behavioral classifier's labels and the verbal classifier's labels on test trials, corrected for chance"
+        },
+        {
+          "name": "Average cross-method agreement",
+          "definition": "Mean of pairwise Cohen's kappa values across all method pairs (here only one pair, so just the kappa itself)"
+        }
+      ],
+      "expected_result": "In the low-sophistication condition, average cross-method agreement is significantly higher for planning than for post-hoc (p < 0.05). In the high-sophistication condition, agreement differences between planning and post-hoc are not significant (or reversed). A significant interaction between condition and sophistication on agreement (p < 0.05) confirms the hypothesis.",
+      "falsifying_result": "No significant interaction between condition and sophistication on agreement, or in the high-sophistication condition, agreement for planning remains significantly higher than for post-hoc (p < 0.05). Also, if agreement in any condition is at chance levels, the hypothesis is falsified.",
+      "minimum_viable_experiment": "A computational simulation with two types of artificial agents: planning agents (using A* search to select moves) and post-hoc agents (random move selection then explanation generation). Post-hoc explanations are generated either by a low-consistency rule-based system (random concatenation of phrases) or a high-consistency language model (GPT-2 fine-tuned to predict future moves). Each agent performs 50 trials of Tower of Hanoi (3 discs). Behavioral traces (move times and sequence) and verbal traces (generated explanations) are collected. For each trace type, a binary classifier (random forest) is trained on an independent dataset of 100 trials per condition to distinguish planning from post-hoc. The trained classifiers are applied to the test trials, and for each condition and sophistication level, Cohen's kappa between the two classifiers' predictions is computed. The average kappa across trials is used as the agreement score. A two-way ANOVA (condition × sophistication) tests for interaction.",
+      "risks_and_confounds": [
+        "Classifiers may have asymmetric accuracy for behavioral vs. verbal traces, biasing agreement",
+        "Synthetic data may not capture nuances of human planning and explanation",
+        "The sophistication manipulation may not elicit the intended internal consistency property",
+        "The choice of task may influence trace diagnosticity"
+      ]
+    },
+    {
+      "hypothesis": "As the delay between thought and concurrent explanation decreases, behavioral traces (reaction time, gaze patterns) transition from post-hoc-like to planning-like at a critical latency threshold, exhibiting a discontinuity rather than a linear trend.",
+      "independent_variables": [
+        "Explanation condition (levels: Plan, Post-hoc, Concurrent with delay 0ms, 100ms, 200ms, 500ms, 1s)"
+      ],
+      "dependent_variables": [
+        "Step-level reaction time",
+        "Fixation duration on future path vs past path",
+        "Gaze transition entropy"
+      ],
+      "controlled_variables": [
+        "Maze size (constant)",
+        "Order counterbalancing",
+        "Time pressure (none)",
+        "Verbal instruction fidelity checked",
+        "Same participants across conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Plan condition",
+          "description": "Participants plan first then act without explanation."
+        },
+        {
+          "name": "Post-hoc condition",
+          "description": "Participants act first then explain after."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Step-level reaction time",
+          "definition": "Time between maze step decisions measured in milliseconds."
+        },
+        {
+          "name": "Fixation duration on future vs past path",
+          "definition": "Ratio of gaze fixations on future path segments (ahead of agent) versus past path segments."
+        },
+        {
+          "name": "Gaze transition entropy",
+          "definition": "Entropy of transitions between gaze regions, measuring randomness of eye movements."
+        }
+      ],
+      "expected_result": "At latencies below a critical threshold (e.g., <200ms), concurrent condition reaction times are statistically indistinguishable from the Plan condition, and gaze patterns show forward-looking fixations. At latencies above the threshold (e.g., >500ms), concurrent condition traces are indistinguishable from Post-hoc condition. A discontinuity (jump) in mean reaction time is observed at the critical latency. The critical latency is consistent across participants.",
+      "falsifying_result": "Concurrent condition reaction times decrease linearly with latency without a sharp break. At all latencies, traces are a mixture (e.g., intermediate reaction times) rather than matching one pure condition. No latency produces gaze patterns identical to either pure condition.",
+      "minimum_viable_experiment": "Human participants perform a maze navigation task under three conditions: Plan (plan then act, no explanation), Post-hoc (act then explain), and Concurrent (explain while acting) with varying explanation latency (0ms, 100ms, 200ms, 500ms, 1s). Behavioral traces (step reaction time, gaze fixation duration on future vs. past path, gaze transition entropy) are recorded. We search for a critical delay where trace metrics abruptly change from resembling Plan to resembling Post-hoc.",
+      "risks_and_confounds": [
+        "Measurement resolution may be insufficient to detect subtle discontinuities.",
+        "Lack of ground truth about actual cognitive processes limits validation.",
+        "Sophisticated post-hoc explanation generators could mimic planning traces, violating diagnostic assumptions.",
+        "Participant variability in cognitive strategies may mask the threshold.",
+        "Learning effects across repeated maze trials could confound latency effects."
+      ]
+    },
+    {
+      "hypothesis": "Classification accuracy for distinguishing planning from post-hoc explanation exhibits a phase transition at a temporal resolution of 200ms when cognitive load is high (dual-task condition), but remains near-chance at coarser resolutions. Under low load, accuracy remains above 85% even at 500ms resolution.",
+      "independent_variables": [
+        "temporal resolution of behavioral logs (200ms, 500ms)",
+        "cognitive load (low: no secondary task, high: concurrent n-back task)"
+      ],
+      "dependent_variables": [
+        "classification accuracy (planning vs. post-hoc)",
+        "classifier confidence scores"
+      ],
+      "controlled_variables": [
+        "same open-source agent architecture and task (navigation with obstacles)",
+        "identical action sequences across conditions",
+        "balanced number of planning and post-hoc trials per condition (e.g., 50 each per cell)",
+        "randomized order of resolution and load conditions",
+        "fixed classifier algorithm and training procedure"
+      ],
+      "baselines": [
+        {
+          "name": "Chance-level accuracy",
+          "description": "Random guessing accuracy of 50% for a binary classification task"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Classification accuracy",
+          "definition": "Proportion of trials where the classifier's label matches the ground truth (planning or post-hoc)"
+        },
+        {
+          "name": "Average confidence score",
+          "definition": "Mean of the classifier's predicted probability for the correct class across trials"
+        }
+      ],
+      "expected_result": "Under high cognitive load, classification accuracy drops sharply from >85% at 200ms resolution to <60% at 500ms resolution. Under low load, accuracy remains >85% at both resolutions.",
+      "falsifying_result": "If under high load, accuracy does not show a sharp drop (e.g., declines linearly or remains above 60% at 500ms) or if load has no significant effect on the accuracy-resolution relationship, the hypothesis is falsified.",
+      "minimum_viable_experiment": "A 2x2 within-subject design with an open-source agent (known ground truth) performing a navigation task under low and high cognitive load. Behavioral traces are recorded at 200ms and 500ms temporal resolutions. A classifier (e.g., logistic regression or simple neural net) is trained on features like reaction times and hesitation patterns to predict planning vs. post-hoc. At least 100 trials per condition (2 loads × 2 resolutions = 4 conditions) are needed for statistical power.",
+      "risks_and_confounds": [
+        "Classifier may overfit to noise or learn artifacts unrelated to planning (e.g., trial order), requiring cross-validation.",
+        "Temporal resolution logging may introduce measurement noise; precise synchronization needed.",
+        "Order effects from alternating loads/resolutions; randomized order mitigates but not eliminated.",
+        "Agent's planning and post-hoc processes may be too simplistic, reducing generalizability.",
+        "Dual-task manipulation may affect overall performance, confounding load with task difficulty."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This paper presents a first-principles research package addressing the challenge of distinguishing true agent planning from post-hoc explanation. It decomposes core concepts, proposes a mechanism model based on behavioral traces, identifies tensions, and designs falsifiable experiments. The work is conceptually rich and identifies important boundaries (e.g., sophistication thresholds, temporal resolution phase transitions). However, the mechanism remains abstract, and the experimental designs, while clever, rely heavily on simulated agents or controlled laboratory settings, limiting generalizability. The assumptions about trace diagnosticity are plausible but not fully validated, and some baselines (e.g., chance-level classifiers, alternative trace types) are missing. Overall, the package provides a strong foundation for future empirical work but stops short of delivering a practical, validated method.",
+    "strengths": [
+      "First-principles derivation is clear and logically sound, with well-defined primitives and assumptions.",
+      "The mechanism model explicitly captures causal chains and bottlenecks, enabling testable predictions.",
+      "Tensions are identified from first principles and translated into concrete research questions with hypotheses.",
+      "The proposed experiments are carefully controlled and include falsification criteria and failure update rules.",
+      "High novelty in isolating boundary conditions (e.g., sophistication threshold, phase transitions) that could sharpen the distinction between planning and post-hoc explanation."
+    ],
+    "weaknesses": [
+      "The core assumption that planning leaves measurable behavioral traces distinct from post-hoc explanation is not empirically supported; the paper acknowledges it could fail but does not provide preliminary evidence.",
+      "The mechanism model is abstract and lacks specification of which behavioral traces are most diagnostic across domains.",
+      "Some experiments (e.g., human maze navigation with precise latency manipulation) are logistically challenging and may not scale.",
+      "Missing baselines: no comparisons to simple heuristic classifiers (e.g., always predict planning) or to alternative trace types (e.g., detailed action logs vs. gaze).",
+      "Overclaiming: the package implies it can distinguish planning from post-hoc, but it only proposes tests; no actual classification method is developed or validated.",
+      "The significance is limited to evaluation of agents, but the paper does not discuss how the findings would generalize to more complex, naturalistic planning scenarios."
+    ],
+    "questions": [
+      "How would the proposed experiments generalize to agents with different architectures (e.g., deep reinforcement learning vs. symbolic planners) or to human participants with diverse cognitive styles?",
+      "Given the assumption that traces are diagnostic, what is the minimum set of trace features required to achieve reliable classification across tasks?",
+      "Can the predicted phase transitions be observed with currently available measurement technology (e.g., fMRI, eye-tracking) or are they purely theoretical?",
+      "How would the results change if the post-hoc explanation generator is allowed to use the same forward simulation as the planner but only during explanation (not during action)?"
+    ],
+    "missing_baselines": [
+      "Comparison to random or naive baselines (e.g., always classifying as planning, chance-level classifier) to establish lower bounds.",
+      "Ablation studies over trace types (e.g., using only reaction time vs. only gaze) to assess necessity.",
+      "Inclusion of an 'honest' condition where the agent explains after acting without any post-hoc rationalization (e.g., simply describing what it did).",
+      "Using real human data as ground truth for planning vs. post-hoc (even if noisy) to calibrate the synthetic experiments."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "What is the minimum post-hoc generator sophistication threshold (measured by access to forward simulation) at which behavioral traces become indistinguishable from those of planning agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical working memory capacity threshold below which agents exhibit planning (as evidenced by behavioral traces) and above which they revert to post-hoc rationalization, and does this transition occur abruptly or continuously?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a threshold in post-hoc explanation sophistication, measured by internal consistency, beyond which cross-method agreement fails to discriminate planning from post-hoc explanation?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a phase transition in behavioral traces as a function of concurrent explanation latency, where below a critical latency traces resemble planning and above they resemble post-hoc?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what combination of temporal resolution and cognitive load does the planning-versus-post-hoc classification accuracy undergo a phase transition?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T170131Z"
+  }
+}

@@ -1,0 +1,1049 @@
+{
+  "topic": {
+    "topic": "When does tool-use routing fail in coding agents?",
+    "topic_id": "T003",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does tool-use routing fail in coding agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Tool",
+        "definition": "An external computational capability that the agent can invoke, accepting inputs and producing outputs, with deterministic or stochastic behavior.",
+        "why_primitive": "Tools are the fundamental unit of action; without them, the agent cannot execute any operation."
+      },
+      {
+        "name": "Task",
+        "definition": "A goal-oriented unit of work, decomposable into subtasks, with a success criterion (e.g., correct code, passing tests).",
+        "why_primitive": "Tasks define the objectives that routing decisions aim to satisfy; all routing is done in service of a task."
+      },
+      {
+        "name": "Routing",
+        "definition": "The decision process that selects a sequence of tools to apply given the current state and the current subtask.",
+        "why_primitive": "Routing is the core cognitive function of the agent; failures in routing directly cause overall failure."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+        "rationale": "Without a known tool set, routing cannot be defined; the agent must know what tools are available and typically what they do.",
+        "possible_failure": "Tools may have hidden side effects, non-determinism, or dependencies that the agent does not model, leading to incorrect routing decisions."
+      },
+      {
+        "assumption": "The agent has full observability of the state relevant to task completion.",
+        "rationale": "Routing decisions rely on state information (e.g., current code, error messages, environment); partial observability can cause suboptimal choices.",
+        "possible_failure": "Hidden variables (e.g., third-party API changes, race conditions) can cause the agent to route to a tool that is ineffective or harmful."
+      },
+      {
+        "assumption": "There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+        "rationale": "If no correct routing exists, failure is inevitable; this assumption allows analysis of when routing fails despite best effort.",
+        "possible_failure": "Multiple correct routings may exist, or the correct routing may depend on unmodeled factors, leading to ambiguity and potential failure."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Exploration vs Exploitation in tool selection",
+        "variables": [
+          "novelty of subtask",
+          "confidence in known routings",
+          "cost of trial and error"
+        ]
+      },
+      {
+        "tradeoff": "Speed vs Accuracy of routing decisions",
+        "variables": [
+          "time budget per step",
+          "complexity of state evaluation",
+          "consequences of incorrect tool use"
+        ]
+      },
+      {
+        "tradeoff": "Generalization vs Specialization of the routing policy",
+        "variables": [
+          "diversity of tasks encountered",
+          "similarity of tool behaviors",
+          "overfitting to training scenarios"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "novelty_of_subtask",
+        "role": "input",
+        "description": "The degree to which the current subtask differs from previously encountered tasks."
+      },
+      {
+        "name": "state_observability",
+        "role": "input",
+        "description": "How much of the relevant state (e.g., code, errors, environment) is visible to the agent."
+      },
+      {
+        "name": "tool_knowledge_accuracy",
+        "role": "input",
+        "description": "The accuracy of the agent's model of tool behaviors, including side effects and dependencies."
+      },
+      {
+        "name": "routing_policy_quality",
+        "role": "mediator",
+        "description": "The quality of the agent's routing policy given the inputs; reflects ability to select appropriate tools."
+      },
+      {
+        "name": "routing_decision_correctness",
+        "role": "mediator",
+        "description": "Whether the chosen tool sequence is correct for the subtask and state."
+      },
+      {
+        "name": "tool_side_effects",
+        "role": "confounder",
+        "description": "Unexpected or unmodeled consequences of using a tool that affect task outcome."
+      },
+      {
+        "name": "task_completion_success",
+        "role": "output",
+        "description": "Whether the overall task (e.g., coding task) is successfully completed."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "novelty_of_subtask",
+        "relation": "negatively influences",
+        "target": "routing_policy_quality",
+        "explanation": "Higher novelty reduces the applicability of prior routing experiences, degrading policy quality."
+      },
+      {
+        "step": "2",
+        "source": "state_observability",
+        "relation": "positively influences",
+        "target": "routing_policy_quality",
+        "explanation": "Better state observability provides more relevant information for routing, improving policy quality."
+      },
+      {
+        "step": "3",
+        "source": "tool_knowledge_accuracy",
+        "relation": "positively influences",
+        "target": "routing_policy_quality",
+        "explanation": "Accurate knowledge of tool behaviors enables better tool selection."
+      },
+      {
+        "step": "4",
+        "source": "routing_policy_quality",
+        "relation": "positively influences",
+        "target": "routing_decision_correctness",
+        "explanation": "Higher quality policy leads to more correct routing decisions."
+      },
+      {
+        "step": "5",
+        "source": "routing_decision_correctness",
+        "relation": "positively influences",
+        "target": "task_completion_success",
+        "explanation": "Correct routing directly enables successful task completion."
+      },
+      {
+        "step": "6",
+        "source": "tool_side_effects",
+        "relation": "negatively influences",
+        "target": "routing_decision_correctness",
+        "explanation": "Unmodeled side effects can cause a correct-seeming decision to actually be incorrect."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Incomplete state observability",
+        "why_it_matters": "The agent may miss critical information (e.g., error messages, environment state) needed to make correct routing decisions, leading to persistent failures."
+      },
+      {
+        "bottleneck": "Inaccurate tool knowledge",
+        "why_it_matters": "If the agent misunderstands tool behavior, it may select a tool that fails or causes unintended consequences, even in familiar tasks."
+      },
+      {
+        "bottleneck": "High subtask novelty",
+        "why_it_matters": "When a subtask is entirely new, the routing policy has no relevant experience, so any decision is effectively random, increasing failure probability."
+      }
+    ],
+    "mechanism_summary": "Failures in tool-use routing occur when routing decisions are incorrect due to insufficient state observability, inaccurate tool knowledge, or high subtask novelty that exceeds the policy's generalization capability. These factors degrade routing policy quality and decision correctness, while unmodeled tool side effects further undermine success."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption of full state observability contradicts the real-world condition of partial observability, which degrades routing policy quality.",
+      "derived_from": [
+        "Assumption: The agent has full observability of the state relevant to task completion.",
+        "Bottleneck: Incomplete state observability"
+      ],
+      "why_it_matters": "When the agent lacks critical information, it makes suboptimal routing decisions, leading to task failure even if other components are perfect.",
+      "what_existing_methods_may_miss": "Many systems assume complete state information during training but fail in deployment when observability is limited.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "The assumption that a correct routing always exists per (state, subtask) pair conflicts with the exploration-exploitation tradeoff, especially under high subtask novelty.",
+      "derived_from": [
+        "Assumption: There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+        "Tradeoff: Exploration vs Exploitation in tool selection"
+      ],
+      "why_it_matters": "In novel situations, a correct routing may not be known, forcing exploration which risks failure and inefficiency.",
+      "what_existing_methods_may_miss": "Current routing policies often assume familiarity; they may not account for total novelty where no correct routing is available.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that tool behaviors are known (tool_knowledge_accuracy) is undermined by unmodeled tool side effects, causing routing decisions to be incorrect despite accurate knowledge.",
+      "derived_from": [
+        "Assumption: The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+        "Mechanism variable: tool_side_effects"
+      ],
+      "why_it_matters": "Even with perfect tool understanding, hidden side effects can derail task completion, revealing a gap between known behavior and actual impact.",
+      "what_existing_methods_may_miss": "Most systems assume deterministic tools; they ignore subtle side effects that accumulate over multiple steps.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does varying the degree of state observability (e.g., hiding error messages) causally impact the quality of routing policy in tool-use tasks, and is this effect mediated by the agent's ability to infer missing state information?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantifies the criticality of state observability for routing quality and identifies whether inference mechanisms can compensate for partial observability."
+    },
+    {
+      "question": "Does increasing the novelty of subtasks reduce the likelihood of correct routing decisions even when the agent employs an optimal exploration strategy, and if so, what is the functional form of this relationship?",
+      "question_type": "causal",
+      "source_tension": "T2",
+      "expected_contribution": "Establishes the trade-off between novelty and routing correctness, informing the design of adaptive exploration policies."
+    },
+    {
+      "question": "When tool knowledge accuracy is high (e.g., known behaviors), do unmodeled side effects significantly decrease routing decision correctness, and what types of side effects have the largest detrimental impact on task completion?",
+      "question_type": "diagnostic",
+      "source_tension": "T3",
+      "expected_contribution": "Reveals the gap between assumed tool determinism and actual system behavior, motivating the inclusion of side-effect modeling in routing policies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An external computational capability that the agent can invoke, accepting inputs and producing outputs, with deterministic or stochastic behavior.",
+          "why_primitive": "Tools are the fundamental unit of action; without them, the agent cannot execute any operation."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal-oriented unit of work, decomposable into subtasks, with a success criterion (e.g., correct code, passing tests).",
+          "why_primitive": "Tasks define the objectives that routing decisions aim to satisfy; all routing is done in service of a task."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects a sequence of tools to apply given the current state and the current subtask.",
+          "why_primitive": "Routing is the core cognitive function of the agent; failures in routing directly cause overall failure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+          "rationale": "Without a known tool set, routing cannot be defined; the agent must know what tools are available and typically what they do.",
+          "possible_failure": "Tools may have hidden side effects, non-determinism, or dependencies that the agent does not model, leading to incorrect routing decisions."
+        },
+        {
+          "assumption": "The agent has full observability of the state relevant to task completion.",
+          "rationale": "Routing decisions rely on state information (e.g., current code, error messages, environment); partial observability can cause suboptimal choices.",
+          "possible_failure": "Hidden variables (e.g., third-party API changes, race conditions) can cause the agent to route to a tool that is ineffective or harmful."
+        },
+        {
+          "assumption": "There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+          "rationale": "If no correct routing exists, failure is inevitable; this assumption allows analysis of when routing fails despite best effort.",
+          "possible_failure": "Multiple correct routings may exist, or the correct routing may depend on unmodeled factors, leading to ambiguity and potential failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "novelty_of_subtask",
+            "role": "input",
+            "description": "The degree to which the current subtask differs from previously encountered tasks."
+          },
+          {
+            "name": "state_observability",
+            "role": "input",
+            "description": "How much of the relevant state (e.g., code, errors, environment) is visible to the agent."
+          },
+          {
+            "name": "tool_knowledge_accuracy",
+            "role": "input",
+            "description": "The accuracy of the agent's model of tool behaviors, including side effects and dependencies."
+          },
+          {
+            "name": "routing_policy_quality",
+            "role": "mediator",
+            "description": "The quality of the agent's routing policy given the inputs; reflects ability to select appropriate tools."
+          },
+          {
+            "name": "routing_decision_correctness",
+            "role": "mediator",
+            "description": "Whether the chosen tool sequence is correct for the subtask and state."
+          },
+          {
+            "name": "tool_side_effects",
+            "role": "confounder",
+            "description": "Unexpected or unmodeled consequences of using a tool that affect task outcome."
+          },
+          {
+            "name": "task_completion_success",
+            "role": "output",
+            "description": "Whether the overall task (e.g., coding task) is successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "novelty_of_subtask",
+            "relation": "negatively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Higher novelty reduces the applicability of prior routing experiences, degrading policy quality."
+          },
+          {
+            "step": "2",
+            "source": "state_observability",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Better state observability provides more relevant information for routing, improving policy quality."
+          },
+          {
+            "step": "3",
+            "source": "tool_knowledge_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Accurate knowledge of tool behaviors enables better tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_quality",
+            "relation": "positively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Higher quality policy leads to more correct routing decisions."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_correctness",
+            "relation": "positively influences",
+            "target": "task_completion_success",
+            "explanation": "Correct routing directly enables successful task completion."
+          },
+          {
+            "step": "6",
+            "source": "tool_side_effects",
+            "relation": "negatively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Unmodeled side effects can cause a correct-seeming decision to actually be incorrect."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete state observability",
+            "why_it_matters": "The agent may miss critical information (e.g., error messages, environment state) needed to make correct routing decisions, leading to persistent failures."
+          },
+          {
+            "bottleneck": "Inaccurate tool knowledge",
+            "why_it_matters": "If the agent misunderstands tool behavior, it may select a tool that fails or causes unintended consequences, even in familiar tasks."
+          },
+          {
+            "bottleneck": "High subtask novelty",
+            "why_it_matters": "When a subtask is entirely new, the routing policy has no relevant experience, so any decision is effectively random, increasing failure probability."
+          }
+        ],
+        "mechanism_summary": "Failures in tool-use routing occur when routing decisions are incorrect due to insufficient state observability, inaccurate tool knowledge, or high subtask novelty that exceeds the policy's generalization capability. These factors degrade routing policy quality and decision correctness, while unmodeled tool side effects further undermine success."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption of full state observability contradicts the real-world condition of partial observability, which degrades routing policy quality.",
+        "derived_from": [
+          "Assumption: The agent has full observability of the state relevant to task completion.",
+          "Bottleneck: Incomplete state observability"
+        ],
+        "why_it_matters": "When the agent lacks critical information, it makes suboptimal routing decisions, leading to task failure even if other components are perfect.",
+        "what_existing_methods_may_miss": "Many systems assume complete state information during training but fail in deployment when observability is limited.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does varying the degree of state observability (e.g., hiding error messages) causally impact the quality of routing policy in tool-use tasks, and is this effect mediated by the agent's ability to infer missing state information?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the criticality of state observability for routing quality and identifies whether inference mechanisms can compensate for partial observability."
+      },
+      "hypothesis": {
+        "statement": "Higher state observability improves routing policy quality, and the effect is partially mediated by the agent's ability to infer missing state information.",
+        "predicted_effect": "As state observability increases, routing policy quality increases. Agents with high inference ability show less degradation under low observability compared to those with low inference ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent performing tool-use tasks. Manipulate state observability (full vs. partial, e.g., hide error messages) and agent's inference ability (through architectural modifications or pre-training on state reconstruction). Measure routing policy quality as the proportion of correct tool selections per subtask.",
+        "independent_variables": [
+          "state_observability (full vs. partial)",
+          "inference_ability (high vs. low)"
+        ],
+        "dependent_variables": [
+          "routing_policy_quality (correctness of tool selection)",
+          "task_completion_success"
+        ],
+        "controls": [
+          "task complexity",
+          "tool set",
+          "novelty of subtasks",
+          "agent's tool knowledge"
+        ],
+        "falsifying_observation": "If routing quality does not differ between full and partial observability when inference ability is low, or if the effect of observability is not moderated by inference ability, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Higher observability leads to higher routing quality across all inference levels.",
+          "Agents with high inference ability show smaller performance drop under partial observability compared to low inference agents.",
+          "Statistical mediation analysis shows a significant indirect effect of observability on routing quality through inference ability."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in routing quality between full and partial observability.",
+          "Inference ability does not moderate the effect of observability on routing quality.",
+          "Partial observability does not degrade routing quality even when inference ability is low."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., no effect of observability or no mediation), then our assumption that state observability is a primary driver of routing failures may be incorrect.",
+        "assumption_to_revise": "The assumption that the agent has full observability of the state relevant to task completion is not a critical bottleneck; instead, other factors like tool knowledge accuracy or subtask novelty may dominate.",
+        "next_question": "How do tool knowledge accuracy and subtask novelty interact to determine routing policy quality, independent of state observability?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An external computational capability that the agent can invoke, accepting inputs and producing outputs, with deterministic or stochastic behavior.",
+          "why_primitive": "Tools are the fundamental unit of action; without them, the agent cannot execute any operation."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal-oriented unit of work, decomposable into subtasks, with a success criterion (e.g., correct code, passing tests).",
+          "why_primitive": "Tasks define the objectives that routing decisions aim to satisfy; all routing is done in service of a task."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects a sequence of tools to apply given the current state and the current subtask.",
+          "why_primitive": "Routing is the core cognitive function of the agent; failures in routing directly cause overall failure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+          "rationale": "Without a known tool set, routing cannot be defined; the agent must know what tools are available and typically what they do.",
+          "possible_failure": "Tools may have hidden side effects, non-determinism, or dependencies that the agent does not model, leading to incorrect routing decisions."
+        },
+        {
+          "assumption": "The agent has full observability of the state relevant to task completion.",
+          "rationale": "Routing decisions rely on state information (e.g., current code, error messages, environment); partial observability can cause suboptimal choices.",
+          "possible_failure": "Hidden variables (e.g., third-party API changes, race conditions) can cause the agent to route to a tool that is ineffective or harmful."
+        },
+        {
+          "assumption": "There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+          "rationale": "If no correct routing exists, failure is inevitable; this assumption allows analysis of when routing fails despite best effort.",
+          "possible_failure": "Multiple correct routings may exist, or the correct routing may depend on unmodeled factors, leading to ambiguity and potential failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "novelty_of_subtask",
+            "role": "input",
+            "description": "The degree to which the current subtask differs from previously encountered tasks."
+          },
+          {
+            "name": "state_observability",
+            "role": "input",
+            "description": "How much of the relevant state (e.g., code, errors, environment) is visible to the agent."
+          },
+          {
+            "name": "tool_knowledge_accuracy",
+            "role": "input",
+            "description": "The accuracy of the agent's model of tool behaviors, including side effects and dependencies."
+          },
+          {
+            "name": "routing_policy_quality",
+            "role": "mediator",
+            "description": "The quality of the agent's routing policy given the inputs; reflects ability to select appropriate tools."
+          },
+          {
+            "name": "routing_decision_correctness",
+            "role": "mediator",
+            "description": "Whether the chosen tool sequence is correct for the subtask and state."
+          },
+          {
+            "name": "tool_side_effects",
+            "role": "confounder",
+            "description": "Unexpected or unmodeled consequences of using a tool that affect task outcome."
+          },
+          {
+            "name": "task_completion_success",
+            "role": "output",
+            "description": "Whether the overall task (e.g., coding task) is successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "novelty_of_subtask",
+            "relation": "negatively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Higher novelty reduces the applicability of prior routing experiences, degrading policy quality."
+          },
+          {
+            "step": "2",
+            "source": "state_observability",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Better state observability provides more relevant information for routing, improving policy quality."
+          },
+          {
+            "step": "3",
+            "source": "tool_knowledge_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Accurate knowledge of tool behaviors enables better tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_quality",
+            "relation": "positively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Higher quality policy leads to more correct routing decisions."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_correctness",
+            "relation": "positively influences",
+            "target": "task_completion_success",
+            "explanation": "Correct routing directly enables successful task completion."
+          },
+          {
+            "step": "6",
+            "source": "tool_side_effects",
+            "relation": "negatively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Unmodeled side effects can cause a correct-seeming decision to actually be incorrect."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete state observability",
+            "why_it_matters": "The agent may miss critical information (e.g., error messages, environment state) needed to make correct routing decisions, leading to persistent failures."
+          },
+          {
+            "bottleneck": "Inaccurate tool knowledge",
+            "why_it_matters": "If the agent misunderstands tool behavior, it may select a tool that fails or causes unintended consequences, even in familiar tasks."
+          },
+          {
+            "bottleneck": "High subtask novelty",
+            "why_it_matters": "When a subtask is entirely new, the routing policy has no relevant experience, so any decision is effectively random, increasing failure probability."
+          }
+        ],
+        "mechanism_summary": "Failures in tool-use routing occur when routing decisions are incorrect due to insufficient state observability, inaccurate tool knowledge, or high subtask novelty that exceeds the policy's generalization capability. These factors degrade routing policy quality and decision correctness, while unmodeled tool side effects further undermine success."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "The assumption that a correct routing always exists per (state, subtask) pair conflicts with the exploration-exploitation tradeoff, especially under high subtask novelty.",
+        "derived_from": [
+          "Assumption: There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+          "Tradeoff: Exploration vs Exploitation in tool selection"
+        ],
+        "why_it_matters": "In novel situations, a correct routing may not be known, forcing exploration which risks failure and inefficiency.",
+        "what_existing_methods_may_miss": "Current routing policies often assume familiarity; they may not account for total novelty where no correct routing is available.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does increasing the novelty of subtasks reduce the likelihood of correct routing decisions even when the agent employs an optimal exploration strategy, and if so, what is the functional form of this relationship?",
+        "question_type": "causal",
+        "source_tension": "T2",
+        "expected_contribution": "Establishes the trade-off between novelty and routing correctness, informing the design of adaptive exploration policies."
+      },
+      "hypothesis": {
+        "statement": "Increasing novelty of subtasks reduces the likelihood of correct routing decisions, even when the agent employs an optimal exploration strategy.",
+        "predicted_effect": "As novelty increases from 0 (completely familiar) to 1 (completely novel), the probability of correct routing decisions decreases monotonically, following a sigmoidal or exponential decay function."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a coding agent with a fixed set of tools and an optimal exploration strategy (e.g., upper confidence bound). Present it with a series of subtasks of varying novelty, measured by the edit distance or conceptual distance from a training distribution. Record routing correctness (binary: correct sequence of tools chosen). Repeat for multiple novelty levels.",
+        "independent_variables": [
+          "novelty of subtask (continuous measure from 0 to 1)"
+        ],
+        "dependent_variables": [
+          "routing decision correctness (binary or proportion correct across trials)"
+        ],
+        "controls": [
+          "same agent architecture",
+          "same tool set",
+          "same optimal exploration strategy (e.g., UCB1)",
+          "same state observability (full)",
+          "same tool knowledge accuracy (perfect)"
+        ],
+        "falsifying_observation": "If routing correctness does not significantly decrease as novelty increases, or if the relationship is non-monotonic (e.g., increases for moderately novel subtasks), the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Across multiple runs, the proportion of correct routing decisions declines monotonically with increasing novelty.",
+          "The decline follows a consistent functional form (e.g., exponential decay) that can be parameterized.",
+          "Even with optimal exploration, novelty reduces correctness, confirming the trade-off."
+        ],
+        "rejects_hypothesis": [
+          "No significant correlation between novelty and routing correctness (p > 0.05).",
+          "Routing correctness remains constant across novelty levels.",
+          "Routing correctness increases for moderately novel subtasks due to exploration benefits."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified, it suggests that optimal exploration can overcome novelty-induced routing failures, or that the assumption of a single correct routing per (state, subtask) is too strong.",
+        "assumption_to_revise": "Assumption: There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+        "next_question": "Under what conditions does optimal exploration allow the agent to discover correct routings for novel subtasks, and what is the maximum novelty level that can be handled?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does tool-use routing fail in coding agents?",
+      "primitive_definitions": [
+        {
+          "name": "Tool",
+          "definition": "An external computational capability that the agent can invoke, accepting inputs and producing outputs, with deterministic or stochastic behavior.",
+          "why_primitive": "Tools are the fundamental unit of action; without them, the agent cannot execute any operation."
+        },
+        {
+          "name": "Task",
+          "definition": "A goal-oriented unit of work, decomposable into subtasks, with a success criterion (e.g., correct code, passing tests).",
+          "why_primitive": "Tasks define the objectives that routing decisions aim to satisfy; all routing is done in service of a task."
+        },
+        {
+          "name": "Routing",
+          "definition": "The decision process that selects a sequence of tools to apply given the current state and the current subtask.",
+          "why_primitive": "Routing is the core cognitive function of the agent; failures in routing directly cause overall failure."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+          "rationale": "Without a known tool set, routing cannot be defined; the agent must know what tools are available and typically what they do.",
+          "possible_failure": "Tools may have hidden side effects, non-determinism, or dependencies that the agent does not model, leading to incorrect routing decisions."
+        },
+        {
+          "assumption": "The agent has full observability of the state relevant to task completion.",
+          "rationale": "Routing decisions rely on state information (e.g., current code, error messages, environment); partial observability can cause suboptimal choices.",
+          "possible_failure": "Hidden variables (e.g., third-party API changes, race conditions) can cause the agent to route to a tool that is ineffective or harmful."
+        },
+        {
+          "assumption": "There exists a correct routing for each (state, subtask) pair under ideal conditions.",
+          "rationale": "If no correct routing exists, failure is inevitable; this assumption allows analysis of when routing fails despite best effort.",
+          "possible_failure": "Multiple correct routings may exist, or the correct routing may depend on unmodeled factors, leading to ambiguity and potential failure."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "novelty_of_subtask",
+            "role": "input",
+            "description": "The degree to which the current subtask differs from previously encountered tasks."
+          },
+          {
+            "name": "state_observability",
+            "role": "input",
+            "description": "How much of the relevant state (e.g., code, errors, environment) is visible to the agent."
+          },
+          {
+            "name": "tool_knowledge_accuracy",
+            "role": "input",
+            "description": "The accuracy of the agent's model of tool behaviors, including side effects and dependencies."
+          },
+          {
+            "name": "routing_policy_quality",
+            "role": "mediator",
+            "description": "The quality of the agent's routing policy given the inputs; reflects ability to select appropriate tools."
+          },
+          {
+            "name": "routing_decision_correctness",
+            "role": "mediator",
+            "description": "Whether the chosen tool sequence is correct for the subtask and state."
+          },
+          {
+            "name": "tool_side_effects",
+            "role": "confounder",
+            "description": "Unexpected or unmodeled consequences of using a tool that affect task outcome."
+          },
+          {
+            "name": "task_completion_success",
+            "role": "output",
+            "description": "Whether the overall task (e.g., coding task) is successfully completed."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "novelty_of_subtask",
+            "relation": "negatively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Higher novelty reduces the applicability of prior routing experiences, degrading policy quality."
+          },
+          {
+            "step": "2",
+            "source": "state_observability",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Better state observability provides more relevant information for routing, improving policy quality."
+          },
+          {
+            "step": "3",
+            "source": "tool_knowledge_accuracy",
+            "relation": "positively influences",
+            "target": "routing_policy_quality",
+            "explanation": "Accurate knowledge of tool behaviors enables better tool selection."
+          },
+          {
+            "step": "4",
+            "source": "routing_policy_quality",
+            "relation": "positively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Higher quality policy leads to more correct routing decisions."
+          },
+          {
+            "step": "5",
+            "source": "routing_decision_correctness",
+            "relation": "positively influences",
+            "target": "task_completion_success",
+            "explanation": "Correct routing directly enables successful task completion."
+          },
+          {
+            "step": "6",
+            "source": "tool_side_effects",
+            "relation": "negatively influences",
+            "target": "routing_decision_correctness",
+            "explanation": "Unmodeled side effects can cause a correct-seeming decision to actually be incorrect."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Incomplete state observability",
+            "why_it_matters": "The agent may miss critical information (e.g., error messages, environment state) needed to make correct routing decisions, leading to persistent failures."
+          },
+          {
+            "bottleneck": "Inaccurate tool knowledge",
+            "why_it_matters": "If the agent misunderstands tool behavior, it may select a tool that fails or causes unintended consequences, even in familiar tasks."
+          },
+          {
+            "bottleneck": "High subtask novelty",
+            "why_it_matters": "When a subtask is entirely new, the routing policy has no relevant experience, so any decision is effectively random, increasing failure probability."
+          }
+        ],
+        "mechanism_summary": "Failures in tool-use routing occur when routing decisions are incorrect due to insufficient state observability, inaccurate tool knowledge, or high subtask novelty that exceeds the policy's generalization capability. These factors degrade routing policy quality and decision correctness, while unmodeled tool side effects further undermine success."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that tool behaviors are known (tool_knowledge_accuracy) is undermined by unmodeled tool side effects, causing routing decisions to be incorrect despite accurate knowledge.",
+        "derived_from": [
+          "Assumption: The set of tools is finite and their behaviors are known (or learnable) to the agent.",
+          "Mechanism variable: tool_side_effects"
+        ],
+        "why_it_matters": "Even with perfect tool understanding, hidden side effects can derail task completion, revealing a gap between known behavior and actual impact.",
+        "what_existing_methods_may_miss": "Most systems assume deterministic tools; they ignore subtle side effects that accumulate over multiple steps.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "When tool knowledge accuracy is high (e.g., known behaviors), do unmodeled side effects significantly decrease routing decision correctness, and what types of side effects have the largest detrimental impact on task completion?",
+        "question_type": "diagnostic",
+        "source_tension": "T3",
+        "expected_contribution": "Reveals the gap between assumed tool determinism and actual system behavior, motivating the inclusion of side-effect modeling in routing policies."
+      },
+      "hypothesis": {
+        "statement": "Even when tool knowledge accuracy is high, unmodeled tool side effects significantly decrease routing decision correctness, and side effects that are subtle and accumulate over multiple steps have the largest detrimental impact on task completion.",
+        "predicted_effect": "Routing decision correctness will drop by at least 20% when hidden side effects are present compared to when they are absent, with cumulative side effects causing the largest drops."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a set of coding tasks where the agent must use tools (e.g., file reader, code editor, test runner). Assign tools with known behaviors but add hidden side effects in some conditions (e.g., tool that writes a file also modifies an environment variable). Vary the type of side effect (immediate vs. cumulative, reversible vs. irreversible). Measure routing decision correctness and task completion success.",
+        "independent_variables": [
+          "Presence vs. absence of unmodeled side effects",
+          "Type of side effect (immediate, cumulative, reversible, irreversible)"
+        ],
+        "dependent_variables": [
+          "Routing decision correctness (binary or continuous)",
+          "Task completion success (binary)"
+        ],
+        "controls": [
+          "Same tool knowledge accuracy across conditions (high)",
+          "Same set of tasks",
+          "Same agent with fixed routing policy"
+        ],
+        "falsifying_observation": "No significant difference in routing decision correctness between conditions with and without side effects, or only trivial (<5%) decrease."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Routing decision correctness is significantly lower in conditions with hidden side effects compared to without.",
+          "Cumulative side effects cause greater decrease in correctness than immediate side effects.",
+          "Irreversible side effects cause greater decrease in task completion than reversible ones."
+        ],
+        "rejects_hypothesis": [
+          "No significant difference in routing decision correctness across conditions.",
+          "Side effects only cause minor (<5%) decreases in correctness.",
+          "All side effect types equally affect correctness."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If hypothesis is rejected (side effects do not significantly decrease correctness), then the assumption that unmodeled side effects are a major cause of routing failure may be incorrect.",
+        "assumption_to_revise": "The assumption that tool side effects are impactful for routing failures in coding agents.",
+        "next_question": "Under what conditions do side effects become detrimental? Or: What other factors (e.g., task complexity, state observability) dominate routing failures?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 4,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Higher state observability improves routing policy quality, and the effect is partially mediated by the agent's ability to infer missing state information.",
+      "independent_variables": [
+        "state_observability (full vs. partial)",
+        "inference_ability (high vs. low)"
+      ],
+      "dependent_variables": [
+        "routing_policy_quality (proportion of correct tool selections per subtask)",
+        "task_completion_success (binary success per task)"
+      ],
+      "controlled_variables": [
+        "task complexity",
+        "tool set",
+        "novelty of subtasks",
+        "agent's tool knowledge accuracy"
+      ],
+      "baselines": [
+        {
+          "name": "Full observability with high inference ability",
+          "description": "Agent receives complete state information (e.g., all error messages, environment state) and has high capacity to infer missing information from available cues."
+        },
+        {
+          "name": "Full observability with low inference ability",
+          "description": "Agent receives complete state information but has low capacity to infer missing information (e.g., no additional inference mechanism)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "routing_quality",
+          "definition": "Proportion of subtasks for which the agent selects the correct tool sequence, as judged by an expert or ground truth based on the task and state."
+        },
+        {
+          "name": "task_success_rate",
+          "definition": "Proportion of overall tasks successfully completed, e.g., all tests pass or output matches expected result."
+        }
+      ],
+      "expected_result": "Agents with high inference ability will show higher routing quality under partial observability compared to those with low inference ability. The performance drop from full to partial observability will be smaller for high inference agents. Under full observability, both inference levels perform similarly high.",
+      "falsifying_result": "If no significant difference in routing quality is found between full and partial observability conditions, or if inference ability does not moderate the effect (i.e., the performance drop under partial observability is similar for both high and low inference ability), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a coding agent with a fixed set of tools (e.g., file read, write, execute code, search). Decompose a set of coding tasks into subtasks. Manipulate state observability by hiding error messages in the partial condition; manipulate inference ability by either providing the agent with a learned state inference module (high) or not (low). For each combination, run multiple trials and measure routing quality and task success. Use factorial ANOVA to test for main effect of observability and interaction with inference ability.",
+      "risks_and_confounds": [
+        "The inference ability manipulation may not be orthogonal to observability if the inference module relies on specific observable cues.",
+        "Task difficulty may interact with observability; use stratified random assignment.",
+        "The agent's learning algorithm may adapt differently across conditions; ensure identical learning procedures except for the manipulations.",
+        "Order effects: randomize task order across trials.",
+        "The tool set might have inherent dependencies that affect routing quality independent of observability."
+      ]
+    },
+    {
+      "hypothesis": "Increasing novelty of subtasks reduces the likelihood of correct routing decisions, even when the agent employs an optimal exploration strategy.",
+      "independent_variables": [
+        "novelty of subtask (continuous, measured from 0 to 1)"
+      ],
+      "dependent_variables": [
+        "routing decision correctness (binary, or proportion of correct decisions across trials)"
+      ],
+      "controlled_variables": [
+        "same agent architecture",
+        "same tool set",
+        "same optimal exploration strategy (UCB1)",
+        "same state observability (full)",
+        "same tool knowledge accuracy (perfect)"
+      ],
+      "baselines": [
+        {
+          "name": "Familiar subtask baseline",
+          "description": "Performance on subtasks with novelty=0 (completely familiar from training distribution)"
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Proportion of correct routing decisions",
+          "definition": "Number of trials where the chosen tool sequence exactly matches the known correct sequence divided by total trials at that novelty level."
+        }
+      ],
+      "expected_result": "As novelty increases, the proportion of correct routing decisions decreases monotonically, fitting a sigmoidal or exponential decay function.",
+      "falsifying_result": "If the proportion of correct routing decisions does not significantly decrease with novelty (e.g., p > 0.05 for negative correlation), or if the relationship is non-monotonic (e.g., increases at moderate novelty), then the hypothesis is rejected.",
+      "minimum_viable_experiment": "Simulate a single coding agent with a fixed tool set and UCB1 exploration policy. Present it with 10 subtasks at each of 5 evenly spaced novelty levels (0, 0.25, 0.5, 0.75, 1.0). Repeat the entire procedure 100 times. Record the proportion of correct routing decisions per novelty level. Use a statistical test (e.g., linear regression or trend test) to assess monotonic decrease.",
+      "risks_and_confounds": [
+        "Random seed variance might obscure trend; use multiple runs.",
+        "Definition of novelty might be ambiguous; use a clear distance metric (e.g., edit distance on task graphs).",
+        "Optimal exploration strategy might not be truly optimal for this setting; consider alternative exploration strategies."
+      ]
+    },
+    {
+      "hypothesis": "Even when tool knowledge accuracy is high, unmodeled tool side effects significantly decrease routing decision correctness, and side effects that are subtle and accumulate over multiple steps have the largest detrimental impact on task completion.",
+      "independent_variables": [
+        "Presence of unmodeled side effects (present vs. absent)"
+      ],
+      "dependent_variables": [
+        "Routing decision correctness (proportion of correct tool selections per task)",
+        "Task completion success (binary: pass/fail)"
+      ],
+      "controlled_variables": [
+        "Tool knowledge accuracy (high, via detailed documentation and prior experience)",
+        "Same set of coding tasks",
+        "Same agent with fixed routing policy",
+        "Full state observability (all relevant state visible)",
+        "Same tool set and behaviors (except side effects)"
+      ],
+      "baselines": [
+        {
+          "name": "No side effects",
+          "description": "All tools behave exactly as documented, with no hidden side effects."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Routing decision correctness",
+          "definition": "For each step, whether the selected tool is the optimal choice given the subtask and state; averaged over all steps in a task."
+        },
+        {
+          "name": "Task completion success",
+          "definition": "Binary indicator: 1 if task's goal (e.g., all tests pass) is achieved, 0 otherwise."
+        }
+      ],
+      "expected_result": "Routing decision correctness will be significantly lower (p < 0.05) in the presence of unmodeled side effects compared to baseline, with a decrease of at least 20%. Task completion success will also be significantly lower.",
+      "falsifying_result": "No statistically significant difference in routing decision correctness or task completion success between conditions, or a decrease less than 5% in either metric.",
+      "minimum_viable_experiment": "Use 10 distinct coding tasks, each requiring 3-5 tool calls. In the experimental condition, introduce a single, cumulative side effect: e.g., a 'file writer' tool that also appends a small hidden marker to a global log, which later interferes with a 'test runner' tool's interpretation of results. Run each condition (control and experimental) 10 times (for statistical power) and compare routing correctness and task success. This requires 20 runs total.",
+      "risks_and_confounds": [
+        "Order effects: if same agent performs both conditions, learning may occur. Use separate random seeds or counterbalance.",
+        "Side effect salience: if side effect is too obvious, agent might detect and adapt, undermining unmodeled nature. Choose subtle side effects.",
+        "Task difficulty: tasks must be of moderate difficulty to avoid floor/ceiling effects.",
+        "Generalizability: results may not extend to other side effect types or more complex tasks."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles analysis of when tool-use routing fails in coding agents, identifying key assumptions, causal mechanisms, and tensions. It proposes three falsifiable hypotheses with experimental designs. However, the novelty is limited, the analysis is theoretical without empirical validation, and relevant baselines from existing literature are missing.",
+    "strengths": [
+      "Clean decomposition into primitive definitions and assumptions.",
+      "Well-specified causal mechanism model with variables and causal chain.",
+      "Falsifiable hypotheses and detailed experimental plans with controls and metrics.",
+      "Tensions are logically derived from assumptions and tradeoffs."
+    ],
+    "weaknesses": [
+      "Limited novelty: the identified failure causes (partial observability, inaccurate tool knowledge, subtask novelty) are well-known in the literature.",
+      "No empirical evaluation; it is purely a research proposal without experimental results.",
+      "The mechanism model oversimplifies several interactions; e.g., side effects are treated as a confounder but could be captured by more comprehensive tool modeling.",
+      "Overclaiming of 'first-principles derivation' – it is more of a systematic taxonomy than a derivation from first principles.",
+      "Missing comparison to existing tool-use agent frameworks and prior work on agent failures."
+    ],
+    "questions": [
+      "How does this analysis differ from existing studies on tool-use failures in embodied agents or program synthesis?",
+      "Are the proposed experiments feasible given the complexity and variability of real-world coding tasks?",
+      "Could the identified bottlenecks be mitigated by better training data or model architecture rather than specific routing policies?"
+    ],
+    "missing_baselines": [
+      "Existing tool-use agents such as ReAct, Toolformer, and GPT-4 with function calling.",
+      "Causal analyses of agent failures in partially observable environments (e.g., POMDPs).",
+      "Previous work on exploration-exploitation tradeoffs in reinforcement learning for code generation."
+    ],
+    "score": 5,
+    "confidence": 4,
+    "recommendation": "weak_reject"
+  },
+  "self_improvement_update": {
+    "failure_type": "Lack of novelty and empirical grounding",
+    "root_cause": "The analysis remained at a generic taxonomy level without identifying a novel mechanistic boundary, phase transition, or non-trivial interaction among variables. The review noted that the failure causes (partial observability, inaccurate tool knowledge, subtask novelty) are well-known, and the work lacks experimental validation and comparison to existing literature.",
+    "violated_principle": "First-principles derivation should yield novel, testable predictions that are not obvious from prior work and should identify precise failure boundaries or phase transitions.",
+    "new_or_updated_principle": "A first-principles analysis must isolate at least one sharp boundary condition, threshold, phase transition, or mechanism interaction that is not already established in existing literature, and must be accompanied by a falsifiable hypothesis that can be tested empirically.",
+    "new_or_updated_skill": "The ability to detect and formalize a novel mechanistic boundary or interaction from primitive definitions and assumptions, such that the resulting hypothesis predicts a nonlinear regime shift (e.g., a tipping point in novelty above which routing correctness decays rapidly) rather than a monotonic trend.",
+    "regression_test": "Given a research package, verify that it contains at least one hypothesis that predicts a non-obvious threshold or interaction (e.g., a specific novelty level above which routing correctness drops sharply, or a specific type of side effect whose impact is disproportionately large). If all hypotheses only predict monotonic or linear effects, flag as insufficiently novel."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}

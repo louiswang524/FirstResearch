@@ -1,0 +1,1538 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A reusable behavior or policy that an agent can execute to accomplish a subgoal or task, often characterized by a distinct state-action mapping.",
+        "why_primitive": "Skills are the atomic units of behavior in lifelong learning; bloat is fundamentally about the proliferation of these units."
+      },
+      {
+        "name": "Library",
+        "definition": "The structured repository of skills maintained by an agent, including mechanisms for storage, indexing, retrieval, and composition.",
+        "why_primitive": "The library is the container whose growth defines bloat; its organization influences how skills are added and removed."
+      },
+      {
+        "name": "Bloat",
+        "definition": "The undesirable increase in library size due to redundant, obsolete, or ineffective skills, leading to degraded performance or wasted resources.",
+        "why_primitive": "Bloat is the core phenomenon to explain; it is not simply growth but growth that harms the agent's capabilities."
+      },
+      {
+        "name": "Lifelong Learning",
+        "definition": "The ability of an agent to continuously adapt and acquire new knowledge or skills over time as it encounters a sequence of tasks without catastrophic forgetting.",
+        "why_primitive": "Lifelong learning creates the context where skills accumulate; without it, libraries would not persist across tasks."
+      },
+      {
+        "name": "Agent",
+        "definition": "An autonomous entity that perceives its environment, makes decisions, and executes actions to achieve goals, with bounded computational and memory resources.",
+        "why_primitive": "All processes—skill discovery, library management, decision-making—are executed by the agent under resource constraints."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are discovered independently, not jointly optimized.",
+        "rationale": "In most lifelong learning setups, skills are acquired one by one as new tasks arise, without global coordination.",
+        "possible_failure": "If skills are discovered in a coordinated manner (e.g., via curriculum learning), bloat may be inherently reduced."
+      },
+      {
+        "assumption": "The agent has bounded memory and computational resources.",
+        "rationale": "Bloat is only problematic under resource constraints; without limits, any number of skills could be stored.",
+        "possible_failure": "If resources are effectively infinite, bloat becomes irrelevant, but this is unrealistic."
+      },
+      {
+        "assumption": "Tasks are drawn from a non-stationary distribution with possible revisits.",
+        "rationale": "Lifelong learning typically involves changing tasks, which can create redundant or conflicting skills.",
+        "possible_failure": "If tasks are strictly repeating and known, one could avoid bloat by storing only necessary skills."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Skill granularity vs. library size",
+        "variables": [
+          "fine-grained skills",
+          "coarse-grained skills",
+          "number of skills"
+        ]
+      },
+      {
+        "tradeoff": "Exploration of new skills vs. exploitation of existing library",
+        "variables": [
+          "novelty bonus",
+          "retrieval cost",
+          "performance gain"
+        ]
+      },
+      {
+        "tradeoff": "Skill retention vs. forgetting",
+        "variables": [
+          "consolidation strength",
+          "catastrophic forgetting",
+          "library pruning"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Task Novelty",
+        "role": "input",
+        "description": "Degree to which new tasks require previously unseen skills, driving discovery."
+      },
+      {
+        "name": "Bounded Resources",
+        "role": "input",
+        "description": "Limited memory and computational capacity of the agent."
+      },
+      {
+        "name": "Skill Discovery Rate",
+        "role": "mediator",
+        "description": "Frequency at which new skills are learned and added to the library."
+      },
+      {
+        "name": "Forgetting Rate",
+        "role": "mediator",
+        "description": "Rate at which skills are pruned or forgotten, influenced by memory constraints and retention policy."
+      },
+      {
+        "name": "Skill Redundancy",
+        "role": "mediator",
+        "description": "Extent to which multiple skills cover similar state-action mappings."
+      },
+      {
+        "name": "Library Size",
+        "role": "output",
+        "description": "Total number of skills stored in the library."
+      },
+      {
+        "name": "Retrieval Cost",
+        "role": "mediator",
+        "description": "Time or computational resources required to select the right skill for a given task."
+      },
+      {
+        "name": "Bloat",
+        "role": "outcome",
+        "description": "Detrimental effect on agent performance due to redundant or obsolete skills, measured as degradation in task completion efficiency."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "Task Novelty",
+        "relation": "increases",
+        "target": "Skill Discovery Rate",
+        "explanation": "Novel tasks require new skills, so higher novelty leads to more frequent skill discovery."
+      },
+      {
+        "step": "2",
+        "source": "Skill Discovery Rate",
+        "relation": "increases",
+        "target": "Library Size",
+        "explanation": "Each discovered skill is added to the library, increasing total count."
+      },
+      {
+        "step": "3",
+        "source": "Bounded Resources",
+        "relation": "increases",
+        "target": "Forgetting Rate",
+        "explanation": "Limited memory capacity necessitates removal of less useful skills, raising the forgetting rate."
+      },
+      {
+        "step": "4",
+        "source": "Forgetting Rate",
+        "relation": "decreases",
+        "target": "Library Size",
+        "explanation": "Higher forgetting removes more skills, reducing library size."
+      },
+      {
+        "step": "5",
+        "source": "Library Size",
+        "relation": "increases",
+        "target": "Skill Redundancy",
+        "explanation": "As more skills are accumulated, the probability of overlapping skills grows."
+      },
+      {
+        "step": "6",
+        "source": "Library Size",
+        "relation": "increases",
+        "target": "Retrieval Cost",
+        "explanation": "Larger libraries require more search to find appropriate skill, increasing time/computation."
+      },
+      {
+        "step": "7",
+        "source": "Skill Redundancy",
+        "relation": "increases",
+        "target": "Retrieval Cost",
+        "explanation": "Redundant skills add confusion and require additional discrimination, raising retrieval cost."
+      },
+      {
+        "step": "8",
+        "source": "Retrieval Cost",
+        "relation": "increases",
+        "target": "Bloat",
+        "explanation": "Higher retrieval cost directly degrades performance, which is the main symptom of bloat."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Insufficient Forgetting",
+        "why_it_matters": "Without enough forgetting, library grows indefinitely, increasing redundancy and retrieval cost."
+      },
+      {
+        "bottleneck": "Poor Skill Discrimination",
+        "why_it_matters": "The agent cannot easily identify redundant or obsolete skills, leading to accumulation of ineffective skills."
+      }
+    ],
+    "mechanism_summary": "The mechanism explains skill-library bloat in lifelong-learning agents as a consequence of independent skill discovery under bounded resources. As the agent encounters novel tasks, it discovers new skills and adds them to the library (Task Novelty → Skill Discovery Rate → Library Size). However, limited memory forces forgetting (Bounded Resources → Forgetting Rate), but insufficient forgetting leads to accumulation. Larger libraries increase skill redundancy and retrieval cost, which degrade performance—this degradation constitutes bloat. The key bottlenecks are the inability to forget outdated skills and the lack of effective discrimination between redundant skills, both of which are exacerbated by the independent discovery assumption."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+      "derived_from": [
+        "Skill granularity vs. library size tradeoff",
+        "Library Size",
+        "Retrieval Cost"
+      ],
+      "why_it_matters": "This tension determines whether the library becomes bloated or remains manageable; optimal granularity is key to balancing performance and resource use.",
+      "what_existing_methods_may_miss": "Existing methods often fix skill granularity without considering dynamic adaptation based on task complexity and resource constraints.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Exploring new skills can lead to redundancy and bloat, while exploiting the existing library may miss novel or more efficient solutions, creating an exploration-exploitation dilemma.",
+      "derived_from": [
+        "Exploration of new skills vs. exploitation of existing library tradeoff",
+        "Skill Discovery Rate",
+        "Skill Redundancy"
+      ],
+      "why_it_matters": "Balancing exploration and exploitation is critical to avoid bloat while still adapting to new tasks; excessive exploration causes bloat, insufficient exploration leads to poor adaptation.",
+      "what_existing_methods_may_miss": "Most methods use fixed exploration rates or heuristics; they do not adapt exploration based on current library redundancy or task novelty.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Retaining skills prevents catastrophic forgetting but can cause bloat; forgetting reduces bloat but risks losing skills that may be needed later, creating a retention-forgetting tradeoff.",
+      "derived_from": [
+        "Skill retention vs. forgetting tradeoff",
+        "Forgetting Rate",
+        "Bloat"
+      ],
+      "why_it_matters": "This tension directly controls library size and performance; suboptimal forgetting policies lead to either bloat or loss of valuable knowledge.",
+      "what_existing_methods_may_miss": "Existing forgetting mechanisms are often global and task-agnostic; they do not consider skill utility over time or task similarity.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that skills are discovered independently without joint optimization may cause redundancy, but coordinated optimization could reduce adaptability or increase computational cost.",
+      "derived_from": [
+        "Assumption: Skills are discovered independently",
+        "Skill Discovery Rate",
+        "Skill Redundancy"
+      ],
+      "why_it_matters": "If this assumption is violated, existing theories of bloat may not apply; understanding when independent discovery is optimal is key to designing better skill acquisition strategies.",
+      "what_existing_methods_may_miss": "Most lifelong learning methods treat skill discovery as independent per task; they miss potential benefits of cross-task coordination via curriculum or meta-learning.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does dynamically adjusting skill granularity based on task complexity and retrieval cost reduce bloat compared to fixed granularity?",
+      "question_type": "algorithmic",
+      "source_tension": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+      "expected_contribution": "Tests if adaptive granularity can mitigate the tradeoff, leading to more efficient libraries."
+    },
+    {
+      "question": "Can an adaptive exploration rate that increases when library redundancy is low reduce skill redundancy without harming task adaptation?",
+      "question_type": "causal",
+      "source_tension": "Exploring new skills can lead to redundancy and bloat, while exploiting the existing library may miss novel or more efficient solutions, creating an exploration-exploitation dilemma.",
+      "expected_contribution": "Provides a mechanism to balance exploration based on redundancy, reducing bloat while maintaining adaptability."
+    },
+    {
+      "question": "Does a utility-based forgetting policy that prunes skills with low predicted future relevance reduce bloat more effectively than first-in-first-out forgetting?",
+      "question_type": "algorithmic",
+      "source_tension": "Retaining skills prevents catastrophic forgetting but can cause bloat; forgetting reduces bloat but risks losing skills that may be needed later, creating a retention-forgetting tradeoff.",
+      "expected_contribution": "Offers a targeted forgetting method that minimizes bloat without losing valuable skills."
+    },
+    {
+      "question": "Does jointly optimizing skill discovery across tasks via curriculum learning reduce skill redundancy compared to independent discovery?",
+      "question_type": "causal",
+      "source_tension": "The assumption that skills are discovered independently without joint optimization may cause redundancy, but coordinated optimization could reduce adaptability or increase computational cost.",
+      "expected_contribution": "Tests the necessity of the independence assumption and explores collaborative skill acquisition."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that an agent can execute to accomplish a subgoal or task, often characterized by a distinct state-action mapping.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; bloat is fundamentally about the proliferation of these units."
+        },
+        {
+          "name": "Library",
+          "definition": "The structured repository of skills maintained by an agent, including mechanisms for storage, indexing, retrieval, and composition.",
+          "why_primitive": "The library is the container whose growth defines bloat; its organization influences how skills are added and removed."
+        },
+        {
+          "name": "Bloat",
+          "definition": "The undesirable increase in library size due to redundant, obsolete, or ineffective skills, leading to degraded performance or wasted resources.",
+          "why_primitive": "Bloat is the core phenomenon to explain; it is not simply growth but growth that harms the agent's capabilities."
+        },
+        {
+          "name": "Lifelong Learning",
+          "definition": "The ability of an agent to continuously adapt and acquire new knowledge or skills over time as it encounters a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "Lifelong learning creates the context where skills accumulate; without it, libraries would not persist across tasks."
+        },
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, makes decisions, and executes actions to achieve goals, with bounded computational and memory resources.",
+          "why_primitive": "All processes—skill discovery, library management, decision-making—are executed by the agent under resource constraints."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are discovered independently, not jointly optimized.",
+          "rationale": "In most lifelong learning setups, skills are acquired one by one as new tasks arise, without global coordination.",
+          "possible_failure": "If skills are discovered in a coordinated manner (e.g., via curriculum learning), bloat may be inherently reduced."
+        },
+        {
+          "assumption": "The agent has bounded memory and computational resources.",
+          "rationale": "Bloat is only problematic under resource constraints; without limits, any number of skills could be stored.",
+          "possible_failure": "If resources are effectively infinite, bloat becomes irrelevant, but this is unrealistic."
+        },
+        {
+          "assumption": "Tasks are drawn from a non-stationary distribution with possible revisits.",
+          "rationale": "Lifelong learning typically involves changing tasks, which can create redundant or conflicting skills.",
+          "possible_failure": "If tasks are strictly repeating and known, one could avoid bloat by storing only necessary skills."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which new tasks require previously unseen skills, driving discovery."
+          },
+          {
+            "name": "Bounded Resources",
+            "role": "input",
+            "description": "Limited memory and computational capacity of the agent."
+          },
+          {
+            "name": "Skill Discovery Rate",
+            "role": "mediator",
+            "description": "Frequency at which new skills are learned and added to the library."
+          },
+          {
+            "name": "Forgetting Rate",
+            "role": "mediator",
+            "description": "Rate at which skills are pruned or forgotten, influenced by memory constraints and retention policy."
+          },
+          {
+            "name": "Skill Redundancy",
+            "role": "mediator",
+            "description": "Extent to which multiple skills cover similar state-action mappings."
+          },
+          {
+            "name": "Library Size",
+            "role": "output",
+            "description": "Total number of skills stored in the library."
+          },
+          {
+            "name": "Retrieval Cost",
+            "role": "mediator",
+            "description": "Time or computational resources required to select the right skill for a given task."
+          },
+          {
+            "name": "Bloat",
+            "role": "outcome",
+            "description": "Detrimental effect on agent performance due to redundant or obsolete skills, measured as degradation in task completion efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Discovery Rate",
+            "explanation": "Novel tasks require new skills, so higher novelty leads to more frequent skill discovery."
+          },
+          {
+            "step": "2",
+            "source": "Skill Discovery Rate",
+            "relation": "increases",
+            "target": "Library Size",
+            "explanation": "Each discovered skill is added to the library, increasing total count."
+          },
+          {
+            "step": "3",
+            "source": "Bounded Resources",
+            "relation": "increases",
+            "target": "Forgetting Rate",
+            "explanation": "Limited memory capacity necessitates removal of less useful skills, raising the forgetting rate."
+          },
+          {
+            "step": "4",
+            "source": "Forgetting Rate",
+            "relation": "decreases",
+            "target": "Library Size",
+            "explanation": "Higher forgetting removes more skills, reducing library size."
+          },
+          {
+            "step": "5",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Skill Redundancy",
+            "explanation": "As more skills are accumulated, the probability of overlapping skills grows."
+          },
+          {
+            "step": "6",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Larger libraries require more search to find appropriate skill, increasing time/computation."
+          },
+          {
+            "step": "7",
+            "source": "Skill Redundancy",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Redundant skills add confusion and require additional discrimination, raising retrieval cost."
+          },
+          {
+            "step": "8",
+            "source": "Retrieval Cost",
+            "relation": "increases",
+            "target": "Bloat",
+            "explanation": "Higher retrieval cost directly degrades performance, which is the main symptom of bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient Forgetting",
+            "why_it_matters": "Without enough forgetting, library grows indefinitely, increasing redundancy and retrieval cost."
+          },
+          {
+            "bottleneck": "Poor Skill Discrimination",
+            "why_it_matters": "The agent cannot easily identify redundant or obsolete skills, leading to accumulation of ineffective skills."
+          }
+        ],
+        "mechanism_summary": "The mechanism explains skill-library bloat in lifelong-learning agents as a consequence of independent skill discovery under bounded resources. As the agent encounters novel tasks, it discovers new skills and adds them to the library (Task Novelty → Skill Discovery Rate → Library Size). However, limited memory forces forgetting (Bounded Resources → Forgetting Rate), but insufficient forgetting leads to accumulation. Larger libraries increase skill redundancy and retrieval cost, which degrade performance—this degradation constitutes bloat. The key bottlenecks are the inability to forget outdated skills and the lack of effective discrimination between redundant skills, both of which are exacerbated by the independent discovery assumption."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+        "derived_from": [
+          "Skill granularity vs. library size tradeoff",
+          "Library Size",
+          "Retrieval Cost"
+        ],
+        "why_it_matters": "This tension determines whether the library becomes bloated or remains manageable; optimal granularity is key to balancing performance and resource use.",
+        "what_existing_methods_may_miss": "Existing methods often fix skill granularity without considering dynamic adaptation based on task complexity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical library size threshold (as a fraction of memory capacity) above which adaptive skill granularity reduces bloat, while below it fixed coarse granularity is optimal?",
+        "question_type": "algorithmic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a sharp boundary condition for when adaptive granularity is beneficial, refining the tradeoff between expressiveness and efficiency."
+      },
+      "hypothesis": {
+        "statement": "When library size exceeds 70% of memory capacity, adaptive skill granularity leads to lower bloat (measured by retrieval cost and task performance degradation) than any fixed granularity; below that threshold, fixed coarse granularity yields comparable or better performance.",
+        "predicted_effect": "Bloat metrics (library size, retrieval cost, task completion time) exhibit a phase transition at approximately 70% memory usage, with adaptive granularity superior above the threshold and coarse granularity superior below."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent on a sequence of tasks with varying complexity. Vary memory capacity (e.g., 100, 200, 500 skill slots) and task novelty rate. For each condition, compare two agents: one with fixed coarse granularity and one with adaptive granularity that adjusts based on current library size relative to memory capacity. Measure bloat as a composite of retrieval cost and task completion efficiency. Identify the library size at which adaptive granularity begins to outperform fixed coarse granularity.",
+        "independent_variables": [
+          "Granularity mechanism (adaptive vs fixed coarse)",
+          "Memory capacity (number of skill slots)",
+          "Task novelty rate"
+        ],
+        "dependent_variables": [
+          "Library size (number of skills)",
+          "Retrieval cost (average time to select skill)",
+          "Task completion efficiency (1/completion time)",
+          "Bloat composite (retrieval cost + (1 - efficiency))"
+        ],
+        "controls": [
+          "Task sequence and difficulty distribution",
+          "Skill discovery algorithm (same across conditions)",
+          "Forgetting algorithm (same across conditions)",
+          "Random seed",
+          "Initial library (empty)"
+        ],
+        "falsifying_observation": "If no clear threshold exists where adaptive granularity consistently outperforms fixed coarse granularity (i.e., the crossover point varies widely across runs or memory capacities), or if adaptive granularity never achieves significantly better bloat than the best fixed granularity at any library size, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For all memory capacities, adaptive granularity yields lower bloat than fixed coarse granularity when library size exceeds ~70% of capacity.",
+          "Below ~70% capacity, fixed coarse granularity matches or outperforms adaptive on bloat.",
+          "The crossover point is robust across different task novelty rates and memory capacities.",
+          "Retrieval cost grows superlinearly after the threshold for fixed granularity but remains sublinear for adaptive."
+        ],
+        "rejects_hypothesis": [
+          "No consistent crossover point; adaptive granularity either always outperforms or never outperforms fixed coarse.",
+          "Adaptive granularity incurs overhead that cancels benefits at all library sizes.",
+          "Fixed coarse granularity performs best across all library sizes.",
+          "The threshold varies unpredictably with memory capacity or task novelty."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "Hypothesis that a critical library size threshold exists for adaptive granularity benefits is not supported.",
+        "assumption_to_revise": "The assumption that adaptive granularity's overhead is negligible relative to its benefits, and that the optimal granularity can be inferred from library size alone.",
+        "next_question": "What is the functional form of adaptive granularity's overhead in terms of library size and task complexity, and under what conditions (if any) does it offset retrieval savings?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that an agent can execute to accomplish a subgoal or task, often characterized by a distinct state-action mapping.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; bloat is fundamentally about the proliferation of these units."
+        },
+        {
+          "name": "Library",
+          "definition": "The structured repository of skills maintained by an agent, including mechanisms for storage, indexing, retrieval, and composition.",
+          "why_primitive": "The library is the container whose growth defines bloat; its organization influences how skills are added and removed."
+        },
+        {
+          "name": "Bloat",
+          "definition": "The undesirable increase in library size due to redundant, obsolete, or ineffective skills, leading to degraded performance or wasted resources.",
+          "why_primitive": "Bloat is the core phenomenon to explain; it is not simply growth but growth that harms the agent's capabilities."
+        },
+        {
+          "name": "Lifelong Learning",
+          "definition": "The ability of an agent to continuously adapt and acquire new knowledge or skills over time as it encounters a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "Lifelong learning creates the context where skills accumulate; without it, libraries would not persist across tasks."
+        },
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, makes decisions, and executes actions to achieve goals, with bounded computational and memory resources.",
+          "why_primitive": "All processes—skill discovery, library management, decision-making—are executed by the agent under resource constraints."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are discovered independently, not jointly optimized.",
+          "rationale": "In most lifelong learning setups, skills are acquired one by one as new tasks arise, without global coordination.",
+          "possible_failure": "If skills are discovered in a coordinated manner (e.g., via curriculum learning), bloat may be inherently reduced."
+        },
+        {
+          "assumption": "The agent has bounded memory and computational resources.",
+          "rationale": "Bloat is only problematic under resource constraints; without limits, any number of skills could be stored.",
+          "possible_failure": "If resources are effectively infinite, bloat becomes irrelevant, but this is unrealistic."
+        },
+        {
+          "assumption": "Tasks are drawn from a non-stationary distribution with possible revisits.",
+          "rationale": "Lifelong learning typically involves changing tasks, which can create redundant or conflicting skills.",
+          "possible_failure": "If tasks are strictly repeating and known, one could avoid bloat by storing only necessary skills."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which new tasks require previously unseen skills, driving discovery."
+          },
+          {
+            "name": "Bounded Resources",
+            "role": "input",
+            "description": "Limited memory and computational capacity of the agent."
+          },
+          {
+            "name": "Skill Discovery Rate",
+            "role": "mediator",
+            "description": "Frequency at which new skills are learned and added to the library."
+          },
+          {
+            "name": "Forgetting Rate",
+            "role": "mediator",
+            "description": "Rate at which skills are pruned or forgotten, influenced by memory constraints and retention policy."
+          },
+          {
+            "name": "Skill Redundancy",
+            "role": "mediator",
+            "description": "Extent to which multiple skills cover similar state-action mappings."
+          },
+          {
+            "name": "Library Size",
+            "role": "output",
+            "description": "Total number of skills stored in the library."
+          },
+          {
+            "name": "Retrieval Cost",
+            "role": "mediator",
+            "description": "Time or computational resources required to select the right skill for a given task."
+          },
+          {
+            "name": "Bloat",
+            "role": "outcome",
+            "description": "Detrimental effect on agent performance due to redundant or obsolete skills, measured as degradation in task completion efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Discovery Rate",
+            "explanation": "Novel tasks require new skills, so higher novelty leads to more frequent skill discovery."
+          },
+          {
+            "step": "2",
+            "source": "Skill Discovery Rate",
+            "relation": "increases",
+            "target": "Library Size",
+            "explanation": "Each discovered skill is added to the library, increasing total count."
+          },
+          {
+            "step": "3",
+            "source": "Bounded Resources",
+            "relation": "increases",
+            "target": "Forgetting Rate",
+            "explanation": "Limited memory capacity necessitates removal of less useful skills, raising the forgetting rate."
+          },
+          {
+            "step": "4",
+            "source": "Forgetting Rate",
+            "relation": "decreases",
+            "target": "Library Size",
+            "explanation": "Higher forgetting removes more skills, reducing library size."
+          },
+          {
+            "step": "5",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Skill Redundancy",
+            "explanation": "As more skills are accumulated, the probability of overlapping skills grows."
+          },
+          {
+            "step": "6",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Larger libraries require more search to find appropriate skill, increasing time/computation."
+          },
+          {
+            "step": "7",
+            "source": "Skill Redundancy",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Redundant skills add confusion and require additional discrimination, raising retrieval cost."
+          },
+          {
+            "step": "8",
+            "source": "Retrieval Cost",
+            "relation": "increases",
+            "target": "Bloat",
+            "explanation": "Higher retrieval cost directly degrades performance, which is the main symptom of bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient Forgetting",
+            "why_it_matters": "Without enough forgetting, library grows indefinitely, increasing redundancy and retrieval cost."
+          },
+          {
+            "bottleneck": "Poor Skill Discrimination",
+            "why_it_matters": "The agent cannot easily identify redundant or obsolete skills, leading to accumulation of ineffective skills."
+          }
+        ],
+        "mechanism_summary": "The mechanism explains skill-library bloat in lifelong-learning agents as a consequence of independent skill discovery under bounded resources. As the agent encounters novel tasks, it discovers new skills and adds them to the library (Task Novelty → Skill Discovery Rate → Library Size). However, limited memory forces forgetting (Bounded Resources → Forgetting Rate), but insufficient forgetting leads to accumulation. Larger libraries increase skill redundancy and retrieval cost, which degrade performance—this degradation constitutes bloat. The key bottlenecks are the inability to forget outdated skills and the lack of effective discrimination between redundant skills, both of which are exacerbated by the independent discovery assumption."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+        "derived_from": [
+          "Skill granularity vs. library size tradeoff",
+          "Library Size",
+          "Retrieval Cost"
+        ],
+        "why_it_matters": "This tension determines whether the library becomes bloated or remains manageable; optimal granularity is key to balancing performance and resource use.",
+        "what_existing_methods_may_miss": "Existing methods often fix skill granularity without considering dynamic adaptation based on task complexity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Below what redundancy threshold does increasing exploration reduce future skill redundancy in lifelong learning, and how does this threshold vary with task similarity distribution?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical crossover point between exploration-driven discovery and forgetting-driven pruning, providing a principled policy switch based on library redundancy."
+      },
+      "hypothesis": {
+        "statement": "There exists a redundancy threshold θ such that when current library redundancy is below θ, increasing exploration reduces future redundancy, but when above θ, increasing forgetting is more effective; this threshold increases with task similarity.",
+        "predicted_effect": "The threshold θ will be positive and vary with task similarity: higher similarity raises θ, making exploration beneficial even at moderate redundancy levels."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a factorial experiment over two binary conditions: exploration rate (fixed vs. adaptive) and forgetting rate (fixed vs. adaptive), using a sequence of tasks with controlled similarity. For each condition, measure redundancy after each task and compute the crossover redundancy where switching policies yields best performance. Compare to a fixed-policy baseline.",
+        "independent_variables": [
+          "Exploration policy (fixed, adaptive threshold)",
+          "Task similarity (low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Crossover redundancy threshold θ",
+          "Skill redundancy over time",
+          "Average task adaptation performance"
+        ],
+        "controls": [
+          "Same task sequence length",
+          "Same skill discovery algorithm",
+          "Same memory constraints",
+          "Same initial library",
+          "Same evaluation tasks"
+        ],
+        "falsifying_observation": "If no consistent threshold θ is found (i.e., exploration always reduces redundancy regardless of level, or never does), or if θ does not vary with task similarity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A clear threshold θ exists where below it exploration reduces redundancy, above it does not.",
+          "θ is significantly higher when task similarity is high than when it is low.",
+          "Adaptive policy based on θ maintains or improves task adaptation compared to fixed policies."
+        ],
+        "rejects_hypothesis": [
+          "No threshold exists; exploration always reduces redundancy equally.",
+          "θ does not vary with task similarity.",
+          "Adaptive policy harms adaptation even when it reduces redundancy at some levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold exists or it is insensitive to similarity, then the assumption that redundancy is a reliable diagnostic for the exploration-forgetting balance is likely incorrect.",
+        "assumption_to_revise": "The assumption that library redundancy can serve as a single scalar metric to trigger a policy switch.",
+        "next_question": "Does the effectiveness of exploration depend on more granular aspects of skill structure, such as the distribution of skill similarities, rather than overall redundancy?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that an agent can execute to accomplish a subgoal or task, often characterized by a distinct state-action mapping.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; bloat is fundamentally about the proliferation of these units."
+        },
+        {
+          "name": "Library",
+          "definition": "The structured repository of skills maintained by an agent, including mechanisms for storage, indexing, retrieval, and composition.",
+          "why_primitive": "The library is the container whose growth defines bloat; its organization influences how skills are added and removed."
+        },
+        {
+          "name": "Bloat",
+          "definition": "The undesirable increase in library size due to redundant, obsolete, or ineffective skills, leading to degraded performance or wasted resources.",
+          "why_primitive": "Bloat is the core phenomenon to explain; it is not simply growth but growth that harms the agent's capabilities."
+        },
+        {
+          "name": "Lifelong Learning",
+          "definition": "The ability of an agent to continuously adapt and acquire new knowledge or skills over time as it encounters a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "Lifelong learning creates the context where skills accumulate; without it, libraries would not persist across tasks."
+        },
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, makes decisions, and executes actions to achieve goals, with bounded computational and memory resources.",
+          "why_primitive": "All processes—skill discovery, library management, decision-making—are executed by the agent under resource constraints."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are discovered independently, not jointly optimized.",
+          "rationale": "In most lifelong learning setups, skills are acquired one by one as new tasks arise, without global coordination.",
+          "possible_failure": "If skills are discovered in a coordinated manner (e.g., via curriculum learning), bloat may be inherently reduced."
+        },
+        {
+          "assumption": "The agent has bounded memory and computational resources.",
+          "rationale": "Bloat is only problematic under resource constraints; without limits, any number of skills could be stored.",
+          "possible_failure": "If resources are effectively infinite, bloat becomes irrelevant, but this is unrealistic."
+        },
+        {
+          "assumption": "Tasks are drawn from a non-stationary distribution with possible revisits.",
+          "rationale": "Lifelong learning typically involves changing tasks, which can create redundant or conflicting skills.",
+          "possible_failure": "If tasks are strictly repeating and known, one could avoid bloat by storing only necessary skills."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which new tasks require previously unseen skills, driving discovery."
+          },
+          {
+            "name": "Bounded Resources",
+            "role": "input",
+            "description": "Limited memory and computational capacity of the agent."
+          },
+          {
+            "name": "Skill Discovery Rate",
+            "role": "mediator",
+            "description": "Frequency at which new skills are learned and added to the library."
+          },
+          {
+            "name": "Forgetting Rate",
+            "role": "mediator",
+            "description": "Rate at which skills are pruned or forgotten, influenced by memory constraints and retention policy."
+          },
+          {
+            "name": "Skill Redundancy",
+            "role": "mediator",
+            "description": "Extent to which multiple skills cover similar state-action mappings."
+          },
+          {
+            "name": "Library Size",
+            "role": "output",
+            "description": "Total number of skills stored in the library."
+          },
+          {
+            "name": "Retrieval Cost",
+            "role": "mediator",
+            "description": "Time or computational resources required to select the right skill for a given task."
+          },
+          {
+            "name": "Bloat",
+            "role": "outcome",
+            "description": "Detrimental effect on agent performance due to redundant or obsolete skills, measured as degradation in task completion efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Discovery Rate",
+            "explanation": "Novel tasks require new skills, so higher novelty leads to more frequent skill discovery."
+          },
+          {
+            "step": "2",
+            "source": "Skill Discovery Rate",
+            "relation": "increases",
+            "target": "Library Size",
+            "explanation": "Each discovered skill is added to the library, increasing total count."
+          },
+          {
+            "step": "3",
+            "source": "Bounded Resources",
+            "relation": "increases",
+            "target": "Forgetting Rate",
+            "explanation": "Limited memory capacity necessitates removal of less useful skills, raising the forgetting rate."
+          },
+          {
+            "step": "4",
+            "source": "Forgetting Rate",
+            "relation": "decreases",
+            "target": "Library Size",
+            "explanation": "Higher forgetting removes more skills, reducing library size."
+          },
+          {
+            "step": "5",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Skill Redundancy",
+            "explanation": "As more skills are accumulated, the probability of overlapping skills grows."
+          },
+          {
+            "step": "6",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Larger libraries require more search to find appropriate skill, increasing time/computation."
+          },
+          {
+            "step": "7",
+            "source": "Skill Redundancy",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Redundant skills add confusion and require additional discrimination, raising retrieval cost."
+          },
+          {
+            "step": "8",
+            "source": "Retrieval Cost",
+            "relation": "increases",
+            "target": "Bloat",
+            "explanation": "Higher retrieval cost directly degrades performance, which is the main symptom of bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient Forgetting",
+            "why_it_matters": "Without enough forgetting, library grows indefinitely, increasing redundancy and retrieval cost."
+          },
+          {
+            "bottleneck": "Poor Skill Discrimination",
+            "why_it_matters": "The agent cannot easily identify redundant or obsolete skills, leading to accumulation of ineffective skills."
+          }
+        ],
+        "mechanism_summary": "The mechanism explains skill-library bloat in lifelong-learning agents as a consequence of independent skill discovery under bounded resources. As the agent encounters novel tasks, it discovers new skills and adds them to the library (Task Novelty → Skill Discovery Rate → Library Size). However, limited memory forces forgetting (Bounded Resources → Forgetting Rate), but insufficient forgetting leads to accumulation. Larger libraries increase skill redundancy and retrieval cost, which degrade performance—this degradation constitutes bloat. The key bottlenecks are the inability to forget outdated skills and the lack of effective discrimination between redundant skills, both of which are exacerbated by the independent discovery assumption."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+        "derived_from": [
+          "Skill granularity vs. library size tradeoff",
+          "Library Size",
+          "Retrieval Cost"
+        ],
+        "why_it_matters": "This tension determines whether the library becomes bloated or remains manageable; optimal granularity is key to balancing performance and resource use.",
+        "what_existing_methods_may_miss": "Existing methods often fix skill granularity without considering dynamic adaptation based on task complexity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does skill granularity moderate the effect of curriculum learning on skill-library redundancy in lifelong learning agents?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a moderating variable (skill granularity) that determines whether curriculum learning reduces or increases redundancy, revealing a threshold condition for effective collaborative discovery."
+      },
+      "hypothesis": {
+        "statement": "Curriculum learning reduces skill redundancy when skill granularity is coarse, but increases redundancy when skill granularity is fine-grained.",
+        "predicted_effect": "The library will have lower redundancy under curriculum learning than independent discovery for coarse skills, but higher redundancy for fine skills."
+      },
+      "minimal_decisive_test": {
+        "experiment": "2x2 factorial design: two discovery methods (independent vs. curriculum learning) and two granularity levels (coarse vs. fine skills). Agents learn a sequence of tasks with controlled novelty and similarity. Measure skill redundancy after a fixed number of tasks.",
+        "independent_variables": [
+          "Discovery method (independent vs. curriculum learning)",
+          "Skill granularity (coarse vs. fine)"
+        ],
+        "dependent_variables": [
+          "Skill redundancy (average pairwise similarity of skill policies)",
+          "Library size",
+          "Retrieval cost per task"
+        ],
+        "controls": [
+          "Same task distribution",
+          "Same environment",
+          "Same forgetting policy",
+          "Same number of tasks",
+          "Same skill representation"
+        ],
+        "falsifying_observation": "Curriculum learning decreases (or does not change) redundancy for both coarse and fine granularity, i.e., no interaction effect."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For coarse granularity, redundancy is significantly lower under curriculum learning.",
+          "For fine granularity, redundancy is significantly higher under curriculum learning.",
+          "Library size and retrieval cost follow the same pattern."
+        ],
+        "rejects_hypothesis": [
+          "Redundancy is lower under curriculum learning for both granularities (no interaction).",
+          "Redundancy is higher under curriculum learning for both granularities (no interaction).",
+          "No significant difference between methods for either granularity."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the interaction is not observed, then the moderating role of granularity is not supported; other factors may dominate.",
+        "assumption_to_revise": "Revise the assumption that granularity is the key moderator; consider task novelty or similarity as alternative moderators.",
+        "next_question": "Does task novelty (low vs. high) moderate the effect of curriculum learning on redundancy, independent of granularity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A reusable behavior or policy that an agent can execute to accomplish a subgoal or task, often characterized by a distinct state-action mapping.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; bloat is fundamentally about the proliferation of these units."
+        },
+        {
+          "name": "Library",
+          "definition": "The structured repository of skills maintained by an agent, including mechanisms for storage, indexing, retrieval, and composition.",
+          "why_primitive": "The library is the container whose growth defines bloat; its organization influences how skills are added and removed."
+        },
+        {
+          "name": "Bloat",
+          "definition": "The undesirable increase in library size due to redundant, obsolete, or ineffective skills, leading to degraded performance or wasted resources.",
+          "why_primitive": "Bloat is the core phenomenon to explain; it is not simply growth but growth that harms the agent's capabilities."
+        },
+        {
+          "name": "Lifelong Learning",
+          "definition": "The ability of an agent to continuously adapt and acquire new knowledge or skills over time as it encounters a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "Lifelong learning creates the context where skills accumulate; without it, libraries would not persist across tasks."
+        },
+        {
+          "name": "Agent",
+          "definition": "An autonomous entity that perceives its environment, makes decisions, and executes actions to achieve goals, with bounded computational and memory resources.",
+          "why_primitive": "All processes—skill discovery, library management, decision-making—are executed by the agent under resource constraints."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are discovered independently, not jointly optimized.",
+          "rationale": "In most lifelong learning setups, skills are acquired one by one as new tasks arise, without global coordination.",
+          "possible_failure": "If skills are discovered in a coordinated manner (e.g., via curriculum learning), bloat may be inherently reduced."
+        },
+        {
+          "assumption": "The agent has bounded memory and computational resources.",
+          "rationale": "Bloat is only problematic under resource constraints; without limits, any number of skills could be stored.",
+          "possible_failure": "If resources are effectively infinite, bloat becomes irrelevant, but this is unrealistic."
+        },
+        {
+          "assumption": "Tasks are drawn from a non-stationary distribution with possible revisits.",
+          "rationale": "Lifelong learning typically involves changing tasks, which can create redundant or conflicting skills.",
+          "possible_failure": "If tasks are strictly repeating and known, one could avoid bloat by storing only necessary skills."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Task Novelty",
+            "role": "input",
+            "description": "Degree to which new tasks require previously unseen skills, driving discovery."
+          },
+          {
+            "name": "Bounded Resources",
+            "role": "input",
+            "description": "Limited memory and computational capacity of the agent."
+          },
+          {
+            "name": "Skill Discovery Rate",
+            "role": "mediator",
+            "description": "Frequency at which new skills are learned and added to the library."
+          },
+          {
+            "name": "Forgetting Rate",
+            "role": "mediator",
+            "description": "Rate at which skills are pruned or forgotten, influenced by memory constraints and retention policy."
+          },
+          {
+            "name": "Skill Redundancy",
+            "role": "mediator",
+            "description": "Extent to which multiple skills cover similar state-action mappings."
+          },
+          {
+            "name": "Library Size",
+            "role": "output",
+            "description": "Total number of skills stored in the library."
+          },
+          {
+            "name": "Retrieval Cost",
+            "role": "mediator",
+            "description": "Time or computational resources required to select the right skill for a given task."
+          },
+          {
+            "name": "Bloat",
+            "role": "outcome",
+            "description": "Detrimental effect on agent performance due to redundant or obsolete skills, measured as degradation in task completion efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "Task Novelty",
+            "relation": "increases",
+            "target": "Skill Discovery Rate",
+            "explanation": "Novel tasks require new skills, so higher novelty leads to more frequent skill discovery."
+          },
+          {
+            "step": "2",
+            "source": "Skill Discovery Rate",
+            "relation": "increases",
+            "target": "Library Size",
+            "explanation": "Each discovered skill is added to the library, increasing total count."
+          },
+          {
+            "step": "3",
+            "source": "Bounded Resources",
+            "relation": "increases",
+            "target": "Forgetting Rate",
+            "explanation": "Limited memory capacity necessitates removal of less useful skills, raising the forgetting rate."
+          },
+          {
+            "step": "4",
+            "source": "Forgetting Rate",
+            "relation": "decreases",
+            "target": "Library Size",
+            "explanation": "Higher forgetting removes more skills, reducing library size."
+          },
+          {
+            "step": "5",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Skill Redundancy",
+            "explanation": "As more skills are accumulated, the probability of overlapping skills grows."
+          },
+          {
+            "step": "6",
+            "source": "Library Size",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Larger libraries require more search to find appropriate skill, increasing time/computation."
+          },
+          {
+            "step": "7",
+            "source": "Skill Redundancy",
+            "relation": "increases",
+            "target": "Retrieval Cost",
+            "explanation": "Redundant skills add confusion and require additional discrimination, raising retrieval cost."
+          },
+          {
+            "step": "8",
+            "source": "Retrieval Cost",
+            "relation": "increases",
+            "target": "Bloat",
+            "explanation": "Higher retrieval cost directly degrades performance, which is the main symptom of bloat."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Insufficient Forgetting",
+            "why_it_matters": "Without enough forgetting, library grows indefinitely, increasing redundancy and retrieval cost."
+          },
+          {
+            "bottleneck": "Poor Skill Discrimination",
+            "why_it_matters": "The agent cannot easily identify redundant or obsolete skills, leading to accumulation of ineffective skills."
+          }
+        ],
+        "mechanism_summary": "The mechanism explains skill-library bloat in lifelong-learning agents as a consequence of independent skill discovery under bounded resources. As the agent encounters novel tasks, it discovers new skills and adds them to the library (Task Novelty → Skill Discovery Rate → Library Size). However, limited memory forces forgetting (Bounded Resources → Forgetting Rate), but insufficient forgetting leads to accumulation. Larger libraries increase skill redundancy and retrieval cost, which degrade performance—this degradation constitutes bloat. The key bottlenecks are the inability to forget outdated skills and the lack of effective discrimination between redundant skills, both of which are exacerbated by the independent discovery assumption."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Fine-grained skills improve flexibility and reusability, but they also increase library size and retrieval cost, creating a tradeoff between expressiveness and efficiency.",
+        "derived_from": [
+          "Skill granularity vs. library size tradeoff",
+          "Library Size",
+          "Retrieval Cost"
+        ],
+        "why_it_matters": "This tension determines whether the library becomes bloated or remains manageable; optimal granularity is key to balancing performance and resource use.",
+        "what_existing_methods_may_miss": "Existing methods often fix skill granularity without considering dynamic adaptation based on task complexity and resource constraints.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical library size L_c beyond which retrieval cost grows superlinearly, and does a utility-based forgetting policy (pruning by predicted future relevance) shift L_c higher compared to FIFO forgetting?",
+        "question_type": "diagnostic",
+        "source_tension": "T1",
+        "expected_contribution": "Identifies a critical library size threshold that governs a phase transition in retrieval cost, and demonstrates how utility-based forgetting can delay the onset of superlinear growth, thereby reducing bloat more effectively than FIFO."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical library size L_c such that retrieval cost grows sublinearly for L < L_c and superlinearly for L > L_c, and a utility-based forgetting policy increases L_c relative to a FIFO forgetting policy.",
+        "predicted_effect": "Utility-based forgetting yields a higher L_c, meaning that the agent can accumulate more skills before bloat (superlinear retrieval cost) emerges, while maintaining comparable task performance."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement two lifelong-learning agents with identical skill discovery mechanisms and bounded resources, differing only in forgetting policy (utility-based vs. FIFO). Train both on a sequence of tasks with controlled novelty to generate libraries of varying sizes. For each policy, measure average retrieval cost as a function of library size across multiple runs. Fit a piecewise linear regression to identify the threshold L_c where the slope changes from sublinear to superlinear. Compare L_c across policies using bootstrap confidence intervals.",
+        "independent_variables": [
+          "Forgetting policy (utility-based vs. FIFO)",
+          "Library size (induced by controlling task novelty and memory budget)"
+        ],
+        "dependent_variables": [
+          "Critical library size L_c (change point in retrieval cost scaling)",
+          "Average retrieval cost",
+          "Task performance (success rate)",
+          "Library size at end of training"
+        ],
+        "controls": [
+          "Same skill discovery mechanism (e.g., option-critic)",
+          "Same task sequence (non-stationary with revisits)",
+          "Same memory and compute budgets",
+          "Same evaluation metrics and statistical testing procedures"
+        ],
+        "falsifying_observation": "If no statistically significant change point in retrieval cost scaling is detected for either policy, or if the L_c for utility-based forgetting is not significantly higher than that for FIFO, or if utility-based forgetting yields significantly worse task performance, then the hypothesis is rejected."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Retrieval cost exhibits a clear change point from sublinear to superlinear growth with library size.",
+          "Utility-based forgetting yields a significantly higher L_c than FIFO.",
+          "Library size at the end of training is smaller for utility-based forgetting.",
+          "Task performance is comparable or better for utility-based forgetting."
+        ],
+        "rejects_hypothesis": [
+          "Retrieval cost scales linearly or sublinearly across all library sizes (no threshold detected).",
+          "Utility-based forgetting does not show a higher L_c than FIFO.",
+          "Utility-based forgetting leads to smaller libraries but task performance degrades significantly.",
+          "No clear difference in bloat metrics between policies."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the experiment fails to detect a critical library size threshold (i.e., retrieval cost grows linearly throughout), or if utility-based forgetting does not shift L_c higher, then the hypothesized phase transition may not exist or the utility-based policy does not exploit it.",
+        "assumption_to_revise": "The assumption that retrieval cost exhibits a scaling change point; it may instead grow smoothly or be dominated by other factors. Also, the assumption that predicted future relevance is a sufficient pruning criterion.",
+        "next_question": "What if the threshold is determined by the diversity of tasks rather than library size alone? Or what if a hybrid forgetting policy that combines utility and recency yields a different threshold?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "When library size exceeds 70% of memory capacity, adaptive skill granularity leads to lower bloat (measured by retrieval cost and task performance degradation) than any fixed granularity; below that threshold, fixed coarse granularity yields comparable or better performance.",
+      "independent_variables": [
+        "Granularity mechanism (adaptive vs fixed coarse)"
+      ],
+      "dependent_variables": [
+        "Library size (number of skills)",
+        "Retrieval cost (average time to select skill)",
+        "Task completion efficiency (1/completion time)",
+        "Bloat composite (retrieval cost + (1 - efficiency))"
+      ],
+      "controlled_variables": [
+        "Memory capacity (200 skill slots)",
+        "Task sequence (fixed sequence of 200 tasks with varying complexity)",
+        "Task difficulty distribution (uniform across tasks)",
+        "Skill discovery algorithm (create new skill for each novel task component)",
+        "Forgetting algorithm (Least Recently Used when capacity full)",
+        "Random seed (42)",
+        "Initial library (empty)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed Coarse Granularity",
+          "description": "Each skill covers an entire task; skill size remains constant."
+        },
+        {
+          "name": "Adaptive Granularity",
+          "description": "Skill size adjusts based on current library size relative to memory capacity: finer granularity when library size < 70% capacity, coarser when >= 70%."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library Size",
+          "definition": "Total number of skills stored in the library, measured at the end of each task."
+        },
+        {
+          "name": "Retrieval Cost",
+          "definition": "Average time (in simulation steps) to select the appropriate skill for a given task, measured over all tasks."
+        },
+        {
+          "name": "Task Completion Efficiency",
+          "definition": "Reciprocal of time taken to complete each task, averaged over all tasks."
+        },
+        {
+          "name": "Bloat Composite",
+          "definition": "Retrieval cost + (1 - efficiency), summed over the experiment."
+        }
+      ],
+      "expected_result": "For the adaptive granularity agent, bloat composite is lower than the fixed coarse agent after library size exceeds approximately 140 skills (70% of 200). Before that, the fixed coarse agent shows similar or lower bloat. The crossover point is consistent across multiple runs with different random seeds.",
+      "falsifying_result": "If no consistent crossover point near 70% memory capacity is observed (e.g., adaptive always worse, always better, or crossover varies widely across runs), the hypothesis is falsified.",
+      "minimum_viable_experiment": "Simulate a lifelong learning agent on a fixed sequence of 200 tasks, with memory capacity of 200 skill slots. Use a skill discovery algorithm that creates new skills for each task. Forgetting algorithm: least recently used when capacity is full. Compare adaptive granularity (skill size adjusted based on library size relative to capacity) vs fixed coarse granularity (each skill covers entire task). Measure bloat metrics every 10 tasks. If the adaptive method does not show consistent improvement over fixed coarse after library size exceeds ~140 skills (70% of 200), the hypothesis is falsified.",
+      "risks_and_confounds": [
+        "Overhead of adaptive mechanism may add computational cost not captured in retrieval cost metric.",
+        "Task sequence may not represent all real-world task distributions; results may not generalize.",
+        "Choice of forgetting algorithm (LRU) may interact with granularity mechanisms; other forgetting policies could yield different results.",
+        "Fixed coarse granularity may be suboptimal if tasks are highly diverse; a more competitive fixed baseline could be necessary."
+      ]
+    },
+    {
+      "hypothesis": "There exists a redundancy threshold θ such that when current library redundancy is below θ, increasing exploration reduces future redundancy, but when above θ, increasing forgetting is more effective; this threshold increases with task similarity.",
+      "independent_variables": [
+        "task similarity (low, high)",
+        "exploration rate (0.1, 0.5, 0.9)",
+        "forgetting rate (0.1, 0.5, 0.9)"
+      ],
+      "dependent_variables": [
+        "skill redundancy after each task",
+        "crossover redundancy threshold θ",
+        "average task adaptation performance"
+      ],
+      "controlled_variables": [
+        "same task sequence length (20 tasks per similarity condition)",
+        "same skill discovery algorithm",
+        "same memory constraints (e.g., max 100 skills)",
+        "same initial library (empty)",
+        "same evaluation tasks (held-out set of 10 tasks)"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed Policy",
+          "description": "Agent with fixed exploration rate (0.5) and forgetting rate (0.5) throughout the task sequence."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill Redundancy",
+          "definition": "Fraction of skills in library that are redundant, i.e., have pairwise cosine similarity > 0.9 to another skill."
+        },
+        {
+          "name": "Crossover Threshold θ",
+          "definition": "The redundancy level at which the effect of increasing exploration (vs. increasing forgetting) on future redundancy changes sign."
+        },
+        {
+          "name": "Task Adaptation Performance",
+          "definition": "Average cumulative reward across all tasks in the sequence."
+        }
+      ],
+      "expected_result": "For low task similarity, the crossover threshold θ is low (around 0.2); for high similarity, θ is higher (around 0.6). The adaptive policy using the estimated θ outperforms fixed policies in terms of final library size and task performance.",
+      "falsifying_result": "No clear crossover threshold is observed in either similarity condition (i.e., the effect of exploration vs. forgetting does not depend on current redundancy), or the crossover threshold does not differ significantly between low and high similarity (p > 0.05).",
+      "minimum_viable_experiment": "Run a lifelong learning agent on two task sequences of 20 tasks each: one with low inter-task similarity (cosine < 0.3) and one with high similarity (cosine > 0.7). For each sequence, conduct a 3x3 grid over exploration rate (0.1, 0.5, 0.9) and forgetting rate (0.1, 0.5, 0.9). For each combination, measure the change in skill redundancy after every 5 tasks. Plot the change in redundancy vs. current redundancy to identify the crossover point. Repeat each condition 5 times with different random seeds to assess stability.",
+      "risks_and_confounds": [
+        "The specific values of exploration and forgetting rates may affect the threshold; need to ensure sufficient range.",
+        "Task similarity measure must be consistent across sequences.",
+        "The effect may depend on the skill discovery algorithm; should control that.",
+        "Statistical noise may obscure threshold; repeat each condition multiple times to ensure reliability."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical library size L_c such that retrieval cost grows sublinearly for L < L_c and superlinearly for L > L_c, and a utility-based forgetting policy increases L_c relative to a FIFO forgetting policy.",
+      "independent_variables": [
+        "Forgetting policy (utility-based vs. FIFO)",
+        "Library size (induced by controlling task novelty and memory budget)"
+      ],
+      "dependent_variables": [
+        "Critical library size L_c (change point in retrieval cost scaling)",
+        "Average retrieval cost",
+        "Task performance (success rate)",
+        "Library size at end of training"
+      ],
+      "controlled_variables": [
+        "Same skill discovery mechanism (e.g., option-critic)",
+        "Same task sequence (non-stationary with revisits)",
+        "Same memory and compute budgets",
+        "Same evaluation metrics and statistical testing procedures"
+      ],
+      "baselines": [
+        {
+          "name": "FIFO Forgetting Policy",
+          "description": "Standard first-in-first-out forgetting where the oldest skills are removed when memory is full."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Critical library size L_c",
+          "definition": "The library size at which the slope of retrieval cost vs. library size changes from sublinear to superlinear, identified via piecewise linear regression."
+        },
+        {
+          "name": "Average retrieval cost",
+          "definition": "Mean time or computational resources required to select the appropriate skill for a given task, averaged over tasks."
+        },
+        {
+          "name": "Task performance",
+          "definition": "Success rate of completing tasks, averaged over the entire task sequence."
+        },
+        {
+          "name": "Library size at end of training",
+          "definition": "Total number of skills stored in the library after the agent has completed the entire task sequence."
+        }
+      ],
+      "expected_result": "Utility-based forgetting policy will result in a significantly higher critical library size L_c compared to FIFO forgetting, indicating that superlinear retrieval cost growth is delayed. Retrieval cost will exhibit a clear change point from sublinear to superlinear scaling. Task performance will be comparable or better for utility-based forgetting.",
+      "falsifying_result": "No statistically significant change point in retrieval cost scaling is detected for either policy, or the critical library size L_c for utility-based forgetting is not significantly higher than that for FIFO, or utility-based forgetting yields significantly worse task performance.",
+      "minimum_viable_experiment": "Implement two lifelong-learning agents with identical skill discovery (option-critic) and bounded resources, differing only in forgetting policy: utility-based (pruning by predicted future relevance) vs. FIFO. Train both on a sequence of tasks with controlled novelty to generate varying library sizes. For each policy, measure retrieval cost as function of library size, fit piecewise linear regression to identify L_c, compare L_c across policies using bootstrap confidence intervals.",
+      "risks_and_confounds": [
+        "The piecewise linear regression may not detect a change point if retrieval cost grows smoothly.",
+        "Utility-based forgetting may require accurate prediction of future relevance, which might be noisy.",
+        "Task novelty control may not yield a wide range of library sizes.",
+        "The choice of skill discovery algorithm (option-critic) may affect the results."
+      ]
+    },
+    {
+      "hypothesis": "Curriculum learning reduces skill redundancy when skill granularity is coarse, but increases redundancy when skill granularity is fine-grained.",
+      "independent_variables": [
+        "Discovery method (independent vs curriculum learning)",
+        "Skill granularity (coarse vs fine)"
+      ],
+      "dependent_variables": [
+        "Skill redundancy (average pairwise similarity of skill policies)",
+        "Library size",
+        "Retrieval cost per task"
+      ],
+      "controlled_variables": [
+        "Same task distribution and sequence",
+        "Same environment",
+        "Same forgetting policy",
+        "Same number of tasks",
+        "Same skill representation (e.g., neural network policy architecture)",
+        "Same agent architecture and resource limits"
+      ],
+      "baselines": [
+        {
+          "name": "Independent learning with coarse granularity",
+          "description": "Agent learns tasks independently (no curriculum) and uses coarse skills (e.g., high-level primitives)."
+        },
+        {
+          "name": "Independent learning with fine granularity",
+          "description": "Agent learns tasks independently and uses fine-grained skills (e.g., low-level atomic actions)."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Skill redundancy",
+          "definition": "Average pairwise cosine similarity between skill policy parameters or state-action mappings across all skills in the library."
+        },
+        {
+          "name": "Library size",
+          "definition": "Total number of distinct skills stored at the end of the experiment."
+        },
+        {
+          "name": "Retrieval cost",
+          "definition": "Average time (or number of function evaluations) required to select a skill for a given task during evaluation."
+        }
+      ],
+      "expected_result": "For coarse granularity, the curriculum learning agent shows significantly lower skill redundancy compared to the independent baseline. For fine granularity, the curriculum learning agent shows significantly higher redundancy compared to the independent baseline. The interaction effect (discovery method × granularity) is statistically significant.",
+      "falsifying_result": "Curriculum learning either reduces redundancy for both granularities, increases it for both, or shows no significant difference compared to independent learning for either granularity. In other words, the predicted interaction does not occur.",
+      "minimum_viable_experiment": "Use a simulated grid-world or robotic arm environment with 8 tasks (4 for each granularity condition) where tasks vary in required skills. Two agents (one with independent discovery, one with curriculum learning) each learn the tasks in sequence. For each granularity condition, run 5 trials with random seeds. After all tasks, compute redundancy, library size, and retrieval cost. A 2x2 ANOVA tests the interaction. Sample size: 5 trials per condition (total 20 trials).",
+      "risks_and_confounds": [
+        "Task ordering may affect curriculum effectiveness; use fixed order across conditions.",
+        "Choice of similarity metric for redundancy may be arbitrary; use multiple metrics.",
+        "Fine/coarse granularity definition must be consistent; ensure both levels are distinct.",
+        "Confounding due to forgetting policy; must be identical across all conditions."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a first-principles decomposition of skill-library bloat in lifelong-learning agents, defining key primitives (skill, library, bloat, lifelong learning, agent) and assumptions (independent discovery, bounded resources, non-stationary tasks). It proposes a causal mechanism model linking task novelty, skill discovery rate, forgetting rate, library size, redundancy, retrieval cost, and bloat. Four tensions are derived, leading to four testable hypotheses with detailed experiment plans, including independent/dependent variables, baselines, controls, and falsification criteria. The work is well-structured and grounded in causal reasoning.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives and assumptions.",
+      "Mechanism model is logically coherent and identifies key bottlenecks (insufficient forgetting, poor skill discrimination).",
+      "Tensions capture core tradeoffs (granularity, exploration-exploitation, retention-forgetting) and lead to novel, falsifiable hypotheses.",
+      "Experiment plans are thorough, specifying variables, baselines, controls, and falsifying observations.",
+      "High potential for guiding empirical research on skill-library management."
+    ],
+    "weaknesses": [
+      "Mechanism model lacks quantitative formalization (e.g., mathematical equations) that would strengthen rigor.",
+      "Some tension testability scores (e.g., T4=2) indicate low feasibility; the package does not address how to overcome this.",
+      "Experiment plans are resource-intensive (e.g., 200-task sequences) and may be difficult to replicate precisely.",
+      "The link between primitive definitions and derived hypotheses could be tighter; some hypotheses feel slightly disconnected from the core decomposition.",
+      "Missing baselines such as random forgetting or importance-weighted replay; existing baselines (FIFO, fixed granularity) are minimal."
+    ],
+    "questions": [
+      "How would the mechanism model change if skills are discovered jointly (e.g., via meta-learning) rather than independently?",
+      "Can the proposed thresholds (e.g., critical library size, redundancy threshold) be derived analytically from the causal chain?"
+    ],
+    "missing_baselines": [
+      "For forgetting experiments, include a baseline with random pruning or L2 regularization-based forgetting.",
+      "For granularity experiments, include a baseline with dynamic granularity learned via reinforcement learning rather than a simple threshold rule."
+    ],
+    "score": 8,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "Is there a critical library size threshold (as a fraction of memory capacity) above which adaptive skill granularity reduces bloat, while below it fixed coarse granularity is optimal?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Below what redundancy threshold does increasing exploration reduce future skill redundancy in lifelong learning, and how does this threshold vary with task similarity distribution?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical library size L_c beyond which retrieval cost grows superlinearly, and does a utility-based forgetting policy (pruning by predicted future relevance) shift L_c higher compared to FIFO forgetting?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "How does skill granularity moderate the effect of curriculum learning on skill-library redundancy in lifelong learning agents?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ]
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

@@ -1,0 +1,1296 @@
+{
+  "topic": {
+    "topic": "What causes skill-library bloat in lifelong-learning agents?",
+    "topic_id": "T007",
+    "goal": null,
+    "domain": "agent skill discovery",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: What causes skill-library bloat in lifelong-learning agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Skill",
+        "definition": "A behavioral primitive that maps a state or context to a sequence of actions to achieve a specific subgoal, reusable across tasks.",
+        "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their definition determines how accumulation and reuse occur."
+      },
+      {
+        "name": "Lifelong learning",
+        "definition": "The ability of an agent to continuously acquire, refine, and retain skills over a sequence of tasks without catastrophic forgetting.",
+        "why_primitive": "The process of ongoing skill acquisition is the context in which bloat emerges; without lifelong learning, bloat is not defined."
+      },
+      {
+        "name": "Skill-library bloat",
+        "definition": "The phenomenon where the number of stored skills grows excessively, leading to redundancy, reduced search efficiency, and degraded performance due to overlapping or obsolete skills.",
+        "why_primitive": "Bloat is the core problem being analyzed; its causes are directly linked to the primitive properties of skill representation and learning."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Skills are stored as distinct parameter sets or symbolic representations without compression or merging.",
+        "rationale": "Without this assumption, bloat could be trivially avoided by compressing similar skills; the assumption isolates the root cause.",
+        "possible_failure": "If the agent employs online compression, bloat may be mitigated, violating the assumption."
+      },
+      {
+        "assumption": "The agent has a finite memory capacity and fixed computational budget for skill selection.",
+        "rationale": "Bloat is only problematic under resource constraints; unlimited resources would make bloat irrelevant.",
+        "possible_failure": "In environments with abundant memory and compute, bloat may not degrade performance, challenging the assumption."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Skill specificity vs. generality: Storing highly specific skills for each task reduces interference but increases library size, whereas general skills may cause negative transfer.",
+        "variables": [
+          "skill granularity",
+          "library size",
+          "task similarity"
+        ]
+      },
+      {
+        "tradeoff": "Skill retention vs. forgetting: Retaining all skills prevents forgetting but causes bloat, while forgetting old skills may cause catastrophic forgetting but keeps library compact.",
+        "variables": [
+          "memory retention rate",
+          "library size",
+          "catastrophic forgetting rate"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "task_diversity",
+        "role": "input",
+        "description": "Variety of tasks encountered over lifetime."
+      },
+      {
+        "name": "skill_granularity",
+        "role": "input",
+        "description": "Level of specificity of learned skills."
+      },
+      {
+        "name": "memory_capacity",
+        "role": "input",
+        "description": "Maximum number of skills that can be stored."
+      },
+      {
+        "name": "skill_overlap",
+        "role": "mediator",
+        "description": "Degree of functional similarity between stored skills."
+      },
+      {
+        "name": "library_size",
+        "role": "output",
+        "description": "Number of skills in the library."
+      },
+      {
+        "name": "search_cost",
+        "role": "mediator",
+        "description": "Computational effort to select relevant skill."
+      },
+      {
+        "name": "performance",
+        "role": "outcome",
+        "description": "Task success rate or efficiency."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "Task sequence",
+        "source": "environment",
+        "relation": "provides",
+        "target": "task_diversity",
+        "explanation": "The environment presents tasks with varying characteristics."
+      },
+      {
+        "step": "Skill learning",
+        "source": "task_diversity",
+        "relation": "influences",
+        "target": "skill_granularity",
+        "explanation": "Agent adjusts granularity based on task similarity."
+      },
+      {
+        "step": "Skill storage",
+        "source": "skill_granularity",
+        "relation": "determines",
+        "target": "skill_overlap",
+        "explanation": "More specific skills lead to higher overlap."
+      },
+      {
+        "step": "Accumulation",
+        "source": "skill_overlap",
+        "relation": "increases",
+        "target": "library_size",
+        "explanation": "Redundant skills accumulate without compression."
+      },
+      {
+        "step": "Selection difficulty",
+        "source": "library_size",
+        "relation": "increases",
+        "target": "search_cost",
+        "explanation": "Larger libraries require more search."
+      },
+      {
+        "step": "Performance impact",
+        "source": "search_cost",
+        "relation": "reduces",
+        "target": "performance",
+        "explanation": "Increased search cost degrades efficiency."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Memory capacity",
+        "why_it_matters": "Finite memory limits the maximum library size, making bloat a problem when library exceeds capacity."
+      },
+      {
+        "bottleneck": "Skill discrimination",
+        "why_it_matters": "Without effective discrimination, similar skills are stored separately, exacerbating bloat."
+      },
+      {
+        "bottleneck": "Selection efficiency",
+        "why_it_matters": "Computational budget for skill selection constrains how many skills can be considered, making bloat reduce performance."
+      }
+    ],
+    "mechanism_summary": "Skill-library bloat arises from the accumulation of redundant skills due to the absence of compression or merging, combined with a fixed memory capacity and computational budget. As task diversity increases, the agent learns more specific skills (high granularity), increasing overlap among stored skills. Without a mechanism to identify and remove redundancy, the library grows excessively. This growth increases search cost during skill selection, degrading performance. Thus, bloat is driven by the interplay of task diversity, skill granularity, and resource constraints."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Storing highly specific skills reduces interference but increases library size, while general skills may cause negative transfer. This creates a tension between skill specificity and generality.",
+      "derived_from": [
+        "Skill",
+        "Lifelong learning",
+        "skill_granularity",
+        "library_size"
+      ],
+      "why_it_matters": "Determines the optimal granularity for skill learning to balance performance and bloat.",
+      "what_existing_methods_may_miss": "Existing methods may not dynamically adjust granularity based on task similarity and library size.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Retaining all skills prevents forgetting but causes bloat, while forgetting old skills may lead to catastrophic forgetting but keeps library compact. This tension between retention and forgetting must be managed.",
+      "derived_from": [
+        "Skill-library bloat",
+        "Lifelong learning",
+        "memory_capacity"
+      ],
+      "why_it_matters": "Directly impacts the tradeoff between preserving past knowledge and maintaining an efficient library.",
+      "what_existing_methods_may_miss": "Many methods treat retention and forgetting as separate; integrating them could yield better balance.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The assumption that skills are stored without compression or merging is necessary for bloat to emerge, but compressing skills could mitigate bloat, creating a tension between the assumption and potential solutions.",
+      "derived_from": [
+        "Skill",
+        "Skill-library bloat",
+        "primitive_definitions"
+      ],
+      "why_it_matters": "Challenges the root cause of bloat and suggests that compression is a viable remedy.",
+      "what_existing_methods_may_miss": "Existing methods often assume no compression; exploring compression could reveal new mechanisms.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "Finite memory capacity limits the maximum library size, but skill accumulation naturally increases library size. This tension between memory capacity and library size underlies the bloat problem.",
+      "derived_from": [
+        "memory_capacity",
+        "library_size",
+        "bottlenecks"
+      ],
+      "why_it_matters": "Highlights the resource constraint that makes bloat detrimental.",
+      "what_existing_methods_may_miss": "Methods that ignore memory limits may underestimate bloat's impact.",
+      "testability": 4
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "How does dynamically adjusting skill granularity based on task similarity affect library growth and performance in lifelong learning?",
+      "question_type": "algorithmic",
+      "source_tension": "T1",
+      "expected_contribution": "An algorithm that adaptively sets skill granularity to balance interference and library size, with experimental validation."
+    },
+    {
+      "question": "Can a retention policy that selectively forgets skills based on their contribution to task performance mitigate skill-library bloat without causing catastrophic forgetting?",
+      "question_type": "algorithmic",
+      "source_tension": "T2",
+      "expected_contribution": "A selective forgetting mechanism that preserves important skills while controlling library size, tested against baselines."
+    },
+    {
+      "question": "Does applying skill compression via functional similarity merging reduce library size while preserving task performance in a lifelong learning system?",
+      "question_type": "causal",
+      "source_tension": "T3",
+      "expected_contribution": "Empirical evidence on the effect of compression on bloat and performance, with analysis of trade-offs."
+    },
+    {
+      "question": "How does memory capacity constraint interact with skill learning strategies to determine the onset of performance degradation due to skill-library bloat?",
+      "question_type": "diagnostic",
+      "source_tension": "T4",
+      "expected_contribution": "Identification of critical memory capacity thresholds and characterization of bloat dynamics under different learning policies."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A behavioral primitive that maps a state or context to a sequence of actions to achieve a specific subgoal, reusable across tasks.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their definition determines how accumulation and reuse occur."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "The ability of an agent to continuously acquire, refine, and retain skills over a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "The process of ongoing skill acquisition is the context in which bloat emerges; without lifelong learning, bloat is not defined."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The phenomenon where the number of stored skills grows excessively, leading to redundancy, reduced search efficiency, and degraded performance due to overlapping or obsolete skills.",
+          "why_primitive": "Bloat is the core problem being analyzed; its causes are directly linked to the primitive properties of skill representation and learning."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct parameter sets or symbolic representations without compression or merging.",
+          "rationale": "Without this assumption, bloat could be trivially avoided by compressing similar skills; the assumption isolates the root cause.",
+          "possible_failure": "If the agent employs online compression, bloat may be mitigated, violating the assumption."
+        },
+        {
+          "assumption": "The agent has a finite memory capacity and fixed computational budget for skill selection.",
+          "rationale": "Bloat is only problematic under resource constraints; unlimited resources would make bloat irrelevant.",
+          "possible_failure": "In environments with abundant memory and compute, bloat may not degrade performance, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of tasks encountered over lifetime."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of specificity of learned skills."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills that can be stored."
+          },
+          {
+            "name": "skill_overlap",
+            "role": "mediator",
+            "description": "Degree of functional similarity between stored skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Number of skills in the library."
+          },
+          {
+            "name": "search_cost",
+            "role": "mediator",
+            "description": "Computational effort to select relevant skill."
+          },
+          {
+            "name": "performance",
+            "role": "outcome",
+            "description": "Task success rate or efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task sequence",
+            "source": "environment",
+            "relation": "provides",
+            "target": "task_diversity",
+            "explanation": "The environment presents tasks with varying characteristics."
+          },
+          {
+            "step": "Skill learning",
+            "source": "task_diversity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "Agent adjusts granularity based on task similarity."
+          },
+          {
+            "step": "Skill storage",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_overlap",
+            "explanation": "More specific skills lead to higher overlap."
+          },
+          {
+            "step": "Accumulation",
+            "source": "skill_overlap",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate without compression."
+          },
+          {
+            "step": "Selection difficulty",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "search_cost",
+            "explanation": "Larger libraries require more search."
+          },
+          {
+            "step": "Performance impact",
+            "source": "search_cost",
+            "relation": "reduces",
+            "target": "performance",
+            "explanation": "Increased search cost degrades efficiency."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Memory capacity",
+            "why_it_matters": "Finite memory limits the maximum library size, making bloat a problem when library exceeds capacity."
+          },
+          {
+            "bottleneck": "Skill discrimination",
+            "why_it_matters": "Without effective discrimination, similar skills are stored separately, exacerbating bloat."
+          },
+          {
+            "bottleneck": "Selection efficiency",
+            "why_it_matters": "Computational budget for skill selection constrains how many skills can be considered, making bloat reduce performance."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of redundant skills due to the absence of compression or merging, combined with a fixed memory capacity and computational budget. As task diversity increases, the agent learns more specific skills (high granularity), increasing overlap among stored skills. Without a mechanism to identify and remove redundancy, the library grows excessively. This growth increases search cost during skill selection, degrading performance. Thus, bloat is driven by the interplay of task diversity, skill granularity, and resource constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "Retaining all skills prevents forgetting but causes bloat, while forgetting old skills may lead to catastrophic forgetting but keeps library compact. This tension between retention and forgetting must be managed.",
+        "derived_from": [
+          "Skill-library bloat",
+          "Lifelong learning",
+          "memory_capacity"
+        ],
+        "why_it_matters": "Directly impacts the tradeoff between preserving past knowledge and maintaining an efficient library.",
+        "what_existing_methods_may_miss": "Many methods treat retention and forgetting as separate; integrating them could yield better balance.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Can a retention policy that selectively forgets skills based on their contribution to task performance mitigate skill-library bloat without causing catastrophic forgetting?",
+        "question_type": "algorithmic",
+        "source_tension": "T2",
+        "expected_contribution": "A selective forgetting mechanism that preserves important skills while controlling library size, tested against baselines."
+      },
+      "hypothesis": {
+        "statement": "Selective forgetting based on skill contribution reduces library bloat while maintaining comparable task performance to full retention, and without inducing catastrophic forgetting.",
+        "predicted_effect": "Library size grows slower, performance does not degrade, and forgetting of important tasks is minimal."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare three retention policies in a lifelong learning agent on a sequence of related tasks: (1) selective forgetting using a contribution metric (e.g., accuracy gain), (2) full retention, (3) random forgetting. Measure library size, average task performance, and forgetting rate on previously learned tasks.",
+        "independent_variables": [
+          "retention_policy"
+        ],
+        "dependent_variables": [
+          "library_size",
+          "average_task_performance",
+          "forgetting_rate"
+        ],
+        "controls": [
+          "task_sequence",
+          "skill_learning_algorithm",
+          "skill_representation",
+          "memory_capacity"
+        ],
+        "falsifying_observation": "If selective forgetting policy results in library size not significantly smaller than full retention, or if average performance drops significantly below full retention, or if forgetting rate is higher than random forgetting."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library size under selective forgetting is significantly smaller than under full retention and comparable to random forgetting.",
+          "Average task performance under selective forgetting is not significantly different from full retention and higher than random forgetting.",
+          "Forgetting rate (performance drop on old tasks) under selective forgetting is lower than random forgetting and comparable to full retention."
+        ],
+        "rejects_hypothesis": [
+          "Library size under selective forgetting is not significantly smaller than full retention.",
+          "Average task performance under selective forgetting is significantly lower than full retention.",
+          "Forgetting rate under selective forgetting is higher than random forgetting."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If selective forgetting fails to reduce bloat without catastrophic forgetting, then reconsider the assumption that skill contribution can be accurately measured without additional overhead.",
+        "assumption_to_revise": "The assumption that a simple contribution metric (e.g., accuracy gain) suffices to identify redundant skills without incurring extra computational cost.",
+        "next_question": "Can a contribution-aware forgetting policy with adaptive threshold reduce bloat without forgetting if we include a rehearsal buffer for important skills?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A behavioral primitive that maps a state or context to a sequence of actions to achieve a specific subgoal, reusable across tasks.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their definition determines how accumulation and reuse occur."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "The ability of an agent to continuously acquire, refine, and retain skills over a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "The process of ongoing skill acquisition is the context in which bloat emerges; without lifelong learning, bloat is not defined."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The phenomenon where the number of stored skills grows excessively, leading to redundancy, reduced search efficiency, and degraded performance due to overlapping or obsolete skills.",
+          "why_primitive": "Bloat is the core problem being analyzed; its causes are directly linked to the primitive properties of skill representation and learning."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct parameter sets or symbolic representations without compression or merging.",
+          "rationale": "Without this assumption, bloat could be trivially avoided by compressing similar skills; the assumption isolates the root cause.",
+          "possible_failure": "If the agent employs online compression, bloat may be mitigated, violating the assumption."
+        },
+        {
+          "assumption": "The agent has a finite memory capacity and fixed computational budget for skill selection.",
+          "rationale": "Bloat is only problematic under resource constraints; unlimited resources would make bloat irrelevant.",
+          "possible_failure": "In environments with abundant memory and compute, bloat may not degrade performance, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of tasks encountered over lifetime."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of specificity of learned skills."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills that can be stored."
+          },
+          {
+            "name": "skill_overlap",
+            "role": "mediator",
+            "description": "Degree of functional similarity between stored skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Number of skills in the library."
+          },
+          {
+            "name": "search_cost",
+            "role": "mediator",
+            "description": "Computational effort to select relevant skill."
+          },
+          {
+            "name": "performance",
+            "role": "outcome",
+            "description": "Task success rate or efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task sequence",
+            "source": "environment",
+            "relation": "provides",
+            "target": "task_diversity",
+            "explanation": "The environment presents tasks with varying characteristics."
+          },
+          {
+            "step": "Skill learning",
+            "source": "task_diversity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "Agent adjusts granularity based on task similarity."
+          },
+          {
+            "step": "Skill storage",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_overlap",
+            "explanation": "More specific skills lead to higher overlap."
+          },
+          {
+            "step": "Accumulation",
+            "source": "skill_overlap",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate without compression."
+          },
+          {
+            "step": "Selection difficulty",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "search_cost",
+            "explanation": "Larger libraries require more search."
+          },
+          {
+            "step": "Performance impact",
+            "source": "search_cost",
+            "relation": "reduces",
+            "target": "performance",
+            "explanation": "Increased search cost degrades efficiency."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Memory capacity",
+            "why_it_matters": "Finite memory limits the maximum library size, making bloat a problem when library exceeds capacity."
+          },
+          {
+            "bottleneck": "Skill discrimination",
+            "why_it_matters": "Without effective discrimination, similar skills are stored separately, exacerbating bloat."
+          },
+          {
+            "bottleneck": "Selection efficiency",
+            "why_it_matters": "Computational budget for skill selection constrains how many skills can be considered, making bloat reduce performance."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of redundant skills due to the absence of compression or merging, combined with a fixed memory capacity and computational budget. As task diversity increases, the agent learns more specific skills (high granularity), increasing overlap among stored skills. Without a mechanism to identify and remove redundancy, the library grows excessively. This growth increases search cost during skill selection, degrading performance. Thus, bloat is driven by the interplay of task diversity, skill granularity, and resource constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "The assumption that skills are stored without compression or merging is necessary for bloat to emerge, but compressing skills could mitigate bloat, creating a tension between the assumption and potential solutions.",
+        "derived_from": [
+          "Skill",
+          "Skill-library bloat",
+          "primitive_definitions"
+        ],
+        "why_it_matters": "Challenges the root cause of bloat and suggests that compression is a viable remedy.",
+        "what_existing_methods_may_miss": "Existing methods often assume no compression; exploring compression could reveal new mechanisms.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Does applying skill compression via functional similarity merging reduce library size while preserving task performance in a lifelong learning system?",
+        "question_type": "causal",
+        "source_tension": "T3",
+        "expected_contribution": "Empirical evidence on the effect of compression on bloat and performance, with analysis of trade-offs."
+      },
+      "hypothesis": {
+        "statement": "Applying skill compression via functional similarity merging reduces library size while preserving task performance in a lifelong learning system.",
+        "predicted_effect": "Compared to no compression, compression leads to a smaller library (fewer skills) and no significant decrease (or slight increase) in task performance."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement a lifelong learning agent that learns skills from a sequence of tasks (e.g., variants of navigation or manipulation). Compare two conditions: (1) no compression (each skill stored separately), (2) compression via functional similarity (merge skills with high functional overlap). Measure library size and average task success rate over the sequence.",
+        "independent_variables": [
+          "compression method (none vs functional similarity merging)"
+        ],
+        "dependent_variables": [
+          "library size (number of skills stored)",
+          "average task performance (success rate or reward)"
+        ],
+        "controls": [
+          "same task sequence",
+          "same skill learning algorithm",
+          "same memory capacity (if finite)",
+          "same computational budget per step"
+        ],
+        "falsifying_observation": "The compression condition does not yield a smaller library or leads to significantly worse performance (e.g., >10% drop) compared to no compression."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Library size is significantly smaller (e.g., 30-50% reduction) under compression.",
+          "Task performance is within 5% of the no-compression baseline (or slightly better due to reduced search cost)."
+        ],
+        "rejects_hypothesis": [
+          "Library size is not smaller or is larger under compression (merging fails or creates new skills).",
+          "Task performance drops significantly (>10%) under compression."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If compression does not reduce library size or harms performance, then the assumption that functional similarity merging is an effective compression technique is called into question.",
+        "assumption_to_revise": "Assumption that skills can be safely merged based on functional similarity without negative transfer or loss of crucial distinctions.",
+        "next_question": "What types of functional similarity criteria (e.g., state-action mapping vs. outcome equivalence) minimize interference while maximizing compression?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A behavioral primitive that maps a state or context to a sequence of actions to achieve a specific subgoal, reusable across tasks.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their definition determines how accumulation and reuse occur."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "The ability of an agent to continuously acquire, refine, and retain skills over a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "The process of ongoing skill acquisition is the context in which bloat emerges; without lifelong learning, bloat is not defined."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The phenomenon where the number of stored skills grows excessively, leading to redundancy, reduced search efficiency, and degraded performance due to overlapping or obsolete skills.",
+          "why_primitive": "Bloat is the core problem being analyzed; its causes are directly linked to the primitive properties of skill representation and learning."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct parameter sets or symbolic representations without compression or merging.",
+          "rationale": "Without this assumption, bloat could be trivially avoided by compressing similar skills; the assumption isolates the root cause.",
+          "possible_failure": "If the agent employs online compression, bloat may be mitigated, violating the assumption."
+        },
+        {
+          "assumption": "The agent has a finite memory capacity and fixed computational budget for skill selection.",
+          "rationale": "Bloat is only problematic under resource constraints; unlimited resources would make bloat irrelevant.",
+          "possible_failure": "In environments with abundant memory and compute, bloat may not degrade performance, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of tasks encountered over lifetime."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of specificity of learned skills."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills that can be stored."
+          },
+          {
+            "name": "skill_overlap",
+            "role": "mediator",
+            "description": "Degree of functional similarity between stored skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Number of skills in the library."
+          },
+          {
+            "name": "search_cost",
+            "role": "mediator",
+            "description": "Computational effort to select relevant skill."
+          },
+          {
+            "name": "performance",
+            "role": "outcome",
+            "description": "Task success rate or efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task sequence",
+            "source": "environment",
+            "relation": "provides",
+            "target": "task_diversity",
+            "explanation": "The environment presents tasks with varying characteristics."
+          },
+          {
+            "step": "Skill learning",
+            "source": "task_diversity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "Agent adjusts granularity based on task similarity."
+          },
+          {
+            "step": "Skill storage",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_overlap",
+            "explanation": "More specific skills lead to higher overlap."
+          },
+          {
+            "step": "Accumulation",
+            "source": "skill_overlap",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate without compression."
+          },
+          {
+            "step": "Selection difficulty",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "search_cost",
+            "explanation": "Larger libraries require more search."
+          },
+          {
+            "step": "Performance impact",
+            "source": "search_cost",
+            "relation": "reduces",
+            "target": "performance",
+            "explanation": "Increased search cost degrades efficiency."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Memory capacity",
+            "why_it_matters": "Finite memory limits the maximum library size, making bloat a problem when library exceeds capacity."
+          },
+          {
+            "bottleneck": "Skill discrimination",
+            "why_it_matters": "Without effective discrimination, similar skills are stored separately, exacerbating bloat."
+          },
+          {
+            "bottleneck": "Selection efficiency",
+            "why_it_matters": "Computational budget for skill selection constrains how many skills can be considered, making bloat reduce performance."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of redundant skills due to the absence of compression or merging, combined with a fixed memory capacity and computational budget. As task diversity increases, the agent learns more specific skills (high granularity), increasing overlap among stored skills. Without a mechanism to identify and remove redundancy, the library grows excessively. This growth increases search cost during skill selection, degrading performance. Thus, bloat is driven by the interplay of task diversity, skill granularity, and resource constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Storing highly specific skills reduces interference but increases library size, while general skills may cause negative transfer. This creates a tension between skill specificity and generality.",
+        "derived_from": [
+          "Skill",
+          "Lifelong learning",
+          "skill_granularity",
+          "library_size"
+        ],
+        "why_it_matters": "Determines the optimal granularity for skill learning to balance performance and bloat.",
+        "what_existing_methods_may_miss": "Existing methods may not dynamically adjust granularity based on task similarity and library size.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does dynamically adjusting skill granularity based on task similarity affect library growth and performance in lifelong learning?",
+        "question_type": "algorithmic",
+        "source_tension": "T1",
+        "expected_contribution": "An algorithm that adaptively sets skill granularity to balance interference and library size, with experimental validation."
+      },
+      "hypothesis": {
+        "statement": "Dynamically adjusting skill granularity in inverse proportion to task similarity (higher granularity for dissimilar tasks, lower granularity for similar tasks) reduces library growth without significant performance loss compared to fixed high or low granularity policies.",
+        "predicted_effect": "Reduced library growth rate and maintained or slightly improved performance over a sequence of tasks with varying similarity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Compare three skill discovery agents on a sequence of tasks with controlled similarity: one using fixed high granularity, one using fixed low granularity, and one using dynamic granularity adjusted by task similarity (measured by embedding distance). Measure library size and task performance over time.",
+        "independent_variables": [
+          "skill granularity adjustment policy (dynamic, fixed high, fixed low)"
+        ],
+        "dependent_variables": [
+          "library size over tasks",
+          "average task reward or success rate"
+        ],
+        "controls": [
+          "task sequence",
+          "memory capacity",
+          "skill learning algorithm",
+          "task similarity measure"
+        ],
+        "falsifying_observation": "The dynamic agent does not exhibit significantly slower library growth than both fixed policies, or its performance is significantly worse than the best fixed policy."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Dynamic agent library size grows slower than both fixed high and fixed low granularity agents over task sequence.",
+          "Dynamic agent performance is comparable to or better than the better of the two fixed granularity policies."
+        ],
+        "rejects_hypothesis": [
+          "Dynamic agent library growth is not significantly different from the fixed policy with higher growth.",
+          "Dynamic agent performance is significantly lower than both fixed policies."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If dynamic adjustment does not reduce library growth or degrades performance, then the assumption that skills are stored without compression may be overly restrictive.",
+        "assumption_to_revise": "Skills are stored as distinct parameter sets without compression or merging.",
+        "next_question": "How does online skill compression affect the relationship between granularity and bloat?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "What causes skill-library bloat in lifelong-learning agents?",
+      "primitive_definitions": [
+        {
+          "name": "Skill",
+          "definition": "A behavioral primitive that maps a state or context to a sequence of actions to achieve a specific subgoal, reusable across tasks.",
+          "why_primitive": "Skills are the atomic units of behavior in lifelong learning; their definition determines how accumulation and reuse occur."
+        },
+        {
+          "name": "Lifelong learning",
+          "definition": "The ability of an agent to continuously acquire, refine, and retain skills over a sequence of tasks without catastrophic forgetting.",
+          "why_primitive": "The process of ongoing skill acquisition is the context in which bloat emerges; without lifelong learning, bloat is not defined."
+        },
+        {
+          "name": "Skill-library bloat",
+          "definition": "The phenomenon where the number of stored skills grows excessively, leading to redundancy, reduced search efficiency, and degraded performance due to overlapping or obsolete skills.",
+          "why_primitive": "Bloat is the core problem being analyzed; its causes are directly linked to the primitive properties of skill representation and learning."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Skills are stored as distinct parameter sets or symbolic representations without compression or merging.",
+          "rationale": "Without this assumption, bloat could be trivially avoided by compressing similar skills; the assumption isolates the root cause.",
+          "possible_failure": "If the agent employs online compression, bloat may be mitigated, violating the assumption."
+        },
+        {
+          "assumption": "The agent has a finite memory capacity and fixed computational budget for skill selection.",
+          "rationale": "Bloat is only problematic under resource constraints; unlimited resources would make bloat irrelevant.",
+          "possible_failure": "In environments with abundant memory and compute, bloat may not degrade performance, challenging the assumption."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "task_diversity",
+            "role": "input",
+            "description": "Variety of tasks encountered over lifetime."
+          },
+          {
+            "name": "skill_granularity",
+            "role": "input",
+            "description": "Level of specificity of learned skills."
+          },
+          {
+            "name": "memory_capacity",
+            "role": "input",
+            "description": "Maximum number of skills that can be stored."
+          },
+          {
+            "name": "skill_overlap",
+            "role": "mediator",
+            "description": "Degree of functional similarity between stored skills."
+          },
+          {
+            "name": "library_size",
+            "role": "output",
+            "description": "Number of skills in the library."
+          },
+          {
+            "name": "search_cost",
+            "role": "mediator",
+            "description": "Computational effort to select relevant skill."
+          },
+          {
+            "name": "performance",
+            "role": "outcome",
+            "description": "Task success rate or efficiency."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "Task sequence",
+            "source": "environment",
+            "relation": "provides",
+            "target": "task_diversity",
+            "explanation": "The environment presents tasks with varying characteristics."
+          },
+          {
+            "step": "Skill learning",
+            "source": "task_diversity",
+            "relation": "influences",
+            "target": "skill_granularity",
+            "explanation": "Agent adjusts granularity based on task similarity."
+          },
+          {
+            "step": "Skill storage",
+            "source": "skill_granularity",
+            "relation": "determines",
+            "target": "skill_overlap",
+            "explanation": "More specific skills lead to higher overlap."
+          },
+          {
+            "step": "Accumulation",
+            "source": "skill_overlap",
+            "relation": "increases",
+            "target": "library_size",
+            "explanation": "Redundant skills accumulate without compression."
+          },
+          {
+            "step": "Selection difficulty",
+            "source": "library_size",
+            "relation": "increases",
+            "target": "search_cost",
+            "explanation": "Larger libraries require more search."
+          },
+          {
+            "step": "Performance impact",
+            "source": "search_cost",
+            "relation": "reduces",
+            "target": "performance",
+            "explanation": "Increased search cost degrades efficiency."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Memory capacity",
+            "why_it_matters": "Finite memory limits the maximum library size, making bloat a problem when library exceeds capacity."
+          },
+          {
+            "bottleneck": "Skill discrimination",
+            "why_it_matters": "Without effective discrimination, similar skills are stored separately, exacerbating bloat."
+          },
+          {
+            "bottleneck": "Selection efficiency",
+            "why_it_matters": "Computational budget for skill selection constrains how many skills can be considered, making bloat reduce performance."
+          }
+        ],
+        "mechanism_summary": "Skill-library bloat arises from the accumulation of redundant skills due to the absence of compression or merging, combined with a fixed memory capacity and computational budget. As task diversity increases, the agent learns more specific skills (high granularity), increasing overlap among stored skills. Without a mechanism to identify and remove redundancy, the library grows excessively. This growth increases search cost during skill selection, degrading performance. Thus, bloat is driven by the interplay of task diversity, skill granularity, and resource constraints."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "Finite memory capacity limits the maximum library size, but skill accumulation naturally increases library size. This tension between memory capacity and library size underlies the bloat problem.",
+        "derived_from": [
+          "memory_capacity",
+          "library_size",
+          "bottlenecks"
+        ],
+        "why_it_matters": "Highlights the resource constraint that makes bloat detrimental.",
+        "what_existing_methods_may_miss": "Methods that ignore memory limits may underestimate bloat's impact.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does memory capacity constraint interact with skill learning strategies to determine the onset of performance degradation due to skill-library bloat?",
+        "question_type": "diagnostic",
+        "source_tension": "T4",
+        "expected_contribution": "Identification of critical memory capacity thresholds and characterization of bloat dynamics under different learning policies."
+      },
+      "hypothesis": {
+        "statement": "Performance degradation due to skill-library bloat occurs when library size exceeds a threshold that depends on memory capacity and skill granularity; specifically, higher memory capacity delays the onset of degradation, while coarser skill granularity (more general skills) also delays it.",
+        "predicted_effect": "The onset threshold (library size at which performance drops) increases with memory capacity and decreases with skill granularity."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate a lifelong learning agent learning a sequence of tasks with varying similarity. Manipulate memory capacity (e.g., number of skills that can be stored) and skill granularity (e.g., via threshold for skill merging or compression). Measure library size and performance over time. Identify the library size at which performance first drops below a baseline (e.g., 90% of optimal).",
+        "independent_variables": [
+          "memory_capacity",
+          "skill_granularity"
+        ],
+        "dependent_variables": [
+          "library_size_at_performance_drop",
+          "performance_trajectory"
+        ],
+        "controls": [
+          "task_sequence",
+          "learning_algorithm",
+          "skill_representation_format",
+          "number_of_tasks"
+        ],
+        "falsifying_observation": "The library size at performance drop is constant across all conditions of memory capacity and skill granularity, or does not vary monotonically with either variable."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "For a fixed memory capacity, decreasing skill granularity (more general skills) results in a larger library size at performance drop.",
+          "For a fixed skill granularity, increasing memory capacity results in a larger library size at performance drop."
+        ],
+        "rejects_hypothesis": [
+          "Library size at performance drop does not change with memory capacity or skill granularity.",
+          "Library size at performance drop increases with skill granularity (contradicting prediction)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no effect of memory capacity or skill granularity on onset threshold is observed.",
+        "assumption_to_revise": "The assumption that memory capacity is a dominant bottleneck; instead, computational budget for skill selection may be the key constraint.",
+        "next_question": "How does the computational budget for skill selection interact with library size to cause performance degradation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 4,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Dynamically adjusting skill granularity in inverse proportion to task similarity (higher granularity for dissimilar tasks, lower granularity for similar tasks) reduces library growth without significant performance loss compared to fixed high or low granularity policies.",
+      "independent_variables": [
+        "Skill granularity adjustment policy (dynamic, fixed high, fixed low)"
+      ],
+      "dependent_variables": [
+        "Library size over tasks",
+        "Average task reward or success rate"
+      ],
+      "controlled_variables": [
+        "Task sequence",
+        "Memory capacity",
+        "Skill learning algorithm",
+        "Task similarity measure (embedding distance)",
+        "Computational budget for skill selection",
+        "Skill representation format"
+      ],
+      "baselines": [
+        {
+          "name": "Fixed high granularity",
+          "description": "A policy that always learns highly specific skills, regardless of task similarity."
+        },
+        {
+          "name": "Fixed low granularity",
+          "description": "A policy that always learns general skills, regardless of task similarity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library size",
+          "definition": "Total number of distinct skills stored in the library after each task."
+        },
+        {
+          "name": "Average task reward",
+          "definition": "Mean cumulative reward or success rate achieved on each task across runs."
+        }
+      ],
+      "expected_result": "The dynamic granularity agent exhibits significantly slower library growth than both fixed policies, and its average task performance is comparable to or better than the best fixed policy.",
+      "falsifying_result": "The dynamic agent does not show significantly slower library growth than at least one fixed policy, OR its performance is significantly worse than both fixed policies.",
+      "minimum_viable_experiment": "Compare three skill discovery agents on a sequence of tasks with controlled similarity: one using fixed high granularity, one using fixed low granularity, and one using dynamic granularity adjusted by task similarity (measured by embedding distance). Measure library size and task performance over time. The task sequence should include a mix of similar and dissimilar tasks to trigger bloat. Memory capacity and other learning parameters are fixed across agents.",
+      "risks_and_confounds": [
+        "Task similarity measurement may be imperfect or rely on a fixed threshold.",
+        "The specific skill learning algorithm may interact with granularity differently.",
+        "Sequence length may be insufficient to observe the effects of bloat.",
+        "Computational budget for skill selection may confound performance differences."
+      ]
+    },
+    {
+      "hypothesis": "Selective forgetting based on skill contribution reduces library bloat while maintaining comparable task performance to full retention, and without inducing catastrophic forgetting.",
+      "independent_variables": [
+        "retention_policy"
+      ],
+      "dependent_variables": [
+        "library_size",
+        "average_task_performance",
+        "forgetting_rate"
+      ],
+      "controlled_variables": [
+        "task_sequence",
+        "skill_learning_algorithm",
+        "skill_representation",
+        "memory_capacity"
+      ],
+      "baselines": [
+        {
+          "name": "full_retention",
+          "description": "Retain all learned skills without any forgetting."
+        },
+        {
+          "name": "random_forgetting",
+          "description": "Randomly forget a skill when memory is full, with uniform probability."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "library_size",
+          "definition": "Number of skills stored in the library after each task."
+        },
+        {
+          "name": "average_task_performance",
+          "definition": "Average success rate or reward across all tasks evaluated after final training."
+        },
+        {
+          "name": "forgetting_rate",
+          "definition": "Performance drop on previously learned tasks, measured as difference in accuracy before and after learning new tasks."
+        }
+      ],
+      "expected_result": "Selective forgetting yields library size significantly smaller than full retention, average task performance not significantly different from full retention, and forgetting rate lower than random forgetting.",
+      "falsifying_result": "Selective forgetting does not result in library size significantly smaller than full retention, or its average performance is significantly lower than full retention, or its forgetting rate is higher than random forgetting.",
+      "minimum_viable_experiment": "Train a lifelong learning agent on a sequence of 10 related tasks. Implement three retention policies: (1) selective forgetting using accuracy gain as contribution metric, (2) full retention, (3) random forgetting. Measure library size after each task and evaluate final performance on all tasks. Use a simple neural network with skill modules. Repeat 10 times with different random seeds and task orders.",
+      "risks_and_confounds": [
+        "Task sequence order may affect bloat; counterbalance or randomize.",
+        "Choice of skill representation may interact with forgetting policy.",
+        "Contribution metric may be noisy; consider alternative metrics.",
+        "Memory capacity setting influences baseline; test at multiple capacities."
+      ]
+    },
+    {
+      "hypothesis": "Applying skill compression via functional similarity merging reduces library size while preserving task performance in a lifelong learning system.",
+      "independent_variables": [
+        "compression method (none vs functional similarity merging)"
+      ],
+      "dependent_variables": [
+        "library size (number of skills stored)",
+        "average task performance (success rate or reward)"
+      ],
+      "controlled_variables": [
+        "same task sequence (e.g., 10 grid-world navigation tasks with varying layouts)",
+        "same skill learning algorithm (e.g., option-critic with fixed parameters)",
+        "same memory capacity (e.g., store up to 100 skills)",
+        "same computational budget per step (e.g., 1 second for skill selection)",
+        "same environment dynamics (deterministic transitions)",
+        "same number of training episodes per task"
+      ],
+      "baselines": [
+        {
+          "name": "No Compression",
+          "description": "Standard lifelong learning agent that stores each learned skill as a separate primitive without any merging or compression."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Library Size",
+          "definition": "Total number of distinct skills stored in the agent's library at the end of the task sequence."
+        },
+        {
+          "name": "Average Task Performance",
+          "definition": "Mean success rate across all tasks, where success for each task is defined as achieving the goal within a fixed number of steps (e.g., 100 steps per episode)."
+        }
+      ],
+      "expected_result": "The compression condition results in a significantly smaller library (e.g., 40% fewer skills) with no statistically significant decrease in average task performance (within 5% relative difference, or p>0.05 in a t-test).",
+      "falsifying_result": "The compression condition does not yield a smaller library (library size is not statistically different or larger) OR leads to a significant decrease in average task performance (>10% relative drop with p<0.05) compared to the no-compression baseline.",
+      "minimum_viable_experiment": "Implement a lifelong learning agent in a grid-world environment with 10 sequentially presented navigation tasks (e.g., different obstacle layouts, goal locations). The agent learns skills via a policy-gradient method (e.g., actor-critic). For the compression condition, after each task, skills that have functionally similar state-action trajectories (measured by cosine similarity of skill embedding or outcome overlap) are merged into a single skill if similarity exceeds a threshold (e.g., 0.9). For the no-compression condition, all skills are stored individually. Both agents are trained on the same random seed sequence of tasks. Library size is recorded after each task, and task performance is averaged over the last 10 episodes per task. Run 30 independent trials with different random seeds. Compare means using paired t-test (since same task sequence).",
+      "risks_and_confounds": [
+        "The functional similarity threshold may be arbitrary; use sensitivity analysis with different thresholds.",
+        "Task ordering effects: use fixed sequence but could also randomize to test robustness.",
+        "Skill learning algorithm may introduce variability; ensure identical initialization and hyperparameters.",
+        "Implementation bugs in compression logic; verify with unit tests."
+      ]
+    },
+    {
+      "hypothesis": "Performance degradation due to skill-library bloat occurs when library size exceeds a threshold that depends on memory capacity and skill granularity; specifically, higher memory capacity delays the onset of degradation, while coarser skill granularity (more general skills) also delays it.",
+      "independent_variables": [
+        "memory_capacity (categorical: low, high)",
+        "skill_granularity (categorical: fine, coarse)"
+      ],
+      "dependent_variables": [
+        "library_size_at_performance_drop (number of skills when performance first falls below 90% of optimal)",
+        "performance_trajectory (sequence of task success rates over lifetime)"
+      ],
+      "controlled_variables": [
+        "task_sequence (fixed order of 20 tasks with controlled similarity)",
+        "learning_algorithm (identical skill learning and selection algorithm)",
+        "skill_representation_format (neural network parameters with fixed architecture)",
+        "number_of_tasks (20)",
+        "number of random seeds per condition (5)"
+      ],
+      "baselines": [
+        {
+          "name": "unconstrained baseline",
+          "description": "Agent with unlimited memory capacity and moderate skill granularity (no compression) to establish optimal performance without resource constraints."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "library_size",
+          "definition": "Total number of distinct skills stored by the agent at each point in time."
+        },
+        {
+          "name": "performance",
+          "definition": "Average task success rate (fraction of tasks completed successfully) over the last 5 tasks evaluated at each step."
+        }
+      ],
+      "expected_result": "Library size at performance drop is largest for high memory + coarse granularity condition, followed by high memory + fine granularity and low memory + coarse granularity, with the smallest for low memory + fine granularity. The pattern shows monotonic increase with memory capacity and monotonic decrease with skill granularity.",
+      "falsifying_result": "The library size at performance drop does not vary significantly across conditions (e.g., all conditions show similar threshold) or varies in the opposite direction (e.g., finer granularity leads to larger threshold).",
+      "minimum_viable_experiment": "Implement a lifelong learning agent with a simple skill library (e.g., parametric skills) and a fixed task sequence of 20 tasks with varying overlap. Manipulate memory capacity by setting a maximum number of stored skills (e.g., 10 vs. 50) and skill granularity via a threshold for skill merging (e.g., fine: merge only if cosine similarity > 0.95, coarse: merge if > 0.8). Run each of the 4 conditions for 5 random seeds. Record library size and performance after each task. Identify the first task where performance drops below 90% of the unconstrained baseline (averaged over seeds). Compare the library size at that point across conditions.",
+      "risks_and_confounds": [
+        "Stochasticity in learning may cause variability; use multiple seeds and statistical tests.",
+        "Task order effects: fixed sequence may bias results; consider randomizing tasks in a secondary analysis.",
+        "Granularity manipulation via merging threshold may not isolate granularity from other factors (e.g., representation); ensure threshold is the only difference.",
+        "Memory capacity as maximum number of skills may be confounded with computational budget; ensure other computational aspects are equal."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package presents a first-principles analysis of skill-library bloat in lifelong-learning agents. It defines core primitives, establishes a causal mechanism model linking task diversity, skill granularity, memory capacity, and performance, and identifies several tensions. It proposes four falsifiable hypotheses with detailed experimental designs. The work is well-structured and rigorous in its decomposition, but the insights are somewhat intuitive and lack novelty compared to existing literature on skill discovery and continual learning.",
+    "strengths": [
+      "Clear and rigorous first-principles decomposition of the problem.",
+      "Well-defined causal mechanism model with identifiable variables and bottlenecks.",
+      "Falsifiable hypotheses with concrete experimental designs, including controls and baseline conditions.",
+      "Strong emphasis on testability and falsification, with explicit failure conditions."
+    ],
+    "weaknesses": [
+      "The identified causes (lack of compression, finite memory) are already well-known in the community; novelty is limited.",
+      "The package does not cite or discuss existing methods for skill library management (e.g., progressive neural networks, elastic weight consolidation, or other replay strategies), making it unclear how the proposed experiments compare to state-of-the-art.",
+      "Some tensions (e.g., T1 specificity vs. generality) are standard trade-offs in machine learning; their derivation from primitives is not particularly surprising.",
+      "The experimental plans, while thorough, may overfit to the specific causal model and lack exploration of alternative mechanisms (e.g., representational drift, task ordering effects).",
+      "The assumption that skills are stored without compression is artificial and may not reflect practical systems, which often include some form of consolidation."
+    ],
+    "questions": [
+      "How do existing methods like Progressive Nets or Memory Aware Synapses relate to the proposed tensions? Why are they not used as baselines?",
+      "Is the assumption of no compression realistic for modern lifelong learning systems? Would the proposed experiments be informative if compression is inherently part of the agent?",
+      "What is the rationale for the specific choice of 20 tasks in the memory capacity experiment? How does task similarity (controlled vs. uncontrolled) affect the conclusions?",
+      "The quality scores in the certificates rate novelty as 3-4; does the author agree that the work is only moderately novel? Why should the conference accept such an incremental contribution?"
+    ],
+    "missing_baselines": [
+      "Existing skill discovery and lifelong learning methods such as Progressive Neural Networks, Elastic Weight Consolidation, GEM, and MER should be compared as baselines to demonstrate the need for a new causal understanding.",
+      "Simple baselines like 'no skill library' (single monolithic policy) or 'oracle skill selection' would help contextualize the bloat problem."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient novelty and lack of integration with existing methods",
+    "root_cause": "The research package, while rigorous in first-principles decomposition, does not sufficiently differentiate from or build upon established lifelong learning techniques (e.g., Progressive Neural Networks, Elastic Weight Consolidation, GEM). The identified tensions (specificity vs. generality, retention vs. forgetting) are well known, and the proposed experiments lack baselines from these methods, making the contribution incremental.",
+    "violated_principle": "First-principles research must contextualize its findings within the existing body of work to demonstrate added value and avoid rediscovering known trade-offs.",
+    "new_or_updated_principle": "When conducting first-principles analysis, explicitly compare derived tensions and predictions with those implied by existing methods, and design experiments that include state-of-the-art baselines to highlight where the new understanding provides greater explanatory power or leads to novel algorithmic insights.",
+    "new_or_updated_skill": "Ability to systematically incorporate and compare against relevant existing methods as baselines, ensuring that experimental designs test whether the new causal model explains phenomena that prior methods do not.",
+    "regression_test": "For any research package, verify that the experimental plans include at least two baselines from the existing literature (e.g., Progressive Nets, EWC, GEM, MER) and that the expected results explicitly state how they would differ from or improve upon those baselines. The package should also discuss why those baselines do not already resolve the target question."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": false,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_novelty_boundary_repair_ablation",
+    "ablation": "novelty_boundary_repair_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T170131Z"
+  }
+}

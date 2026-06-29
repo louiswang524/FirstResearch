@@ -1,0 +1,1333 @@
+{
+  "topic": {
+    "topic": "When does retrieval help or hurt autonomous research agents?",
+    "topic_id": "T010",
+    "goal": null,
+    "domain": "auto research",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: When does retrieval help or hurt autonomous research agents?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Autonomous Research Agent",
+        "definition": "An AI system that autonomously performs research tasks, including hypothesis generation, experimentation, analysis, and synthesis, without human intervention.",
+        "why_primitive": "It is the fundamental entity under study; the analysis focuses on the agent's behavior and performance."
+      },
+      {
+        "name": "Retrieval Operation",
+        "definition": "The action of querying an external knowledge source (e.g., database, web, corpus) to obtain documents or data relevant to the current research context.",
+        "why_primitive": "It is a core primitive action whose effects we analyze; cannot be reduced further without losing specificity."
+      },
+      {
+        "name": "Information Utility",
+        "definition": "The measure of how much retrieved information reduces uncertainty or improves the quality of decisions and actions in the research process.",
+        "why_primitive": "It captures the fundamental benefit of retrieval; its components (relevance, novelty, correctness) are secondary."
+      },
+      {
+        "name": "Research Task State",
+        "definition": "The representation of the agent's current progress, including established facts, hypotheses, and pending queries.",
+        "why_primitive": "It determines the context in which retrieval is performed; the state influences the utility of retrieved information."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "The research agent has finite cognitive and computational resources.",
+        "rationale": "Real agents have limited attention, memory, and processing capacity. This makes irrelevant or noisy retrieval consumption harmful.",
+        "possible_failure": "If agents have abundant resources (e.g., unlimited context window and processing), retrieval may not hurt."
+      },
+      {
+        "assumption": "Retrieval operations incur non-zero costs, including time, energy, and potential distraction.",
+        "rationale": "Real-world retrieval involves latency, bandwidth, and compute costs. These costs can outweigh benefits if retrieval is overused.",
+        "possible_failure": "If retrieval is instantaneous and free (e.g., perfect recall from infinite memory), it would never be harmful."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Breadth vs. Depth: More retrieval broadens knowledge but may dilute focus.",
+        "variables": [
+          "retrieval frequency",
+          "number of sources",
+          "relevance threshold",
+          "state uncertainty"
+        ]
+      },
+      {
+        "tradeoff": "Exploration vs. Exploitation: Retrieval explores new information, but uses resources that could be used for reasoning (exploitation).",
+        "variables": [
+          "retrieval budget",
+          "information need certainty",
+          "novelty preference",
+          "temporal discount"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "state_uncertainty",
+        "role": "input",
+        "description": "The degree of uncertainty in the agent's current research task state, including missing information or ambiguous hypotheses."
+      },
+      {
+        "name": "retrieval_frequency",
+        "role": "input",
+        "description": "How often the agent performs retrieval operations over a given period of research activity."
+      },
+      {
+        "name": "relevance_threshold",
+        "role": "confounder",
+        "description": "The minimum relevance score required for retrieved information to be considered useful, affecting the quality-cost tradeoff."
+      },
+      {
+        "name": "information_utility",
+        "role": "mediator",
+        "description": "The measure of how much retrieved information reduces uncertainty or improves decision quality."
+      },
+      {
+        "name": "resource_cost",
+        "role": "mediator",
+        "description": "The total costs incurred by retrieval operations, including time, computation, and potential distraction."
+      },
+      {
+        "name": "agent_performance",
+        "role": "outcome",
+        "description": "The overall quality and efficiency of the research process, including hypothesis generation, experimentation, and synthesis."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "state_uncertainty",
+        "relation": "increases",
+        "target": "retrieval_frequency",
+        "explanation": "Higher uncertainty motivates the agent to seek more information through retrieval."
+      },
+      {
+        "step": "2",
+        "source": "retrieval_frequency",
+        "relation": "increases with diminishing returns",
+        "target": "information_utility",
+        "explanation": "More retrievals yield more information, but beyond a point, additional retrievals add less novel or relevant data."
+      },
+      {
+        "step": "3",
+        "source": "retrieval_frequency",
+        "relation": "increases",
+        "target": "resource_cost",
+        "explanation": "Each retrieval consumes time and computational resources, adding to overall cost."
+      },
+      {
+        "step": "4",
+        "source": "information_utility",
+        "relation": "increases",
+        "target": "agent_performance",
+        "explanation": "Higher utility information improves decisions and research outcomes."
+      },
+      {
+        "step": "5",
+        "source": "resource_cost",
+        "relation": "decreases",
+        "target": "agent_performance",
+        "explanation": "Costs detract from net performance by consuming resources that could be used for reasoning or experimentation."
+      },
+      {
+        "step": "6",
+        "source": "relevance_threshold",
+        "relation": "moderates",
+        "target": "information_utility",
+        "explanation": "A higher threshold increases the expected utility per retrieval but may reduce the number of retrievals that pass, affecting overall utility."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Finite attention and processing capacity",
+        "why_it_matters": "Even if retrieval yields useful information, the agent cannot process unlimited amounts; overload can degrade performance."
+      },
+      {
+        "bottleneck": "Non-zero retrieval costs",
+        "why_it_matters": "Costs of time and compute accumulate and can outweigh benefits, especially if retrieval yields low-utility information."
+      },
+      {
+        "bottleneck": "Noisy or irrelevant retrieval results",
+        "why_it_matters": "Low-quality retrieval wastes resources and can mislead the agent, reducing overall research quality."
+      }
+    ],
+    "mechanism_summary": "The mechanism describes how retrieval impacts autonomous research agent performance through a tradeoff between information utility and resource costs, moderated by state uncertainty and relevance thresholds. Retrieval helps when the expected utility of retrieved information outweighs its costs, especially when state uncertainty is high and retrieval is selective; it hurts when costs dominate due to noise, overload, or unnecessary retrieval."
+  },
+  "tensions": [
+    {
+      "tension_id": "utility_cost_tradeoff",
+      "statement": "Increasing retrieval frequency improves information utility but also increases resource costs, creating a tradeoff where net performance gain must exceed cost for retrieval to be beneficial.",
+      "derived_from": [
+        "Autonomous Research Agent",
+        "Retrieval Operation",
+        "Information Utility"
+      ],
+      "why_it_matters": "This tradeoff is fundamental to optimizing retrieval strategies; ignoring it can lead to over-retrieval that degrades performance.",
+      "what_existing_methods_may_miss": "Many methods treat retrieval as uniformly beneficial without accounting for diminishing returns or cost saturation.",
+      "testability": 4
+    },
+    {
+      "tension_id": "breadth_vs_depth",
+      "statement": "Broad retrieval increases coverage but may dilute focus on the most relevant information, reducing depth of analysis.",
+      "derived_from": [
+        "Retrieval Operation",
+        "Research Task State"
+      ],
+      "why_it_matters": "Balancing breadth and depth is crucial for efficient research; current methods may not adapt well to this tradeoff.",
+      "what_existing_methods_may_miss": "Standard retrieval-augmented generation often retrieves top-k documents without considering the cost of dilution.",
+      "testability": 3
+    },
+    {
+      "tension_id": "finite_resources_assumption",
+      "statement": "The assumption of finite cognitive and computational resources is critical; if resources are abundant, retrieval costs become negligible and over-retrieval is not harmful.",
+      "derived_from": [
+        "The research agent has finite cognitive and computational resources."
+      ],
+      "why_it_matters": "If future agents have virtually unlimited capacity, the tradeoffs change, potentially invalidating current optimization approaches.",
+      "what_existing_methods_may_miss": "Current cost-aware retrieval methods assume scarcity; they may fail in abundant-resource regimes.",
+      "testability": 2
+    },
+    {
+      "tension_id": "diminishing_returns",
+      "statement": "The relationship between retrieval frequency and information utility exhibits diminishing returns, but the exact shape and threshold are uncertain.",
+      "derived_from": [
+        "Retrieval Operation",
+        "Information Utility"
+      ],
+      "why_it_matters": "Understanding the diminishing point is key to stopping retrieval; methods that assume linear returns may over-retrieve.",
+      "what_existing_methods_may_miss": "Many retrieval policies do not model diminishing returns and thus fail to stop at optimal points.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing retrieval frequency beyond a certain threshold lead to a net decrease in agent performance due to accumulating resource costs outweighing diminishing information utility?",
+      "question_type": "causal",
+      "source_tension": "utility_cost_tradeoff",
+      "expected_contribution": "Identifies the optimal retrieval frequency and validates the tradeoff hypothesis."
+    },
+    {
+      "question": "How does the breadth of retrieval (number of distinct sources) versus depth (number of retrievals per source) affect the accuracy of hypothesis generation in autonomous research agents?",
+      "question_type": "causal",
+      "source_tension": "breadth_vs_depth",
+      "expected_contribution": "Quantifies the impact of retrieval allocation strategies on research quality."
+    },
+    {
+      "question": "What is the empirical shape of the relationship between retrieval frequency and information utility in typical research tasks, and at what point does marginal utility become negligible?",
+      "question_type": "descriptive",
+      "source_tension": "diminishing_returns",
+      "expected_contribution": "Provides empirical parameters for modeling diminishing returns in retrieval optimization."
+    },
+    {
+      "question": "Under what conditions of computational resource abundance does the cost-benefit tradeoff of retrieval become irrelevant, and how does that change optimal retrieval strategies?",
+      "question_type": "diagnostic",
+      "source_tension": "finite_resources_assumption",
+      "expected_contribution": "Determines the threshold resource level where cost-aware policies are unnecessary."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that autonomously performs research tasks, including hypothesis generation, experimentation, analysis, and synthesis, without human intervention.",
+          "why_primitive": "It is the fundamental entity under study; the analysis focuses on the agent's behavior and performance."
+        },
+        {
+          "name": "Retrieval Operation",
+          "definition": "The action of querying an external knowledge source (e.g., database, web, corpus) to obtain documents or data relevant to the current research context.",
+          "why_primitive": "It is a core primitive action whose effects we analyze; cannot be reduced further without losing specificity."
+        },
+        {
+          "name": "Information Utility",
+          "definition": "The measure of how much retrieved information reduces uncertainty or improves the quality of decisions and actions in the research process.",
+          "why_primitive": "It captures the fundamental benefit of retrieval; its components (relevance, novelty, correctness) are secondary."
+        },
+        {
+          "name": "Research Task State",
+          "definition": "The representation of the agent's current progress, including established facts, hypotheses, and pending queries.",
+          "why_primitive": "It determines the context in which retrieval is performed; the state influences the utility of retrieved information."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The research agent has finite cognitive and computational resources.",
+          "rationale": "Real agents have limited attention, memory, and processing capacity. This makes irrelevant or noisy retrieval consumption harmful.",
+          "possible_failure": "If agents have abundant resources (e.g., unlimited context window and processing), retrieval may not hurt."
+        },
+        {
+          "assumption": "Retrieval operations incur non-zero costs, including time, energy, and potential distraction.",
+          "rationale": "Real-world retrieval involves latency, bandwidth, and compute costs. These costs can outweigh benefits if retrieval is overused.",
+          "possible_failure": "If retrieval is instantaneous and free (e.g., perfect recall from infinite memory), it would never be harmful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "state_uncertainty",
+            "role": "input",
+            "description": "The degree of uncertainty in the agent's current research task state, including missing information or ambiguous hypotheses."
+          },
+          {
+            "name": "retrieval_frequency",
+            "role": "input",
+            "description": "How often the agent performs retrieval operations over a given period of research activity."
+          },
+          {
+            "name": "relevance_threshold",
+            "role": "confounder",
+            "description": "The minimum relevance score required for retrieved information to be considered useful, affecting the quality-cost tradeoff."
+          },
+          {
+            "name": "information_utility",
+            "role": "mediator",
+            "description": "The measure of how much retrieved information reduces uncertainty or improves decision quality."
+          },
+          {
+            "name": "resource_cost",
+            "role": "mediator",
+            "description": "The total costs incurred by retrieval operations, including time, computation, and potential distraction."
+          },
+          {
+            "name": "agent_performance",
+            "role": "outcome",
+            "description": "The overall quality and efficiency of the research process, including hypothesis generation, experimentation, and synthesis."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "state_uncertainty",
+            "relation": "increases",
+            "target": "retrieval_frequency",
+            "explanation": "Higher uncertainty motivates the agent to seek more information through retrieval."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_frequency",
+            "relation": "increases with diminishing returns",
+            "target": "information_utility",
+            "explanation": "More retrievals yield more information, but beyond a point, additional retrievals add less novel or relevant data."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_frequency",
+            "relation": "increases",
+            "target": "resource_cost",
+            "explanation": "Each retrieval consumes time and computational resources, adding to overall cost."
+          },
+          {
+            "step": "4",
+            "source": "information_utility",
+            "relation": "increases",
+            "target": "agent_performance",
+            "explanation": "Higher utility information improves decisions and research outcomes."
+          },
+          {
+            "step": "5",
+            "source": "resource_cost",
+            "relation": "decreases",
+            "target": "agent_performance",
+            "explanation": "Costs detract from net performance by consuming resources that could be used for reasoning or experimentation."
+          },
+          {
+            "step": "6",
+            "source": "relevance_threshold",
+            "relation": "moderates",
+            "target": "information_utility",
+            "explanation": "A higher threshold increases the expected utility per retrieval but may reduce the number of retrievals that pass, affecting overall utility."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Finite attention and processing capacity",
+            "why_it_matters": "Even if retrieval yields useful information, the agent cannot process unlimited amounts; overload can degrade performance."
+          },
+          {
+            "bottleneck": "Non-zero retrieval costs",
+            "why_it_matters": "Costs of time and compute accumulate and can outweigh benefits, especially if retrieval yields low-utility information."
+          },
+          {
+            "bottleneck": "Noisy or irrelevant retrieval results",
+            "why_it_matters": "Low-quality retrieval wastes resources and can mislead the agent, reducing overall research quality."
+          }
+        ],
+        "mechanism_summary": "The mechanism describes how retrieval impacts autonomous research agent performance through a tradeoff between information utility and resource costs, moderated by state uncertainty and relevance thresholds. Retrieval helps when the expected utility of retrieved information outweighs its costs, especially when state uncertainty is high and retrieval is selective; it hurts when costs dominate due to noise, overload, or unnecessary retrieval."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "breadth_vs_depth",
+        "statement": "Broad retrieval increases coverage but may dilute focus on the most relevant information, reducing depth of analysis.",
+        "derived_from": [
+          "Retrieval Operation",
+          "Research Task State"
+        ],
+        "why_it_matters": "Balancing breadth and depth is crucial for efficient research; current methods may not adapt well to this tradeoff.",
+        "what_existing_methods_may_miss": "Standard retrieval-augmented generation often retrieves top-k documents without considering the cost of dilution.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "Is there a 'retrieval redundancy saturation point' beyond which increasing retrieval depth per source reduces hypothesis generation accuracy, and a 'breadth noise threshold' beyond which increasing retrieval breadth degrades accuracy, such that the optimal strategy lies at the intersection of these thresholds?",
+        "question_type": "causal",
+        "source_tension": "breadth_vs_depth",
+        "expected_contribution": "Identifies precise phase transitions where retrieval transitions from helpful to harmful, quantified by redundancy ratio and noise ratio."
+      },
+      "hypothesis": {
+        "statement": "Autonomous research agents exhibit a phase transition in hypothesis generation accuracy: accuracy is maximized when the ratio of retrieval depth to source-specific redundancy capacity is below a saturation threshold AND the ratio of retrieval breadth to relevant source diversity is below a noise threshold; exceeding either threshold causes a sharp decline in accuracy.",
+        "predicted_effect": "Accuracy peaks at a specific combination of depth and breadth, with a sharp drop when depth exceeds 4 retrievals per source (given typical redundancy) or breadth exceeds 8 sources (given typical noise), controlling for total retrieval count."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Implement autonomous research agents with fixed architecture. Use a research task requiring hypothesis generation from a given dataset. Vary breadth (1,4,8,12,16 sources) and depth (1,2,4,6,8 retrievals per source) in a factorial design, keeping total retrieved documents constant (e.g., 16). For each condition, measure 'information redundancy' (e.g., pairwise cosine similarity among retrieved documents) and 'source noise' (e.g., proportion of irrelevant facts). Measure accuracy of generated hypothesis via expert evaluation blind to condition. Test for sharp thresholds: identify the point where accuracy drops more than 20% from peak.",
+        "independent_variables": [
+          "breadth (number of distinct sources)",
+          "depth (number of retrievals per source)"
+        ],
+        "dependent_variables": [
+          "accuracy of hypothesis generation (expert rating on 1-10 scale)",
+          "information redundancy (mean pairwise similarity)",
+          "source noise (irrelevant fact proportion)"
+        ],
+        "controls": [
+          "same research task",
+          "same agent architecture",
+          "same total retrieval count (16)",
+          "same retrieval system",
+          "same time limit (5 minutes)",
+          "same relevance scoring function"
+        ],
+        "falsifying_observation": "If no sharp drop (>20% from peak) is observed for any combination of depth and breadth, or if accuracy is monotonically increasing with depth or breadth, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Accuracy peaks at moderate depth (4) and moderate breadth (8).",
+          "Accuracy drops sharply when depth exceeds 4 for any breadth (saturation).",
+          "Accuracy drops sharply when breadth exceeds 8 for any depth (noise).",
+          "Information redundancy increases sharply at depth >4; source noise increases sharply at breadth >8."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy is highest at extreme depth (8) regardless of breadth.",
+          "Accuracy is highest at extreme breadth (16) regardless of depth.",
+          "No sharp drop observed; accuracy changes gradually.",
+          "Redundancy or noise does not correlate with accuracy drops."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no sharp thresholds are observed or the optimal strategy is extreme (e.g., very low depth/high breadth or vice versa),",
+        "assumption_to_revise": "Assumption that retrieval is subject to redundancy saturation and noise thresholds. Possibly agents can process unlimited redundant information without detriment, or noise filtering mechanisms are effective.",
+        "next_question": "What agent-level mechanisms (e.g., attention filtering, relevance re-ranking) can suppress the harmful effects of redundancy and noise, and under what conditions do they break down?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that autonomously performs research tasks, including hypothesis generation, experimentation, analysis, and synthesis, without human intervention.",
+          "why_primitive": "It is the fundamental entity under study; the analysis focuses on the agent's behavior and performance."
+        },
+        {
+          "name": "Retrieval Operation",
+          "definition": "The action of querying an external knowledge source (e.g., database, web, corpus) to obtain documents or data relevant to the current research context.",
+          "why_primitive": "It is a core primitive action whose effects we analyze; cannot be reduced further without losing specificity."
+        },
+        {
+          "name": "Information Utility",
+          "definition": "The measure of how much retrieved information reduces uncertainty or improves the quality of decisions and actions in the research process.",
+          "why_primitive": "It captures the fundamental benefit of retrieval; its components (relevance, novelty, correctness) are secondary."
+        },
+        {
+          "name": "Research Task State",
+          "definition": "The representation of the agent's current progress, including established facts, hypotheses, and pending queries.",
+          "why_primitive": "It determines the context in which retrieval is performed; the state influences the utility of retrieved information."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The research agent has finite cognitive and computational resources.",
+          "rationale": "Real agents have limited attention, memory, and processing capacity. This makes irrelevant or noisy retrieval consumption harmful.",
+          "possible_failure": "If agents have abundant resources (e.g., unlimited context window and processing), retrieval may not hurt."
+        },
+        {
+          "assumption": "Retrieval operations incur non-zero costs, including time, energy, and potential distraction.",
+          "rationale": "Real-world retrieval involves latency, bandwidth, and compute costs. These costs can outweigh benefits if retrieval is overused.",
+          "possible_failure": "If retrieval is instantaneous and free (e.g., perfect recall from infinite memory), it would never be harmful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "state_uncertainty",
+            "role": "input",
+            "description": "The degree of uncertainty in the agent's current research task state, including missing information or ambiguous hypotheses."
+          },
+          {
+            "name": "retrieval_frequency",
+            "role": "input",
+            "description": "How often the agent performs retrieval operations over a given period of research activity."
+          },
+          {
+            "name": "relevance_threshold",
+            "role": "confounder",
+            "description": "The minimum relevance score required for retrieved information to be considered useful, affecting the quality-cost tradeoff."
+          },
+          {
+            "name": "information_utility",
+            "role": "mediator",
+            "description": "The measure of how much retrieved information reduces uncertainty or improves decision quality."
+          },
+          {
+            "name": "resource_cost",
+            "role": "mediator",
+            "description": "The total costs incurred by retrieval operations, including time, computation, and potential distraction."
+          },
+          {
+            "name": "agent_performance",
+            "role": "outcome",
+            "description": "The overall quality and efficiency of the research process, including hypothesis generation, experimentation, and synthesis."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "state_uncertainty",
+            "relation": "increases",
+            "target": "retrieval_frequency",
+            "explanation": "Higher uncertainty motivates the agent to seek more information through retrieval."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_frequency",
+            "relation": "increases with diminishing returns",
+            "target": "information_utility",
+            "explanation": "More retrievals yield more information, but beyond a point, additional retrievals add less novel or relevant data."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_frequency",
+            "relation": "increases",
+            "target": "resource_cost",
+            "explanation": "Each retrieval consumes time and computational resources, adding to overall cost."
+          },
+          {
+            "step": "4",
+            "source": "information_utility",
+            "relation": "increases",
+            "target": "agent_performance",
+            "explanation": "Higher utility information improves decisions and research outcomes."
+          },
+          {
+            "step": "5",
+            "source": "resource_cost",
+            "relation": "decreases",
+            "target": "agent_performance",
+            "explanation": "Costs detract from net performance by consuming resources that could be used for reasoning or experimentation."
+          },
+          {
+            "step": "6",
+            "source": "relevance_threshold",
+            "relation": "moderates",
+            "target": "information_utility",
+            "explanation": "A higher threshold increases the expected utility per retrieval but may reduce the number of retrievals that pass, affecting overall utility."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Finite attention and processing capacity",
+            "why_it_matters": "Even if retrieval yields useful information, the agent cannot process unlimited amounts; overload can degrade performance."
+          },
+          {
+            "bottleneck": "Non-zero retrieval costs",
+            "why_it_matters": "Costs of time and compute accumulate and can outweigh benefits, especially if retrieval yields low-utility information."
+          },
+          {
+            "bottleneck": "Noisy or irrelevant retrieval results",
+            "why_it_matters": "Low-quality retrieval wastes resources and can mislead the agent, reducing overall research quality."
+          }
+        ],
+        "mechanism_summary": "The mechanism describes how retrieval impacts autonomous research agent performance through a tradeoff between information utility and resource costs, moderated by state uncertainty and relevance thresholds. Retrieval helps when the expected utility of retrieved information outweighs its costs, especially when state uncertainty is high and retrieval is selective; it hurts when costs dominate due to noise, overload, or unnecessary retrieval."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "finite_resources_assumption",
+        "statement": "The assumption of finite cognitive and computational resources is critical; if resources are abundant, retrieval costs become negligible and over-retrieval is not harmful.",
+        "derived_from": [
+          "The research agent has finite cognitive and computational resources."
+        ],
+        "why_it_matters": "If future agents have virtually unlimited capacity, the tradeoffs change, potentially invalidating current optimization approaches.",
+        "what_existing_methods_may_miss": "Current cost-aware retrieval methods assume scarcity; they may fail in abundant-resource regimes.",
+        "testability": 2
+      },
+      "research_question": {
+        "question": "At what threshold of retrieval frequency does information overload outweigh the benefits of retrieval for autonomous research agents, and how does this threshold depend on the complexity of the research task?",
+        "question_type": "diagnostic",
+        "source_tension": "finite_resources_assumption",
+        "expected_contribution": "Identifies a sharp phase transition where retrieval becomes harmful due to cognitive overload, even with unlimited computational resources, and quantifies how task complexity shifts this threshold."
+      },
+      "hypothesis": {
+        "statement": "For autonomous research agents, there exists a retrieval frequency threshold beyond which agent performance declines, even under abundant computational resources, because information overload (processing conflicting or irrelevant facts) degrades reasoning quality. This threshold decreases as task complexity increases.",
+        "predicted_effect": "Agent performance (e.g., research quality score) will first increase with retrieval frequency, then peak, then decline at high frequencies. The peak shifts to lower frequencies for more complex tasks."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate autonomous research agents with abundant computational resources (unlimited context window, no compute limit) on two standardized research tasks of differing complexity (simple fact-finding vs. complex hypothesis synthesis). Vary retrieval frequency from 0 to very high (e.g., 0, 1, 5, 20, 50 retrievals per research cycle). Measure agent performance (e.g., accuracy and completeness of final answer) and information utility metrics.",
+        "independent_variables": [
+          "Retrieval frequency (number of retrievals per research cycle)",
+          "Task complexity (simple vs. complex)"
+        ],
+        "dependent_variables": [
+          "Agent performance (composite score of hypothesis correctness, novelty, and completeness)",
+          "Average information utility (relevance and novelty of retrieved documents)",
+          "Cognitive load proxy (e.g., number of distinct facts considered per decision)"
+        ],
+        "controls": [
+          "Same initial research task state",
+          "Same retrieval source and query formulation strategy",
+          "Same relevance threshold (e.g., 0.5)",
+          "Same agent architecture and reasoning steps",
+          "Abundant computational resources ensured"
+        ],
+        "falsifying_observation": "If agent performance increases monotonically with retrieval frequency for both task complexities, showing no decline at high frequencies, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Agent performance exhibits an inverted U-shape: peaks at a moderate retrieval frequency and declines at very high frequencies.",
+          "The peak frequency is lower for the complex task compared to the simple task.",
+          "Information utility remains high even at high frequencies, but performance drops, indicating overload rather than low-quality retrieval."
+        ],
+        "rejects_hypothesis": [
+          "Agent performance increases monotonically with retrieval frequency, showing no decline at high frequencies.",
+          "No difference in peak location between task complexities; performance is always highest at maximum retrieval.",
+          "Performance decline at high frequencies coincides with low information utility, suggesting retrieval quality rather than overload."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If performance increases monotonically with retrieval frequency, then the hypothesized overload phase transition does not exist under abundant resources.",
+        "assumption_to_revise": "The assumption that cognitive limitations (information overload) exist even with abundant computational resources may be false; agents might effectively ignore irrelevant information.",
+        "next_question": "What architectural features (e.g., attention mechanisms, memory refresh) allow agents to avoid information overload from high-frequency retrieval?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that autonomously performs research tasks, including hypothesis generation, experimentation, analysis, and synthesis, without human intervention.",
+          "why_primitive": "It is the fundamental entity under study; the analysis focuses on the agent's behavior and performance."
+        },
+        {
+          "name": "Retrieval Operation",
+          "definition": "The action of querying an external knowledge source (e.g., database, web, corpus) to obtain documents or data relevant to the current research context.",
+          "why_primitive": "It is a core primitive action whose effects we analyze; cannot be reduced further without losing specificity."
+        },
+        {
+          "name": "Information Utility",
+          "definition": "The measure of how much retrieved information reduces uncertainty or improves the quality of decisions and actions in the research process.",
+          "why_primitive": "It captures the fundamental benefit of retrieval; its components (relevance, novelty, correctness) are secondary."
+        },
+        {
+          "name": "Research Task State",
+          "definition": "The representation of the agent's current progress, including established facts, hypotheses, and pending queries.",
+          "why_primitive": "It determines the context in which retrieval is performed; the state influences the utility of retrieved information."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The research agent has finite cognitive and computational resources.",
+          "rationale": "Real agents have limited attention, memory, and processing capacity. This makes irrelevant or noisy retrieval consumption harmful.",
+          "possible_failure": "If agents have abundant resources (e.g., unlimited context window and processing), retrieval may not hurt."
+        },
+        {
+          "assumption": "Retrieval operations incur non-zero costs, including time, energy, and potential distraction.",
+          "rationale": "Real-world retrieval involves latency, bandwidth, and compute costs. These costs can outweigh benefits if retrieval is overused.",
+          "possible_failure": "If retrieval is instantaneous and free (e.g., perfect recall from infinite memory), it would never be harmful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "state_uncertainty",
+            "role": "input",
+            "description": "The degree of uncertainty in the agent's current research task state, including missing information or ambiguous hypotheses."
+          },
+          {
+            "name": "retrieval_frequency",
+            "role": "input",
+            "description": "How often the agent performs retrieval operations over a given period of research activity."
+          },
+          {
+            "name": "relevance_threshold",
+            "role": "confounder",
+            "description": "The minimum relevance score required for retrieved information to be considered useful, affecting the quality-cost tradeoff."
+          },
+          {
+            "name": "information_utility",
+            "role": "mediator",
+            "description": "The measure of how much retrieved information reduces uncertainty or improves decision quality."
+          },
+          {
+            "name": "resource_cost",
+            "role": "mediator",
+            "description": "The total costs incurred by retrieval operations, including time, computation, and potential distraction."
+          },
+          {
+            "name": "agent_performance",
+            "role": "outcome",
+            "description": "The overall quality and efficiency of the research process, including hypothesis generation, experimentation, and synthesis."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "state_uncertainty",
+            "relation": "increases",
+            "target": "retrieval_frequency",
+            "explanation": "Higher uncertainty motivates the agent to seek more information through retrieval."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_frequency",
+            "relation": "increases with diminishing returns",
+            "target": "information_utility",
+            "explanation": "More retrievals yield more information, but beyond a point, additional retrievals add less novel or relevant data."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_frequency",
+            "relation": "increases",
+            "target": "resource_cost",
+            "explanation": "Each retrieval consumes time and computational resources, adding to overall cost."
+          },
+          {
+            "step": "4",
+            "source": "information_utility",
+            "relation": "increases",
+            "target": "agent_performance",
+            "explanation": "Higher utility information improves decisions and research outcomes."
+          },
+          {
+            "step": "5",
+            "source": "resource_cost",
+            "relation": "decreases",
+            "target": "agent_performance",
+            "explanation": "Costs detract from net performance by consuming resources that could be used for reasoning or experimentation."
+          },
+          {
+            "step": "6",
+            "source": "relevance_threshold",
+            "relation": "moderates",
+            "target": "information_utility",
+            "explanation": "A higher threshold increases the expected utility per retrieval but may reduce the number of retrievals that pass, affecting overall utility."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Finite attention and processing capacity",
+            "why_it_matters": "Even if retrieval yields useful information, the agent cannot process unlimited amounts; overload can degrade performance."
+          },
+          {
+            "bottleneck": "Non-zero retrieval costs",
+            "why_it_matters": "Costs of time and compute accumulate and can outweigh benefits, especially if retrieval yields low-utility information."
+          },
+          {
+            "bottleneck": "Noisy or irrelevant retrieval results",
+            "why_it_matters": "Low-quality retrieval wastes resources and can mislead the agent, reducing overall research quality."
+          }
+        ],
+        "mechanism_summary": "The mechanism describes how retrieval impacts autonomous research agent performance through a tradeoff between information utility and resource costs, moderated by state uncertainty and relevance thresholds. Retrieval helps when the expected utility of retrieved information outweighs its costs, especially when state uncertainty is high and retrieval is selective; it hurts when costs dominate due to noise, overload, or unnecessary retrieval."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "utility_cost_tradeoff",
+        "statement": "Increasing retrieval frequency improves information utility but also increases resource costs, creating a tradeoff where net performance gain must exceed cost for retrieval to be beneficial.",
+        "derived_from": [
+          "Autonomous Research Agent",
+          "Retrieval Operation",
+          "Information Utility"
+        ],
+        "why_it_matters": "This tradeoff is fundamental to optimizing retrieval strategies; ignoring it can lead to over-retrieval that degrades performance.",
+        "what_existing_methods_may_miss": "Many methods treat retrieval as uniformly beneficial without accounting for diminishing returns or cost saturation.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "How does the effect of retrieval frequency on autonomous research agent performance depend on the initial level of state uncertainty?",
+        "question_type": "causal",
+        "source_tension": "utility_cost_tradeoff",
+        "expected_contribution": "Identifies state uncertainty as a critical boundary condition that determines whether retrieval helps or hurts, and characterises the crossover interaction."
+      },
+      "hypothesis": {
+        "statement": "There is a crossover interaction between retrieval frequency and initial state uncertainty: when uncertainty is high, higher retrieval frequency improves performance; when uncertainty is low, higher retrieval frequency degrades performance.",
+        "predicted_effect": "Performance increases with retrieval frequency under high uncertainty, but decreases under low uncertainty, resulting in a qualitative shift in the optimal strategy."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Simulate an autonomous research agent performing a literature review and hypothesis generation task. Manipulate initial state uncertainty by providing (high) minimal prior knowledge vs. (low) comprehensive prior knowledge. Vary retrieval frequency (number of queries per task) at three levels (low, medium, high). Measure agent performance as a composite of hypothesis quality, coverage, and completion time. Repeat for 30 runs per condition.",
+        "independent_variables": [
+          "retrieval frequency (low, medium, high per task)",
+          "initial state uncertainty (high vs. low via prior knowledge amount)"
+        ],
+        "dependent_variables": [
+          "agent performance composite score (hypothesis novelty, relevance, and efficiency)"
+        ],
+        "controls": [
+          "fixed relevance threshold (0.5)",
+          "same agent architecture",
+          "identical task (e.g., 'Generate hypotheses about the relationship between X and Y')",
+          "fixed resource budget (time and compute per task)"
+        ],
+        "falsifying_observation": "No significant interaction: e.g., retrieval frequency has similar effect in both uncertainty conditions, or main effects only."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Under high uncertainty, performance increases monotonically with retrieval frequency.",
+          "Under low uncertainty, performance decreases monotonically with retrieval frequency.",
+          "A significant crossover interaction in ANOVA (p<0.05) with opposite slopes."
+        ],
+        "rejects_hypothesis": [
+          "Performance increases (or decreases) with retrieval frequency in both uncertainty conditions.",
+          "No significant variation in performance across retrieval frequency in either condition.",
+          "Retrieval frequency and state uncertainty show only additive main effects."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no crossover interaction is observed, the proposed boundary condition (initial state uncertainty) may be insufficient. The mechanism might be better explained by a different moderator (e.g., task complexity, relevance threshold) or by non-monotonic effects within each uncertainty level.",
+        "assumption_to_revise": "The assumption that state uncertainty directly moderates the utility-cost tradeoff. It may be that retrieval is beneficial only when the agent's internal knowledge is below a certain absolute level, regardless of uncertainty.",
+        "next_question": "Does the effect of retrieval frequency on agent performance instead depend on the ratio of known to unknown facts (knowledge coverage) rather than on subjective uncertainty?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "When does retrieval help or hurt autonomous research agents?",
+      "primitive_definitions": [
+        {
+          "name": "Autonomous Research Agent",
+          "definition": "An AI system that autonomously performs research tasks, including hypothesis generation, experimentation, analysis, and synthesis, without human intervention.",
+          "why_primitive": "It is the fundamental entity under study; the analysis focuses on the agent's behavior and performance."
+        },
+        {
+          "name": "Retrieval Operation",
+          "definition": "The action of querying an external knowledge source (e.g., database, web, corpus) to obtain documents or data relevant to the current research context.",
+          "why_primitive": "It is a core primitive action whose effects we analyze; cannot be reduced further without losing specificity."
+        },
+        {
+          "name": "Information Utility",
+          "definition": "The measure of how much retrieved information reduces uncertainty or improves the quality of decisions and actions in the research process.",
+          "why_primitive": "It captures the fundamental benefit of retrieval; its components (relevance, novelty, correctness) are secondary."
+        },
+        {
+          "name": "Research Task State",
+          "definition": "The representation of the agent's current progress, including established facts, hypotheses, and pending queries.",
+          "why_primitive": "It determines the context in which retrieval is performed; the state influences the utility of retrieved information."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "The research agent has finite cognitive and computational resources.",
+          "rationale": "Real agents have limited attention, memory, and processing capacity. This makes irrelevant or noisy retrieval consumption harmful.",
+          "possible_failure": "If agents have abundant resources (e.g., unlimited context window and processing), retrieval may not hurt."
+        },
+        {
+          "assumption": "Retrieval operations incur non-zero costs, including time, energy, and potential distraction.",
+          "rationale": "Real-world retrieval involves latency, bandwidth, and compute costs. These costs can outweigh benefits if retrieval is overused.",
+          "possible_failure": "If retrieval is instantaneous and free (e.g., perfect recall from infinite memory), it would never be harmful."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "state_uncertainty",
+            "role": "input",
+            "description": "The degree of uncertainty in the agent's current research task state, including missing information or ambiguous hypotheses."
+          },
+          {
+            "name": "retrieval_frequency",
+            "role": "input",
+            "description": "How often the agent performs retrieval operations over a given period of research activity."
+          },
+          {
+            "name": "relevance_threshold",
+            "role": "confounder",
+            "description": "The minimum relevance score required for retrieved information to be considered useful, affecting the quality-cost tradeoff."
+          },
+          {
+            "name": "information_utility",
+            "role": "mediator",
+            "description": "The measure of how much retrieved information reduces uncertainty or improves decision quality."
+          },
+          {
+            "name": "resource_cost",
+            "role": "mediator",
+            "description": "The total costs incurred by retrieval operations, including time, computation, and potential distraction."
+          },
+          {
+            "name": "agent_performance",
+            "role": "outcome",
+            "description": "The overall quality and efficiency of the research process, including hypothesis generation, experimentation, and synthesis."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "state_uncertainty",
+            "relation": "increases",
+            "target": "retrieval_frequency",
+            "explanation": "Higher uncertainty motivates the agent to seek more information through retrieval."
+          },
+          {
+            "step": "2",
+            "source": "retrieval_frequency",
+            "relation": "increases with diminishing returns",
+            "target": "information_utility",
+            "explanation": "More retrievals yield more information, but beyond a point, additional retrievals add less novel or relevant data."
+          },
+          {
+            "step": "3",
+            "source": "retrieval_frequency",
+            "relation": "increases",
+            "target": "resource_cost",
+            "explanation": "Each retrieval consumes time and computational resources, adding to overall cost."
+          },
+          {
+            "step": "4",
+            "source": "information_utility",
+            "relation": "increases",
+            "target": "agent_performance",
+            "explanation": "Higher utility information improves decisions and research outcomes."
+          },
+          {
+            "step": "5",
+            "source": "resource_cost",
+            "relation": "decreases",
+            "target": "agent_performance",
+            "explanation": "Costs detract from net performance by consuming resources that could be used for reasoning or experimentation."
+          },
+          {
+            "step": "6",
+            "source": "relevance_threshold",
+            "relation": "moderates",
+            "target": "information_utility",
+            "explanation": "A higher threshold increases the expected utility per retrieval but may reduce the number of retrievals that pass, affecting overall utility."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Finite attention and processing capacity",
+            "why_it_matters": "Even if retrieval yields useful information, the agent cannot process unlimited amounts; overload can degrade performance."
+          },
+          {
+            "bottleneck": "Non-zero retrieval costs",
+            "why_it_matters": "Costs of time and compute accumulate and can outweigh benefits, especially if retrieval yields low-utility information."
+          },
+          {
+            "bottleneck": "Noisy or irrelevant retrieval results",
+            "why_it_matters": "Low-quality retrieval wastes resources and can mislead the agent, reducing overall research quality."
+          }
+        ],
+        "mechanism_summary": "The mechanism describes how retrieval impacts autonomous research agent performance through a tradeoff between information utility and resource costs, moderated by state uncertainty and relevance thresholds. Retrieval helps when the expected utility of retrieved information outweighs its costs, especially when state uncertainty is high and retrieval is selective; it hurts when costs dominate due to noise, overload, or unnecessary retrieval."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "diminishing_returns",
+        "statement": "The relationship between retrieval frequency and information utility exhibits diminishing returns, but the exact shape and threshold are uncertain.",
+        "derived_from": [
+          "Retrieval Operation",
+          "Information Utility"
+        ],
+        "why_it_matters": "Understanding the diminishing point is key to stopping retrieval; methods that assume linear returns may over-retrieve.",
+        "what_existing_methods_may_miss": "Many retrieval policies do not model diminishing returns and thus fail to stop at optimal points.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the critical retrieval frequency at which the net effect of retrieval on agent performance transitions from helpful to harmful, and how does this threshold depend on task complexity and relevance threshold?",
+        "question_type": "causal",
+        "source_tension": "diminishing_returns",
+        "expected_contribution": "Identifies a phase transition in retrieval utility and its dependency on task and agent parameters, enabling adaptive retrieval policies that avoid harmful over-retrieval."
+      },
+      "hypothesis": {
+        "statement": "For a given task and agent, there exists a critical retrieval frequency f_c such that cumulative agent performance increases with retrieval frequency for f < f_c and decreases for f > f_c. Moreover, f_c decreases as task complexity increases, due to higher cognitive load.",
+        "predicted_effect": "At low retrieval frequencies (< f_c), retrieval reduces uncertainty and improves decisions; at high retrieval frequencies (> f_c), context pollution and cognitive overhead outweigh the benefits, degrading performance."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Conduct a controlled simulation of an autonomous research agent performing a set of research tasks with varying complexity (number of related subtopics). For each task, allow retrieval frequencies from 0 to 40 in steps of 2. Measure agent performance as a composite score of hypothesis quality and experiment efficiency. Fit a quadratic or piecewise linear model to detect a peak. Repeat with different relevance thresholds (0.5, 0.7, 0.9).",
+        "independent_variables": [
+          "retrieval frequency (number of retrieval operations per task)",
+          "task complexity (number of subtopics, e.g., 3, 6, 9)",
+          "relevance threshold (minimum relevance score for retrieved documents)"
+        ],
+        "dependent_variables": [
+          "agent performance (composite of hypothesis quality and experiment efficiency)",
+          "critical frequency f_c (estimated from peak of performance curve)"
+        ],
+        "controls": [
+          "retrieval source quality (same corpus for all runs)",
+          "agent reasoning capabilities (fixed LLM)",
+          "initial knowledge (same seed)",
+          "time horizon per task (fixed limit)"
+        ],
+        "falsifying_observation": "If the performance curve is monotonic (always increasing or always decreasing) for any combination of task complexity and relevance threshold, or if the estimated f_c does not significantly decrease with increasing task complexity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Performance curves exhibit a clear peak at some f_c greater than zero for all conditions.",
+          "f_c decreases by at least 30% when task complexity increases from 3 to 9 subtopics.",
+          "Lower relevance thresholds shift f_c to higher values due to more noise."
+        ],
+        "rejects_hypothesis": [
+          "Performance increases monotonically with retrieval frequency for all task complexity levels.",
+          "Performance is flat after an initial increase, with no decline.",
+          "f_c remains constant across different task complexity levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is falsified (e.g., no evidence of a performance decline or no shift with complexity), then the assumption that context pollution scales linearly with retrieval frequency may be incorrect.",
+        "assumption_to_revise": "The negative effect of retrieval is solely due to cognitive overload and context pollution. Alternative mechanisms (e.g., noise accumulation, distraction) may not cause a downturn.",
+        "next_question": "Under what conditions does retrieval become harmful, and is there an alternative mechanism (e.g., confirmation bias) that prevents performance degradation?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Tighten topic adherence; the question should preserve the user's original topic terms."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There is a crossover interaction between retrieval frequency and initial state uncertainty: when uncertainty is high, higher retrieval frequency improves performance; when uncertainty is low, higher retrieval frequency degrades performance.",
+      "independent_variables": [
+        "retrieval frequency (none, low, high)",
+        "initial state uncertainty (high, low via prior knowledge amount)"
+      ],
+      "dependent_variables": [
+        "agent performance composite score (hypothesis novelty, relevance, and efficiency)"
+      ],
+      "controlled_variables": [
+        "fixed relevance threshold (0.5)",
+        "same agent architecture",
+        "identical task (e.g., 'Generate hypotheses about the relationship between X and Y')",
+        "fixed resource budget (time and compute per task)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval",
+          "description": "Agent performs task without any retrieval operation, representing zero retrieval frequency."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Performance composite score",
+          "definition": "Combined measure of hypothesis novelty, relevance, and efficiency, normalized to 0-1."
+        }
+      ],
+      "expected_result": "A significant crossover interaction in ANOVA (p<0.05): performance increases with retrieval frequency under high uncertainty, decreases under low uncertainty.",
+      "falsifying_result": "No significant interaction: retrieval frequency has similar effect in both uncertainty conditions, or only additive main effects.",
+      "minimum_viable_experiment": "Simulate an autonomous research agent performing a literature review and hypothesis generation task. Use a 2 (uncertainty: high vs low) x 3 (retrieval frequency: none, low, high) between-subjects design. Each condition run 30 times. Measure composite performance.",
+      "risks_and_confounds": [
+        "Order effects if within-subject; use between-subjects design.",
+        "Task difficulty may vary across conditions; keep identical task.",
+        "Randomness in agent behavior; average over multiple runs."
+      ]
+    },
+    {
+      "hypothesis": "Autonomous research agents exhibit a phase transition in hypothesis generation accuracy: accuracy is maximized when the ratio of retrieval depth to source-specific redundancy capacity is below a saturation threshold AND the ratio of retrieval breadth to relevant source diversity is below a noise threshold; exceeding either threshold causes a sharp decline in accuracy.",
+      "independent_variables": [
+        "breadth (number of distinct sources)",
+        "depth (number of retrievals per source)"
+      ],
+      "dependent_variables": [
+        "accuracy of hypothesis generation (expert rating on 1-10 scale)",
+        "information redundancy (mean pairwise cosine similarity)",
+        "source noise (proportion of irrelevant facts)"
+      ],
+      "controlled_variables": [
+        "same research task",
+        "same agent architecture",
+        "same total retrieval count (16)",
+        "same retrieval system",
+        "same time limit (5 minutes)",
+        "same relevance scoring function"
+      ],
+      "baselines": [
+        {
+          "name": "No Retrieval",
+          "description": "Agent performs hypothesis generation without any retrieval operation, relying solely on internal knowledge."
+        },
+        {
+          "name": "Extreme Depth",
+          "description": "Retrieval depth=16, breadth=1, total documents=16."
+        },
+        {
+          "name": "Extreme Breadth",
+          "description": "Retrieval breadth=16, depth=1, total documents=16."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Accuracy",
+          "definition": "Expert rating of hypothesis quality on a 1-10 scale, averaged across multiple evaluators."
+        },
+        {
+          "name": "Information Redundancy",
+          "definition": "Mean pairwise cosine similarity among retrieved documents for a given condition."
+        },
+        {
+          "name": "Source Noise",
+          "definition": "Proportion of retrieved facts that are irrelevant to the research task, as judged by experts."
+        }
+      ],
+      "expected_result": "Accuracy peaks at moderate depth (4) and moderate breadth (8) and drops sharply (>20% from peak) when depth exceeds 4 or breadth exceeds 8. Information redundancy increases sharply at depth>4; source noise increases sharply at breadth>8.",
+      "falsifying_result": "No sharp drop (>20% from peak) observed for any combination of depth and breadth, or accuracy is monotonically increasing with depth or breadth, or the optimal accuracy occurs at extreme values (e.g., depth=8 or breadth=16).",
+      "minimum_viable_experiment": "Implement autonomous research agents with fixed architecture. Use a research task requiring hypothesis generation from a given dataset. Manipulate breadth (1,4,8,12,16) and depth (1,2,4,6,8) in a full factorial design, while keeping total retrieved documents constant at 16 (by adjusting depth and breadth accordingly). For each condition, collect 10 independent runs. Measure accuracy, information redundancy, and source noise. Test for sharp thresholds using plateau detection. The experiment is minimal because it varies only two factors and holds all else constant, using a single research task and agent architecture.",
+      "risks_and_confounds": [
+        "Order effects if conditions are not randomized",
+        "Evaluator bias if experts are not blind to condition",
+        "Variability due to random initialization of agent",
+        "The specific research task may not generalize",
+        "The chosen thresholds (4,8) may not hold for different tasks"
+      ]
+    },
+    {
+      "hypothesis": "For a given task and agent, there exists a critical retrieval frequency f_c such that cumulative agent performance increases with retrieval frequency for f < f_c and decreases for f > f_c. Moreover, f_c decreases as task complexity increases.",
+      "independent_variables": [
+        "retrieval frequency (number of retrievals per task: 0, 10, 20, 30, 40)",
+        "task complexity (number of subtopics: 3, 9)"
+      ],
+      "dependent_variables": [
+        "agent performance (composite score of hypothesis quality and experiment efficiency)",
+        "critical frequency f_c (estimated from performance curve)"
+      ],
+      "controlled_variables": [
+        "retrieval source quality (same corpus for all runs)",
+        "agent reasoning capabilities (fixed LLM)",
+        "initial knowledge (same seed)",
+        "time horizon per task (fixed limit)"
+      ],
+      "baselines": [
+        {
+          "name": "no retrieval",
+          "description": "Retrieval frequency set to 0 for each task complexity level."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "agent performance",
+          "definition": "Composite score normalized between 0 and 1, combining hypothesis quality (measured by alignment with ground truth) and experiment efficiency (number of steps to reach correct conclusion)."
+        },
+        {
+          "name": "critical frequency",
+          "definition": "The retrieval frequency at which performance is maximized, estimated by fitting a quadratic model to the performance vs. frequency curve."
+        }
+      ],
+      "expected_result": "For each task complexity, the performance curve shows a clear peak at some f_c > 0. For task complexity=9, f_c is at least 30% lower than for task complexity=3.",
+      "falsifying_result": "Either (a) the performance curve is monotonic (always increasing or decreasing) for both complexity levels, or (b) the estimated f_c does not decrease when task complexity increases from 3 to 9.",
+      "minimum_viable_experiment": "Simulate a single automated research agent performing a research task on a simple topic (e.g., 'effects of fertilizer on plant growth'). Task complexity is manipulated by varying the number of related subtopics (e.g., 3 subtopics: nitrogen, phosphorus, potassium; 9 subtopics: nitrogen fixation, phosphorus uptake, potassium transport, soil pH, microbial activity, water availability, light intensity, temperature, carbon dioxide). For each combination of complexity and retrieval frequency (0, 10, 20, 30, 40), run 5 independent trials (to account for randomness). Each trial runs until the agent produces a final hypothesis and experimental plan, subject to a fixed time limit (e.g., 100 steps). Agent performance is computed from the final hypothesis accuracy and number of steps used. Fit a quadratic regression for each complexity level to estimate the peak. Compare f_c values.",
+      "risks_and_confounds": [
+        "Random variation in agent outputs may obscure the peak; multiple trials mitigate this.",
+        "The specific task domain may not generalize; choose a domain where retrieval is relevant.",
+        "The fixed time limit may cap performance; ensure it is not too restrictive.",
+        "The agent's underlying LLM may have inherent retrieval preferences; use a neutral LLM."
+      ]
+    },
+    {
+      "hypothesis": "For autonomous research agents, there exists a retrieval frequency threshold beyond which agent performance declines, even under abundant computational resources, because information overload degrades reasoning quality. This threshold decreases as task complexity increases.",
+      "independent_variables": [
+        "Retrieval frequency (number of retrievals per research cycle: 0, 1, 5, 20, 50)",
+        "Task complexity (simple fact-finding vs. complex hypothesis synthesis)"
+      ],
+      "dependent_variables": [
+        "Agent performance (composite score of hypothesis correctness, novelty, and completeness)",
+        "Average information utility (relevance and novelty of retrieved documents)",
+        "Cognitive load proxy (number of distinct facts considered per decision)"
+      ],
+      "controlled_variables": [
+        "Same initial research task state for each task complexity",
+        "Same retrieval source and query formulation strategy",
+        "Same relevance threshold (0.5)",
+        "Same agent architecture and reasoning steps",
+        "Abundant computational resources (unlimited context window, no compute limit)"
+      ],
+      "baselines": [
+        {
+          "name": "No retrieval baseline",
+          "description": "Agent performs zero retrievals (frequency=0) to establish baseline performance without any external information."
+        },
+        {
+          "name": "Moderate retrieval baseline",
+          "description": "Agent performs a moderate number of retrievals (e.g., 5 per cycle) to represent typical retrieval behavior."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Agent performance score",
+          "definition": "A composite score (0-100) weighting correctness of final hypothesis (50%), novelty relative to retrieved information (25%), and completeness of reasoning (25%), assessed by human evaluators or automated metrics."
+        },
+        {
+          "name": "Average information utility",
+          "definition": "The mean relevance score of retrieved documents (0-1, using cosine similarity to task context) weighted by novelty (1 - cosine similarity to previously retrieved documents)."
+        },
+        {
+          "name": "Cognitive load proxy",
+          "definition": "The total number of unique facts or entities considered during the agent's reasoning process, logged from the agent's internal state."
+        }
+      ],
+      "expected_result": "Agent performance exhibits an inverted U-shape: increases from zero to moderate retrieval frequencies, then declines at high frequencies (20-50 retrievals per cycle). The peak occurs at lower frequencies for the complex task (e.g., 5 retrievals) compared to the simple task (e.g., 20 retrievals). Information utility remains high at high frequencies, but cognitive load proxy increases sharply, leading to performance decline.",
+      "falsifying_result": "Agent performance increases monotonically with retrieval frequency for both task complexities, showing no decline even at the highest frequency (50). Alternatively, if performance declines at high frequencies but coincides with low information utility (indicating retrieval quality issues rather than overload), or if peak frequencies are identical for both tasks.",
+      "minimum_viable_experiment": "Implement two autonomous research agents (same architecture, unlimited context and compute) that solve a simple fact-finding task (e.g., 'What is the capital of France?') and a complex hypothesis synthesis task (e.g., 'Propose a novel mechanism for antibiotic resistance based on recent literature'). For each task, run the agent with retrieval frequencies of 0, 1, 5, 20, and 50 retrievals per research cycle. Each condition is repeated 10 times to account for stochasticity. Compare the composite performance scores across frequencies and tasks, looking for an inverted-U shape and differing peak locations.",
+      "risks_and_confounds": [
+        "Task specificity: Results may not generalize to other tasks or domains.",
+        "Agent architecture: Choice of reasoning mechanism (e.g., chain-of-thought, tool-use) may affect overload susceptibility.",
+        "Retrieval source quality: If retrieval source is too noisy or too curated, results may vary.",
+        "Relevance threshold: Fixed at 0.5; different thresholds might shift results.",
+        "Measurement of performance: Subjective evaluation of novelty and completeness may introduce bias.",
+        "Confound of diminishing returns: At high frequencies, retrieval may yield redundant information, which could also cause performance decline without overload."
+      ]
+    }
+  ],
+  "review": {
+    "summary": "The paper presents a first-principles decomposition of the tradeoffs when retrieval is used by autonomous research agents, deriving causal models, tensions, and falsifiable hypotheses. The work is systematic and addresses a timely question, but the specific threshold predictions in the hypotheses appear under-justified and the experimental designs, while clever, may not generalize beyond the chosen tasks.",
+    "strengths": [
+      "Clear first-principles derivation with well-defined primitives, assumptions, and causal chains.",
+      "Novel focus on identifying phase transitions and sharp thresholds for when retrieval becomes harmful.",
+      "Falsifiable hypotheses with detailed minimal decisive tests, enabling empirical validation.",
+      "Multiple candidate tensions (e.g., utility-cost, breadth-depth, resource abundance) are well-articulated."
+    ],
+    "weaknesses": [
+      "Specific numerical thresholds (e.g., depth=4, breadth=8) in hypotheses lack strong theoretical justification and appear somewhat arbitrary.",
+      "The baseline set is limited; missing comparisons to adaptive retrieval policies or alternative cost models.",
+      "Causal chain assumes linear or monotonic relationships but does not account for potential nonlinearities or interaction effects beyond those tested.",
+      "Generalizability across different agent architectures, retrieval systems, and research domains is not addressed."
+    ],
+    "questions": [
+      "How were the hypothesized thresholds (e.g., depth >4, breadth >8) derived from the first principles? Could they instead be estimated empirically from pilot experiments?",
+      "Would the conclusions change if the retrieval system had different latency/quality characteristics, or if the agent used a different reasoning architecture (e.g., transformer vs. recurrent)?"
+    ],
+    "missing_baselines": [
+      "Baseline with random retrieval (same number of documents but uninformative) to separate the effect of information content from retrieval overhead.",
+      "Baseline with an oracle query that retrieves exactly the needed information in one call, to quantify the upper bound.",
+      "Adaptive retrieval strategy that dynamically adjusts frequency based on state uncertainty, as a stronger comparison."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "insufficient_justification_for_numerical_thresholds",
+    "root_cause": "Hypotheses include specific numerical thresholds (e.g., depth=4, breadth=8) that are not derived from the mechanism model or any theoretical reasoning, but rather appear arbitrary, reducing the strength of first-principles derivation.",
+    "violated_principle": "All predictions in a first-principles research package must be directly derivable from the mechanism model or primitives, not based on ad-hoc numerical choices.",
+    "new_or_updated_principle": "When a hypothesis predicts a phase transition or threshold, the threshold must be expressed as a function of latent variables in the mechanism (e.g., redundancy capacity, noise tolerance) or justified by a pilot study; fixed numerical thresholds are not allowed without such derivation.",
+    "new_or_updated_skill": "Threshold derivation from mechanism model: given a causal chain, identify the point where marginal benefit equals marginal cost (or a similar condition) and solve for the threshold in terms of other variables, then provide a rationale for any remaining numerical constants.",
+    "regression_test": "For each hypothesis in a candidate question, verify that any explicit numerical threshold (e.g., 'depth > 4') is accompanied by a derivation showing how it emerges from the mechanism model or from a preliminary empirical calibration. If no derivation is provided, flag the hypothesis as insufficiently justified."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 4,
+    "gate_repairs": [
+      {
+        "question": "How does the effect of retrieval frequency on autonomous research agent performance depend on the initial level of state uncertainty?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a 'retrieval redundancy saturation point' beyond which increasing retrieval depth per source reduces hypothesis generation accuracy, and a 'breadth noise threshold' beyond which increasing retrieval breadth degrades accuracy, such that the optimal strategy lies at the intersection of these thresholds?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": [
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ]
+      },
+      {
+        "question": "What is the critical retrieval frequency at which the net effect of retrieval on agent performance transitions from helpful to harmful, and how does this threshold depend on task complexity and relevance threshold?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "At what threshold of retrieval frequency does information overload outweigh the benefits of retrieval for autonomous research agents, and how does this threshold depend on the complexity of the research task?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ]
+  }
+}

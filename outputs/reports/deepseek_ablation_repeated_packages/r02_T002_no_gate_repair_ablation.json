@@ -1,0 +1,1382 @@
+{
+  "topic": {
+    "topic": "How should we measure agent process fidelity?",
+    "topic_id": "T002",
+    "goal": null,
+    "domain": "LLM agent evaluation",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should we measure agent process fidelity?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Agent Process",
+        "definition": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output.",
+        "why_primitive": "It is the fundamental object of measurement; cannot be decomposed further without losing the concept of what an agent does internally."
+      },
+      {
+        "name": "Reference Process",
+        "definition": "The prescribed or expected sequence of steps that the agent should follow according to a specification.",
+        "why_primitive": "It defines the norm against which actual process is compared; without it, fidelity has no standard."
+      },
+      {
+        "name": "Fidelity Measure",
+        "definition": "A function that quantifies the degree of match between the agent process and the reference process.",
+        "why_primitive": "It is the core operation of measurement; all other concepts (e.g., metrics, thresholds) derive from this."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Observability of Process",
+        "rationale": "We assume that at least partial information about the agent's internal process can be obtained, e.g., via intermediate outputs or logging.",
+        "possible_failure": "The agent's process may be opaque (e.g., black-box model) or introspective reports may be unreliable, making measurement impossible."
+      },
+      {
+        "assumption": "Existence of Ground Truth",
+        "rationale": "We assume there exists a well-defined, correct reference process that the agent should follow.",
+        "possible_failure": "The specification may be ambiguous, incomplete, or contradictory, leading to no single correct process."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Granularity vs. Cost",
+        "variables": [
+          "Trace detail level",
+          "Monitoring overhead",
+          "Measurement accuracy"
+        ]
+      },
+      {
+        "tradeoff": "Invasiveness vs. Behavioral Fidelity",
+        "variables": [
+          "Monitoring intrusiveness",
+          "Agent naturalness",
+          "Validity of measurement"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "Agent Process",
+        "role": "input",
+        "description": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output."
+      },
+      {
+        "name": "Reference Process",
+        "role": "input",
+        "description": "The prescribed or expected sequence of steps that the agent should follow according to a specification."
+      },
+      {
+        "name": "Observability",
+        "role": "confounder",
+        "description": "The extent to which the agent's internal process can be observed or logged."
+      },
+      {
+        "name": "Invasiveness",
+        "role": "confounder",
+        "description": "The degree to which monitoring or logging interferes with the agent's natural behavior."
+      },
+      {
+        "name": "Trace Data",
+        "role": "mediator",
+        "description": "The recorded partial observation of the agent's process, limited by observability and invasiveness."
+      },
+      {
+        "name": "Fidelity Measure",
+        "role": "mediator",
+        "description": "The algorithm that compares trace data to the reference process and produces a fidelity score."
+      },
+      {
+        "name": "Granularity",
+        "role": "mediator",
+        "description": "The level of detail at which the process is traced and compared, affecting accuracy and cost."
+      },
+      {
+        "name": "Measured Fidelity",
+        "role": "output",
+        "description": "The quantitative fidelity score output by the measurement system."
+      },
+      {
+        "name": "Actual Fidelity",
+        "role": "outcome",
+        "description": "The true fidelity of the agent process that we aim to estimate but cannot directly observe."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": null,
+        "source": "Agent Process",
+        "relation": "produces",
+        "target": "Trace Data",
+        "explanation": "The agent's internal steps are partially recorded as trace data, subject to observability limitations."
+      },
+      {
+        "step": null,
+        "source": "Observability",
+        "relation": "moderates",
+        "target": "Trace Data",
+        "explanation": "Higher observability allows more complete and accurate trace data."
+      },
+      {
+        "step": null,
+        "source": "Invasiveness",
+        "relation": "may alter",
+        "target": "Agent Process",
+        "explanation": "Invasive monitoring can change the agent's behavior, affecting the representativeness of trace data."
+      },
+      {
+        "step": null,
+        "source": "Trace Data and Reference Process",
+        "relation": "are compared using",
+        "target": "Fidelity Measure",
+        "explanation": "The fidelity measure takes the observed trace and the reference process as inputs to compute a score."
+      },
+      {
+        "step": null,
+        "source": "Granularity",
+        "relation": "influences",
+        "target": "Fidelity Measure",
+        "explanation": "The granularity of trace data affects the precision and cost of the comparison."
+      },
+      {
+        "step": null,
+        "source": "Fidelity Measure",
+        "relation": "outputs",
+        "target": "Measured Fidelity",
+        "explanation": "The algorithm produces a quantitative fidelity score."
+      },
+      {
+        "step": null,
+        "source": "Measured Fidelity",
+        "relation": "is a proxy for",
+        "target": "Actual Fidelity",
+        "explanation": "The measured score approximates the true but unobservable fidelity of the agent process."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Limited Observability",
+        "why_it_matters": "Without full observability, the trace data is incomplete, leading to inaccurate fidelity measurement."
+      },
+      {
+        "bottleneck": "Invasiveness",
+        "why_it_matters": "Invasive monitoring can change the agent's process, so the measured fidelity may not reflect the agent's natural behavior, reducing validity."
+      },
+      {
+        "bottleneck": "Granularity vs. Cost",
+        "why_it_matters": "Choosing a coarse granularity may miss important steps, while fine granularity incurs high computational and storage costs, limiting scalability."
+      },
+      {
+        "bottleneck": "Reference Process Ambiguity",
+        "why_it_matters": "If the reference process is not well-defined, there is no clear standard for comparison, making the fidelity measure meaningless."
+      }
+    ],
+    "mechanism_summary": "Measuring agent process fidelity involves capturing trace data from the agent's internal process and comparing it to a reference process using a fidelity measure. The mechanism is constrained by the observability of the agent's steps, the invasiveness of monitoring (which can alter behavior), and the tradeoff between granularity and cost. The output is a measured fidelity score that serves as a proxy for the true but unobservable fidelity. Key bottlenecks include limited observability, invasiveness, granularity-cost tradeoffs, and ambiguous reference specifications."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+      "derived_from": [
+        "Granularity vs. Cost core tradeoff",
+        "Granularity bottleneck in mechanism model"
+      ],
+      "why_it_matters": "Choosing the right granularity is critical for practical deployment. Too coarse may miss important steps; too fine may be infeasible.",
+      "what_existing_methods_may_miss": "Many fidelity metrics assume a fixed granularity without considering cost implications.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T2",
+      "statement": "Monitoring the agent's process to measure fidelity may alter the agent's behavior, so the measured fidelity may not reflect the agent's natural process.",
+      "derived_from": [
+        "Invasiveness vs. Behavioral Fidelity tradeoff",
+        "Invasiveness may alter Agent Process in causal chain",
+        "Invasiveness bottleneck"
+      ],
+      "why_it_matters": "If measurement changes the behavior, the fidelity assessment is biased and may lead to incorrect conclusions about agent performance.",
+      "what_existing_methods_may_miss": "Existing methods often assume monitoring is non-reactive, ignoring the Hawthorne effect.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T3",
+      "statement": "The measurement framework assumes that at least partial observability of the agent's internal process is possible, but many agents (e.g., deep neural networks) are inherently black-box, making any trace data unattainable or unreliable.",
+      "derived_from": [
+        "Observability of Process assumption",
+        "Limited Observability bottleneck"
+      ],
+      "why_it_matters": "If observability is impossible, the entire fidelity measurement approach fails, limiting its applicability to transparent agents.",
+      "what_existing_methods_may_miss": "Existing methods that rely on logging may not apply to agents without introspection capabilities.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The framework assumes a well-defined reference process, but in practice specifications are often ambiguous or incomplete, making it impossible to define a single correct process.",
+      "derived_from": [
+        "Existence of Ground Truth assumption",
+        "Reference Process Ambiguity bottleneck"
+      ],
+      "why_it_matters": "Without a clear reference, fidelity measurement becomes meaningless or reliant on subjective interpretation.",
+      "what_existing_methods_may_miss": "Existing fidelity measures often assume a fixed reference, ignoring specification evolution or ambiguity.",
+      "testability": 2
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "Does increasing the granularity of process tracing beyond a certain threshold produce diminishing returns in fidelity accuracy while linearly increasing computational cost?",
+      "question_type": "causal",
+      "source_tension": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+      "expected_contribution": "Quantifies the tradeoff between granularity and cost, providing guidance for selecting optimal granularity in practice."
+    },
+    {
+      "question": "Does the presence of invasive monitoring significantly alter the measured fidelity of an agent's process compared to a non-invasive baseline?",
+      "question_type": "causal",
+      "source_tension": "Monitoring the agent's process to measure fidelity may alter the agent's behavior, so the measured fidelity may not reflect the agent's natural process.",
+      "expected_contribution": "Establishes the magnitude of the Hawthorne effect in process fidelity measurement, informing whether corrections are needed."
+    },
+    {
+      "question": "For which classes of agents (e.g., fully transparent vs. black-box) is process fidelity measurement feasible given observability constraints?",
+      "question_type": "descriptive",
+      "source_tension": "The measurement framework assumes that at least partial observability of the agent's internal process is possible, but many agents (e.g., deep neural networks) are inherently black-box, making any trace data unattainable or unreliable.",
+      "expected_contribution": "Maps the applicability of fidelity measurement to agent architectures, highlighting where alternative methods are needed."
+    },
+    {
+      "question": "Does increasing ambiguity in the reference process (e.g., multiple possible correct processes) decrease the reliability of fidelity measurements?",
+      "question_type": "causal",
+      "source_tension": "The framework assumes a well-defined reference process, but in practice specifications are often ambiguous or incomplete, making it impossible to define a single correct process.",
+      "expected_contribution": "Quantifies the effect of reference ambiguity on measurement reliability, guiding how to handle underspecified specifications."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output.",
+          "why_primitive": "It is the fundamental object of measurement; cannot be decomposed further without losing the concept of what an agent does internally."
+        },
+        {
+          "name": "Reference Process",
+          "definition": "The prescribed or expected sequence of steps that the agent should follow according to a specification.",
+          "why_primitive": "It defines the norm against which actual process is compared; without it, fidelity has no standard."
+        },
+        {
+          "name": "Fidelity Measure",
+          "definition": "A function that quantifies the degree of match between the agent process and the reference process.",
+          "why_primitive": "It is the core operation of measurement; all other concepts (e.g., metrics, thresholds) derive from this."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Observability of Process",
+          "rationale": "We assume that at least partial information about the agent's internal process can be obtained, e.g., via intermediate outputs or logging.",
+          "possible_failure": "The agent's process may be opaque (e.g., black-box model) or introspective reports may be unreliable, making measurement impossible."
+        },
+        {
+          "assumption": "Existence of Ground Truth",
+          "rationale": "We assume there exists a well-defined, correct reference process that the agent should follow.",
+          "possible_failure": "The specification may be ambiguous, incomplete, or contradictory, leading to no single correct process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output."
+          },
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The prescribed or expected sequence of steps that the agent should follow according to a specification."
+          },
+          {
+            "name": "Observability",
+            "role": "confounder",
+            "description": "The extent to which the agent's internal process can be observed or logged."
+          },
+          {
+            "name": "Invasiveness",
+            "role": "confounder",
+            "description": "The degree to which monitoring or logging interferes with the agent's natural behavior."
+          },
+          {
+            "name": "Trace Data",
+            "role": "mediator",
+            "description": "The recorded partial observation of the agent's process, limited by observability and invasiveness."
+          },
+          {
+            "name": "Fidelity Measure",
+            "role": "mediator",
+            "description": "The algorithm that compares trace data to the reference process and produces a fidelity score."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is traced and compared, affecting accuracy and cost."
+          },
+          {
+            "name": "Measured Fidelity",
+            "role": "output",
+            "description": "The quantitative fidelity score output by the measurement system."
+          },
+          {
+            "name": "Actual Fidelity",
+            "role": "outcome",
+            "description": "The true fidelity of the agent process that we aim to estimate but cannot directly observe."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Agent Process",
+            "relation": "produces",
+            "target": "Trace Data",
+            "explanation": "The agent's internal steps are partially recorded as trace data, subject to observability limitations."
+          },
+          {
+            "step": null,
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Trace Data",
+            "explanation": "Higher observability allows more complete and accurate trace data."
+          },
+          {
+            "step": null,
+            "source": "Invasiveness",
+            "relation": "may alter",
+            "target": "Agent Process",
+            "explanation": "Invasive monitoring can change the agent's behavior, affecting the representativeness of trace data."
+          },
+          {
+            "step": null,
+            "source": "Trace Data and Reference Process",
+            "relation": "are compared using",
+            "target": "Fidelity Measure",
+            "explanation": "The fidelity measure takes the observed trace and the reference process as inputs to compute a score."
+          },
+          {
+            "step": null,
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Fidelity Measure",
+            "explanation": "The granularity of trace data affects the precision and cost of the comparison."
+          },
+          {
+            "step": null,
+            "source": "Fidelity Measure",
+            "relation": "outputs",
+            "target": "Measured Fidelity",
+            "explanation": "The algorithm produces a quantitative fidelity score."
+          },
+          {
+            "step": null,
+            "source": "Measured Fidelity",
+            "relation": "is a proxy for",
+            "target": "Actual Fidelity",
+            "explanation": "The measured score approximates the true but unobservable fidelity of the agent process."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited Observability",
+            "why_it_matters": "Without full observability, the trace data is incomplete, leading to inaccurate fidelity measurement."
+          },
+          {
+            "bottleneck": "Invasiveness",
+            "why_it_matters": "Invasive monitoring can change the agent's process, so the measured fidelity may not reflect the agent's natural behavior, reducing validity."
+          },
+          {
+            "bottleneck": "Granularity vs. Cost",
+            "why_it_matters": "Choosing a coarse granularity may miss important steps, while fine granularity incurs high computational and storage costs, limiting scalability."
+          },
+          {
+            "bottleneck": "Reference Process Ambiguity",
+            "why_it_matters": "If the reference process is not well-defined, there is no clear standard for comparison, making the fidelity measure meaningless."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves capturing trace data from the agent's internal process and comparing it to a reference process using a fidelity measure. The mechanism is constrained by the observability of the agent's steps, the invasiveness of monitoring (which can alter behavior), and the tradeoff between granularity and cost. The output is a measured fidelity score that serves as a proxy for the true but unobservable fidelity. Key bottlenecks include limited observability, invasiveness, granularity-cost tradeoffs, and ambiguous reference specifications."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+        "derived_from": [
+          "Granularity vs. Cost core tradeoff",
+          "Granularity bottleneck in mechanism model"
+        ],
+        "why_it_matters": "Choosing the right granularity is critical for practical deployment. Too coarse may miss important steps; too fine may be infeasible.",
+        "what_existing_methods_may_miss": "Many fidelity metrics assume a fixed granularity without considering cost implications.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Does the presence of invasive monitoring significantly alter the measured fidelity of an agent's process compared to a non-invasive baseline?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Establishes the magnitude of the Hawthorne effect in process fidelity measurement, informing whether corrections are needed."
+      },
+      "hypothesis": {
+        "statement": "Invasive monitoring of an agent's internal process leads to a significant change in the measured fidelity compared to non-invasive monitoring.",
+        "predicted_effect": "Measured fidelity in the invasive condition will be significantly different (likely lower) from that in the non-invasive condition, indicating that monitoring alters the agent's natural process."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Randomly assign a set of agents to either an invasive monitoring condition or a non-invasive monitoring condition. Both groups perform the same task with a well-defined reference process. In the invasive condition, agents are required to output step-by-step reasoning logs at each intermediate step (e.g., via a logging API). In the non-invasive condition, only the final output and a single post-hoc explanation are recorded. The fidelity of each agent's process is measured by comparing the actual steps (as recorded) to the reference process using a standard sequence alignment metric (e.g., edit distance). The comparison is done blinded to condition. Statistical test (e.g., t-test) is used to compare the mean fidelity scores between the two groups.",
+        "independent_variables": [
+          "Invasiveness of monitoring (invasive vs non-invasive)"
+        ],
+        "dependent_variables": [
+          "Measured fidelity score (e.g., sequence alignment score)"
+        ],
+        "controls": [
+          "Same task",
+          "Same reference process",
+          "Same agent model",
+          "Same evaluation metric",
+          "Random assignment",
+          "Sufficient sample size"
+        ],
+        "falsifying_observation": "If the mean measured fidelity in the invasive condition is not significantly different (p > 0.05) from that in the non-invasive condition, then the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Mean fidelity score in invasive condition is significantly lower than in non-invasive condition.",
+          "Statistical test yields p < 0.05."
+        ],
+        "rejects_hypothesis": [
+          "Mean fidelity scores are not significantly different between conditions.",
+          "Statistical test yields p >= 0.05."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "The hypothesis is falsified if no significant difference is found.",
+        "assumption_to_revise": "The assumption that observability of the agent's process is limited and that monitoring is invasive enough to alter behavior may need revision. Perhaps the agent's process is robust to monitoring, or the measurement is insensitive.",
+        "next_question": "Under what conditions does invasive monitoring alter agent process fidelity? For example, does the effect depend on task complexity, agent architecture, or monitoring frequency?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output.",
+          "why_primitive": "It is the fundamental object of measurement; cannot be decomposed further without losing the concept of what an agent does internally."
+        },
+        {
+          "name": "Reference Process",
+          "definition": "The prescribed or expected sequence of steps that the agent should follow according to a specification.",
+          "why_primitive": "It defines the norm against which actual process is compared; without it, fidelity has no standard."
+        },
+        {
+          "name": "Fidelity Measure",
+          "definition": "A function that quantifies the degree of match between the agent process and the reference process.",
+          "why_primitive": "It is the core operation of measurement; all other concepts (e.g., metrics, thresholds) derive from this."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Observability of Process",
+          "rationale": "We assume that at least partial information about the agent's internal process can be obtained, e.g., via intermediate outputs or logging.",
+          "possible_failure": "The agent's process may be opaque (e.g., black-box model) or introspective reports may be unreliable, making measurement impossible."
+        },
+        {
+          "assumption": "Existence of Ground Truth",
+          "rationale": "We assume there exists a well-defined, correct reference process that the agent should follow.",
+          "possible_failure": "The specification may be ambiguous, incomplete, or contradictory, leading to no single correct process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output."
+          },
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The prescribed or expected sequence of steps that the agent should follow according to a specification."
+          },
+          {
+            "name": "Observability",
+            "role": "confounder",
+            "description": "The extent to which the agent's internal process can be observed or logged."
+          },
+          {
+            "name": "Invasiveness",
+            "role": "confounder",
+            "description": "The degree to which monitoring or logging interferes with the agent's natural behavior."
+          },
+          {
+            "name": "Trace Data",
+            "role": "mediator",
+            "description": "The recorded partial observation of the agent's process, limited by observability and invasiveness."
+          },
+          {
+            "name": "Fidelity Measure",
+            "role": "mediator",
+            "description": "The algorithm that compares trace data to the reference process and produces a fidelity score."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is traced and compared, affecting accuracy and cost."
+          },
+          {
+            "name": "Measured Fidelity",
+            "role": "output",
+            "description": "The quantitative fidelity score output by the measurement system."
+          },
+          {
+            "name": "Actual Fidelity",
+            "role": "outcome",
+            "description": "The true fidelity of the agent process that we aim to estimate but cannot directly observe."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Agent Process",
+            "relation": "produces",
+            "target": "Trace Data",
+            "explanation": "The agent's internal steps are partially recorded as trace data, subject to observability limitations."
+          },
+          {
+            "step": null,
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Trace Data",
+            "explanation": "Higher observability allows more complete and accurate trace data."
+          },
+          {
+            "step": null,
+            "source": "Invasiveness",
+            "relation": "may alter",
+            "target": "Agent Process",
+            "explanation": "Invasive monitoring can change the agent's behavior, affecting the representativeness of trace data."
+          },
+          {
+            "step": null,
+            "source": "Trace Data and Reference Process",
+            "relation": "are compared using",
+            "target": "Fidelity Measure",
+            "explanation": "The fidelity measure takes the observed trace and the reference process as inputs to compute a score."
+          },
+          {
+            "step": null,
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Fidelity Measure",
+            "explanation": "The granularity of trace data affects the precision and cost of the comparison."
+          },
+          {
+            "step": null,
+            "source": "Fidelity Measure",
+            "relation": "outputs",
+            "target": "Measured Fidelity",
+            "explanation": "The algorithm produces a quantitative fidelity score."
+          },
+          {
+            "step": null,
+            "source": "Measured Fidelity",
+            "relation": "is a proxy for",
+            "target": "Actual Fidelity",
+            "explanation": "The measured score approximates the true but unobservable fidelity of the agent process."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited Observability",
+            "why_it_matters": "Without full observability, the trace data is incomplete, leading to inaccurate fidelity measurement."
+          },
+          {
+            "bottleneck": "Invasiveness",
+            "why_it_matters": "Invasive monitoring can change the agent's process, so the measured fidelity may not reflect the agent's natural behavior, reducing validity."
+          },
+          {
+            "bottleneck": "Granularity vs. Cost",
+            "why_it_matters": "Choosing a coarse granularity may miss important steps, while fine granularity incurs high computational and storage costs, limiting scalability."
+          },
+          {
+            "bottleneck": "Reference Process Ambiguity",
+            "why_it_matters": "If the reference process is not well-defined, there is no clear standard for comparison, making the fidelity measure meaningless."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves capturing trace data from the agent's internal process and comparing it to a reference process using a fidelity measure. The mechanism is constrained by the observability of the agent's steps, the invasiveness of monitoring (which can alter behavior), and the tradeoff between granularity and cost. The output is a measured fidelity score that serves as a proxy for the true but unobservable fidelity. Key bottlenecks include limited observability, invasiveness, granularity-cost tradeoffs, and ambiguous reference specifications."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+        "derived_from": [
+          "Granularity vs. Cost core tradeoff",
+          "Granularity bottleneck in mechanism model"
+        ],
+        "why_it_matters": "Choosing the right granularity is critical for practical deployment. Too coarse may miss important steps; too fine may be infeasible.",
+        "what_existing_methods_may_miss": "Many fidelity metrics assume a fixed granularity without considering cost implications.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Does increasing the granularity of process tracing beyond a certain threshold produce diminishing returns in fidelity accuracy while linearly increasing computational cost?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the tradeoff between granularity and cost, providing guidance for selecting optimal granularity in practice."
+      },
+      "hypothesis": {
+        "statement": "Increasing the granularity of process tracing improves fidelity accuracy with diminishing returns beyond a certain threshold, while computational cost increases linearly.",
+        "predicted_effect": "Accuracy initially rises steeply with granularity, then plateaus; cost grows proportionally with granularity level."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Use a set of synthetic agents with known ground truth processes (e.g., a fixed sequence of reasoning steps). Vary the granularity of process tracing (e.g., log every step, every other step, every fifth step). For each granularity, compute the measured fidelity score using a standard algorithm (e.g., sequence alignment) and record the computational cost (time and memory). Compare the measured fidelity to the true fidelity (known from the ground truth) to compute accuracy (e.g., mean squared error or correlation).",
+        "independent_variables": [
+          "Granularity level (e.g., step sampling rate: 1, 2, 5, 10, 20, 50% of steps)"
+        ],
+        "dependent_variables": [
+          "Fidelity accuracy (e.g., -MSE between measured and true fidelity)",
+          "Computational cost (e.g., runtime in seconds, memory in MB)"
+        ],
+        "controls": [
+          "Agent model (same architecture and parameters)",
+          "Task complexity (fixed reference process length)",
+          "Fidelity measurement algorithm (fixed alignment method)",
+          "Hardware and software environment constant"
+        ],
+        "falsifying_observation": "If accuracy continues to improve linearly with granularity without plateauing, or if computational cost grows superlinearly (e.g., exponentially) with granularity, the hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Accuracy increases steeply at low granularities then plateaus (e.g., cost-benefit curve becomes flat).",
+          "Computational cost increases roughly linearly with granularity level."
+        ],
+        "rejects_hypothesis": [
+          "Accuracy grows linearly with granularity without diminishing returns.",
+          "Computational cost grows quadratically or exponentially with granularity.",
+          "Accuracy does not improve beyond a very coarse granularity, or not at all."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If accuracy does not plateau or cost is not linear, revisit the tradeoff assumptions.",
+        "assumption_to_revise": "Assume that granularity and accuracy have a monotonic relationship and cost is linear. If falsified, consider that the relationship may be task-dependent or that cost may have a non-linear component.",
+        "next_question": "Does the shape of the accuracy-granularity curve depend on the complexity or structure of the reference process?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output.",
+          "why_primitive": "It is the fundamental object of measurement; cannot be decomposed further without losing the concept of what an agent does internally."
+        },
+        {
+          "name": "Reference Process",
+          "definition": "The prescribed or expected sequence of steps that the agent should follow according to a specification.",
+          "why_primitive": "It defines the norm against which actual process is compared; without it, fidelity has no standard."
+        },
+        {
+          "name": "Fidelity Measure",
+          "definition": "A function that quantifies the degree of match between the agent process and the reference process.",
+          "why_primitive": "It is the core operation of measurement; all other concepts (e.g., metrics, thresholds) derive from this."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Observability of Process",
+          "rationale": "We assume that at least partial information about the agent's internal process can be obtained, e.g., via intermediate outputs or logging.",
+          "possible_failure": "The agent's process may be opaque (e.g., black-box model) or introspective reports may be unreliable, making measurement impossible."
+        },
+        {
+          "assumption": "Existence of Ground Truth",
+          "rationale": "We assume there exists a well-defined, correct reference process that the agent should follow.",
+          "possible_failure": "The specification may be ambiguous, incomplete, or contradictory, leading to no single correct process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output."
+          },
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The prescribed or expected sequence of steps that the agent should follow according to a specification."
+          },
+          {
+            "name": "Observability",
+            "role": "confounder",
+            "description": "The extent to which the agent's internal process can be observed or logged."
+          },
+          {
+            "name": "Invasiveness",
+            "role": "confounder",
+            "description": "The degree to which monitoring or logging interferes with the agent's natural behavior."
+          },
+          {
+            "name": "Trace Data",
+            "role": "mediator",
+            "description": "The recorded partial observation of the agent's process, limited by observability and invasiveness."
+          },
+          {
+            "name": "Fidelity Measure",
+            "role": "mediator",
+            "description": "The algorithm that compares trace data to the reference process and produces a fidelity score."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is traced and compared, affecting accuracy and cost."
+          },
+          {
+            "name": "Measured Fidelity",
+            "role": "output",
+            "description": "The quantitative fidelity score output by the measurement system."
+          },
+          {
+            "name": "Actual Fidelity",
+            "role": "outcome",
+            "description": "The true fidelity of the agent process that we aim to estimate but cannot directly observe."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Agent Process",
+            "relation": "produces",
+            "target": "Trace Data",
+            "explanation": "The agent's internal steps are partially recorded as trace data, subject to observability limitations."
+          },
+          {
+            "step": null,
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Trace Data",
+            "explanation": "Higher observability allows more complete and accurate trace data."
+          },
+          {
+            "step": null,
+            "source": "Invasiveness",
+            "relation": "may alter",
+            "target": "Agent Process",
+            "explanation": "Invasive monitoring can change the agent's behavior, affecting the representativeness of trace data."
+          },
+          {
+            "step": null,
+            "source": "Trace Data and Reference Process",
+            "relation": "are compared using",
+            "target": "Fidelity Measure",
+            "explanation": "The fidelity measure takes the observed trace and the reference process as inputs to compute a score."
+          },
+          {
+            "step": null,
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Fidelity Measure",
+            "explanation": "The granularity of trace data affects the precision and cost of the comparison."
+          },
+          {
+            "step": null,
+            "source": "Fidelity Measure",
+            "relation": "outputs",
+            "target": "Measured Fidelity",
+            "explanation": "The algorithm produces a quantitative fidelity score."
+          },
+          {
+            "step": null,
+            "source": "Measured Fidelity",
+            "relation": "is a proxy for",
+            "target": "Actual Fidelity",
+            "explanation": "The measured score approximates the true but unobservable fidelity of the agent process."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited Observability",
+            "why_it_matters": "Without full observability, the trace data is incomplete, leading to inaccurate fidelity measurement."
+          },
+          {
+            "bottleneck": "Invasiveness",
+            "why_it_matters": "Invasive monitoring can change the agent's process, so the measured fidelity may not reflect the agent's natural behavior, reducing validity."
+          },
+          {
+            "bottleneck": "Granularity vs. Cost",
+            "why_it_matters": "Choosing a coarse granularity may miss important steps, while fine granularity incurs high computational and storage costs, limiting scalability."
+          },
+          {
+            "bottleneck": "Reference Process Ambiguity",
+            "why_it_matters": "If the reference process is not well-defined, there is no clear standard for comparison, making the fidelity measure meaningless."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves capturing trace data from the agent's internal process and comparing it to a reference process using a fidelity measure. The mechanism is constrained by the observability of the agent's steps, the invasiveness of monitoring (which can alter behavior), and the tradeoff between granularity and cost. The output is a measured fidelity score that serves as a proxy for the true but unobservable fidelity. Key bottlenecks include limited observability, invasiveness, granularity-cost tradeoffs, and ambiguous reference specifications."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+        "derived_from": [
+          "Granularity vs. Cost core tradeoff",
+          "Granularity bottleneck in mechanism model"
+        ],
+        "why_it_matters": "Choosing the right granularity is critical for practical deployment. Too coarse may miss important steps; too fine may be infeasible.",
+        "what_existing_methods_may_miss": "Many fidelity metrics assume a fixed granularity without considering cost implications.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Does increasing ambiguity in the reference process (e.g., multiple possible correct processes) decrease the reliability of fidelity measurements?",
+        "question_type": "causal",
+        "source_tension": "T1",
+        "expected_contribution": "Quantifies the effect of reference ambiguity on measurement reliability, guiding how to handle underspecified specifications."
+      },
+      "hypothesis": {
+        "statement": "Increasing ambiguity in the reference process (e.g., multiple possible correct processes) decreases the reliability of fidelity measurements.",
+        "predicted_effect": "As the number of valid reference sequences increases, the measured fidelity scores become less consistent (higher variance) across repeated measurements or across different evaluators, indicating lower reliability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a set of agent traces (fixed process). Define reference processes with varying ambiguity: single well-defined process (low ambiguity), a small set of possible processes (medium ambiguity), and a large set (high ambiguity). For each ambiguity level, compute fidelity scores using the same fidelity measure. Repeat the measurement multiple times and calculate the variance of scores across repetitions. Compare the variances across ambiguity levels.",
+        "independent_variables": [
+          "Ambiguity level of reference process (categorical: low, medium, high)"
+        ],
+        "dependent_variables": [
+          "Variance of fidelity scores across repeated measurements"
+        ],
+        "controls": [
+          "Agent process (same trace for all conditions)",
+          "Observability (full trace available)",
+          "Granularity (fixed detail level)",
+          "Fidelity measure (same algorithm)",
+          "Number of measurements per condition"
+        ],
+        "falsifying_observation": "The variance of fidelity scores does not increase with ambiguity level, or decreases, indicating that ambiguity does not harm reliability."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Variance of fidelity scores is significantly higher for medium and high ambiguity compared to low ambiguity.",
+          "The difference in variance between low and high ambiguity is statistically significant (p < 0.05)."
+        ],
+        "rejects_hypothesis": [
+          "Variance of fidelity scores is similar across all ambiguity levels.",
+          "Variance decreases with higher ambiguity, suggesting improved reliability."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If the hypothesis is not supported (i.e., ambiguity does not decrease reliability), then the assumption that reference process clarity is critical for reliability is challenged.",
+        "assumption_to_revise": "The assumption that fidelity measurement reliability is inherently sensitive to reference process ambiguity.",
+        "next_question": "What factors, other than reference process ambiguity, significantly affect the reliability of fidelity measurements? For example, does the complexity of the agent process or the choice of fidelity measure interact with ambiguity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should we measure agent process fidelity?",
+      "primitive_definitions": [
+        {
+          "name": "Agent Process",
+          "definition": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output.",
+          "why_primitive": "It is the fundamental object of measurement; cannot be decomposed further without losing the concept of what an agent does internally."
+        },
+        {
+          "name": "Reference Process",
+          "definition": "The prescribed or expected sequence of steps that the agent should follow according to a specification.",
+          "why_primitive": "It defines the norm against which actual process is compared; without it, fidelity has no standard."
+        },
+        {
+          "name": "Fidelity Measure",
+          "definition": "A function that quantifies the degree of match between the agent process and the reference process.",
+          "why_primitive": "It is the core operation of measurement; all other concepts (e.g., metrics, thresholds) derive from this."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Observability of Process",
+          "rationale": "We assume that at least partial information about the agent's internal process can be obtained, e.g., via intermediate outputs or logging.",
+          "possible_failure": "The agent's process may be opaque (e.g., black-box model) or introspective reports may be unreliable, making measurement impossible."
+        },
+        {
+          "assumption": "Existence of Ground Truth",
+          "rationale": "We assume there exists a well-defined, correct reference process that the agent should follow.",
+          "possible_failure": "The specification may be ambiguous, incomplete, or contradictory, leading to no single correct process."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "Agent Process",
+            "role": "input",
+            "description": "The actual sequence of internal steps (reasoning, planning, tool use) taken by an agent to produce an output."
+          },
+          {
+            "name": "Reference Process",
+            "role": "input",
+            "description": "The prescribed or expected sequence of steps that the agent should follow according to a specification."
+          },
+          {
+            "name": "Observability",
+            "role": "confounder",
+            "description": "The extent to which the agent's internal process can be observed or logged."
+          },
+          {
+            "name": "Invasiveness",
+            "role": "confounder",
+            "description": "The degree to which monitoring or logging interferes with the agent's natural behavior."
+          },
+          {
+            "name": "Trace Data",
+            "role": "mediator",
+            "description": "The recorded partial observation of the agent's process, limited by observability and invasiveness."
+          },
+          {
+            "name": "Fidelity Measure",
+            "role": "mediator",
+            "description": "The algorithm that compares trace data to the reference process and produces a fidelity score."
+          },
+          {
+            "name": "Granularity",
+            "role": "mediator",
+            "description": "The level of detail at which the process is traced and compared, affecting accuracy and cost."
+          },
+          {
+            "name": "Measured Fidelity",
+            "role": "output",
+            "description": "The quantitative fidelity score output by the measurement system."
+          },
+          {
+            "name": "Actual Fidelity",
+            "role": "outcome",
+            "description": "The true fidelity of the agent process that we aim to estimate but cannot directly observe."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": null,
+            "source": "Agent Process",
+            "relation": "produces",
+            "target": "Trace Data",
+            "explanation": "The agent's internal steps are partially recorded as trace data, subject to observability limitations."
+          },
+          {
+            "step": null,
+            "source": "Observability",
+            "relation": "moderates",
+            "target": "Trace Data",
+            "explanation": "Higher observability allows more complete and accurate trace data."
+          },
+          {
+            "step": null,
+            "source": "Invasiveness",
+            "relation": "may alter",
+            "target": "Agent Process",
+            "explanation": "Invasive monitoring can change the agent's behavior, affecting the representativeness of trace data."
+          },
+          {
+            "step": null,
+            "source": "Trace Data and Reference Process",
+            "relation": "are compared using",
+            "target": "Fidelity Measure",
+            "explanation": "The fidelity measure takes the observed trace and the reference process as inputs to compute a score."
+          },
+          {
+            "step": null,
+            "source": "Granularity",
+            "relation": "influences",
+            "target": "Fidelity Measure",
+            "explanation": "The granularity of trace data affects the precision and cost of the comparison."
+          },
+          {
+            "step": null,
+            "source": "Fidelity Measure",
+            "relation": "outputs",
+            "target": "Measured Fidelity",
+            "explanation": "The algorithm produces a quantitative fidelity score."
+          },
+          {
+            "step": null,
+            "source": "Measured Fidelity",
+            "relation": "is a proxy for",
+            "target": "Actual Fidelity",
+            "explanation": "The measured score approximates the true but unobservable fidelity of the agent process."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Limited Observability",
+            "why_it_matters": "Without full observability, the trace data is incomplete, leading to inaccurate fidelity measurement."
+          },
+          {
+            "bottleneck": "Invasiveness",
+            "why_it_matters": "Invasive monitoring can change the agent's process, so the measured fidelity may not reflect the agent's natural behavior, reducing validity."
+          },
+          {
+            "bottleneck": "Granularity vs. Cost",
+            "why_it_matters": "Choosing a coarse granularity may miss important steps, while fine granularity incurs high computational and storage costs, limiting scalability."
+          },
+          {
+            "bottleneck": "Reference Process Ambiguity",
+            "why_it_matters": "If the reference process is not well-defined, there is no clear standard for comparison, making the fidelity measure meaningless."
+          }
+        ],
+        "mechanism_summary": "Measuring agent process fidelity involves capturing trace data from the agent's internal process and comparing it to a reference process using a fidelity measure. The mechanism is constrained by the observability of the agent's steps, the invasiveness of monitoring (which can alter behavior), and the tradeoff between granularity and cost. The output is a measured fidelity score that serves as a proxy for the true but unobservable fidelity. Key bottlenecks include limited observability, invasiveness, granularity-cost tradeoffs, and ambiguous reference specifications."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "Finer granularity in process tracing improves measurement accuracy but incurs higher computational and storage costs, creating a fundamental tradeoff.",
+        "derived_from": [
+          "Granularity vs. Cost core tradeoff",
+          "Granularity bottleneck in mechanism model"
+        ],
+        "why_it_matters": "Choosing the right granularity is critical for practical deployment. Too coarse may miss important steps; too fine may be infeasible.",
+        "what_existing_methods_may_miss": "Many fidelity metrics assume a fixed granularity without considering cost implications.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "For which classes of agents (e.g., fully transparent vs. black-box) is process fidelity measurement feasible given observability constraints?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Maps the applicability of fidelity measurement to agent architectures, highlighting where alternative methods are needed."
+      },
+      "hypothesis": {
+        "statement": "Feasibility of process fidelity measurement is positively correlated with agent transparency: transparent agents (e.g., chain-of-thought models) yield meaningful fidelity scores, while black-box agents (e.g., standard neural networks without intermediate outputs) yield infeasible or unreliable scores.",
+        "predicted_effect": "Transparent agents will enable successful fidelity measurement (completable, valid score), whereas black-box agents will result in failed or invalid measurement due to insufficient trace data."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Select two groups of agents: Group A (transparent) implements step-by-step reasoning (e.g., via chain-of-thought prompting); Group B (black-box) outputs only final answers. Both groups perform the same set of tasks (e.g., math problems) with a predefined reference process. For each agent, attempt to compute a fidelity score using a standard measure (e.g., step alignment). Compare success rate, completeness of trace, and score variability.",
+        "independent_variables": [
+          "Agent transparency: transparent vs. black-box"
+        ],
+        "dependent_variables": [
+          "Success of fidelity measurement (whether a valid score can be computed)",
+          "Completeness of trace data (fraction of required steps observed)",
+          "Variance of fidelity scores across trials"
+        ],
+        "controls": [
+          "Task difficulty and type",
+          "Complexity of reference process (same for all agents)",
+          "Number of agents per group (>=30)",
+          "Random assignment of tasks"
+        ],
+        "falsifying_observation": "Black-box agents produce fidelity scores as consistently and meaningfully as transparent agents, or transparent agents fail to yield scores."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Transparent agents yield high success rate (>90%) of valid fidelity measurement.",
+          "Black-box agents yield low success rate (<10%) or high rate of undefined scores.",
+          "Trace data completeness is significantly higher for transparent agents (p < 0.01)."
+        ],
+        "rejects_hypothesis": [
+          "Black-box agents yield valid fidelity scores in >80% of cases.",
+          "Transparent agents fail to yield scores in >50% of cases due to partial traces.",
+          "No statistically significant difference in success rate or completeness between groups."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If black-box agents still produce valid fidelity scores, then observability may not be the sole bottleneck, or the reference process definition can be adapted to black-box settings.",
+        "assumption_to_revise": "Observability of internal process is necessary for fidelity measurement.",
+        "next_question": "Can process fidelity be reliably measured for black-box agents using output-only or behavioral signals, and if so, how do such measures correlate with actual process adherence?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [
+        "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+        "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+      ],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 3,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "Increasing the granularity of process tracing improves fidelity accuracy with diminishing returns beyond a certain threshold, while computational cost increases linearly.",
+      "independent_variables": [
+        "Granularity level: step sampling rate (e.g., 1%, 2%, 5%, 10%, 20%, 50%, 100% of steps)"
+      ],
+      "dependent_variables": [
+        "Fidelity accuracy: mean squared error (MSE) between measured fidelity and true fidelity",
+        "Computational cost: runtime in seconds and memory usage in MB"
+      ],
+      "controlled_variables": [
+        "Agent model: same architecture and parameters",
+        "Task complexity: fixed reference process length (e.g., 100 steps)",
+        "Fidelity measurement algorithm: fixed sequence alignment method",
+        "Hardware and software environment constant"
+      ],
+      "baselines": [
+        {
+          "name": "Full granularity (100% steps)",
+          "description": "Trace every step; serves as the benchmark for maximum accuracy and maximum cost."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity Accuracy",
+          "definition": "Mean squared error between the measured fidelity score (obtained from comparing traced steps to reference) and the true fidelity (from full trace). Lower MSE indicates higher accuracy."
+        },
+        {
+          "name": "Computational Cost",
+          "definition": "Combined runtime and memory usage, normalized to baseline (full granularity)."
+        }
+      ],
+      "expected_result": "Accuracy improves steeply at low granularities, then plateaus; computational cost increases roughly linearly with granularity.",
+      "falsifying_result": "Accuracy continues to improve linearly without plateau, or computational cost grows superlinearly (e.g., quadratically or exponentially) with granularity.",
+      "minimum_viable_experiment": "Use a synthetic agent with a known fixed sequence of 100 reasoning steps. Vary the step sampling rate from 1% to 100% in increments (e.g., 1%, 2%, 5%, 10%, 20%, 50%, 100%). For each rate, run the agent, record traces, compute measured fidelity via sequence alignment against the full reference, measure runtime and memory. Plot accuracy (MSE) vs. granularity and cost vs. granularity. Determine if accuracy plateaus and cost remains linear.",
+      "risks_and_confounds": [
+        "Synthetic agents may not generalize to real-world agents with more complex or stochastic processes.",
+        "Observability may be limited in real scenarios; this experiment assumes full observability of traced steps.",
+        "Cost measurements may be sensitive to implementation details and hardware.",
+        "The chosen fidelity metric (sequence alignment) may not capture all aspects of process fidelity."
+      ]
+    },
+    {
+      "hypothesis": "Invasive monitoring of an agent's internal process leads to a significant change in the measured fidelity compared to non-invasive monitoring.",
+      "independent_variables": [
+        "Invasiveness of monitoring (invasive vs non-invasive)"
+      ],
+      "dependent_variables": [
+        "Measured fidelity score (e.g., sequence alignment score)"
+      ],
+      "controlled_variables": [
+        "Same task",
+        "Same reference process",
+        "Same agent model",
+        "Same evaluation metric",
+        "Random assignment",
+        "Sufficient sample size"
+      ],
+      "baselines": [
+        {
+          "name": "Non-invasive monitoring",
+          "description": "Only final output and a single post-hoc explanation are recorded."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Sequence alignment score",
+          "definition": "Edit distance between the actual steps (traced) and the reference process steps, normalized to [0,1]."
+        }
+      ],
+      "expected_result": "Mean fidelity score in invasive monitoring condition is significantly lower than in non-invasive monitoring condition (p < 0.05).",
+      "falsifying_result": "Mean fidelity scores are not significantly different between conditions (p >= 0.05).",
+      "minimum_viable_experiment": "Randomly assign a set of agents to either an invasive monitoring condition or a non-invasive monitoring condition. Both groups perform the same task with a well-defined reference process. In the invasive condition, agents are required to output step-by-step reasoning logs at each intermediate step. In the non-invasive condition, only the final output and a single post-hoc explanation are recorded. The fidelity of each agent's process is measured by comparing the actual steps (as recorded) to the reference process using a standard sequence alignment metric (e.g., edit distance). A statistical test (e.g., independent samples t-test) is used to compare the mean fidelity scores between the two groups. The sample size must be sufficient to detect a moderate effect size (e.g., n=30 per group).",
+      "risks_and_confounds": [
+        "Invasive monitoring may alter agent behavior beyond the logging requirement (Hawthorne effect)",
+        "The metric may not be sensitive enough to capture behavioral changes",
+        "Sample size may be too small to detect true difference",
+        "The task may be too simple or too complex, affecting generalization"
+      ]
+    },
+    {
+      "hypothesis": "Feasibility of process fidelity measurement is positively correlated with agent transparency: transparent agents (e.g., chain-of-thought models) yield meaningful fidelity scores, while black-box agents (e.g., standard neural networks without intermediate outputs) yield infeasible or unreliable scores.",
+      "independent_variables": [
+        "Agent transparency: transparent vs. black-box"
+      ],
+      "dependent_variables": [
+        "Success of fidelity measurement (whether a valid score can be computed)",
+        "Completeness of trace data (fraction of required steps observed)",
+        "Variance of fidelity scores across trials"
+      ],
+      "controlled_variables": [
+        "Task difficulty and type (same for all agents)",
+        "Complexity of reference process (same for all agents)",
+        "Number of agents per group (>=30)",
+        "Random assignment of tasks"
+      ],
+      "baselines": [
+        {
+          "name": "Perfect Process Agent",
+          "description": "An agent that exactly follows the reference process, yielding maximum fidelity score."
+        },
+        {
+          "name": "Random Process Agent",
+          "description": "An agent that takes random steps unrelated to the reference process, yielding minimum fidelity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Step Alignment Rate",
+          "definition": "Proportion of steps in agent trace that match the reference process steps in correct order."
+        },
+        {
+          "name": "Trace Completeness",
+          "definition": "Fraction of reference steps that appear in the agent trace."
+        }
+      ],
+      "expected_result": "Transparent agents yield valid fidelity scores with high trace completeness (>80%), while black-box agents yield invalid or low scores (<20% success).",
+      "falsifying_result": "Black-box agents yield valid fidelity scores in >80% of cases, or transparent agents fail to yield scores in >50% of cases.",
+      "minimum_viable_experiment": "Select 30 transparent (chain-of-thought) and 30 black-box (direct output) agents. Assign each agent 10 math problems with a predefined step-by-step reference solution. For each agent, attempt to compute a step alignment score based on available trace (for transparent agents, intermediate reasoning steps; for black-box agents, only final answer). Compare the proportion of successful measurements and mean trace completeness between groups.",
+      "risks_and_confounds": [
+        "Task difficulty may affect traceability; ensure uniform difficulty across groups.",
+        "Reference process complexity may be too low or high; pilot test to calibrate.",
+        "Agents may differ in other capabilities; control for model size, training data.",
+        "Logging may alter agent behavior; use non-invasive logging if possible."
+      ]
+    },
+    {
+      "hypothesis": "Increasing ambiguity in the reference process (e.g., multiple possible correct processes) decreases the reliability of fidelity measurements.",
+      "independent_variables": [
+        "Ambiguity level of reference process (low, medium, high)"
+      ],
+      "dependent_variables": [
+        "Variance of fidelity scores across repeated measurements"
+      ],
+      "controlled_variables": [
+        "Agent process (same trace for all conditions)",
+        "Observability (full trace available)",
+        "Granularity (fixed detail level)",
+        "Fidelity measure (same algorithm)",
+        "Number of measurements per condition"
+      ],
+      "baselines": [
+        {
+          "name": "Low ambiguity reference",
+          "description": "Single well-defined reference process."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Fidelity score variance",
+          "definition": "Variance of fidelity scores across repeated measurements for each ambiguity level."
+        }
+      ],
+      "expected_result": "Variance of fidelity scores is significantly higher for medium and high ambiguity compared to low ambiguity, indicating lower reliability.",
+      "falsifying_result": "Variance of fidelity scores does not increase with ambiguity level, or decreases, indicating that ambiguity does not harm reliability.",
+      "minimum_viable_experiment": "Create a set of agent traces (fixed process). Define reference processes with varying ambiguity: single well-defined process (low ambiguity), a small set of possible processes (medium ambiguity), and a large set (high ambiguity). For each ambiguity level, compute fidelity scores using the same fidelity measure. Repeat the measurement multiple times and calculate the variance of scores across repetitions. Compare the variances across ambiguity levels.",
+      "risks_and_confounds": [
+        "Order effects if participants are exposed to multiple ambiguity levels sequentially",
+        "Learning or fatigue effects from repeated measurements",
+        "Choice of specific reference sets may not represent general ambiguity",
+        "Potential interaction between ambiguity level and the specific fidelity measure used"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This research package provides a structured first-principles analysis of how to measure agent process fidelity. It defines primitive concepts (Agent Process, Reference Process, Fidelity Measure), identifies assumptions, core tradeoffs, and tensions, and proposes a causal mechanism model with explicit bottlenecks. The package then generates several candidate hypotheses with minimal decisive tests and experiment plans. The derivation is logical and covers key aspects such as granularity, invasiveness, observability, and reference ambiguity.",
+    "strengths": [
+      "Clear first-principles decomposition and mechanism model.",
+      "Tensions are well-derived from assumptions and tradeoffs.",
+      "Hypotheses are falsifiable with concrete experimental designs.",
+      "Addresses a timely and practically important problem in LLM agent evaluation."
+    ],
+    "weaknesses": [
+      "Limited novelty: tradeoffs and tensions (granularity vs cost, invasiveness vs fidelity) are well-known in other measurement domains.",
+      "No empirical validation or comparison to existing fidelity measures (e.g., process adherence metrics from software engineering).",
+      "The experimental plans rely heavily on synthetic agents and may not generalize to real-world LLM agents with stochastic or emergent behaviors.",
+      "Overclaims general applicability without addressing scalability or practical deployment constraints in detail."
+    ],
+    "questions": [
+      "How do the proposed fidelity measures compare to existing methods like BLEU, ROUGE, or process mining techniques?",
+      "Could the inversion of the causal model be considered—i.e., does the measurement system itself introduce confounding that could be corrected?",
+      "What is the interaction effect between granularity and invasiveness? Does finer granularity inherently require more invasive monitoring?"
+    ],
+    "missing_baselines": [
+      "Baselines from software process measurement (e.g., process conformance checking).",
+      "Comparison to post-hoc fidelity metrics that use only final outputs (e.g., output-based alignment).",
+      "Existing agent evaluation frameworks like AgentBench, GAIA, or SWE-bench might have implicit process fidelity aspects."
+    ],
+    "score": 6,
+    "confidence": 4,
+    "recommendation": "weak_accept"
+  },
+  "self_improvement_update": {
+    "failure_type": "Insufficient novelty and lack of empirical comparison to existing baselines",
+    "root_cause": "The research package proposes a first-principles decomposition and causal model for measuring agent process fidelity but does not compare against or incorporate established metrics from related domains (e.g., BLEU, process mining conformance checking, output-based alignment). The derived hypotheses are plausible but do not demonstrate an incremental advance over existing knowledge, resulting in a score of 6 and weak acceptance recommendation.",
+    "violated_principle": "Novelty must be explicitly established by contrasting with prior work and identifying a clear gap or limitation that the proposed framework addresses.",
+    "new_or_updated_principle": "Any proposed fidelity measure or framework must include a comparison against at least one existing baseline (e.g., output-only fidelity, process alignment from software engineering) to quantify its added value in terms of accuracy, reliability, or expressiveness.",
+    "new_or_updated_skill": "Literature synthesis and baseline benchmarking: systematically identify, implement, and evaluate relevant prior fidelity metrics within the experimental design to enable direct comparison and contextualization.",
+    "regression_test": "For any future research package on agent process fidelity, enforce a mandatory section titled 'Comparison to Existing Approaches' that (a) lists at least two established metrics from adjacent fields (e.g., process mining conformance, output-level similarity), (b) runs the proposed experiments with these baselines on the same datasets, and (c) statistically compares results to quantify the improvement or trade-offs. The comparison must cover at least one tradeoff dimension (e.g., accuracy vs. cost, sensitivity to observability)."
+  },
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 0,
+    "gate_repairs": [],
+    "ablation_settings": {
+      "enable_gate_repair": false,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": true
+    },
+    "baseline": "no_gate_repair_ablation",
+    "ablation": "gate_repair_removed",
+    "replicate": 2,
+    "run_id": "run-20260628T161536Z"
+  }
+}

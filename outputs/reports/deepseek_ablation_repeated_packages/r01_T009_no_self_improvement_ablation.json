@@ -1,0 +1,1607 @@
+{
+  "topic": {
+    "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+    "topic_id": "T009",
+    "goal": null,
+    "domain": "coding agents",
+    "target_venue": null,
+    "domain_constraints": [],
+    "available_compute": null,
+    "preferred_method": null
+  },
+  "topic_summary": "First-principles research package for: How should coding-agent benchmarks isolate non-inferable requirements?",
+  "first_principles_decomposition": {
+    "primitive_definitions": [
+      {
+        "name": "Requirement",
+        "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+        "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+      },
+      {
+        "name": "Inferable Requirement",
+        "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+        "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+      },
+      {
+        "name": "Isolation",
+        "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+        "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+      }
+    ],
+    "assumptions": [
+      {
+        "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+        "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+        "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+      },
+      {
+        "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+        "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+        "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+      }
+    ],
+    "core_tradeoffs": [
+      {
+        "tradeoff": "Explicitness vs. realism in requirement specification",
+        "variables": [
+          "Degree of explicitness of requirements in benchmark",
+          "Realism of task representation"
+        ]
+      },
+      {
+        "tradeoff": "Isolation granularity vs. benchmark complexity",
+        "variables": [
+          "Number of isolated non-inferable requirements",
+          "Overall benchmark size and evaluation cost"
+        ]
+      }
+    ]
+  },
+  "mechanism_model": {
+    "variables": [
+      {
+        "name": "InformationSetControl",
+        "role": "input",
+        "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+      },
+      {
+        "name": "RequirementExplicitness",
+        "role": "mediator",
+        "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+      },
+      {
+        "name": "IsolationGranularity",
+        "role": "mediator",
+        "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+      },
+      {
+        "name": "InferenceDemand",
+        "role": "mediator",
+        "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+      },
+      {
+        "name": "UnintendedLeakage",
+        "role": "confounder",
+        "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+      },
+      {
+        "name": "BenchmarkValidity",
+        "role": "outcome",
+        "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+      }
+    ],
+    "causal_chain": [
+      {
+        "step": "1",
+        "source": "InformationSetControl",
+        "relation": "determines",
+        "target": "RequirementExplicitness",
+        "explanation": "Controlling the information set sets how explicit requirements appear."
+      },
+      {
+        "step": "2",
+        "source": "InformationSetControl",
+        "relation": "enables",
+        "target": "IsolationGranularity",
+        "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+      },
+      {
+        "step": "3",
+        "source": "RequirementExplicitness",
+        "relation": "increases",
+        "target": "InferenceDemand",
+        "explanation": "Less explicit requirements increase the need for inference."
+      },
+      {
+        "step": "4",
+        "source": "IsolationGranularity",
+        "relation": "moderates",
+        "target": "InferenceDemand",
+        "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+      },
+      {
+        "step": "5",
+        "source": "InferenceDemand",
+        "relation": "increases",
+        "target": "BenchmarkValidity",
+        "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+      },
+      {
+        "step": "6",
+        "source": "IsolationGranularity",
+        "relation": "moderates",
+        "target": "BenchmarkValidity",
+        "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+      },
+      {
+        "step": "7",
+        "source": "UnintendedLeakage",
+        "relation": "reduces",
+        "target": "BenchmarkValidity",
+        "explanation": "Leakage allows agents to bypass inference, reducing validity."
+      }
+    ],
+    "bottlenecks": [
+      {
+        "bottleneck": "Distinguishing inferable from non-inferable requirements",
+        "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+      },
+      {
+        "bottleneck": "Preventing unintended information leakage",
+        "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+      }
+    ],
+    "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+  },
+  "tensions": [
+    {
+      "tension_id": "T1",
+      "statement": "The assumption that non-inferable requirements exist and can be distinguished from inferable ones is contradicted by the practical challenge of making that distinction cleanly in benchmark design.",
+      "derived_from": [
+        "Inferable Requirement",
+        "Isolation",
+        "assumption 1",
+        "bottleneck 1"
+      ],
+      "why_it_matters": "If the distinction is flawed, the benchmark may measure the wrong construct (e.g., pattern matching instead of reasoning).",
+      "what_existing_methods_may_miss": "Current benchmarks often assume a clear separation without validating it, potentially leading to misattribution of agent performance.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T2",
+      "statement": "There is a tradeoff between making requirements less explicit to increase inference demand and maintaining realistic task representation.",
+      "derived_from": [
+        "RequirementExplicitness",
+        "InferenceDemand",
+        "tradeoff 1"
+      ],
+      "why_it_matters": "Benchmarks that sacrifice realism may not generalize to real-world coding tasks, reducing practical relevance.",
+      "what_existing_methods_may_miss": "Most benchmarks either use fully explicit requirements (low inference demand) or are too artificial; few explore the tradeoff systematically.",
+      "testability": 3
+    },
+    {
+      "tension_id": "T3",
+      "statement": "Achieving fine-grained isolation of non-inferable requirements increases benchmark complexity and evaluation cost, limiting scalability.",
+      "derived_from": [
+        "IsolationGranularity",
+        "tradeoff 2"
+      ],
+      "why_it_matters": "Oversimplified isolation may lead to coarse evaluation, while overly complex benchmarks may be impractical for routine use.",
+      "what_existing_methods_may_miss": "Existing benchmarks often use coarse isolation (e.g., whole task level) without evaluating the impact of granularity on validity.",
+      "testability": 5
+    },
+    {
+      "tension_id": "T4",
+      "statement": "The assumption that information set control prevents unintended leakage is under-tested; leakage can occur through code comments, test names, or structure.",
+      "derived_from": [
+        "InformationSetControl",
+        "UnintendedLeakage",
+        "assumption 2"
+      ],
+      "why_it_matters": "Unintended leakage allows agents to solve tasks without genuine inference, undermining benchmark validity.",
+      "what_existing_methods_may_miss": "Current benchmark designs rarely audit for leakage, and agents may exploit subtle cues.",
+      "testability": 4
+    },
+    {
+      "tension_id": "T5",
+      "statement": "The causal chain assumes that inference demand directly increases benchmark validity, but unintended leakage and other confounders can attenuate this relationship.",
+      "derived_from": [
+        "causal step 5",
+        "causal step 7",
+        "mechanism_summary"
+      ],
+      "why_it_matters": "If validity depends on controlling confounders, the mechanism may not hold in practice without rigorous checks.",
+      "what_existing_methods_may_miss": "Most benchmarks assume a monotonic relationship between inference demand and validity without testing for confounders.",
+      "testability": 3
+    }
+  ],
+  "candidate_questions": [
+    {
+      "question": "To what extent does misclassification of inferable vs. non-inferable requirements in current coding benchmarks lead to overestimation of agent reasoning ability?",
+      "question_type": "causal",
+      "source_tension": "T1",
+      "expected_contribution": "Quantify the impact of flawed requirement classification on benchmark validity, guiding better benchmark design."
+    },
+    {
+      "question": "How does varying requirement explicitness affect the trade-off between inference demand and task realism in coding-agent benchmarks?",
+      "question_type": "descriptive",
+      "source_tension": "T2",
+      "expected_contribution": "Characterize the relationship to inform optimal benchmark design that balances inference demand and realism."
+    },
+    {
+      "question": "Can an automated method be developed to detect unintended information leakage in coding benchmarks?",
+      "question_type": "algorithmic",
+      "source_tension": "T4",
+      "expected_contribution": "Provide a tool for benchmark designers to identify and mitigate leakage, improving validity."
+    },
+    {
+      "question": "How does the granularity of isolation of non-inferable requirements affect benchmark validity and scalability?",
+      "question_type": "descriptive",
+      "source_tension": "T3",
+      "expected_contribution": "Establish guidelines for choosing isolation granularity based on validity and cost trade-offs."
+    },
+    {
+      "question": "To what extent does unintended leakage confound the relationship between inference demand and benchmark validity?",
+      "question_type": "causal",
+      "source_tension": "T5",
+      "expected_contribution": "Quantify the confounder effect to improve causal interpretation of benchmark results."
+    }
+  ],
+  "certificates": [
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+          "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+          "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+          "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+          "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+          "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+        },
+        {
+          "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+          "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+          "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "InformationSetControl",
+            "role": "input",
+            "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+          },
+          {
+            "name": "RequirementExplicitness",
+            "role": "mediator",
+            "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+          },
+          {
+            "name": "IsolationGranularity",
+            "role": "mediator",
+            "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+          },
+          {
+            "name": "InferenceDemand",
+            "role": "mediator",
+            "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+          },
+          {
+            "name": "UnintendedLeakage",
+            "role": "confounder",
+            "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+          },
+          {
+            "name": "BenchmarkValidity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "InformationSetControl",
+            "relation": "determines",
+            "target": "RequirementExplicitness",
+            "explanation": "Controlling the information set sets how explicit requirements appear."
+          },
+          {
+            "step": "2",
+            "source": "InformationSetControl",
+            "relation": "enables",
+            "target": "IsolationGranularity",
+            "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+          },
+          {
+            "step": "3",
+            "source": "RequirementExplicitness",
+            "relation": "increases",
+            "target": "InferenceDemand",
+            "explanation": "Less explicit requirements increase the need for inference."
+          },
+          {
+            "step": "4",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "InferenceDemand",
+            "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+          },
+          {
+            "step": "5",
+            "source": "InferenceDemand",
+            "relation": "increases",
+            "target": "BenchmarkValidity",
+            "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+          },
+          {
+            "step": "6",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "BenchmarkValidity",
+            "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+          },
+          {
+            "step": "7",
+            "source": "UnintendedLeakage",
+            "relation": "reduces",
+            "target": "BenchmarkValidity",
+            "explanation": "Leakage allows agents to bypass inference, reducing validity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Distinguishing inferable from non-inferable requirements",
+            "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+          },
+          {
+            "bottleneck": "Preventing unintended information leakage",
+            "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T3",
+        "statement": "Achieving fine-grained isolation of non-inferable requirements increases benchmark complexity and evaluation cost, limiting scalability.",
+        "derived_from": [
+          "IsolationGranularity",
+          "tradeoff 2"
+        ],
+        "why_it_matters": "Oversimplified isolation may lead to coarse evaluation, while overly complex benchmarks may be impractical for routine use.",
+        "what_existing_methods_may_miss": "Existing benchmarks often use coarse isolation (e.g., whole task level) without evaluating the impact of granularity on validity.",
+        "testability": 5
+      },
+      "research_question": {
+        "question": "Is there a critical granularity of isolation of non-inferable requirements beyond which the validity-scalability trade-off reverses due to increased susceptibility to information leakage?",
+        "question_type": "descriptive",
+        "source_tension": "T3",
+        "expected_contribution": "Identify a threshold granularity that balances validity and cost, and characterize the role of information leakage as a moderating factor at fine granularities."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold granularity level (e.g., per-requirement isolation) where further increasing isolation granularity leads to diminishing returns in benchmark validity while disproportionately increasing evaluation cost, and a secondary phase where fine-grained isolation actually reduces validity due to heightened sensitivity to unintended leakage, creating an inverted-U relationship between granularity and validity.",
+        "predicted_effect": "As granularity increases from coarse to medium, validity improves; at a critical point (e.g., sub-task level), gains plateau or reverse; at fine granularity, validity may drop because each isolated requirement becomes more vulnerable to leakage from test names or code structure, reducing the benchmark's ability to measure genuine inference."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct four versions of a coding-agent benchmark with increasing granularity: whole-task (coarse), sub-task (medium), per-requirement (fine), and per-sub-requirement (very fine). Use the same set of non-inferable requirements and control for leakage by systematically inserting subtle hints in test names and code comments across versions. Evaluate multiple agents on each version. Measure validity as the correlation between agent performance on non-inferable requirements and an independent reasoning assessment. Measure scalability as total test cases and evaluation time. Also measure leakage impact by comparing performance with vs. without hints in a separate ablation.",
+        "independent_variables": [
+          "Isolation granularity (coarse, medium, fine, very fine)",
+          "Presence of subtle information leakage (controlled insertion of hints in test names and code comments)"
+        ],
+        "dependent_variables": [
+          "Benchmark validity (correlation with reasoning test)",
+          "Scalability (number of test cases, evaluation time per agent)",
+          "Leakage susceptibility (performance difference between hinted and non-hinted conditions)"
+        ],
+        "controls": [
+          "Same set of non-inferable requirements across all granularity levels",
+          "Same information set provided to agents (except deliberate hints)",
+          "Same evaluation protocol and scoring function",
+          "Control for agent architecture by using multiple agent types",
+          "Randomize order of test cases to avoid ordering effects"
+        ],
+        "falsifying_observation": "If validity monotonically increases with granularity without any saturation or decrease (i.e., no inverted-U shape), or if the presence of hints does not differentially affect validity across granularity levels, then the hypothesis of a threshold and leakage interaction is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "Validity correlation with reasoning test shows an inverted-U pattern: coarse < medium ≈ fine > very fine.",
+          "Scalability (test cases and time) increases exponentially from coarse to very fine.",
+          "Leakage susceptibility (performance difference with hints) is larger at fine and very fine granularity than at coarse and medium.",
+          "At very fine granularity, validity in the no-hint condition is lower than at fine granularity, and validity in the hint condition is even lower, indicating leakage harm."
+        ],
+        "rejects_hypothesis": [
+          "Validity increases monotonically with granularity and never decreases.",
+          "Validity does not plateau or decline at very fine granularity.",
+          "Leakage susceptibility is constant across granularity levels.",
+          "Fine granularity shows higher validity despite high leakage."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no inverted-U or threshold is observed (validity monotonic or flat), then the assumption that fine granularity amplifies leakage is not supported.",
+        "assumption_to_revise": "The assumption that isolation granularity interacts with unintended leakage in a non-linear way, creating a critical point.",
+        "next_question": "What other design factors (e.g., requirement type, agent architecture) moderate the relationship between granularity and validity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+          "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+          "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+          "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+          "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+          "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+        },
+        {
+          "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+          "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+          "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "InformationSetControl",
+            "role": "input",
+            "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+          },
+          {
+            "name": "RequirementExplicitness",
+            "role": "mediator",
+            "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+          },
+          {
+            "name": "IsolationGranularity",
+            "role": "mediator",
+            "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+          },
+          {
+            "name": "InferenceDemand",
+            "role": "mediator",
+            "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+          },
+          {
+            "name": "UnintendedLeakage",
+            "role": "confounder",
+            "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+          },
+          {
+            "name": "BenchmarkValidity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "InformationSetControl",
+            "relation": "determines",
+            "target": "RequirementExplicitness",
+            "explanation": "Controlling the information set sets how explicit requirements appear."
+          },
+          {
+            "step": "2",
+            "source": "InformationSetControl",
+            "relation": "enables",
+            "target": "IsolationGranularity",
+            "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+          },
+          {
+            "step": "3",
+            "source": "RequirementExplicitness",
+            "relation": "increases",
+            "target": "InferenceDemand",
+            "explanation": "Less explicit requirements increase the need for inference."
+          },
+          {
+            "step": "4",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "InferenceDemand",
+            "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+          },
+          {
+            "step": "5",
+            "source": "InferenceDemand",
+            "relation": "increases",
+            "target": "BenchmarkValidity",
+            "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+          },
+          {
+            "step": "6",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "BenchmarkValidity",
+            "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+          },
+          {
+            "step": "7",
+            "source": "UnintendedLeakage",
+            "relation": "reduces",
+            "target": "BenchmarkValidity",
+            "explanation": "Leakage allows agents to bypass inference, reducing validity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Distinguishing inferable from non-inferable requirements",
+            "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+          },
+          {
+            "bottleneck": "Preventing unintended information leakage",
+            "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T5",
+        "statement": "The causal chain assumes that inference demand directly increases benchmark validity, but unintended leakage and other confounders can attenuate this relationship.",
+        "derived_from": [
+          "causal step 5",
+          "causal step 7",
+          "mechanism_summary"
+        ],
+        "why_it_matters": "If validity depends on controlling confounders, the mechanism may not hold in practice without rigorous checks.",
+        "what_existing_methods_may_miss": "Most benchmarks assume a monotonic relationship between inference demand and validity without testing for confounders.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "What is the threshold of unintended leakage beyond which coding-agent benchmarks fail to isolate non-inferable requirements?",
+        "question_type": "diagnostic",
+        "source_tension": "T5",
+        "expected_contribution": "Identify a critical leakage threshold that marks a phase transition in benchmark validity, enabling designers to set safe information bounds."
+      },
+      "hypothesis": {
+        "statement": "There exists a critical threshold of unintended leakage such that when leakage exceeds this threshold, the benchmark's ability to isolate non-inferable requirements drops discontinuously.",
+        "predicted_effect": "Below the threshold, increasing inference demand continues to improve validity; above the threshold, validity collapses because agents can shortcut reasoning via leaked cues."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create a coding-agent benchmark with controlled leakage. Vary leakage continuously from 0 (no extra hints) to high (many hints). For each leakage level, measure benchmark validity as the correlation between agent performance and human-judged true reasoning ability on non-inferable requirements. Fit a segmented regression to detect a breakpoint in the validity vs. leakage curve.",
+        "independent_variables": [
+          "UnintendedLeakage (continuous: number or proportion of leaked cues)"
+        ],
+        "dependent_variables": [
+          "BenchmarkValidity (correlation score)"
+        ],
+        "controls": [
+          "InferenceDemand held at medium level",
+          "Same set of non-inferable requirements",
+          "Same agent model",
+          "Same task difficulty"
+        ],
+        "falsifying_observation": "If the segmented regression finds no significant breakpoint (i.e., the relationship is linear or monotonic without a sharp drop), then the threshold hypothesis is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "A statistically significant breakpoint in the validity vs. leakage curve, with a sharp drop after the threshold.",
+          "Below threshold, validity increases with inference demand; above threshold, validity is low regardless of inference demand."
+        ],
+        "rejects_hypothesis": [
+          "No breakpoint detected; validity declines gradually or remains stable across leakage levels.",
+          "Validity increases with leakage (contrary to hypothesized direction)."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold is found and leakage only linearly reduces validity, then the assumption of a sharp boundary is wrong.",
+        "assumption_to_revise": "The assumption that leakage affects validity through a phase transition rather than a gradual degradation.",
+        "next_question": "What functional form best describes the relationship between unintended leakage and benchmark validity, and under what conditions does isolation become impossible?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+          "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+          "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+          "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+          "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+          "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+        },
+        {
+          "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+          "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+          "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "InformationSetControl",
+            "role": "input",
+            "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+          },
+          {
+            "name": "RequirementExplicitness",
+            "role": "mediator",
+            "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+          },
+          {
+            "name": "IsolationGranularity",
+            "role": "mediator",
+            "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+          },
+          {
+            "name": "InferenceDemand",
+            "role": "mediator",
+            "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+          },
+          {
+            "name": "UnintendedLeakage",
+            "role": "confounder",
+            "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+          },
+          {
+            "name": "BenchmarkValidity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "InformationSetControl",
+            "relation": "determines",
+            "target": "RequirementExplicitness",
+            "explanation": "Controlling the information set sets how explicit requirements appear."
+          },
+          {
+            "step": "2",
+            "source": "InformationSetControl",
+            "relation": "enables",
+            "target": "IsolationGranularity",
+            "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+          },
+          {
+            "step": "3",
+            "source": "RequirementExplicitness",
+            "relation": "increases",
+            "target": "InferenceDemand",
+            "explanation": "Less explicit requirements increase the need for inference."
+          },
+          {
+            "step": "4",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "InferenceDemand",
+            "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+          },
+          {
+            "step": "5",
+            "source": "InferenceDemand",
+            "relation": "increases",
+            "target": "BenchmarkValidity",
+            "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+          },
+          {
+            "step": "6",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "BenchmarkValidity",
+            "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+          },
+          {
+            "step": "7",
+            "source": "UnintendedLeakage",
+            "relation": "reduces",
+            "target": "BenchmarkValidity",
+            "explanation": "Leakage allows agents to bypass inference, reducing validity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Distinguishing inferable from non-inferable requirements",
+            "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+          },
+          {
+            "bottleneck": "Preventing unintended information leakage",
+            "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T1",
+        "statement": "The assumption that non-inferable requirements exist and can be distinguished from inferable ones is contradicted by the practical challenge of making that distinction cleanly in benchmark design.",
+        "derived_from": [
+          "Inferable Requirement",
+          "Isolation",
+          "assumption 1",
+          "bottleneck 1"
+        ],
+        "why_it_matters": "If the distinction is flawed, the benchmark may measure the wrong construct (e.g., pattern matching instead of reasoning).",
+        "what_existing_methods_may_miss": "Current benchmarks often assume a clear separation without validating it, potentially leading to misattribution of agent performance.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "At what threshold of information set control (ratio of non-inferable to inferable requirements) do coding-agent benchmarks exhibit a phase transition in the validity of agent reasoning assessment?",
+        "question_type": "descriptive",
+        "source_tension": "T1",
+        "expected_contribution": "Identify a critical ratio of non-inferable requirements that, when exceeded, causes benchmark validity to collapse due to agents shifting from reasoning to pattern-matching."
+      },
+      "hypothesis": {
+        "statement": "There exists a threshold in the proportion of non-inferable requirements relative to inferable ones such that below the threshold, benchmark validity is high because agents must genuinely reason, but above the threshold, validity drops sharply because agents exploit pattern matching over a larger set of examples, leading to an apparent performance plateau that does not reflect true reasoning ability.",
+        "predicted_effect": "Below the threshold, agent performance correlates with an independent reasoning test; above the threshold, performance becomes uncorrelated and saturates regardless of agent reasoning ability."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct a controlled coding benchmark where the ratio of non-inferable to inferable requirements is systematically varied (e.g., 0%, 20%, 40%, 60%, 80%, 100%). For each ratio, run a set of state-of-the-art coding agents and measure their pass rates. Additionally, administer an independent reasoning test (e.g., on held-out non-inferable tasks). Compute the correlation between pass rate and reasoning test score for each ratio. Look for a sharp discontinuity in the correlation coefficient as the ratio increases.",
+        "independent_variables": [
+          "Ratio of non-inferable to inferable requirements (6 levels: 0%, 20%, 40%, 60%, 80%, 100%)"
+        ],
+        "dependent_variables": [
+          "Agent pass rate on the benchmark",
+          "Correlation coefficient between pass rate and independent reasoning test score"
+        ],
+        "controls": [
+          "Same total number of requirements across all ratios",
+          "Same coding tasks (same code, same test suite)",
+          "Same agents and compute resources",
+          "Same difficulty level of individual requirements",
+          "No unintended leakage (information set is rigorously controlled)"
+        ],
+        "falsifying_observation": "If the correlation coefficient decreases monotonically with the ratio without a clear discontinuity or if there is no ratio at which the correlation drops sharply, then the hypothesis of a threshold phase transition is falsified."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "There exists a ratio R* (e.g., 60%) such that for ratios < R*, correlation is high (r > 0.8), and for ratios > R*, correlation drops significantly (r < 0.3).",
+          "Agent pass rate saturates at a high plateau for ratios > R*, while independent reasoning test scores continue to improve for better agents.",
+          "The variance in pass rates decreases as ratio passes R*, indicating that all agents achieve similar performance via pattern matching."
+        ],
+        "rejects_hypothesis": [
+          "Correlation decreases linearly with ratio, no sharp transition.",
+          "Agent pass rate continues to increase with ratio but without saturation.",
+          "No significant difference in correlation across any ratio levels."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no threshold phase transition is observed (i.e., correlation decreases linearly or not at all), then the assumption that the ratio of non-inferable to inferable requirements is the key driver of benchmark validity must be revised.",
+        "assumption_to_revise": "The assumption that the ratio of non-inferable requirements is the primary factor causing a phase transition.",
+        "next_question": "Given that the ratio does not cause a phase transition, what other properties of non-inferable requirements (e.g., their complexity, domain specificity, or interaction with agent architecture) drive benchmark validity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+          "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+          "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+          "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+          "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+          "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+        },
+        {
+          "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+          "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+          "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "InformationSetControl",
+            "role": "input",
+            "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+          },
+          {
+            "name": "RequirementExplicitness",
+            "role": "mediator",
+            "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+          },
+          {
+            "name": "IsolationGranularity",
+            "role": "mediator",
+            "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+          },
+          {
+            "name": "InferenceDemand",
+            "role": "mediator",
+            "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+          },
+          {
+            "name": "UnintendedLeakage",
+            "role": "confounder",
+            "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+          },
+          {
+            "name": "BenchmarkValidity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "InformationSetControl",
+            "relation": "determines",
+            "target": "RequirementExplicitness",
+            "explanation": "Controlling the information set sets how explicit requirements appear."
+          },
+          {
+            "step": "2",
+            "source": "InformationSetControl",
+            "relation": "enables",
+            "target": "IsolationGranularity",
+            "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+          },
+          {
+            "step": "3",
+            "source": "RequirementExplicitness",
+            "relation": "increases",
+            "target": "InferenceDemand",
+            "explanation": "Less explicit requirements increase the need for inference."
+          },
+          {
+            "step": "4",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "InferenceDemand",
+            "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+          },
+          {
+            "step": "5",
+            "source": "InferenceDemand",
+            "relation": "increases",
+            "target": "BenchmarkValidity",
+            "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+          },
+          {
+            "step": "6",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "BenchmarkValidity",
+            "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+          },
+          {
+            "step": "7",
+            "source": "UnintendedLeakage",
+            "relation": "reduces",
+            "target": "BenchmarkValidity",
+            "explanation": "Leakage allows agents to bypass inference, reducing validity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Distinguishing inferable from non-inferable requirements",
+            "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+          },
+          {
+            "bottleneck": "Preventing unintended information leakage",
+            "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T4",
+        "statement": "The assumption that information set control prevents unintended leakage is under-tested; leakage can occur through code comments, test names, or structure.",
+        "derived_from": [
+          "InformationSetControl",
+          "UnintendedLeakage",
+          "assumption 2"
+        ],
+        "why_it_matters": "Unintended leakage allows agents to solve tasks without genuine inference, undermining benchmark validity.",
+        "what_existing_methods_may_miss": "Current benchmark designs rarely audit for leakage, and agents may exploit subtle cues.",
+        "testability": 4
+      },
+      "research_question": {
+        "question": "Is there a critical leakage level (proportion of benchmarks with inadvertent hints) above which a coding-agent benchmark's validity for measuring genuine inference collapses?",
+        "question_type": "causal",
+        "source_tension": "T4",
+        "expected_contribution": "Identify a phase transition threshold that benchmark designers can use to calibrate acceptable leakage levels."
+      },
+      "hypothesis": {
+        "statement": "Benchmark validity degrades nonlinearly with increasing leakage; there exists a threshold L_c (e.g., 20% of items with hints) beyond which validity drops sharply below 0.5.",
+        "predicted_effect": "As the proportion of benchmarks with unintended hints increases from 0% to 50%, the correlation between agent performance and genuine reasoning ability (measured by a controlled reference task) will drop abruptly at L_c."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Create 100 synthetic coding benchmarks with ground-truth agent reasoning ability. Randomly inject unintended hints (e.g., revealing variable names or test outcomes) into a varying proportion of benchmarks (0%, 10%, 20%, …, 50%). Have 10 distinct agents complete each set. Measure the correlation between benchmark performance and a separate reference test of reasoning (the same agents' scores on a no-leakage task). Plot correlation vs. leakage proportion and identify the point of sharp decline.",
+        "independent_variables": [
+          "leakage proportion (ratio of benchmarks with hints)"
+        ],
+        "dependent_variables": [
+          "Pearson correlation between benchmark performance and reference reasoning score"
+        ],
+        "controls": [
+          "same agents across all leakage conditions",
+          "same set of 100 benchmarks per condition",
+          "identical reference reasoning test",
+          "hints injected via same mechanism (e.g., test names)"
+        ],
+        "falsifying_observation": "No clear threshold exists; the correlation decreases gradually (linearly) with leakage, or the correlation never drops below 0.5."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "The correlation remains above 0.8 for leakage < L_c and drops below 0.5 for leakage > L_c, with a rapid transition at L_c.",
+          "The threshold L_c is consistent across multiple benchmark sets and agent types.",
+          "The nonlinear drop is statistically significant (segmented regression, p < 0.01)."
+        ],
+        "rejects_hypothesis": [
+          "No abrupt drop; correlation declines linearly with leakage.",
+          "Threshold varies widely across benchmark sets or agents.",
+          "Correlation never falls below 0.5 even at 50% leakage."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no clear threshold is found or the threshold is not replicable.",
+        "assumption_to_revise": "The assumption that leakage has a nonlinear, threshold effect on validity; it may be gradual or context-dependent.",
+        "next_question": "What other factors (e.g., benchmark difficulty, agent architecture) moderate the effect of leakage on benchmark validity?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "topic": "How should coding-agent benchmarks isolate non-inferable requirements?",
+      "primitive_definitions": [
+        {
+          "name": "Requirement",
+          "definition": "A specification that defines a desired property or behavior of a software system, often expressed as a condition to be satisfied.",
+          "why_primitive": "Requirements are the fundamental building blocks of coding tasks; a benchmark measures an agent's ability to satisfy them."
+        },
+        {
+          "name": "Inferable Requirement",
+          "definition": "A requirement that can be deduced from context, examples, or other provided information without explicit statement.",
+          "why_primitive": "Distinguishing inferable from non-inferable is central to the problem; it determines what needs isolation."
+        },
+        {
+          "name": "Isolation",
+          "definition": "The process of separating non-inferable requirements from inferable ones so that only the latter are evaluated.",
+          "why_primitive": "Isolation is the core challenge in benchmark design to ensure fair assessment of agent reasoning ability."
+        }
+      ],
+      "first_principle_assumptions": [
+        {
+          "assumption": "Non-inferable requirements exist and can be distinguished from inferable ones.",
+          "rationale": "Without this assumption, the problem collapses; we assume there are requirements that cannot be deduced from available information.",
+          "possible_failure": "If all requirements are inferable, then isolation is unnecessary, and the benchmark may not measure genuine reasoning."
+        },
+        {
+          "assumption": "Benchmarks can be designed to control the information set available to the agent.",
+          "rationale": "Isolation requires clear boundaries on what info the agent receives; this assumes we can define and enforce an information set.",
+          "possible_failure": "In practice, agents may infer requirements from unintended sources (e.g., code comments, test names), making isolation imperfect."
+        }
+      ],
+      "mechanism_model": {
+        "variables": [
+          {
+            "name": "InformationSetControl",
+            "role": "input",
+            "description": "The extent to which the benchmark controls what information (code, comments, examples) is available to the agent."
+          },
+          {
+            "name": "RequirementExplicitness",
+            "role": "mediator",
+            "description": "How explicitly requirements are stated in the benchmark; low explicitness forces inference."
+          },
+          {
+            "name": "IsolationGranularity",
+            "role": "mediator",
+            "description": "The degree to which non-inferable requirements are separated from inferable ones in evaluation."
+          },
+          {
+            "name": "InferenceDemand",
+            "role": "mediator",
+            "description": "The amount of reasoning required from the agent to deduce non-inferable requirements."
+          },
+          {
+            "name": "UnintendedLeakage",
+            "role": "confounder",
+            "description": "Extra information in the benchmark (e.g., test names, code structure) that could allow agents to infer requirements without reasoning."
+          },
+          {
+            "name": "BenchmarkValidity",
+            "role": "outcome",
+            "description": "The degree to which the benchmark accurately measures the agent's ability to handle non-inferable requirements."
+          }
+        ],
+        "causal_chain": [
+          {
+            "step": "1",
+            "source": "InformationSetControl",
+            "relation": "determines",
+            "target": "RequirementExplicitness",
+            "explanation": "Controlling the information set sets how explicit requirements appear."
+          },
+          {
+            "step": "2",
+            "source": "InformationSetControl",
+            "relation": "enables",
+            "target": "IsolationGranularity",
+            "explanation": "Control over information allows precise isolation of which requirements are non-inferable."
+          },
+          {
+            "step": "3",
+            "source": "RequirementExplicitness",
+            "relation": "increases",
+            "target": "InferenceDemand",
+            "explanation": "Less explicit requirements increase the need for inference."
+          },
+          {
+            "step": "4",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "InferenceDemand",
+            "explanation": "Fine-grained isolation ensures that only non-inferable requirements contribute to inference demand."
+          },
+          {
+            "step": "5",
+            "source": "InferenceDemand",
+            "relation": "increases",
+            "target": "BenchmarkValidity",
+            "explanation": "Higher inference demand better tests the agent's reasoning ability on non-inferable requirements."
+          },
+          {
+            "step": "6",
+            "source": "IsolationGranularity",
+            "relation": "moderates",
+            "target": "BenchmarkValidity",
+            "explanation": "Better isolation increases the benchmark's ability to attribute performance to inference on non-inferable requirements."
+          },
+          {
+            "step": "7",
+            "source": "UnintendedLeakage",
+            "relation": "reduces",
+            "target": "BenchmarkValidity",
+            "explanation": "Leakage allows agents to bypass inference, reducing validity."
+          }
+        ],
+        "bottlenecks": [
+          {
+            "bottleneck": "Distinguishing inferable from non-inferable requirements",
+            "why_it_matters": "If this distinction is flawed, the benchmark may measure the wrong thing, e.g., memory or pattern matching instead of reasoning."
+          },
+          {
+            "bottleneck": "Preventing unintended information leakage",
+            "why_it_matters": "Leakage can give away non-inferable requirements, making the benchmark trivial and invalidating the assessment."
+          }
+        ],
+        "mechanism_summary": "The mechanism for isolating non-inferable requirements in coding-agent benchmarks involves controlling the information set available to the agent (InformationSetControl), which determines how explicit requirements are (RequirementExplicitness) and enables precise isolation of non-inferable requirements (IsolationGranularity). Low explicitness and fine granularity increase the demand for inference (InferenceDemand), which in turn improves the benchmark's validity (BenchmarkValidity) as a measure of reasoning ability. However, unintended information leakage (UnintendedLeakage) can reduce validity by allowing agents to infer requirements without genuine reasoning. Key bottlenecks include correctly distinguishing inferable from non-inferable requirements and preventing leakage."
+      },
+      "tension_or_contradiction": {
+        "tension_id": "T2",
+        "statement": "There is a tradeoff between making requirements less explicit to increase inference demand and maintaining realistic task representation.",
+        "derived_from": [
+          "RequirementExplicitness",
+          "InferenceDemand",
+          "tradeoff 1"
+        ],
+        "why_it_matters": "Benchmarks that sacrifice realism may not generalize to real-world coding tasks, reducing practical relevance.",
+        "what_existing_methods_may_miss": "Most benchmarks either use fully explicit requirements (low inference demand) or are too artificial; few explore the tradeoff systematically.",
+        "testability": 3
+      },
+      "research_question": {
+        "question": "How does the presence of uncontrolled information leakage moderate the phase transition from realistic high-explicitness tasks to unrealistic low-explicitness tasks in coding-agent benchmarks?",
+        "question_type": "diagnostic",
+        "source_tension": "T2",
+        "expected_contribution": "Identify a critical explicitness threshold and its moderation by leakage, enabling benchmark designers to target the transition region for maximum diagnostic power."
+      },
+      "hypothesis": {
+        "statement": "When unintended leakage is low, decreasing requirement explicitness leads to a monotonic increase in inference demand, but realism remains high until a critical explicitness threshold, below which realism drops discontinuously. When leakage is high, the threshold disappears and inference demand is low regardless of explicitness.",
+        "predicted_effect": "At low leakage, a phase transition occurs: for high and medium explicitness, realism is high (~4-5 on scale), but at low explicitness, realism drops sharply (<2). Inference demand increases gradually. At high leakage, realism remains high for all explicitness levels and inference demand is uniformly low."
+      },
+      "minimal_decisive_test": {
+        "experiment": "Construct 20 coding tasks. For each task, create 3 explicitness versions (high, medium, low) and 2 leakage conditions (low: no extra hints; high: include informative test names and comments). Present each combination to 10 SOTA agents. Measure inference demand (number of clarification queries or reasoning steps) and realism (expert rating 1-5). Use a discontinuity detection method (e.g., segmented regression) to identify a threshold for low-leakage condition.",
+        "independent_variables": [
+          "RequirementExplicitness (high, medium, low)",
+          "UnintendedLeakage (low, high)"
+        ],
+        "dependent_variables": [
+          "InferenceDemand (reasoning steps)",
+          "TaskRealism (expert rating 1-5)"
+        ],
+        "controls": [
+          "InformationSetControl (same base content)",
+          "Task difficulty (matched across tasks)",
+          "Agent model (same agents used for all conditions)"
+        ],
+        "falsifying_observation": "If in the low-leakage condition, realism decreases linearly with explicitness (no discontinuity), or if inference demand does not rise in low explicitness, or if high-leakage condition shows a discontinuity."
+      },
+      "expected_observations": {
+        "supports_hypothesis": [
+          "In low-leakage, realism scores for high and medium explicitness are similar (mean ~4.5) and significantly higher than for low explicitness (mean <2), showing a drop.",
+          "In low-leakage, inference demand increases from high to medium (e.g., +30%) and continues increasing from medium to low (e.g., +20%), but not as sharply as realism drop.",
+          "In high-leakage, realism scores are high across all explicitness levels (mean >4) and inference demand stays low (mean <2 steps).",
+          "Segmented regression in low-leakage indicates a breakpoint between medium and low explicitness."
+        ],
+        "rejects_hypothesis": [
+          "In low-leakage, realism declines linearly across explicitness levels without a sharp drop.",
+          "In low-leakage, inference demand does not increase when moving from medium to low explicitness.",
+          "In high-leakage, there is a similar discontinuity as in low-leakage.",
+          "The interaction between explicitness and leakage is not significant."
+        ]
+      },
+      "failure_update_rule": {
+        "if_failed": "If no discontinuity is found in low-leakage, then the relationship is continuous and we need to test whether a different form of non-linearity exists (e.g., saturation).",
+        "assumption_to_revise": "The assumption that there is a sharp phase transition; instead, the trade-off may be continuous.",
+        "next_question": "What is the shape of the continuous trade-off between explicitness and realism? Is it convex or concave?"
+      },
+      "quality_scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "gate_decisions": [
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 5,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 5,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 5
+      }
+    },
+    {
+      "passed": true,
+      "reason": "Passed deterministic gate rules.",
+      "repair_suggestions": [],
+      "scores": {
+        "first_principles_derivation": 4,
+        "falsifiability": 5,
+        "mechanism_clarity": 4,
+        "novelty": 5,
+        "experimentability": 4
+      }
+    }
+  ],
+  "experiment_plans": [
+    {
+      "hypothesis": "There exists a threshold in the proportion of non-inferable requirements relative to inferable ones such that below the threshold, benchmark validity is high because agents must genuinely reason, but above the threshold, validity drops sharply because agents exploit pattern matching over a larger set of examples, leading to an apparent performance plateau that does not reflect true reasoning ability.",
+      "independent_variables": [
+        "Ratio of non-inferable to inferable requirements (three levels: 20%, 50%, 80%)"
+      ],
+      "dependent_variables": [
+        "Agent pass rate on the benchmark",
+        "Correlation coefficient between pass rate and independent reasoning test score"
+      ],
+      "controlled_variables": [
+        "Total number of requirements is constant across conditions",
+        "Same coding tasks (code and test suite)",
+        "Same set of coding agents used across all conditions",
+        "Same compute resources and environment",
+        "Same difficulty level of individual requirements",
+        "No unintended information leakage (information set rigorously controlled)"
+      ],
+      "baselines": [
+        {
+          "name": "All inferable baseline",
+          "description": "Condition with 0% non-inferable requirements, serves as a baseline where agents rely solely on explicit instructions."
+        },
+        {
+          "name": "Perfect reasoning baseline",
+          "description": "A synthetic agent that perfectly reasons about non-inferable requirements, providing upper bound performance."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Pass Rate",
+          "definition": "Fraction of test cases passed by the agent on the benchmark."
+        },
+        {
+          "name": "Correlation Coefficient",
+          "definition": "Pearson correlation between agent pass rate on the benchmark and its score on an independent reasoning test consisting of held-out non-inferable tasks."
+        }
+      ],
+      "expected_result": "There will be a sharp decrease in the correlation coefficient when the ratio of non-inferable requirements exceeds a threshold (e.g., around 60%), and agent pass rates will plateau at a high level for ratios above the threshold, while independent reasoning scores continue to vary.",
+      "falsifying_result": "If the correlation coefficient decreases monotonically with the ratio without a sharp discontinuity, or if no ratio yields a significant drop in correlation, or if agent pass rates continue to increase linearly without saturation, then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct a coding benchmark with a controlled set of requirements. Vary the ratio of non-inferable to inferable requirements at three levels: low (20%), medium (50%), and high (80%). For each ratio, run the same set of 10 state-of-the-art coding agents and measure pass rates. Also administer an independent reasoning test. Compute the correlation between pass rate and reasoning score for each ratio. If a sharp drop in correlation is observed between the low and high ratios, support the hypothesis; otherwise, falsify.",
+      "risks_and_confounds": [
+        "The threshold may be outside the tested range (e.g., below 20% or above 80%)",
+        "Unintended leakage may occur despite controls, reducing validity",
+        "The independent reasoning test may not accurately measure reasoning ability",
+        "Agents may use different strategies across conditions, complicating interpretation"
+      ]
+    },
+    {
+      "hypothesis": "When unintended leakage is low, decreasing requirement explicitness leads to a monotonic increase in inference demand, but realism remains high until a critical explicitness threshold, below which realism drops discontinuously. When leakage is high, the threshold disappears and inference demand is low regardless of explicitness.",
+      "independent_variables": [
+        "RequirementExplicitness (high, medium, low)",
+        "UnintendedLeakage (low, high)"
+      ],
+      "dependent_variables": [
+        "InferenceDemand (number of reasoning steps per task)",
+        "TaskRealism (expert rating on 1-5 scale)"
+      ],
+      "controlled_variables": [
+        "Base task content (same across versions)",
+        "Task difficulty (matched across tasks)",
+        "Agent model (same set of agents used for all conditions)",
+        "Information set control (same base information except explicitness manipulation)",
+        "Evaluation procedure (same instructions for experts)"
+      ],
+      "baselines": [
+        {
+          "name": "High_explicitness_low_leakage",
+          "description": "Baseline condition with fully explicit requirements and no unintended leakage, representing the standard benchmark setup."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "InferenceDemand",
+          "definition": "Number of reasoning steps or clarification queries made by the agent before generating a solution, averaged per task."
+        },
+        {
+          "name": "TaskRealism",
+          "definition": "Average expert rating of how realistic the task appears, measured on a Likert scale from 1 (very artificial) to 5 (very realistic)."
+        }
+      ],
+      "expected_result": "In the low-leakage condition, realism scores for high and medium explicitness are high (mean ~4.5) and significantly higher than for low explicitness (mean <2), indicating a sharp drop; inference demand increases gradually from high to medium to low explicitness. In the high-leakage condition, realism scores remain high across all explicitness levels (mean >4) and inference demand stays low (mean <2 steps). Segmented regression reveals a breakpoint between medium and low explicitness in low-leakage but not in high-leakage.",
+      "falsifying_result": "The hypothesis is falsified if: (a) in the low-leakage condition, realism decreases linearly with explicitness (no discontinuity); (b) in low-leakage, inference demand does not increase when moving from medium to low explicitness; (c) in high-leakage, a similar discontinuity is observed; or (d) the interaction between explicitness and leakage is not significant.",
+      "minimum_viable_experiment": "Construct 5 coding tasks. For each task, create 3 versions differing in requirement explicitness (high: full specification; medium: partial specification with some missing details; low: minimal specification with only goal statement). For each version, create two leakage conditions: low leakage (no extra hints) and high leakage (include informative test names and code comments that hint at the non-inferable requirements). Each of the 30 task-version-leakage combinations is completed by 5 state-of-the-art coding agents (e.g., GPT-4, Claude, etc.), counterbalancing order. Inference demand is measured as the number of reasoning steps the agent exhibits (e.g., via chain-of-thought tracing or number of API calls). Additionally, 3 expert software engineers rate each of the 30 combinations for realism on a 1-5 scale. Use segmented regression on realism vs. explicitness for the low-leakage condition to detect a threshold; compare with high-leakage condition using an interaction model.",
+      "risks_and_confounds": [
+        "Expert rating subjectivity: different experts may have different criteria for realism.",
+        "Order effects: agents may learn from previous tasks; use counterbalancing.",
+        "Leakage manipulation may not be equally effective across tasks.",
+        "Small number of tasks and agents may limit statistical power to detect a discontinuity.",
+        "Agents might use unintended signals (e.g., code structure) even in low-leakage condition."
+      ]
+    },
+    {
+      "hypothesis": "Benchmark validity degrades nonlinearly with increasing leakage; there exists a threshold L_c (e.g., 20% of items with hints) beyond which validity drops sharply below 0.5.",
+      "independent_variables": [
+        "leakage proportion (0%, 20%, 50% of benchmarks with injected hints)"
+      ],
+      "dependent_variables": [
+        "Pearson correlation between benchmark performance (score on leaked benchmarks) and reference reasoning score (score on no-leakage task) for each leakage level"
+      ],
+      "controlled_variables": [
+        "Same 10 agents across all leakage conditions (within-subjects counterbalanced order)",
+        "Same set of 100 synthetic coding benchmarks per condition",
+        "Identical reference reasoning test (no leakage) for all agents",
+        "Hints injected via same mechanism (e.g., revealing variable names or test outcomes in code comments)",
+        "Benchmark difficulty distribution held constant across conditions"
+      ],
+      "baselines": [
+        {
+          "name": "Zero leakage",
+          "description": "Leakage proportion = 0% (no hints injected); expected correlation approximates ideal benchmark validity."
+        },
+        {
+          "name": "Full leakage",
+          "description": "Leakage proportion = 100% (all benchmarks have hints); expected correlation near zero or negative, indicating no validity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Correlation coefficient (r)",
+          "definition": "Pearson correlation between benchmark performance and reference reasoning score computed across 10 agents for each leakage level."
+        },
+        {
+          "name": "Threshold detection",
+          "definition": "Identification of leakage proportion where a segmented regression shows a significant change in slope (p < 0.01)."
+        }
+      ],
+      "expected_result": "For leakage proportions ≤ 20%, correlation remains above 0.8; for proportions > 20%, correlation drops sharply below 0.5, confirming a nonlinear threshold at approximately 20%.",
+      "falsifying_result": "Correlation declines linearly with increasing leakage without abrupt drop, or correlation never falls below 0.5 even at 50% leakage.",
+      "minimum_viable_experiment": "Create 100 synthetic coding benchmarks with known ground-truth agent reasoning ability. Randomly inject unintended hints (e.g., revealing test outcomes) into a varying proportion of benchmarks: 0% (baseline), 20%, and 50%. Have 10 agents complete all three conditions (counterbalanced order). Measure performance on benchmarks and a separate reference reasoning test (no leakage). Compute Pearson correlation per leakage level. Use segmented regression to test for a threshold. Hypothesis is falsified if no significant breakpoint is found or if correlation decreases linearly.",
+      "risks_and_confounds": [
+        "Order effects: agents may learn from earlier conditions; counterbalance order across agents.",
+        "Reference test validity: the no-leakage task may not perfectly measure pure reasoning ability; use a validated test.",
+        "Hint salience: hints may be too subtle or too obvious; pilot test hint effectiveness.",
+        "Sample size: only 10 agents may yield noisy correlations; consider bootstrapping for confidence intervals."
+      ]
+    },
+    {
+      "hypothesis": "There exists a threshold granularity level (e.g., per-requirement isolation) where further increasing isolation granularity leads to diminishing returns in benchmark validity while disproportionately increasing evaluation cost, and a secondary phase where fine-grained isolation actually reduces validity due to heightened sensitivity to unintended leakage, creating an inverted-U relationship between granularity and validity.",
+      "independent_variables": [
+        "Isolation granularity (coarse: whole-task, medium: sub-task, fine: per-requirement, very fine: per-sub-requirement)",
+        "Presence of subtle information leakage (hints in test names and code comments: present vs absent)"
+      ],
+      "dependent_variables": [
+        "Benchmark validity (Pearson correlation between agent performance on non-inferable requirements and an independent reasoning assessment)",
+        "Scalability (total number of test cases and average evaluation time per agent, in minutes)",
+        "Leakage susceptibility (performance difference between hint-present and hint-absent conditions, as percentage points)"
+      ],
+      "controlled_variables": [
+        "Same set of non-inferable requirements across all granularity levels",
+        "Same information set provided to agents (except deliberate hints)",
+        "Same evaluation protocol and scoring function",
+        "Same set of agent architectures (2 types: GPT-4o and Claude 3.5 Sonnet)",
+        "Randomized order of test cases within each condition",
+        "Same computational budget for agent inference (max tokens, temperature=0)"
+      ],
+      "baselines": [
+        {
+          "name": "Coarse granularity without hints",
+          "description": "Whole-task isolation with no deliberate information leakage; serves as baseline for validity and scalability at coarsest level."
+        },
+        {
+          "name": "Medium granularity without hints",
+          "description": "Sub-task isolation with no leakage; serves as baseline for moderate granularity."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "Validity correlation",
+          "definition": "Pearson r between pass rate on non-inferable requirements (0-1) and score on independent reasoning test (1-100)."
+        },
+        {
+          "name": "Scalability count",
+          "definition": "Total number of test cases per condition (sum of all requirement-level test cases)."
+        },
+        {
+          "name": "Scalability time",
+          "definition": "Average wall-clock time in minutes for an agent to complete all test cases in a condition."
+        },
+        {
+          "name": "Leakage susceptibility",
+          "definition": "Difference in pass rate on non-inferable requirements between hint-present and hint-absent conditions, expressed as percentage points."
+        }
+      ],
+      "expected_result": "Validity correlation peaks at fine granularity (per-requirement) and decreases at very fine granularity (per-sub-requirement), forming an inverted-U shape. Scalability (test cases and time) increases monotonically from coarse to very fine. Leakage susceptibility is larger at fine and very fine granularities than at coarse and medium, especially at very fine where hints cause the largest performance increase. This supports the hypothesis of a threshold and leakage-mediated reversal.",
+      "falsifying_result": "Validity correlation increases monotonically with granularity (no peak or drop at fine/very fine). Alternatively, if leakage susceptibility is constant across all granularity levels, or if fine and very fine granularities show higher validity despite high leakage (no decrease), then the hypothesis is falsified.",
+      "minimum_viable_experiment": "Construct 4 versions of a benchmark with increasing granularity (coarse: whole-task, medium: sub-task, fine: per-requirement, very fine: per-sub-requirement) using the same set of 50 non-inferable requirements. For each granularity, create two conditions: one with no deliberate hints (clean) and one with subtle hints embedded in test names and comments (leakage). Use 2 agent architectures (e.g., GPT-4o and Claude 3.5 Sonnet). Each agent completes all 8 conditions (order randomized). Measure pass rate on non-inferable requirements, total test cases, evaluation time, and administer an independent reasoning test (e.g., HellaSwag). Compute Pearson correlation between pass rate and reasoning score for each condition. Compute leakage susceptibility as pass rate difference between hint and clean conditions. Total conditions: 4 granularities × 2 hint conditions = 8; each run with 2 agents yields 16 evaluations per metric. This is minimal because reducing granularity levels would not detect inversion, and removing hint conditions would miss the leakage interaction.",
+      "risks_and_confounds": [
+        "Independent reasoning test may not perfectly capture reasoning ability specific to coding, leading to noise in validity measure.",
+        "Agent performance may vary due to stochasticity; use temperature=0 and multiple runs (e.g., 3 seeds) to mitigate.",
+        "Hints may be too subtle or too obvious; pilot test to calibrate leakage strength.",
+        "Order effects: randomize condition order across agents.",
+        "Requirement difficulty may interact with granularity; control by using identical requirements in each granularity level (only test organization changes)."
+      ]
+    },
+    {
+      "hypothesis": "There exists a critical threshold of unintended leakage such that when leakage exceeds this threshold, the benchmark's ability to isolate non-inferable requirements drops discontinuously.",
+      "independent_variables": [
+        "UnintendedLeakage (continuous: number or proportion of leaked cues)"
+      ],
+      "dependent_variables": [
+        "BenchmarkValidity (correlation score)"
+      ],
+      "controlled_variables": [
+        "InferenceDemand (medium level)",
+        "Same set of non-inferable requirements",
+        "Same agent model",
+        "Same task difficulty"
+      ],
+      "baselines": [
+        {
+          "name": "Zero Leakage",
+          "description": "No unintended leakage, all requirements are non-inferable and no extra hints."
+        },
+        {
+          "name": "Maximum Leakage",
+          "description": "All non-inferable requirements are explicitly hinted, making them effectively inferable."
+        }
+      ],
+      "metrics": [
+        {
+          "name": "BenchmarkValidity",
+          "definition": "Pearson correlation between agent performance (e.g., pass rate on tasks) and human-judged true reasoning ability on non-inferable requirements."
+        },
+        {
+          "name": "Leakage Level",
+          "definition": "Number or proportion of leaked cues in the benchmark."
+        }
+      ],
+      "expected_result": "A statistically significant breakpoint in the validity vs. leakage curve, with a sharp drop after the threshold.",
+      "falsifying_result": "No significant breakpoint detected; the relationship is linear or monotonic without a sharp drop.",
+      "minimum_viable_experiment": "Create a coding-agent benchmark with controlled leakage. Vary leakage continuously from 0 (no extra hints) to high (many hints). For each leakage level, measure benchmark validity as the correlation between agent performance and human-judged true reasoning ability on non-inferable requirements. Fit a segmented regression to detect a breakpoint in the validity vs. leakage curve.",
+      "risks_and_confounds": [
+        "Difficulty in precisely controlling unintended leakage without introducing other confounds",
+        "Human judgment of true reasoning ability may be subjective or noisy",
+        "Agents might exploit other unintended cues (e.g., test names) not controlled",
+        "Small number of leakage levels may reduce statistical power to detect breakpoint"
+      ]
+    }
+  ],
+  "review": {
+    "summary": "This work presents a first-principles decomposition of the problem of isolating non-inferable requirements in coding-agent benchmarks. It proposes a mechanism model with key variables (InformationSetControl, RequirementExplicitness, IsolationGranularity, InferenceDemand, UnintendedLeakage, BenchmarkValidity) and derives tensions and testable hypotheses, including phase transition hypotheses. The experimental designs are detailed and falsifiable. However, the assumptions about cleanly distinguishing inferable from non-inferable requirements and controlling information sets may be unrealistic in practice. The trade-off between realism and explicitness is acknowledged but not deeply addressed. Some hypotheses, while interesting, may overclaim the existence of sharp phase transitions without sufficient evidence from existing literature. The novelty is moderate, as the problem is well-known, but the formalization is useful.",
+    "strengths": [
+      "Clear first-principles derivation of primitive definitions and assumptions.",
+      "Well-structured causal mechanism model with explicit variables and causal chains.",
+      "Testable hypotheses with falsifiable predictions and detailed experimental designs.",
+      "Identification of key tensions (e.g., explicitness vs. realism, granularity vs. complexity).",
+      "Inclusion of multiple candidate certificates and experiment plans, showing thoroughness."
+    ],
+    "weaknesses": [
+      "Assumption that non-inferable requirements can be reliably distinguished from inferable ones is not justified and may be infeasible in practice.",
+      "The mechanism model assumes a level of control over information sets that is difficult to achieve in real-world benchmarks (e.g., unavoidable leakage through code structure).",
+      "Hypotheses about phase transitions (e.g., threshold effects) may overclaim; the predicted sharp discontinuities lack empirical grounding or theoretical justification.",
+      "Trade-off between realism and explicitness is acknowledged but not fully explored; realistic tasks often have ambiguous requirements that blur the inferable/non-inferable distinction.",
+      "Missing baselines: no comparison to rule-based agents, random guessing, or simple pattern-matching baselines. The independent reasoning test used as ground truth is not validated.",
+      "Scalability and cost concerns are mentioned but not quantified; the proposed experiments may be prohibitively expensive (e.g., multiple agent architectures, many conditions)."
+    ],
+    "questions": [
+      "How would you operationalize the distinction between inferable and non-inferable requirements in a way that is both principled and practical? Could this be done automatically or requires human annotation?",
+      "Given the complexity of controlling information leakage, what guarantees can you provide that unintended cues (e.g., variable names, code idioms) are truly eliminated?",
+      "The phase transition hypotheses predict sharp thresholds. What theoretical justification exists for such nonlinearities, and how would you distinguish them from gradual changes in a limited sample size?",
+      "How do you plan to validate the independent reasoning test used as the ground truth for benchmark validity? Could it itself be biased or confounded?",
+      "In the trade-off between realism and explicitness, how do you define 'realism'? Is it possible that low-explicitness tasks are actually more realistic (e.g., real-world ambiguous specs)?"
+    ],
+    "missing_baselines": [
+      "Random baseline: agents that output random correct-looking code or copy from examples.",
+      "Simple pattern-matching baseline: agents that search for similar requirements in a training set (if allowed).",
+      "Ablation baselines: compare with agents that have full information (all requirements explicit) to quantify inference demand.",
+      "Human baseline: how do human developers perform on these tasks? This would provide an upper bound on realistic performance.",
+      "Existing benchmark baselines (e.g., SWE-bench, HumanEval) with and without the proposed isolation techniques."
+    ],
+    "score": 7,
+    "confidence": 4,
+    "recommendation": "borderline"
+  },
+  "self_improvement_update": null,
+  "metadata": {
+    "llm_client": "DeepSeekClient",
+    "gate_repair_count": 5,
+    "gate_repairs": [
+      {
+        "question": "At what threshold of information set control (ratio of non-inferable to inferable requirements) do coding-agent benchmarks exhibit a phase transition in the validity of agent reasoning assessment?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "How does the presence of uncontrolled information leakage moderate the phase transition from realistic high-explicitness tasks to unrealistic low-explicitness tasks in coding-agent benchmarks?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical leakage level (proportion of benchmarks with inadvertent hints) above which a coding-agent benchmark's validity for measuring genuine inference collapses?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "Is there a critical granularity of isolation of non-inferable requirements beyond which the validity-scalability trade-off reverses due to increased susceptibility to information leakage?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff."
+        ],
+        "remaining_suggestions": []
+      },
+      {
+        "question": "What is the threshold of unintended leakage beyond which coding-agent benchmarks fail to isolate non-inferable requirements?",
+        "original_suggestions": [
+          "Increase novelty to a competitive 5/5 by isolating a sharper boundary condition, threshold, phase transition, or mechanism interaction.",
+          "State the novel mechanism boundary explicitly, such as a threshold, interaction, failure regime, or nonlinear tradeoff.",
+          "Tighten topic adherence; the question should preserve the user's original topic terms."
+        ],
+        "remaining_suggestions": []
+      }
+    ],
+    "ablation_settings": {
+      "enable_gate_repair": true,
+      "require_novelty_boundary": true,
+      "enable_mechanism_builder": true,
+      "enable_reviewer": true,
+      "enable_meta_researcher": false
+    },
+    "baseline": "no_self_improvement_ablation",
+    "ablation": "self_improvement_removed",
+    "replicate": 1,
+    "run_id": "run-20260628T161536Z"
+  }
+}
