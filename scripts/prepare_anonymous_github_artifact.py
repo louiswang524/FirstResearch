@@ -19,10 +19,6 @@ INCLUDE_PATTERNS = [
     "firstresearch/prompts/*.md",
     "scripts/*.py",
     "tests/*.py",
-    "papers/firstresearch_draft.md",
-    "papers/reproducibility_appendix.md",
-    "papers/claim_evidence_registry.yaml",
-    "papers/reference_registry.yaml",
     "outputs/reports/deepseek_strong_baselines_10topics.csv",
     "outputs/reports/deepseek_strong_baselines_10topics.jsonl",
     "outputs/reports/deepseek_strong_baselines_10topics_metadata.json",
@@ -57,18 +53,10 @@ INCLUDE_PATTERNS = [
     "outputs/reports/deepseek_ablation_repeated_packages/*.json",
     "outputs/reports/deepseek_strong_baselines_package_audit.md",
     "outputs/reports/deepseek_strong_baselines_package_audit.json",
-    "outputs/reports/results_table_audit.md",
-    "outputs/reports/results_table_audit.json",
     "outputs/reports/baseline_fidelity_report.md",
     "outputs/reports/baseline_fidelity_report.json",
-    "outputs/reports/reference_audit.md",
-    "outputs/reports/reference_audit.json",
     "outputs/reports/human_review_protocol.md",
     "outputs/reports/human_review_protocol.json",
-    "outputs/reports/paper_evidence_audit.md",
-    "outputs/reports/paper_evidence_audit.json",
-    "outputs/reports/claim_evidence_audit.md",
-    "outputs/reports/claim_evidence_audit.json",
     "outputs/reports/artifact_manifest.md",
     "outputs/reports/artifact_manifest.json",
     "outputs/reports/expected_results_check.json",
@@ -140,4 +128,3 @@ def _artifact_gitignore() -> str:
 
 if __name__ == "__main__":
     main()
-

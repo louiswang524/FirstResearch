@@ -1,6 +1,6 @@
 # Artifact Manifest
 
-Generated at UTC: `2026-06-29T05:43:46.967489+00:00`
+Generated at UTC: `2026-06-29T05:49:36.436743+00:00`
 
 | Path | Bytes | SHA-256 |
 |---|---:|---|
@@ -44,8 +44,6 @@ Generated at UTC: `2026-06-29T05:43:46.967489+00:00`
 | `firstresearch/utils/llm.py` | 45494 | `c20290fb41ae326141d2f2b9ad08d6429a227499d86cef9cbab759c260718c46` |
 | `outputs/reports/baseline_fidelity_report.json` | 3243 | `4ebf2cf6827168246af6237057e76a8433c965517eb2f2c24c68a97ab3262d1b` |
 | `outputs/reports/baseline_fidelity_report.md` | 2836 | `c2b9b0f31092b68e56974f12d7d289d24bbad801b78981404b7d143b2fad10f4` |
-| `outputs/reports/claim_evidence_audit.json` | 3292 | `5c97ec59813a6b57ee034192f57499f40c2b96d141dbbcca7c123089b06fc89d` |
-| `outputs/reports/claim_evidence_audit.md` | 979 | `fe32db0d359fafabad6acaceb436e7de9a2188a21d697410f7ae83df679893c6` |
 | `outputs/reports/deepseek_ablation_repeated_gemini_judge_agreement.csv` | 5194 | `2d67bb1b2bd5283d9bae2056ff8102f63963a16873fba34e8e961eb522cf5105` |
 | `outputs/reports/deepseek_ablation_repeated_gemini_judge_agreement.md` | 4403 | `b1028aa99694889f3ef5be6aaf826c7f17dd3fdb14c76fdc741ee4dc7662f6f8` |
 | `outputs/reports/deepseek_ablation_repeated_gemini_judge_metadata.json` | 494 | `e7efa208486415d1e8db832d14dfc79278f7c42f937d8c0dba105a1858e7e7ea` |
@@ -256,16 +254,6 @@ Generated at UTC: `2026-06-29T05:43:46.967489+00:00`
 | `outputs/reports/deepseek_strong_baselines_package_audit.md` | 457 | `e302cd9992de890b2107290e994ba496d6757dadbdd2a5d9f91fd60814b0bd8f` |
 | `outputs/reports/human_review_protocol.json` | 3764 | `481076ba2bd17ecd468d8d80aecac2d66516de7f92028ab64c82af55b0a121be` |
 | `outputs/reports/human_review_protocol.md` | 3631 | `2d7ed1f62c3fec4ba378c328878852aac3b5eab6253e6efb8faaea58dc14f8f2` |
-| `outputs/reports/paper_evidence_audit.json` | 6676 | `4fc7309899fc4c59c536c035638b4fbd96ac12b410e2c1bee55df8d243aff319` |
-| `outputs/reports/paper_evidence_audit.md` | 3322 | `bada3380fa04dde84fa7fc0c15670cab83dff1b2109cf899bfb29a40eb3550bb` |
-| `outputs/reports/reference_audit.json` | 1792 | `04fadfd4a13eb8073b2c2fde2b39a08f6eec6e536cc74cf3b2071d1fcf3cbdfe` |
-| `outputs/reports/reference_audit.md` | 699 | `d6d35c20e9069d59d683f137b160499b9a83ab7e709de3ef8f1266170291f675` |
-| `outputs/reports/results_table_audit.json` | 5047 | `e8e5fa8d760478b59296aca53926190c026a0cd23b9f577e87a489a7e1302331` |
-| `outputs/reports/results_table_audit.md` | 1830 | `05a4f2152732f0fc07f36841ec421b77582a87980fd22ff6c9a51ac1bb97aef3` |
-| `papers/claim_evidence_registry.yaml` | 2850 | `4c02ad017893c9f5c4ee5e420e7279993ade398aef71de9de9b5220c62c66ec1` |
-| `papers/firstresearch_draft.md` | 50254 | `ec924b2cc5fd84ec80f40e92dc5e92aa92a8781cc0454f2d599e0604c91beed3` |
-| `papers/reference_registry.yaml` | 1414 | `7e08294e90757ccf1219c57808735f68352ebe47158b4e57c7fdf98f0cd58038` |
-| `papers/reproducibility_appendix.md` | 18418 | `35b4d773568b32779ac4131d05515de3f191cc738d3d7dcb1b6604f50b5f6da9` |
 | `scripts/analyze_human_review.py` | 5581 | `780ca919f1185c086558563f52f3c5c8c69d7ac4faae63f37e311856cee78e31` |
 | `scripts/analyze_judge_agreement.py` | 11226 | `5e5e2970801a837b0c928f56ce59e85136fb7dca464e359c41af971985ee8605` |
 | `scripts/analyze_pairwise_review.py` | 5311 | `8b3d0b3e30314927e015a7db65d34a9942bdf5e7054aaab2784909537cb6dffb` |
@@ -285,7 +273,7 @@ Generated at UTC: `2026-06-29T05:43:46.967489+00:00`
 | `scripts/generate_repro_appendix.py` | 12067 | `3bee3098b85ea3667a2f929f786492db105d46c87390ac196469c3d7f12b4b3b` |
 | `scripts/generate_submission_readiness_report.py` | 10399 | `82bc6421a5b4b90e19c64098e9f0794376125d8939b6812ca34c7f3e91c08e01` |
 | `scripts/prepare_anonymous_github_artifact.py` | 5642 | `dd6b29ca684ff493c1664275c33f8f6b2cc012504477f73a6290896ee0491956` |
-| `scripts/reproduce_paper.py` | 10373 | `750e05bc87625ea7741f5476d3d542cefa720e2f1337c4648bfc2541936b30f9` |
+| `scripts/reproduce_paper.py` | 11097 | `e70d787c626a2d99be4bc3f669fbd7d9f0df0dd56e57c9ca979598612b322486` |
 | `scripts/rescore_packages.py` | 4430 | `88ee4391a58a0159cd2da25635e98c3bc75c82b24414928cf65efc11b589336f` |
 | `scripts/run_benchmark.py` | 5534 | `8d34cff21e9a47287696948b25139b61f193fe9d83d2e62bda09f62a153678cf` |
 | `scripts/run_paper_evidence_pipeline.py` | 23335 | `b75d4b1ec7373df3bd678589855d431961e06ce4a1028c709f9dac7c459316bf` |

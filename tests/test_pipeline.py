@@ -4,6 +4,8 @@ import json
 import subprocess
 import sys
 
+import pytest
+
 from firstresearch.benchmark.report import generate_report
 from firstresearch.benchmark.baselines import get_baselines
 from firstresearch.benchmark.runners import run_benchmark
@@ -529,6 +531,8 @@ def test_analyze_judge_agreement(tmp_path: Path):
 
 
 def test_claim_evidence_audit_modes(tmp_path: Path):
+    if not Path("papers/claim_evidence_registry.yaml").exists():
+        pytest.skip("paper claim-evidence registry is not included in the code/results artifact")
     evidence = tmp_path / "evidence.json"
     evidence.write_text(
         '[{"id":"strong_baseline_csv","passed":true},'
@@ -813,6 +817,8 @@ def test_generate_baseline_fidelity_report(tmp_path: Path):
 
 
 def test_audit_references(tmp_path: Path):
+    if not Path("papers/reference_registry.yaml").exists():
+        pytest.skip("paper reference registry is not included in the code/results artifact")
     manuscript = tmp_path / "paper.md"
     manuscript.write_text(
         "The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery arXiv:2408.06292 "
@@ -897,6 +903,8 @@ def test_paper_evidence_pipeline_dry_run(tmp_path: Path):
 
 
 def test_audit_paper_evidence_runs(tmp_path: Path):
+    if not Path("papers/reproducibility_appendix.md").exists():
+        pytest.skip("paper reproducibility appendix is not included in the code/results artifact")
     manifest_path = tmp_path / "manifest.json"
     manifest_md = tmp_path / "manifest.md"
     subprocess.run(

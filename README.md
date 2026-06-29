@@ -1,12 +1,12 @@
 # FirstResearch Reproducibility Artifact
 
-This repository contains the anonymized code, prompts, configs, benchmark topics, saved model outputs, and audit scripts used for the paper:
+This repository contains the anonymized code, prompts, configs, benchmark topics, saved model outputs, and audit scripts used for the experiments in:
 
 **FirstResearch: Auditable Question Formation for LLM Scientific Discovery Agents**
 
 The artifact supports three levels of reproducibility:
 
-1. **No-API verification:** run unit tests, regenerate reports from saved CSV/package artifacts, audit paper tables, and verify headline numbers.
+1. **No-API verification:** run unit tests, regenerate reports from saved CSV/package artifacts, and verify headline numbers.
 2. **Independent-judge rescore:** rescore saved packages with Gemini or any OpenAI-compatible judge endpoint.
 3. **Full regeneration:** rerun the DeepSeek-backed generation and judging workflows with fresh API calls.
 
@@ -21,7 +21,7 @@ python scripts/check_expected_results.py
 python scripts/reproduce_paper.py --no-api
 ```
 
-The no-API path should finish locally and checks the saved artifacts used by the paper.
+The no-API path should finish locally and checks the saved experimental artifacts.
 
 ## Reproduce Saved-Artifact Results
 
@@ -31,12 +31,9 @@ python scripts/reproduce_paper.py --no-api
 
 This regenerates:
 
-- strong-baseline reports and table audits
+- strong-baseline reports
 - baseline-fidelity report
-- reference and claim-evidence audits
 - artifact manifest
-- reproducibility appendix
-- submission-readiness summary
 
 It does not call external LLM APIs.
 
@@ -97,8 +94,9 @@ python scripts/analyze_judge_agreement.py \
 - `data/`: benchmark topics.
 - `scripts/`: benchmark, report, audit, rescore, and artifact scripts.
 - `outputs/reports/`: saved CSVs, reports, package JSONs, and audit artifacts used by the paper.
-- `papers/`: manuscript draft, registry files, and reproducibility appendix.
 - `tests/`: unit and pipeline tests.
+
+The manuscript source is intentionally not included in this public code/results repository.
 
 ## Double-Blind / Anonymous GitHub Notes
 

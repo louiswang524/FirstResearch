@@ -16,6 +16,7 @@ class Step:
     name: str
     command: list[str]
     requires_env: tuple[str, ...] = ()
+    skip_if_missing: tuple[str, ...] = ()
 
 
 def main() -> None:
@@ -31,6 +32,11 @@ def main() -> None:
         steps = _api_steps() + steps
 
     for step in steps:
+        missing_files = [path for path in step.skip_if_missing if not (ROOT / path).exists()]
+        if missing_files:
+            print(f"\n==> {step.name}")
+            print(f"Skipping because optional file(s) are absent: {', '.join(missing_files)}")
+            continue
         missing = [name for name in step.requires_env if not os.environ.get(name)]
         if missing:
             raise SystemExit(f"{step.name}: missing required environment variable(s): {', '.join(missing)}")
@@ -208,6 +214,7 @@ def _no_api_steps() -> list[Step]:
                 "outputs/reports/results_table_audit.json",
                 "--strict",
             ],
+            skip_if_missing=("papers/firstresearch_draft.md",),
         ),
         Step(
             "Generate baseline fidelity report",
@@ -237,6 +244,7 @@ def _no_api_steps() -> list[Step]:
                 "outputs/reports/reference_audit.json",
                 "--strict",
             ],
+            skip_if_missing=("papers/reference_registry.yaml", "papers/firstresearch_draft.md"),
         ),
         Step(
             "Generate human-review protocol",
@@ -261,6 +269,7 @@ def _no_api_steps() -> list[Step]:
                 "outputs/reports/paper_evidence_audit.json",
                 "--strict",
             ],
+            skip_if_missing=("papers/firstresearch_draft.md", "papers/claim_evidence_registry.yaml"),
         ),
         Step(
             "Audit claim evidence",
@@ -279,11 +288,13 @@ def _no_api_steps() -> list[Step]:
                 "outputs/reports/claim_evidence_audit.json",
                 "--strict",
             ],
+            skip_if_missing=("papers/claim_evidence_registry.yaml", "papers/firstresearch_draft.md"),
         ),
         Step("Check expected headline numbers", [py, "scripts/check_expected_results.py"]),
         Step(
             "Generate reproducibility appendix",
             [py, "scripts/generate_repro_appendix.py", "--output", "papers/reproducibility_appendix.md"],
+            skip_if_missing=("papers",),
         ),
     ]
 
